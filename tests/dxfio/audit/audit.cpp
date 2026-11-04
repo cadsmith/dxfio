@@ -466,15 +466,42 @@ TEST_CASE("audit: an insert of no block is left out")
   CHECK(drawing.Entities.size() == before - 1);
 }
 
+TEST_CASE("audit: a mesh with no vertices or no faces is left out")
+{
+  Document drawing = Fresh();
+  Entities::Mesh faceless{};
+  faceless.Net->Vertices = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+  Entities::Mesh pointless{};
+  pointless.Net->Faces = {3, 0, 1, 2};
+  REQUIRE(Edit::Add(drawing, faceless));
+  REQUIRE(Edit::Add(drawing, Entities::Line{}));
+  REQUIRE(Edit::AddBlock(drawing, "PART"));
+  REQUIRE(Edit::Add(drawing, pointless, "PART"));
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Errors() == 2);
+  CHECK(seen.Findings.at(0).What == "mesh with no faces, left out");
+  CHECK(seen.Findings.at(0).Subject == BaseOf(drawing.Entities.front()).Self);
+  CHECK(seen.Findings.at(1).What == "mesh with no vertices, left out");
+  CHECK(drawing.Entities.size() == 2);
+  CHECK(Repair(drawing).Clean());
+  REQUIRE(drawing.Entities.size() == 1);
+  CHECK(std::holds_alternative<Entities::Line>(drawing.Entities.front()));
+  CHECK(Edit::FindBlock(drawing, "PART")->Entities.empty());
+  CHECK(Check(drawing).Findings.empty());
+}
+
 TEST_CASE("audit: a mesh with a crease short is given one")
 {
   Document drawing = Fresh();
   Entities::Mesh mesh{};
   mesh.Record.Base.Self = Past(drawing);
+  mesh.Net->Vertices = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+  mesh.Net->Faces = {3, 0, 1, 2};
   mesh.Net->Edges = {0, 1, 1, 2};
   mesh.Net->Creases = {0.5};
   drawing.Blocks.front().Entities.emplace_back(mesh);
-  Entities::Mesh whole{};
+  Entities::Mesh whole = mesh;
+  whole.Net->Creases = {0.5, 0.0};
   whole.Record.Base.Self = Handle{.Value = mesh.Record.Base.Self.Value + 1};
   drawing.Blocks.front().Entities.emplace_back(whole);
   drawing.Entities.emplace_back(Lined(Handle{.Value = mesh.Record.Base.Self.Value + 2}));
