@@ -7,6 +7,7 @@
 #include <charconv>
 #include <cstdint>
 #include <expected>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <system_error>
@@ -77,6 +78,28 @@ auto Counted(std::string_view text) -> Parsed
   return number ? Parsed{Content{*number}} : std::unexpected{Integer};
 }
 
+// An integer within the range the group's width holds: the writer refuses one past it.
+template <std::int64_t Low, std::int64_t High, const std::string_view &Expected>
+auto Bounded(std::string_view text) -> Parsed
+{
+  const std::optional<std::int64_t> number = Integral(Bare(text));
+  if (!number)
+  {
+    return std::unexpected{Integer};
+  }
+  return *number >= Low && *number <= High ? Parsed{Content{*number}} : std::unexpected{Expected};
+}
+
+constexpr std::string_view Short = "integer of 16 bits";
+
+constexpr std::string_view Long = "integer of 32 bits";
+
+constexpr auto Counted16 =
+    Bounded<std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::uint16_t>::max(), Short>;
+
+constexpr auto Counted32 =
+    Bounded<std::numeric_limits<std::int32_t>::min(), std::numeric_limits<std::int32_t>::max(), Long>;
+
 auto Flagged(std::string_view text) -> Parsed
 {
   const std::optional<std::int64_t> number = Integral(Bare(text));
@@ -86,7 +109,7 @@ auto Flagged(std::string_view text) -> Parsed
 using Reading = Parsed (*)(std::string_view text);
 
 constexpr std::array<Reading, 8> Readings{
-    Verbatim, Counted, Counted, Counted, Measured, Flagged, Verbatim, Verbatim,
+    Verbatim, Counted16, Counted32, Counted, Measured, Flagged, Verbatim, Verbatim,
 };
 } // namespace
 

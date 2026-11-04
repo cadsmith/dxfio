@@ -148,6 +148,19 @@ TEST_CASE("load: a value that does not parse is left out and told, the record re
   CHECK(read->Issues == std::vector{Issue{.Line = 8, .What = "number expected for group 39, found \"abc\", left out"}});
 }
 
+TEST_CASE("load: an integer past the range of its group is left out and told, so what loads saves")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n 62\n70000\n  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  REQUIRE(read->Document.Entities.size() == 1);
+  const auto *line = std::get_if<Entities::Line>(&read->Document.Entities.front());
+  REQUIRE(line != nullptr);
+  CHECK(line->Record.Color == 256);
+  CHECK(read->Issues ==
+        std::vector{Issue{.Line = 8, .What = "integer of 16 bits expected for group 62, found \"70000\", left out"}});
+  CHECK(Tests::Written(read->Document, {.Release = Version::R12}));
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

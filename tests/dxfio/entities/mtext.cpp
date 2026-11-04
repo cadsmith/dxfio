@@ -302,15 +302,15 @@ TEST_CASE("mtext: dropped with one, as AutoCAD refuses them past the object")
   }
 }
 
-TEST_CASE("mtext: a group the record could not take stays out of the object")
+TEST_CASE("mtext: a group left out before the record stays out of the object")
 {
   const std::string text = Held(std::string{Whole} + " 90\r\n3000000000\r\n" + std::string{Block});
-  const auto all = Tags::All(text);
+  std::vector<Issue> issues;
+  const auto all = Tags::All(text, &issues);
   REQUIRE(all);
   File::Cursor in{*all};
   const auto taken = in.Take();
   REQUIRE(taken);
-  std::vector<Issue> issues;
   const MText one = DxfIO::Taken<MText>(*taken, Fields::Reading{.Text = Encoding::Utf8(), .Issues = &issues});
   CHECK(issues.size() == 1);
   CHECK(one.Record.Base.Extra.empty());
