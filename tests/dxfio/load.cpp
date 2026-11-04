@@ -161,6 +161,16 @@ TEST_CASE("load: an integer past the range of its group is left out and told, so
   CHECK(Tests::Written(read->Document, {.Release = Version::R12}));
 }
 
+TEST_CASE("load: a chunk that is not hex is left out and told, so what loads saves in binary too")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n1001\nACAD\n1004\nzz\n  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  REQUIRE(read->Document.Entities.size() == 1);
+  CHECK(BaseOf(read->Document.Entities.front()).Extended.front().Groups.empty());
+  CHECK(read->Issues == std::vector{Issue{.Line = 10, .What = "hex expected for group 1004, found \"zz\", left out"}});
+  CHECK(Tests::Written(read->Document, {.Release = Version::R2000, .Binary = true}));
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

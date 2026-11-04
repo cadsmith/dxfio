@@ -3,7 +3,9 @@
 #include "../kind.hpp"
 #include "entities/io.hpp"
 
+#include <algorithm>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
@@ -73,12 +75,11 @@ TEST_CASE("ole: named as DXF names it")
 
 namespace DxfIO::Entities
 {
-TEST_CASE("ole: bytes not in hex keep the record as it came")
+TEST_CASE("ole: a chunk not in hex keeps the record as it came")
 {
-  std::string bad = Embedding;
-  bad.replace(bad.find("DEADBEEF"), 8, "ZZ");
-  const auto all = Tags::All(bad);
+  auto all = Tags::All(Embedding);
   REQUIRE(all);
+  std::ranges::find(*all, 310, &Tags::Tag::Code)->Value = std::string_view{"ZZ"};
   File::Cursor in{*all};
   const auto one = in.Take();
   REQUIRE(one);

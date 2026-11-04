@@ -94,6 +94,8 @@ TEST_CASE("ascii: a value that does not parse is left out and told, the rest rea
                       Issue{.Line = 6, .What = "integer expected for group 70, found \"1e300\", left out"},
                   });
   CHECK(Read(" 40\nnope\n").empty());
+  CHECK(Told("310\nxyz\n") ==
+        std::vector{Issue{.Line = 2, .What = "hex expected for group 310, found \"xyz\", left out"}});
   CHECK(Told(" 70\n100000\n 90\n3000000000\n") ==
         std::vector{
             Issue{.Line = 2, .What = "integer of 16 bits expected for group 70, found \"100000\", left out"},
