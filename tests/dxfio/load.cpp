@@ -218,6 +218,51 @@ TEST_CASE("load: tables outside a TABLES section are read as one, which the save
   CHECK(saved->contains("SECTION\r\n  2\r\nTABLES\r\n  0\r\nTABLE\r\n"));
 }
 
+TEST_CASE("load: with no $ACADVER, records carrying subclass markers read as R2000, told")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLWPOLYLINE\n  5\nA1\n100\nAcDbEntity\n  8\n0\n"
+                         "100\nAcDbPolyline\n 90\n        2\n 70\n     0\n 10\n0.0\n 20\n0.0\n 10\n1.0\n 20\n0.0\n"
+                         "  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  REQUIRE(read->Document.Entities.size() == 1);
+  CHECK(std::holds_alternative<Entities::LwPolyline>(read->Document.Entities.front()));
+  CHECK(Header::Declared(read->Document.Header) == Version::R2000);
+  CHECK(read->Document.Header.front() ==
+        Header::Variable{.Name = "$ACADVER", .Values = {Group{.Code = 1, .Value = std::string{"AC1015"}}}});
+  CHECK(read->Issues ==
+        std::vector{Issue{.Line = 0, .What = "no $ACADVER, read as R2000 for the subclass markers its records carry"}});
+  const auto headed = Load("  0\nSECTION\n  2\nHEADER\n  9\n$INSUNITS\n 70\n     4\n  0\nENDSEC\n"
+                           "  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n100\nAcDbEntity\n  8\n0\n100\nAcDbLine\n"
+                           "  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(headed);
+  REQUIRE(headed->Document.Header.size() == 2);
+  CHECK(headed->Document.Header.front().Name == "$ACADVER");
+  CHECK(headed->Document.Header.back().Name == "$INSUNITS");
+}
+
+TEST_CASE("load: a file declared R12 keeps every kind R12 does not have as Unknown, markers or not")
+{
+  std::string text = Bytes(std::filesystem::path{DXFIO_FUZZ_DIR} / "corpus" / "sample-r2018.dxf");
+  text.replace(text.find("AC1032"), 6, "AC1009");
+  const auto read = Load(text);
+  REQUIRE(read);
+  CHECK(std::ranges::all_of(read->Document.Objects,
+                            [](const Object &one) -> bool { return std::holds_alternative<Unknown>(one); }));
+  CHECK(std::ranges::any_of(read->Document.Entities,
+                            [](const Entity &one) -> bool { return std::holds_alternative<Unknown>(one); }));
+  CHECK(std::ranges::any_of(read->Document.Entities,
+                            [](const Entity &one) -> bool { return std::holds_alternative<Entities::Line>(one); }));
+}
+
+TEST_CASE("load: with no $ACADVER and no subclass marker, the file is R12, as it was")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n  8\n0\n  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  CHECK(Header::Declared(read->Document.Header) == Version::R12);
+  CHECK(read->Document.Header.empty());
+  CHECK(read->Issues.empty());
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==
