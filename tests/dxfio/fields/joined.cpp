@@ -165,12 +165,12 @@ TEST_CASE("joined: another class's groups before it are not taken")
 TEST_CASE("joined: one that cannot take its group told, whichever fence")
 {
   const auto all = Tags::All("100\nAcDbEntity\n100\nAcDbText\n"
-                             " 72\n99999999999\n100\nAcDbText\n");
+                             "160\n99999999999\n100\nAcDbText\n");
   REQUIRE(all);
   const std::tuple fitted{
       Subclass{.Marker = "AcDbEntity"},
       Joined{.Marker = "AcDbText"},
-      Field{.Code = 72, .Member = &Word::Vertical, .Fallback = 0},
+      Field{.Code = 160, .Member = &Word::Vertical, .Fallback = 0},
       Joined{.Marker = "AcDbText"},
   };
   std::vector<Issue> issues;

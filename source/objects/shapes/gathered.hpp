@@ -44,7 +44,7 @@ inline auto Flagged(const std::vector<DxfIO::Group> &data, Version release) -> s
     return std::nullopt;
   }
   const auto *value = std::get_if<std::int64_t>(&data.front().Value);
-  if (value == nullptr || !std::in_range<int>(*value))
+  if (value == nullptr)
   {
     return std::nullopt;
   }

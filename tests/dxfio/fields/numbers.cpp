@@ -28,14 +28,14 @@ TEST_CASE("numbers: integers, reals and flags as their groups hold them")
 
 TEST_CASE("numbers: an integer too large for an int left untaken, told")
 {
-  const auto all = Tags::All(" 70\n4294967297\n");
+  const auto all = Tags::All("160\n4294967297\n");
   REQUIRE(all);
   std::vector<Issue> issues;
   Walk in{*all, Reading{.Issues = &issues}};
-  CHECK_FALSE(Value<int>::Read(in, 70));
+  CHECK_FALSE(Value<int>::Read(in, 160));
   CHECK(in.Kept().empty());
   REQUIRE(issues.size() == 1);
-  CHECK(issues.front().What == "group 70 holds no value its field takes");
+  CHECK(issues.front().What == "group 160 holds no value its field takes");
 }
 
 TEST_CASE("numbers: written in the columns of their code")

@@ -95,13 +95,6 @@ TEST_CASE("xrecord: a first 280 holding no whole number is no flag")
   CHECK(Flagged(numbered, Version::R2018) == 3);
 }
 
-TEST_CASE("xrecord: a first 280 out of a flag's range is data")
-{
-  const XRecord one = Read<XRecord>(Row("XRECORD", "100\r\nAcDbXrecord\r\n280\r\n4294967296\r\n"));
-  CHECK(one.Cloning == 1);
-  CHECK(one.Data.size() == 1);
-}
-
 TEST_CASE("xrecord: its data goes to every release")
 {
   const XRecord one = Read<XRecord>(Row("XRECORD", "100\r\nAcDbXrecord\r\n280\r\n     1\r\n  1\r\nkept\r\n"));

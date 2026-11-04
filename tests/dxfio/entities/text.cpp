@@ -221,12 +221,13 @@ TEST_CASE("text: however wrong, what is read is what the next load reads")
             .Record.Base.Extra.size() == 2);
 }
 
-TEST_CASE("text: a number too large for its field told, not written back")
+TEST_CASE("text: a number too large for its group is left out before the record, told")
 {
-  const auto all = Tags::All("100\nAcDbEntity\n  8\n0\n100\nAcDbText\n 40\n2.0\n  1\nx\n"
-                             " 72\n99999999999\n 71\n99999999999\n100\nAcDbText\n");
-  REQUIRE(all);
   std::vector<Issue> issues;
+  const auto all = Tags::All("100\nAcDbEntity\n  8\n0\n100\nAcDbText\n 40\n2.0\n  1\nx\n"
+                             " 72\n99999999999\n 71\n99999999999\n100\nAcDbText\n",
+                             &issues);
+  REQUIRE(all);
   Fields::Walk in{*all, Fields::Reading{.Issues = &issues}};
   Text taken{};
   Fields::Read(taken, in, Shapes<Text>);

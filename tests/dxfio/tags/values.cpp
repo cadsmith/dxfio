@@ -40,6 +40,20 @@ TEST_CASE("values: an integer is read whole, as AutoCAD pads it")
   CHECK_FALSE(Parse(Codes::Type::Int16, ""));
 }
 
+TEST_CASE("values: an integer past the range of its group is what its type expected, not a value")
+{
+  CHECK(Parse(Codes::Type::Int16, "65535") == Content{std::int64_t{65535}});
+  CHECK(Parse(Codes::Type::Int16, "-32768") == Content{std::int64_t{-32768}});
+  CHECK(Parse(Codes::Type::Int16, "65536").error() == "integer of 16 bits");
+  CHECK(Parse(Codes::Type::Int16, "-32769").error() == "integer of 16 bits");
+  CHECK(Parse(Codes::Type::Int32, "2147483647") == Content{std::int64_t{2147483647}});
+  CHECK(Parse(Codes::Type::Int32, "-2147483648") == Content{std::int64_t{-2147483648}});
+  CHECK(Parse(Codes::Type::Int32, "2147483648").error() == "integer of 32 bits");
+  CHECK(Parse(Codes::Type::Int32, "-2147483649").error() == "integer of 32 bits");
+  CHECK(Parse(Codes::Type::Int64, "2147483648") == Content{std::int64_t{2147483648}});
+  CHECK(Parse(Codes::Type::Boolean, "65536") == Content{true});
+}
+
 TEST_CASE("values: an integer given as a real is truncated")
 {
   CHECK(Parse(Codes::Type::Int16, "1.0") == Content{std::int64_t{1}});
