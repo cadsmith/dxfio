@@ -59,7 +59,8 @@ struct DXFIO_API Report
 /// Runs the checks of Check and fixes what they find, in place: a missing or duplicate handle is replaced, a missing
 /// layer or required record made, a layer with no plot style given the drawing's default one, an application named
 /// by extended data registered, a missing linetype or text style set to ByLayer or Standard, an insert of a missing
-/// block left out, a mesh given one crease per edge, an ellipse's ratio brought between 0 and 1,
+/// block left out, a mesh with no vertices or faces left out, one given one crease per edge, an ellipse's ratio
+/// brought between 0 and 1,
 /// a POLYLINE or an INSERT with attributes given the SEQEND it lacks, an INSERT's attributes said to follow it.
 /// A handle it gives comes past every handle in use, or, once the drawing holds the last handle there is, is the lowest
 /// one no record holds. It then moves $HANDSEED past the handles in use, adding it when the header has none.
