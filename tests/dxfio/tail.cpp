@@ -5,6 +5,7 @@
 
 #include <doctest/doctest.h>
 
+#include <format>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,25 @@ TEST_CASE("tail: extended data an application each, a repeat dropped")
   CHECK(taken.Extended.front().Groups.size() == 1);
   REQUIRE(issues.size() == 1);
   CHECK(issues.front().What == "extended data of ACAD given again, the first kept");
+}
+
+TEST_CASE("tail: thousands of applications read each once, in their order, in their time")
+{
+  std::string text;
+  for (int at = 0; at < 20000; ++at)
+  {
+    text += std::format("1001\nAPP{}\n1070\n1\n", at);
+  }
+  text += "1001\nAPP0\n";
+  const auto all = Tags::All(text);
+  REQUIRE(all);
+  Base taken{};
+  std::vector<Issue> issues;
+  Tail(*all, taken, Fields::Reading{.Issues = &issues});
+  REQUIRE(taken.Extended.size() == 20000);
+  CHECK(taken.Extended.front().Application == "APP0");
+  CHECK(taken.Extended.back().Application == "APP19999");
+  CHECK(issues.size() == 1);
 }
 
 TEST_CASE("tail: written an application each")

@@ -7,17 +7,14 @@
 #include <algorithm>
 #include <format>
 #include <string>
+#include <unordered_set>
+#include <utility>
 
 namespace DxfIO
 {
 namespace
 {
 constexpr int Application = 1001;
-
-auto Known(const Base &into, const std::string &name) -> bool
-{
-  return std::ranges::any_of(into.Extended, [&name](const Xdata &one) -> bool { return one.Application == name; });
-}
 
 } // namespace
 
@@ -29,6 +26,7 @@ auto Trailing(std::span<const Tags::Tag> body) -> std::size_t
 
 void Tail(std::span<const Tags::Tag> groups, Base &into, const Fields::Reading &with)
 {
+  std::unordered_set<std::string> known;
   bool dropped = false;
   for (const Tags::Tag &one : groups)
   {
@@ -48,8 +46,8 @@ void Tail(std::span<const Tags::Tag> groups, Base &into, const Fields::Reading &
       }
       continue;
     }
-    const std::string name = Encoding::Decode(with.Text, Tags::Text(one));
-    dropped = Known(into, name);
+    std::string name = Encoding::Decode(with.Text, Tags::Text(one));
+    dropped = !known.insert(name).second;
     if (dropped)
     {
       with.Tell(Issue{
@@ -58,7 +56,7 @@ void Tail(std::span<const Tags::Tag> groups, Base &into, const Fields::Reading &
       });
       continue;
     }
-    into.Extended.push_back(Xdata{.Application = name, .Groups = {}});
+    into.Extended.push_back(Xdata{.Application = std::move(name), .Groups = {}});
   }
 }
 
