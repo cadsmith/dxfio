@@ -70,9 +70,11 @@ namespace DxfIO::Fields
 {
 TEST_CASE("picture: a chunk not in hex refuses the record")
 {
-  const auto all = Tags::All("160\n1\n310\nZZ\n");
-  REQUIRE(all);
-  Walk in{*all, Reading{}};
+  const std::vector<Tags::Tag> all{
+      Tags::Tag{.Code = 160, .Value = std::int64_t{1}},
+      Tags::Tag{.Code = 310, .Value = std::string_view{"ZZ"}},
+  };
+  Walk in{all, Reading{}};
   Shown out{};
   Fields::Read(out, in, Shapes);
   CHECK(out.Bytes.empty());
@@ -81,9 +83,12 @@ TEST_CASE("picture: a chunk not in hex refuses the record")
 
 TEST_CASE("picture: a chunk in hex only in part adds none of its bytes")
 {
-  const auto all = Tags::All("160\n4\n310\nABCD\n310\nEFZZ\n");
-  REQUIRE(all);
-  Walk in{*all, Reading{}};
+  const std::vector<Tags::Tag> all{
+      Tags::Tag{.Code = 160, .Value = std::int64_t{4}},
+      Tags::Tag{.Code = 310, .Value = std::string_view{"ABCD"}},
+      Tags::Tag{.Code = 310, .Value = std::string_view{"EFZZ"}},
+  };
+  Walk in{all, Reading{}};
   Shown out{};
   Fields::Read(out, in, Shapes);
   CHECK(out.Bytes == "\xab\xcd");

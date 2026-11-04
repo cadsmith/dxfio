@@ -3,8 +3,11 @@
 #include "blanks.hpp"
 #include "tags/decimal.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cctype>
 #include <charconv>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <limits>
@@ -113,6 +116,25 @@ auto Bounded(std::string_view text, const Width &width) -> Parsed
   return Content{*number};
 }
 
+constexpr std::string_view Hex = "hex";
+
+constexpr std::size_t Pair = 2;
+
+auto Digit(char letter) -> bool
+{
+  return std::isxdigit(static_cast<unsigned char>(letter)) != 0;
+}
+
+// A chunk as it is written: hex digits, two to a byte, kept as the text they came in.
+auto Hexed(std::string_view text) -> Parsed
+{
+  if (text.size() % Pair != 0 || !std::ranges::all_of(text, Digit))
+  {
+    return std::unexpected{Hex};
+  }
+  return Content{text};
+}
+
 auto Counted16(std::string_view text) -> Parsed
 {
   return Bounded(text, Short);
@@ -132,7 +154,7 @@ auto Flagged(std::string_view text) -> Parsed
 using Reading = Parsed (*)(std::string_view text);
 
 constexpr std::array<Reading, 8> Readings{
-    Verbatim, Counted16, Counted32, Counted, Measured, Flagged, Verbatim, Verbatim,
+    Verbatim, Counted16, Counted32, Counted, Measured, Flagged, Verbatim, Hexed,
 };
 } // namespace
 

@@ -16,6 +16,15 @@ TEST_CASE("values: text, handles and chunks are kept as read")
   CHECK(Parse(Codes::Type::Binary, "00FF10") == Content{std::string_view{"00FF10"}});
 }
 
+TEST_CASE("values: a chunk is hex digits in pairs, kept as read")
+{
+  CHECK(Parse(Codes::Type::Binary, "00ff10") == Content{std::string_view{"00ff10"}});
+  CHECK(Parse(Codes::Type::Binary, "") == Content{std::string_view{}});
+  CHECK(Parse(Codes::Type::Binary, "0FG0").error() == "hex");
+  CHECK(Parse(Codes::Type::Binary, "ABC").error() == "hex");
+  CHECK(Parse(Codes::Type::Binary, " 0F").error() == "hex");
+}
+
 TEST_CASE("values: a real is read whole, its blanks and one plus aside")
 {
   CHECK(Parse(Codes::Type::Real, "1.5") == Content{1.5});
