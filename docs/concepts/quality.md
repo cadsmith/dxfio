@@ -11,7 +11,7 @@ How the interface stays stable, what tests stand behind it, and what it does not
 
 ## Tests and AutoCAD {#checked}
 
-- 155 drawings AutoCAD 2026 wrote, for each release, read without an issue and save back byte for byte.
+- 155 drawings AutoCAD 2026 wrote, for each release, read without an issue, and what dxfio saves back reads to the same document: every group and value, in its order.
 - What dxfio writes, to each release, is opened by AutoCAD's console and passes its audit.
 - The tests cover every line, function, region and branch; the coverage build fails below that.
 - libFuzzer targets feed broken input to the reader, the tags and the text escapes.

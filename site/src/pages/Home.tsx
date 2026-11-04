@@ -26,7 +26,7 @@ const features = [
   {
     icon: ShieldCheckIcon,
     title: 'Checked by AutoCAD',
-    text: '155 drawings AutoCAD 2026 wrote save back byte for byte, and what dxfio writes passes AutoCAD’s own audit.',
+    text: '155 drawings AutoCAD 2026 wrote read without an issue and save back with every group kept, and what dxfio writes passes AutoCAD’s own audit.',
   },
   {
     icon: BracesIcon,
@@ -79,7 +79,7 @@ export default function Home() {
             ))}
           </h1>
           <p className="hero-lead">
-            dxfio reads any AutoCAD drawing exchange file into plain C++ values, and writes it back unchanged or to any
+            dxfio reads any AutoCAD drawing exchange file into plain C++ values, and writes it back whole or to any
             other release.
           </p>
           <div className="hero-actions">

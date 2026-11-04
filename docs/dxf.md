@@ -45,8 +45,10 @@ const auto saved = DxfIO::SaveFile(loaded->Document, "plan-r2010.dxf",
 
 ## What is kept
 
-Reading and writing back the same release gives the same file: every group of
-every record, in its order, including what the library has no type for.
+Reading and writing back the same release keeps every group of every record,
+in its order, including what the library has no type for. The bytes can still
+differ: a real is written in the shortest form that reads back to the same
+value, and lines end in CR LF whatever the file had.
 
 - Each record of a known kind is read into its own type: `DxfIO::Entity` and
   `DxfIO::Object` are variants of them, ending with `Unknown`.
@@ -132,8 +134,8 @@ they find:
 ## Checked against AutoCAD
 
 The tests read every file under `tests/fixtures/acad`, written by AutoCAD
-2026 for each release, and require each to read without an issue and to save
-back unchanged. `tools/acad/*.scr` are the AutoCAD scripts that made them;
+2026 for each release, and require each to read without an issue, and what it saves
+back to read to the same document. `tools/acad/*.scr` are the AutoCAD scripts that made them;
 `tools/acad/verify.py` opens files in AutoCAD's console and runs its audit.
 The `fuzz` preset builds libFuzzer targets that feed broken input to the
 reader and save what it read to every release.
