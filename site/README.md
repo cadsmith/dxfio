@@ -44,7 +44,7 @@ host serves `dist/`, and `dist/404.html` is the page for an address with no
 file. Build with the address the site is served at:
 
 ```sh
-SITE_URL=https://dxfio.vercel.app/ npm run build
+SITE_URL=https://dxfio.dev/ npm run build
 ```
 
 Each page then names its full address as canonical, carries link previews
