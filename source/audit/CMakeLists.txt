@@ -2,6 +2,7 @@ target_sources(dxfio
   PRIVATE
     applications.cpp
     audit.cpp
+    ellipses.cpp
     handles.cpp
     meshes.cpp
     names.cpp

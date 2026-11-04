@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <format>
 #include <limits>
+#include <numbers>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -185,6 +186,70 @@ TEST_CASE("audit: R12 applications made carry no handle")
   const Tables::Appid *made = Edit::Find(drawing.Appid, "SOUTH");
   REQUIRE(made != nullptr);
   CHECK_FALSE(made->Record.Base.Self);
+}
+
+TEST_CASE("audit: an ellipse whose ratio is above 1 has its axes swapped, the curve the same")
+{
+  Document drawing = Fresh();
+  Entities::Ellipse whole{};
+  whole.Center = Vector{.X = 1, .Y = 2, .Z = 0};
+  whole.Axis = Vector{.X = 3, .Y = 0, .Z = 0};
+  whole.Ratio = 2;
+  Entities::Ellipse part = whole;
+  part.Start = std::numbers::pi / 2;
+  part.End = std::numbers::pi;
+  Entities::Ellipse wrapped = whole;
+  wrapped.Start = std::numbers::pi / 4;
+  wrapped.End = 3 * std::numbers::pi / 4;
+  Entities::Ellipse flat = whole;
+  flat.Axis = Vector{};
+  REQUIRE(Edit::Add(drawing, whole));
+  REQUIRE(Edit::Add(drawing, wrapped));
+  REQUIRE(Edit::Add(drawing, flat));
+  REQUIRE(Edit::AddBlock(drawing, "PART"));
+  REQUIRE(Edit::Add(drawing, part, "PART"));
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Errors() == 4);
+  CHECK(seen.Findings.front().What == "ellipse ratio 2 not between 0 and 1");
+  CHECK(seen.Findings.front().Subject == BaseOf(drawing.Entities.front()).Self);
+  CHECK(Repair(drawing).Clean());
+  const auto &swapped = std::get<Entities::Ellipse>(drawing.Entities.front());
+  CHECK(swapped.Axis == Vector{.X = 0, .Y = 6, .Z = 0});
+  CHECK(swapped.Ratio == 0.5);
+  CHECK(swapped.Start == 0);
+  CHECK(swapped.End == Entities::Turn);
+  const auto &turned = std::get<Entities::Ellipse>(drawing.Entities.at(1));
+  CHECK(turned.Start == doctest::Approx(7 * std::numbers::pi / 4));
+  CHECK(turned.End == doctest::Approx(9 * std::numbers::pi / 4));
+  const auto &line = std::get<Entities::Ellipse>(drawing.Entities.at(2));
+  CHECK(line.Axis == Vector{});
+  CHECK(line.Ratio == 0.5);
+  const auto &arc = std::get<Entities::Ellipse>(Edit::FindBlock(drawing, "PART")->Entities.front());
+  CHECK(arc.Axis == Vector{.X = 0, .Y = 6, .Z = 0});
+  CHECK(arc.Start == doctest::Approx(0));
+  CHECK(arc.End == doctest::Approx(std::numbers::pi / 2));
+  CHECK(Check(drawing).Findings.empty());
+}
+
+TEST_CASE("audit: an ellipse whose ratio is 0 or less, or no number, takes the least one AutoCAD takes")
+{
+  for (const double ratio : {0.0, -1.0, std::numeric_limits<double>::quiet_NaN()})
+  {
+    CAPTURE(ratio);
+    Document drawing = Fresh();
+    Entities::Ellipse flat{};
+    flat.Ratio = ratio;
+    REQUIRE(Edit::Add(drawing, flat));
+    CHECK(Check(drawing).Errors() == 1);
+    CHECK(Repair(drawing).Clean());
+    CHECK(std::get<Entities::Ellipse>(drawing.Entities.front()).Ratio == 1e-6);
+    CHECK(Check(drawing).Findings.empty());
+  }
+  Document drawing = Fresh();
+  Entities::Ellipse round{};
+  round.Ratio = 1;
+  REQUIRE(Edit::Add(drawing, round));
+  CHECK(Check(drawing).Findings.empty());
 }
 
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")

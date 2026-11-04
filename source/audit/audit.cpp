@@ -33,6 +33,7 @@ auto Run(DocumentT &drawing) -> Report
   Applied(with);
   Referred(with);
   Meshed(with);
+  Curved(with);
   Sequenced(with);
   if constexpr (Auditor<DocumentT>::Fix)
   {
