@@ -107,6 +107,28 @@ TEST_CASE("add: a polyline's vertices take the flags its kind asks, their own fi
   CHECK(flags(3) == std::vector{192, 128, 128, 128, 128});
 }
 
+TEST_CASE("add: a block given an attribute definition that is not constant is flagged as holding them")
+{
+  Document drawing = Create();
+  REQUIRE(AddBlock(drawing, "TAGGED"));
+  REQUIRE(AddBlock(drawing, "FIXED"));
+  Entities::Attdef constant{};
+  constant.Flags = 2;
+  REQUIRE(Add(drawing, constant, "FIXED"));
+  CHECK(FindBlock(drawing, "FIXED")->Begin.Flags == 0);
+  REQUIRE(Add(drawing, Entities::Attdef{}, "TAGGED"));
+  CHECK(FindBlock(drawing, "TAGGED")->Begin.Flags == 2);
+  REQUIRE(Add(drawing, Entities::Attdef{}, "*Model_Space"));
+  CHECK(FindBlock(drawing, "*Model_Space")->Begin.Flags == 2);
+  REQUIRE(Add(drawing, Entities::Attdef{}, Space::Paper));
+  CHECK(FindBlock(drawing, "*Paper_Space")->Begin.Flags == 2);
+  REQUIRE(Add(drawing, Entities::Attdef{}, "TAGGED"));
+  CHECK(FindBlock(drawing, "TAGGED")->Begin.Flags == 2);
+  Document old = Create(Version::R12);
+  REQUIRE(Add(old, Entities::Attdef{}, Space::Model));
+  CHECK(FindBlock(old, "*Model_Space") == nullptr);
+}
+
 TEST_CASE("add: a record or a block with no name is refused")
 {
   Document drawing = Create();

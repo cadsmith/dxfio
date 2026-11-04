@@ -222,6 +222,13 @@ auto Asked(const Polyline &parent, const Vertex &one) -> int
   return Masked(parent.Flags, Spatial) != 0 ? kept + Space : kept;
 }
 
+auto Attributing(const Entity &one) -> bool
+{
+  constexpr int Constant = 2;
+  const auto *definition = std::get_if<Attdef>(&one);
+  return definition != nullptr && Masked(definition->Flags, Constant) == 0;
+}
+
 void Claim(Entity &one, Handle owner)
 {
   std::visit(

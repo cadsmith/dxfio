@@ -30,6 +30,8 @@ DXFIO_API void Claim(Entity &one, Handle owner);
 // The flags a vertex of that polyline carries: its own fitting bits, and the bit its polyline's kind asks, 32 of a
 // 3D polyline, 64 of a polygon mesh, 128 for a face of a polyface mesh and 64 with it for a vertex of one.
 [[nodiscard]] DXFIO_API auto Asked(const Polyline &parent, const Vertex &one) -> int;
+// Whether an entity is an ATTDEF that is not constant: one that makes its block an attributed block, flag 2.
+[[nodiscard]] DXFIO_API auto Attributing(const Entity &one) -> bool;
 DXFIO_API void Own(Entity &one, Seed &handles, Handle owner);
 DXFIO_API void Bare(Entity &one, bool extended = true);
 DXFIO_API void Loose(Entity &one, const std::set<Handle> &gone);

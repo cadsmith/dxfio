@@ -1,6 +1,7 @@
 #include "dxfio/edit/add.hpp"
 
 #include "entities/io.hpp"
+#include "masked.hpp"
 #include "seeding.hpp"
 
 #include "dxfio/edit/find.hpp"
@@ -70,6 +71,17 @@ void Closed(Entity &one)
       one);
 }
 
+constexpr int Attributed = 2;
+
+// Flags a block that takes an ATTDEF as holding attribute definitions, as AutoCAD does, else its inserts ignore them.
+void Tagged(Blocks::Block *block, const Entity &one)
+{
+  if (block != nullptr && Entities::Attributing(one) && Masked(block->Begin.Flags, Attributed) == 0)
+  {
+    block->Begin.Flags += Attributed;
+  }
+}
+
 auto Owned(Document &drawing, Entity &one, Handle owner) -> std::expected<Handle, Failure>
 {
   return Seeded(drawing).transform(
@@ -128,6 +140,7 @@ auto Add(Document &drawing, Entity one, Space space) -> std::expected<Handle, Fa
             {
               Entities::Claim(one, owner);
             }
+            Tagged(FindBlock(drawing, paper ? Paper : Model), one);
             drawing.Entities.push_back(std::move(one));
             return self;
           });
@@ -157,6 +170,7 @@ auto Add(Document &drawing, Entity one, std::string_view block) -> std::expected
             {
               Entities::Claim(one, owner);
             }
+            Tagged(found, one);
             found->Entities.push_back(std::move(one));
             return self;
           });
