@@ -549,6 +549,43 @@ TEST_CASE("audit: a $HANDSEED behind the handles in use, or none, is an error th
                              [](const Finding &one) -> bool { return one.What.contains("$HANDSEED"); }));
 }
 
+TEST_CASE("audit: a lineweight AutoCAD does not have takes the nearest it has, on entities and layers")
+{
+  Document drawing = Fresh();
+  Entities::Line heavy{};
+  heavy.Record.Lineweight = 284;
+  Entities::Line odd{};
+  odd.Record.Lineweight = -4;
+  Entities::Polyline chain{};
+  chain.Vertices.Children.push_back(Entities::Vertex{});
+  chain.Vertices.Children.front().Record.Lineweight = 7;
+  Entities::Line fine{};
+  fine.Record.Lineweight = 211;
+  REQUIRE(Edit::Add(drawing, heavy));
+  REQUIRE(Edit::Add(drawing, odd));
+  REQUIRE(Edit::Add(drawing, chain));
+  REQUIRE(Edit::Add(drawing, fine));
+  Tables::Layer walls{};
+  walls.Record.Name = "WALLS";
+  walls.Lineweight = 1000;
+  REQUIRE(Edit::Add(drawing, walls));
+  const Report seen = Check(drawing);
+  CHECK(seen.Errors() == 0);
+  REQUIRE(seen.Warnings() == 4);
+  CHECK(seen.Findings.at(0).What == "lineweight 1000 is none AutoCAD has, 211 taken");
+  CHECK(seen.Findings.at(0).Subject == Edit::Find(drawing.Layer, "WALLS")->Record.Base.Self);
+  CHECK(seen.Findings.at(1).What == "lineweight 284 is none AutoCAD has, 211 taken");
+  CHECK(seen.Findings.at(2).What == "lineweight -4 is none AutoCAD has, -3 taken");
+  CHECK(seen.Findings.at(3).What == "lineweight 7 is none AutoCAD has, 5 taken");
+  CHECK(Repair(drawing).Clean());
+  CHECK(Edit::Find(drawing.Layer, "WALLS")->Lineweight == 211);
+  CHECK(std::get<Entities::Line>(drawing.Entities.at(0)).Record.Lineweight == 211);
+  CHECK(std::get<Entities::Line>(drawing.Entities.at(1)).Record.Lineweight == -3);
+  CHECK(std::get<Entities::Polyline>(drawing.Entities.at(2)).Vertices.Children.front().Record.Lineweight == 5);
+  CHECK(std::get<Entities::Line>(drawing.Entities.at(3)).Record.Lineweight == 211);
+  CHECK(Check(drawing).Findings.empty());
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();

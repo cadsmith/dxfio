@@ -40,7 +40,8 @@ struct DXFIO_API Finding
 struct DXFIO_API Report
 {
   /// The findings, in the order the checks ran: $HANDSEED, handles, names, required records, applications, references,
-  /// meshes, ellipses, leaders, SEQENDs, blocks with attribute definitions, groups of no DXF code, classes.
+  /// lineweights, meshes, ellipses, leaders, SEQENDs, blocks with attribute definitions, groups of no DXF code,
+  /// classes.
   std::vector<Finding> Findings{};
 
   /// Whether no error is left unfixed: AutoCAD would open the drawing without recovering it.
@@ -59,16 +60,14 @@ struct DXFIO_API Report
 /// Runs the checks of Check and fixes what they find, in place: a missing or duplicate handle is replaced, a record
 /// or block with no name left out and an entity on a layer with none moved to layer 0, a missing layer or required
 /// record made, a layer with no plot style given the drawing's default one, an application named
-/// by extended data registered, a missing linetype, text style or dimension style set to ByLayer or Standard, an
-/// insert of a missing
-/// block left out, a mesh with no vertices or faces left out, one given one crease per edge, an ellipse's ratio
-/// brought between 0 and 1, a leader with fewer than two vertices left out,
-/// a POLYLINE or an INSERT with attributes given the SEQEND it lacks, its vertices the flags its kind asks, an
-/// INSERT's attributes said to follow it, a block holding attribute definitions flagged so, a group of a code DXF
-/// does not define left out, a
-/// kind of AutoCAD's own with no CLASS record given the one AutoCAD writes.
-/// A handle it gives comes past every handle in use, or, once the drawing holds the last handle there is, is the lowest
-/// one no record holds. It then moves $HANDSEED past the handles in use, adding it when the header has none.
+/// by extended data registered, a missing linetype, text style or dimension style set to ByLayer or Standard, a
+/// lineweight AutoCAD does not have set to the nearest it has, an insert of a missing block left out, a mesh with no
+/// vertices or faces left out, one given one crease per edge, an ellipse's ratio brought between 0 and 1, a leader with
+/// fewer than two vertices left out, a POLYLINE or an INSERT with attributes given the SEQEND it lacks, its vertices
+/// the flags its kind asks, an INSERT's attributes said to follow it, a block holding attribute definitions flagged so,
+/// a group of a code DXF does not define left out, a kind of AutoCAD's own with no CLASS record given the one AutoCAD
+/// writes. A handle it gives comes past every handle in use, or, once the drawing holds the last handle there is, is
+/// the lowest one no record holds. It then moves $HANDSEED past the handles in use, adding it when the header has none.
 DXFIO_API auto Repair(Document &drawing) -> Report;
 } // namespace DxfIO::Audit
 
