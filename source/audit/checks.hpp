@@ -82,6 +82,9 @@ void Curved(Auditor<DocumentT> &with);
 
 template <class DocumentT>
 void Sequenced(Auditor<DocumentT> &with);
+
+template <class DocumentT>
+void Classed(Auditor<DocumentT> &with);
 } // namespace DxfIO::Audit
 
 #endif /* DXFIO_AUDIT_CHECKS_HPP */
