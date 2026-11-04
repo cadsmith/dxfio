@@ -14,7 +14,7 @@ struct DXFIO_API PlotSettings
   /// The handle, owner, reactors and extended data.
   DxfIO::Base Base{};
   /// What the page setup plots and how; kept on the heap, so every object stays small.
-  Boxed<Objects::Plot> Plot;
+  Boxed<Objects::Plot> Plot{};
 
   auto operator==(const PlotSettings &) const -> bool = default;
 };

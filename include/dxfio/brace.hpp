@@ -14,9 +14,9 @@ namespace DxfIO
 struct DXFIO_API Brace
 {
   /// The name after the opening brace, such as "BLKREFS".
-  std::string Name;
+  std::string Name{};
   /// The groups between the opening and the closing 102, in their order.
-  std::vector<Group> Groups;
+  std::vector<Group> Groups{};
 
   auto operator==(const Brace &) const -> bool = default;
 };

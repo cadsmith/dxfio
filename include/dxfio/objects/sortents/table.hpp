@@ -16,7 +16,7 @@ struct DXFIO_API Entry
   /// The entity. Group 331.
   Handle Entity{};
   /// The handle the entity is drawn in the order of, in place of its own. Group 5.
-  std::optional<Handle> Key;
+  std::optional<Handle> Key{};
 
   auto operator==(const Entry &) const -> bool = default;
 };
@@ -32,7 +32,7 @@ struct DXFIO_API SortEntsTable
   /// The BLOCK_RECORD of the space whose entities it orders. Group 330.
   Handle Block{};
   /// The entities it moves in the draw order.
-  std::vector<Sortents::Entry> Entries;
+  std::vector<Sortents::Entry> Entries{};
 
   auto operator==(const SortEntsTable &) const -> bool = default;
 };

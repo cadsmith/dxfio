@@ -14,9 +14,9 @@ template <class ChildT>
 struct Sequence
 {
   /// The vertices or attributes, in the order they come.
-  std::vector<ChildT> Children;
+  std::vector<ChildT> Children{};
   /// The SEQEND that closes them, or none when the file had none.
-  std::optional<Boxed<Entities::Seqend>> Closing;
+  std::optional<Boxed<Entities::Seqend>> Closing{};
 
   auto operator==(const Sequence &) const -> bool = default;
 };

@@ -35,9 +35,9 @@ struct DXFIO_API Layer
   /// The material of the layer's entities. Group 347, from R2007.
   Handle Material{};
   /// The true color as 0xRRGGBB, when the layer has one. Group 420, from R2004.
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
   /// The color book and the color's name in it, joined by a $, when the color comes from one. Group 430, from R2004.
-  std::optional<std::string> Book;
+  std::optional<std::string> Book{};
   /// A handle AutoCAD writes with no published meaning, usually none. Group 348, from R2013.
   Handle Spare{};
 

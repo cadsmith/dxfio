@@ -34,25 +34,25 @@ struct DXFIO_API Gap
 struct DXFIO_API Stem
 {
   /// The vertices, in world coordinates. Groups 10, 20, 30.
-  std::vector<Vector> Points;
+  std::vector<Vector> Points{};
   /// The breaks in its segments, each opened by group 90.
-  std::vector<Gap> Gaps;
+  std::vector<Gap> Gaps{};
   /// The line's index in its leader. Group 91.
   int Index{};
   /// The color of the line, as a packed color, when it has its own. Group 92.
-  std::optional<int> Color;
+  std::optional<int> Color{};
   /// The line type, when it has its own: 0 invisible, 1 straight, 2 spline. Group 170.
-  std::optional<int> Kind;
+  std::optional<int> Kind{};
   /// The linetype of the line, when it has its own. Group 340.
   Handle Linetype{};
   /// The lineweight of the line, when it has its own. Group 171.
-  std::optional<int> Lineweight;
+  std::optional<int> Lineweight{};
   /// The size of the arrowhead, when it has its own. Group 40.
-  std::optional<double> Arrow;
+  std::optional<double> Arrow{};
   /// The block that draws the arrowhead, when it has its own. Group 341.
   Handle Head{};
   /// Which properties the line has of its own, as bits. Group 94.
-  std::optional<int> Overrides;
+  std::optional<int> Overrides{};
 
   auto operator==(const Stem &) const -> bool = default;
 };
@@ -80,13 +80,13 @@ struct DXFIO_API Branch
   /// The direction of the dogleg. Groups 11, 21, 31.
   Vector Dogleg{.X = 1};
   /// The breaks in the dogleg, each opened by group 12.
-  std::vector<Span> Spans;
+  std::vector<Span> Spans{};
   /// The leader's index. Group 90.
   int Index{};
   /// The length of the dogleg. Group 40.
   double Length{};
   /// The leader lines, each between group 304 LEADER_LINE{ and group 305.
-  std::vector<Stem> Stems;
+  std::vector<Stem> Stems{};
   /// How the leader attaches to the content: 0 horizontally, 1 vertically. Group 271, from R2010.
   int Attachment{};
 
@@ -117,7 +117,7 @@ struct DXFIO_API Note
   /// Whether the content is text, which the groups from Text to Breaks then describe. Group 290.
   bool Texted{};
   /// What the text says, with its MTEXT formatting codes. Group 304.
-  std::string Text;
+  std::string Text{};
   /// The normal of the text's plane. Groups 11, 21, 31.
   Vector Normal{Up};
   /// The text style. Group 340.
@@ -163,7 +163,7 @@ struct DXFIO_API Note
   /// Whether the text flows through the columns in reverse. Group 294.
   bool Reversed{};
   /// The height of each column. Group 144.
-  std::vector<double> Heights;
+  std::vector<double> Heights{};
   /// Whether words break at the edge of the frame. Group 295.
   bool Breaks{};
   /// Whether the content is a block, which the groups from Block to Frame then describe. Group 296.
@@ -191,7 +191,7 @@ struct DXFIO_API Note
   /// Whether the normal of the MULTILEADER's plane is reversed. Group 297.
   bool Flipped{};
   /// The leaders, each between group 302 LEADER{ and group 303.
-  std::vector<Branch> Branches;
+  std::vector<Branch> Branches{};
   /// How text attaches to a leader below it, 9 at its center. Group 272, from R2010.
   int Bottom{9};
   /// How text attaches to a leader above it, 9 at its center. Group 273, from R2010.
@@ -221,7 +221,7 @@ struct DXFIO_API Label
   /// The width of the attribute's text. Group 44.
   double Width{};
   /// The value the attribute takes. Group 302.
-  std::string Text;
+  std::string Text{};
 
   auto operator==(const Label &) const -> bool = default;
 };
@@ -284,9 +284,9 @@ struct DXFIO_API Callout
   /// Whether the MULTILEADER is annotative. Group 293.
   bool Annotative{};
   /// The arrowheads of the leader lines, each opened by group 94.
-  std::vector<Tip> Tips;
+  std::vector<Tip> Tips{};
   /// The values of the block's attributes, each opened by group 330.
-  std::vector<Label> Labels;
+  std::vector<Label> Labels{};
   /// Whether the text runs in the negative direction. Group 294.
   bool Negative{};
   /// The alignment of the text while it is edited in place. Group 178.
@@ -313,9 +313,9 @@ struct DXFIO_API MultiLeader
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The leaders, their content and what they override of their style, from the AcDbMLeader subclass.
-  Boxed<Entities::Callout> Callout;
+  Boxed<Entities::Callout> Callout{};
 
   auto operator==(const MultiLeader &) const -> bool = default;
 };

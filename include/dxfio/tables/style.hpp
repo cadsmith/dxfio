@@ -30,7 +30,7 @@ struct DXFIO_API Style
   /// The font file, such as "txt" or "arial.ttf". Group 3.
   std::string Font{"txt"};
   /// The big font file for Asian characters; empty for none. Group 4.
-  std::string Bigfont;
+  std::string Bigfont{};
 
   auto operator==(const Style &) const -> bool = default;
 };

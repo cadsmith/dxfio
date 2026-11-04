@@ -19,7 +19,7 @@ struct DXFIO_API Frame
   /// The OLE version. Group 70.
   int Version{2};
   /// The description of the object, such as the kind of document it is. Group 3.
-  std::string Description;
+  std::string Description{};
   /// The upper-left corner, in world coordinates. Groups 10, 20, 30.
   Vector Upper{};
   /// The lower-right corner, in world coordinates. Groups 11, 21, 31.
@@ -29,7 +29,7 @@ struct DXFIO_API Frame
   /// 0 in model space, 1 in paper space. Group 72.
   int Space{};
   /// The bytes of the OLE object. Groups 90 and 310.
-  std::string Data;
+  std::string Data{};
 
   auto operator==(const Frame &) const -> bool = default;
 };
@@ -40,7 +40,7 @@ struct DXFIO_API Ole2Frame
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The frame and the object, from the AcDbOle2Frame subclass.
-  Boxed<Entities::Frame> Frame;
+  Boxed<Entities::Frame> Frame{};
 
   auto operator==(const Ole2Frame &) const -> bool = default;
 };

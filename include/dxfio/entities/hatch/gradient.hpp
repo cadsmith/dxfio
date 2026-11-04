@@ -15,9 +15,9 @@ struct DXFIO_API Stop
   /// Where the color lies along the gradient, 0 to 1. Group 463.
   double Place{};
   /// The AutoCAD Color Index of the color, when it has one. Group 63.
-  std::optional<int> Color;
+  std::optional<int> Color{};
   /// The true color, as 0xRRGGBB, when it has one. Group 421.
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
 
   auto operator==(const Stop &) const -> bool = default;
 };
@@ -38,9 +38,9 @@ struct DXFIO_API Gradient
   /// How far a gradient of one color is tinted, 0 to 1. Group 462.
   double Tint{};
   /// The colors; group 453 counts them.
-  std::vector<Stop> Stops;
+  std::vector<Stop> Stops{};
   /// The name of the gradient, such as LINEAR or SPHERICAL. Group 470.
-  std::string Name;
+  std::string Name{};
 
   auto operator==(const Gradient &) const -> bool = default;
 };

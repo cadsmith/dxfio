@@ -34,7 +34,7 @@ struct DXFIO_API Dash
   /// How far the shape or text is moved across the line. Group 45, from R13.
   double Across{};
   /// The text drawn, when Flags has 2. Group 9, from R13.
-  std::string Text;
+  std::string Text{};
 
   auto operator==(const Dash &) const -> bool = default;
 };
@@ -45,13 +45,13 @@ struct DXFIO_API Ltype
   /// The name, flags and handles every table record carries.
   Tables::Record Record{};
   /// The text that tells what the pattern looks like, such as "__ __ __". Group 3.
-  std::string Description;
+  std::string Description{};
   /// How the pattern fits the line; always 'A'. Group 72.
   int Alignment{Aligned};
   /// The length of the whole pattern. Group 40.
   double Length{};
   /// The elements of the pattern, in order; their count is group 73.
-  std::vector<Tables::Dash> Dashes;
+  std::vector<Tables::Dash> Dashes{};
 
   auto operator==(const Ltype &) const -> bool = default;
 };

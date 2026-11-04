@@ -21,7 +21,7 @@ struct DXFIO_API Lettering
   /// The height of the letters, in drawing units. Group 40.
   double Height{};
   /// What the text says, with its control codes such as %%d. Group 1.
-  std::string Value;
+  std::string Value{};
   /// The rotation, in degrees. Group 50.
   double Rotation{};
   /// The relative width of the letters, 1 for the style's own. Group 41.
@@ -35,7 +35,7 @@ struct DXFIO_API Lettering
   /// The horizontal justification: 0 left, 1 center, 2 right, 3 aligned, 4 middle, 5 fit. Group 72.
   int Horizontal{};
   /// The second alignment point, which justified text keeps to; none for text aligned left. Groups 11, 21, 31.
-  std::optional<Vector> Alignment;
+  std::optional<Vector> Alignment{};
   /// The normal of the plane the entity is drawn in. Groups 210, 220, 230.
   Vector Extrusion{Up};
 

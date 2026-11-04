@@ -18,7 +18,7 @@ struct DXFIO_API BlockRecord
   Handle Layout{};
   /// The INSERT entities of the block, as AutoCAD lists them in a 102 {BLKREFS brace after 340: group 331
   /// each, from R2000. Empty writes no brace.
-  std::vector<Handle> Inserts;
+  std::vector<Handle> Inserts{};
   /// The units the block is inserted in, as $INSUNITS gives them: 0 none, 1 inches, 4 millimeters and so on.
   /// Group 70, from R2007.
   int Units{};

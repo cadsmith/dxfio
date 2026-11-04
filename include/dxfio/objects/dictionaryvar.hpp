@@ -16,7 +16,7 @@ struct DXFIO_API DictionaryVar
   /// The schema number of the object, 0 as AutoCAD writes it. Group 280.
   int Schema{};
   /// The variable's value, as text. Group 1.
-  std::string Value;
+  std::string Value{};
 
   auto operator==(const DictionaryVar &) const -> bool = default;
 };

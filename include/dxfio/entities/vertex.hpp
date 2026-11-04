@@ -18,9 +18,9 @@ struct DXFIO_API Vertex
   /// Groups 10, 20, 30.
   Vector Position{};
   /// The width the segment from this vertex starts with, when it has its own. Group 40.
-  std::optional<double> Start;
+  std::optional<double> Start{};
   /// The width the segment from this vertex ends with, when it has its own. Group 41.
-  std::optional<double> End;
+  std::optional<double> End{};
   /// The bulge of the segment to the next vertex: the tangent of a quarter of its arc's angle, 0 when straight.
   /// Group 42.
   double Bulge{};

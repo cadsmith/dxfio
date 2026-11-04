@@ -15,9 +15,9 @@ struct UnderlayDefinition
   /// The handle, owner, reactors and extended data.
   DxfIO::Base Base{};
   /// The path of the file. Group 1.
-  std::string File;
+  std::string File{};
   /// The part of the file shown: a PDF's page, a DWF's sheet or a DGN's model. Group 2.
-  std::string Name;
+  std::string Name{};
 
   auto operator==(const UnderlayDefinition &) const -> bool = default;
 };

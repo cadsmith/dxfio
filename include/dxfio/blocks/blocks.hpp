@@ -14,7 +14,7 @@ struct DXFIO_API Block
   /// The BLOCK that opens the block, with its name, flags and base point.
   Blocks::Begin Begin{};
   /// The entities of the block, in the order they are drawn.
-  DxfIO::Entities::List Entities;
+  DxfIO::Entities::List Entities{};
   /// The ENDBLK that closes the block.
   Blocks::End End{};
 

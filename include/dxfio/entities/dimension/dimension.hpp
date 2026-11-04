@@ -112,7 +112,7 @@ struct DXFIO_API Figure
   /// The block, the text and the plane, from the AcDbDimension subclass.
   Entities::Measure Measure{};
   /// The kind of dimension and its points, from the subclass of that kind.
-  Forms::Form Form;
+  Forms::Form Form{};
 
   auto operator==(const Figure &) const -> bool = default;
 };
@@ -123,7 +123,7 @@ struct DXFIO_API Dimension
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// What the dimension measures and how it is drawn.
-  Boxed<Entities::Figure> Figure;
+  Boxed<Entities::Figure> Figure{};
 
   auto operator==(const Dimension &) const -> bool = default;
 };
@@ -161,9 +161,9 @@ struct DXFIO_API ArcDimension
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The arc measured and how the dimension is drawn, from the AcDbArcDimension subclass.
-  Boxed<Entities::Bend> Bend;
+  Boxed<Entities::Bend> Bend{};
 
   auto operator==(const ArcDimension &) const -> bool = default;
 };
@@ -191,9 +191,9 @@ struct DXFIO_API LargeRadialDimension
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The curve measured and the jog, from the AcDbRadialDimensionLarge subclass.
-  Boxed<Entities::Jog> Jog;
+  Boxed<Entities::Jog> Jog{};
 
   auto operator==(const LargeRadialDimension &) const -> bool = default;
 };

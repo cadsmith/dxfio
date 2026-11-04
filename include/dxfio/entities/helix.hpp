@@ -44,9 +44,9 @@ struct DXFIO_API Helix
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The spline that draws the helix, from the AcDbSpline subclass.
-  Boxed<Entities::Curve> Curve;
+  Boxed<Entities::Curve> Curve{};
   /// The axis, radius and turns, from the AcDbHelix subclass.
   Entities::Coil Coil{};
 

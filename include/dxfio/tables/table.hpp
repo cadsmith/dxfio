@@ -14,7 +14,7 @@ struct Table
   /// The TABLE record that opens the table.
   Tables::Head Head{};
   /// The records of the table, in the order the file gives them.
-  std::vector<RecordT> Records;
+  std::vector<RecordT> Records{};
 
   auto operator==(const Table &) const -> bool = default;
 };

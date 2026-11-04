@@ -19,7 +19,7 @@ struct DXFIO_API Lamp
   /// The version of the light's layout. Group 90.
   int Version{1};
   /// The name of the light. Group 1.
-  std::string Name;
+  std::string Name{};
   /// 1 distant, 2 point, 3 spot. Group 70.
   int Kind{2};
   /// Whether the light is on. Group 290.
@@ -66,9 +66,9 @@ struct DXFIO_API Light
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The kind, color and place of the light, from the AcDbLight subclass.
-  Boxed<Entities::Lamp> Lamp;
+  Boxed<Entities::Lamp> Lamp{};
 
   auto operator==(const Light &) const -> bool = default;
 };

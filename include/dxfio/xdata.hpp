@@ -13,9 +13,9 @@ namespace DxfIO
 struct DXFIO_API Xdata
 {
   /// The application's name, as the APPID table registers it, such as "ACAD".
-  std::string Application;
+  std::string Application{};
   /// The groups after the 1001, in their order.
-  std::vector<Group> Groups;
+  std::vector<Group> Groups{};
 
   auto operator==(const Xdata &) const -> bool = default;
 };

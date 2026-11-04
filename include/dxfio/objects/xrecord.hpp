@@ -17,7 +17,7 @@ struct DXFIO_API XRecord
   /// What cloning does with a name already taken, as a dictionary's. Group 280, the first.
   int Cloning{1};
   /// The application's groups, in the order they came.
-  std::vector<DxfIO::Group> Data;
+  std::vector<DxfIO::Group> Data{};
 
   auto operator==(const XRecord &) const -> bool = default;
 };

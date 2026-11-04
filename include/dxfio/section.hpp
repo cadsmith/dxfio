@@ -13,9 +13,9 @@ namespace DxfIO
 struct DXFIO_API Section
 {
   /// The name its 2 group gives, such as "THUMBNAILIMAGE".
-  std::string Name;
+  std::string Name{};
   /// The groups between its name and its ENDSEC, in their order.
-  std::vector<Group> Groups;
+  std::vector<Group> Groups{};
 
   auto operator==(const Section &) const -> bool = default;
 };

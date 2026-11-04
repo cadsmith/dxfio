@@ -29,11 +29,11 @@ struct DXFIO_API Record
   /// The AutoCAD Color Index: 1 to 255, 0 for ByBlock, 256 for ByLayer. Group 62.
   int Color{Colors::Bylayer};
   /// The true color as 0xRRGGBB, when the entity has one. Group 420, from R2004.
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
   /// The color book and the color's name in it, joined by a $, when the color comes from one. Group 430, from R2004.
-  std::optional<std::string> Book;
+  std::optional<std::string> Book{};
   /// The transparency, when the entity has its own rather than its layer's. Group 440, from R2004.
-  std::optional<int> Transparency;
+  std::optional<int> Transparency{};
   /// The scale of the linetype for this entity. Group 48, from R13.
   double Scale{1};
   /// Whether the entity is invisible. Group 60, from R13.

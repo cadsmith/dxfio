@@ -13,9 +13,9 @@ namespace DxfIO::Header
 struct DXFIO_API Variable
 {
   /// The name, with its leading $, such as "$ACADVER". Group 9.
-  std::string Name;
+  std::string Name{};
   /// The groups of its value, as they follow the name: one group 1 for $ACADVER, groups 10, 20, 30 for a point.
-  std::vector<Group> Values;
+  std::vector<Group> Values{};
 
   auto operator==(const Variable &) const -> bool = default;
 };

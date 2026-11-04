@@ -14,7 +14,7 @@ struct DXFIO_API Record
   /// The handle, owner, reactors and extended data.
   DxfIO::Base Base{};
   /// The name entities and other records know the record by. Group 2.
-  std::string Name;
+  std::string Name{};
   /// Bits: 16 when the record comes from an xref, 32 once that xref is resolved, 64 when an entity used it
   /// the last time the drawing was edited; the low bits are the table's own, such as a frozen layer's 1. Group 70.
   int Flags{};
