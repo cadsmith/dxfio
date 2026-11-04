@@ -327,6 +327,41 @@ TEST_CASE("audit: a kind's CLASS is asked for in the releases AutoCAD writes it,
   CHECK(Check(old).Findings.empty());
 }
 
+TEST_CASE("audit: a dimension style named nowhere becomes the standard one, on every kind that names one")
+{
+  Document drawing = Fresh();
+  Entities::Dimension dimension{};
+  dimension.Figure->Measure.Style = Symbol{"NOPE"};
+  Entities::ArcDimension arc{};
+  arc.Bend->Measure.Style = Symbol{"NOPE"};
+  Entities::LargeRadialDimension jogged{};
+  jogged.Jog->Measure.Style = Symbol{"NOPE"};
+  Entities::Leader leader{};
+  leader.Lead->Style = Symbol{"NOPE"};
+  Entities::Tolerance tolerance{};
+  tolerance.Style = Symbol{"NOPE"};
+  Entities::Dimension fine{};
+  fine.Figure->Measure.Style = Symbol{"standard"};
+  REQUIRE(Edit::Add(drawing, dimension));
+  REQUIRE(Edit::Add(drawing, arc));
+  REQUIRE(Edit::Add(drawing, jogged));
+  REQUIRE(Edit::Add(drawing, leader));
+  REQUIRE(Edit::Add(drawing, tolerance));
+  REQUIRE(Edit::Add(drawing, fine));
+  const Report seen = Check(drawing);
+  CHECK(seen.Warnings() == 5);
+  CHECK(seen.Findings.front().What == "dimension style NOPE missing");
+  CHECK(seen.Findings.front().Subject == BaseOf(drawing.Entities.front()).Self);
+  REQUIRE(Repair(drawing).Warnings() == 5);
+  CHECK(std::get<Entities::Dimension>(drawing.Entities.at(0)).Figure->Measure.Style.View() == "Standard");
+  CHECK(std::get<Entities::ArcDimension>(drawing.Entities.at(1)).Bend->Measure.Style.View() == "Standard");
+  CHECK(std::get<Entities::LargeRadialDimension>(drawing.Entities.at(2)).Jog->Measure.Style.View() == "Standard");
+  CHECK(std::get<Entities::Leader>(drawing.Entities.at(3)).Lead->Style.View() == "Standard");
+  CHECK(std::get<Entities::Tolerance>(drawing.Entities.at(4)).Style.View() == "Standard");
+  CHECK(std::get<Entities::Dimension>(drawing.Entities.at(5)).Figure->Measure.Style.View() == "standard");
+  CHECK(Check(drawing).Findings.empty());
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();
