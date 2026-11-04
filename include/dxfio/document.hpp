@@ -29,7 +29,8 @@ namespace DxfIO
 /// A table whose head has no name, as when the file had no such table, is not written.
 struct DXFIO_API Document
 {
-  /// The names of the sections, such as "HEADER", in the order the file gave them. Save writes these, in this order.
+  /// The names of the sections, such as "HEADER", in the order the file gave them. Save writes these, in this order,
+  /// and after them any other section the drawing holds something for, each where DXF puts it.
   std::vector<std::string> Order{};
   /// The HEADER section: each $ variable with its groups, in the order the file gave them.
   std::vector<Header::Variable> Header{};

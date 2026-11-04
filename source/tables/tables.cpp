@@ -90,11 +90,22 @@ void Filled(const File::Nest &one, const Tables::Head &head, const Filling &into
   into.Drawing->*Member = Tabled<KindT>(one, head, into);
 }
 
+// Writes a table whose head is named, or whose records need it, then named for its kind.
 template <class KindT, Table<KindT> Document::*Member>
 auto Written(Fields::Writing &to, const Document &from) -> std::expected<void, Failure>
 {
   const Table<KindT> &one = from.*Member;
-  return one.Head.Name.empty() ? std::expected<void, Failure>{} : Wrote(to, one);
+  if (!one.Head.Name.empty())
+  {
+    return Wrote(to, one);
+  }
+  if (one.Records.empty())
+  {
+    return {};
+  }
+  Table<KindT> named = one;
+  named.Head.Name = Type<KindT>;
+  return Wrote(to, named);
 }
 
 void Loose(const File::Nest &one, const Tables::Head &head, const Filling &into)
