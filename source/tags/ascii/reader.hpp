@@ -28,6 +28,8 @@ public:
 
 private:
   auto Line() -> std::string_view;
+  // A group 0 value without the blanks around it, which AutoCAD's viewer reads past; told when there were any.
+  auto Bare(std::string_view text, std::size_t line) -> std::string_view;
   void Tell(Issue issue);
 
   std::string_view m_Text;

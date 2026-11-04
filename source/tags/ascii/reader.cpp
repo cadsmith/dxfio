@@ -74,7 +74,7 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
   {
     return std::unexpected{Failure{.Line = at, .What = "value missing after the last group code"}};
   }
-  const std::string_view text = Line();
+  const std::string_view text = *code == 0 ? Bare(Line(), at + 1) : Line();
   const std::expected<Content, std::string_view> value = Parse(Codes::Of(*code), text);
   if (!value)
   {
@@ -94,6 +94,16 @@ auto Reader::Line() -> std::string_view
   m_At += end + Ending(rest.substr(end));
   ++m_Line;
   return rest.substr(0, end);
+}
+
+auto Reader::Bare(std::string_view text, std::size_t line) -> std::string_view
+{
+  const std::string_view word = Trimmed(text);
+  if (word.size() != text.size())
+  {
+    Tell(Issue{.Line = line, .What = std::format("group 0 holds \"{}\" with blanks, trimmed", Glimpse(text))});
+  }
+  return word;
 }
 
 void Reader::Tell(Issue issue)

@@ -171,6 +171,17 @@ TEST_CASE("load: a chunk that is not hex is left out and told, so what loads sav
   CHECK(Tests::Written(read->Document, {.Release = Version::R2000, .Binary = true}));
 }
 
+TEST_CASE("load: a blank after a section word or a record name is trimmed and told")
+{
+  const auto read = Load("  0\nSECTION \n  2\nENTITIES\n  0\nLINE \n  0\nENDSEC \n  0\nEOF \n");
+  REQUIRE(read);
+  CHECK(read->Document.Order == std::vector<std::string>{"ENTITIES"});
+  REQUIRE(read->Document.Entities.size() == 1);
+  CHECK(std::holds_alternative<Entities::Line>(read->Document.Entities.front()));
+  CHECK(read->Issues.size() == 4);
+  CHECK(read->Issues.front() == Issue{.Line = 2, .What = "group 0 holds \"SECTION \" with blanks, trimmed"});
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==
