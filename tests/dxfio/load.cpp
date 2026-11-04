@@ -276,6 +276,15 @@ TEST_CASE("load: a code page named as DWG names it reads its text")
   CHECK(text->Lettering.Value == "\xea\xb0\x80");
 }
 
+TEST_CASE("load: a group of a code DXF does not define is kept with the record, and told")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n250\n2\n  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  REQUIRE(read->Document.Entities.size() == 1);
+  CHECK(BaseOf(read->Document.Entities.front()).Extra == std::vector{Group{.Code = 250, .Value = std::string{"2"}}});
+  CHECK(read->Issues == std::vector{Issue{.Line = 7, .What = "group 250 is no DXF group, kept"}});
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

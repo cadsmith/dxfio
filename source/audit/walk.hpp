@@ -2,6 +2,7 @@
 #define DXFIO_AUDIT_WALK_HPP
 
 #include "../based.hpp"
+#include "../objects/shapes/defaulted.hpp"
 #include "ascii.hpp"
 #include "entities/io.hpp"
 

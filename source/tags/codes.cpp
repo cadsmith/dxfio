@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <utility>
 
 namespace DxfIO::Tags::Codes
 {
@@ -29,6 +30,19 @@ constexpr std::array Ranges{
     Range{.First = 160, .Last = 169, .Is = Type::Int64},    Range{.First = 290, .Last = 299, .Is = Type::Boolean},
 };
 } // namespace
+
+// The codes the DXF reference defines, as the ranges of its table of group code value types.
+constexpr std::array<std::pair<int, int>, 27> Given{{
+    {0, 59},    {60, 79},   {90, 99},   {100, 102}, {105, 105}, {110, 149},   {160, 169},   {170, 179},   {210, 239},
+    {270, 309}, {310, 369}, {370, 389}, {390, 399}, {400, 409}, {410, 419},   {420, 429},   {430, 439},   {440, 449},
+    {450, 459}, {460, 469}, {470, 479}, {480, 481}, {999, 999}, {1000, 1009}, {1010, 1059}, {1060, 1070}, {1071, 1071},
+}};
+
+auto Defined(int code) -> bool
+{
+  return std::ranges::any_of(Given, [code](const std::pair<int, int> &range) -> bool
+                             { return code >= range.first && code <= range.second; });
+}
 
 auto Of(int code) -> Type
 {

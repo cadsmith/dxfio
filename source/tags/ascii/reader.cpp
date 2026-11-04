@@ -85,6 +85,10 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
     });
     return std::optional<Tag>{};
   }
+  if (!Codes::Defined(*code))
+  {
+    Tell(Issue{.Line = at, .What = std::format("group {} is no DXF group, kept", *code)});
+  }
   return std::optional{Tag{.Code = *code, .Value = *value, .Line = at}};
 }
 

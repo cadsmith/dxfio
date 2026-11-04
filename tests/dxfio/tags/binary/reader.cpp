@@ -157,6 +157,18 @@ TEST_CASE("binary: a real that is not finite is left out and told, the rest read
   }
 }
 
+TEST_CASE("binary: a group of a code DXF does not define is kept and told")
+{
+  std::string bytes;
+  Code(bytes, true, 0);
+  Put(bytes, std::string_view{"LINE"});
+  Code(bytes, true, 250);
+  Put(bytes, std::string_view{"2"});
+  std::vector<Issue> issues;
+  CHECK(Read(bytes, &issues).size() == 2);
+  CHECK(issues == std::vector{Issue{.Line = 0, .What = "group 250 is no DXF group, kept"}});
+}
+
 TEST_CASE("binary: a code past the last there is is a failure")
 {
   std::string bytes;

@@ -38,6 +38,7 @@ auto Run(DocumentT &drawing) -> Report
   Led(with);
   Sequenced(with);
   Attributed(with);
+  Grouped(with);
   Classed(with);
   if constexpr (Auditor<DocumentT>::Fix)
   {

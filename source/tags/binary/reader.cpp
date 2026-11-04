@@ -154,6 +154,10 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
     Tell(Issue{.Line = 0, .What = std::format("group {} is no finite number, left out", *group)});
     return std::optional<Tag>{};
   }
+  if (!Codes::Defined(*group))
+  {
+    Tell(Issue{.Line = 0, .What = std::format("group {} is no DXF group, kept", *group)});
+  }
   return std::optional{Tag{.Code = *group, .Value = *value}};
 }
 
