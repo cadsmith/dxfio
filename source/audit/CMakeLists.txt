@@ -1,5 +1,6 @@
 target_sources(dxfio
   PRIVATE
+    applications.cpp
     audit.cpp
     handles.cpp
     meshes.cpp

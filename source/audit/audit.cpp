@@ -30,6 +30,7 @@ auto Run(DocumentT &drawing) -> Report
   }
   Handled(with);
   Tabled(with);
+  Applied(with);
   Referred(with);
   Meshed(with);
   Sequenced(with);
