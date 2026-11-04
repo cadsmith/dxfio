@@ -31,7 +31,7 @@ void Walk::Spend()
   m_Used.assign(m_Body.size(), true);
 }
 
-auto Walk::Kept() const -> std::vector<Group>
+auto Walk::Kept() -> std::vector<Group>
 {
   std::vector<Group> out;
   bool beyond = false;
@@ -55,7 +55,7 @@ auto Walk::Kept() const -> std::vector<Group>
   return out;
 }
 
-auto Walk::Dropped(std::size_t at, int code, Standing where) const -> std::optional<std::string>
+auto Walk::Dropped(std::size_t at, int code, Standing where) -> std::optional<std::string>
 {
   if (!m_Unfit.at(at) && m_Repeats.Repeated(at, code))
   {
@@ -65,8 +65,15 @@ auto Walk::Dropped(std::size_t at, int code, Standing where) const -> std::optio
   {
     return std::nullopt;
   }
-  return std::format("group {} {}", code,
-                     m_Unfit.at(at) ? "holds no value its field takes" : "out of its place, dropped");
+  if (m_Unfit.at(at))
+  {
+    return std::format("group {} holds no value its field takes", code);
+  }
+  // A group of a code the kind names, outside the part that names it: the record does not fit its layout.
+  // A kind read through Taking is then kept as Unknown, whole; one read through Taken keeps its fields and
+  // loses the group, and is told.
+  m_Refused = true;
+  return std::format("group {} out of its place, dropped", code);
 }
 
 auto Walk::Opening() const -> std::size_t
