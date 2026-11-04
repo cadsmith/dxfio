@@ -4,9 +4,12 @@
 #include "names.hpp"
 #include "walk.hpp"
 
+#include "dxfio/entities/tolerance.hpp"
+
 #include <algorithm>
 #include <format>
 #include <string_view>
+#include <type_traits>
 #include <variant>
 
 namespace DxfIO::Audit
@@ -27,6 +30,7 @@ struct Known
   Names Layers;
   Names Linetypes;
   Names Styles;
+  Names Dimstyles;
   Names Blocks;
 };
 
@@ -79,6 +83,20 @@ void Styled(Known<DocumentT> &known, SymbolT &style, Handle self)
     return;
   }
   known.With->Note(Severity::Warning, std::format("text style {} missing", style.View()), self);
+  if constexpr (Auditor<DocumentT>::Fix)
+  {
+    style = Symbol{Standard};
+  }
+}
+
+template <class DocumentT, class SymbolT>
+void Dimstyled(Known<DocumentT> &known, SymbolT &style, Handle self)
+{
+  if (known.Dimstyles.contains(style.View()))
+  {
+    return;
+  }
+  known.With->Note(Severity::Warning, std::format("dimension style {} missing", style.View()), self);
   if constexpr (Auditor<DocumentT>::Fix)
   {
     style = Symbol{Standard};
@@ -140,6 +158,26 @@ void Looked(Known<DocumentT> &known, KindT &kind)
   {
     Styled(known, kind.Lettering->Style, kind.Record.Base.Self);
   }
+  if constexpr (requires { kind.Figure->Measure.Style; })
+  {
+    Dimstyled(known, kind.Figure->Measure.Style, kind.Record.Base.Self);
+  }
+  if constexpr (requires { kind.Bend->Measure.Style; })
+  {
+    Dimstyled(known, kind.Bend->Measure.Style, kind.Record.Base.Self);
+  }
+  if constexpr (requires { kind.Jog->Measure.Style; })
+  {
+    Dimstyled(known, kind.Jog->Measure.Style, kind.Record.Base.Self);
+  }
+  if constexpr (requires { kind.Lead->Style; })
+  {
+    Dimstyled(known, kind.Lead->Style, kind.Record.Base.Self);
+  }
+  if constexpr (std::is_same_v<std::remove_cvref_t<KindT>, Entities::Tolerance>)
+  {
+    Dimstyled(known, kind.Style, kind.Record.Base.Self);
+  }
   if constexpr (requires { kind.Vertices.Children; })
   {
     Carried(known, kind.Vertices);
@@ -166,6 +204,7 @@ void Referred(Auditor<DocumentT> &with)
       .Layers = Named(drawing.Layer),
       .Linetypes = Named(drawing.Ltype),
       .Styles = Named(drawing.Style),
+      .Dimstyles = Named(drawing.Dimstyle),
       .Blocks = Defined(drawing.Blocks),
   };
   Lists(*with.Drawing,
