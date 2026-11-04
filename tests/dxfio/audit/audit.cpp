@@ -338,6 +338,7 @@ TEST_CASE("audit: a dimension style named nowhere becomes the standard one, on e
   jogged.Jog->Measure.Style = Symbol{"NOPE"};
   Entities::Leader leader{};
   leader.Lead->Style = Symbol{"NOPE"};
+  leader.Lead->Points = {Vector{}, Vector{.X = 1}};
   Entities::Tolerance tolerance{};
   tolerance.Style = Symbol{"NOPE"};
   Entities::Dimension fine{};
@@ -423,6 +424,32 @@ TEST_CASE("audit: a record or a block with no name is left out, what named it fa
   CHECK(lined.Record.Linetype.View() == "ByLayer");
   CHECK(std::get<Entities::Text>(drawing.Entities.at(1)).Lettering.Style.View() == "Standard");
   CHECK(std::get<Entities::Leader>(drawing.Entities.at(2)).Lead->Style.View() == "Standard");
+  CHECK(Check(drawing).Findings.empty());
+}
+
+TEST_CASE("audit: a leader with fewer than two vertices is left out")
+{
+  Document drawing = Fresh();
+  Entities::Leader none{};
+  none.Lead->Style = Symbol{"Standard"};
+  Entities::Leader one = none;
+  one.Lead->Points = {Vector{}};
+  Entities::Leader two = none;
+  two.Lead->Points = {Vector{}, Vector{.X = 1}};
+  REQUIRE(Edit::Add(drawing, none));
+  REQUIRE(Edit::Add(drawing, two));
+  REQUIRE(Edit::Add(drawing, one));
+  REQUIRE(Edit::AddBlock(drawing, "PART"));
+  REQUIRE(Edit::Add(drawing, one, "PART"));
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Errors() == 3);
+  CHECK(seen.Findings.front().What == "leader with fewer than two vertices, left out");
+  CHECK(seen.Findings.front().Subject == BaseOf(drawing.Entities.front()).Self);
+  CHECK(seen.Warnings() == 0);
+  CHECK(Repair(drawing).Clean());
+  REQUIRE(drawing.Entities.size() == 1);
+  CHECK(std::get<Entities::Leader>(drawing.Entities.front()).Lead->Points.size() == 2);
+  CHECK(Edit::FindBlock(drawing, "PART")->Entities.empty());
   CHECK(Check(drawing).Findings.empty());
 }
 

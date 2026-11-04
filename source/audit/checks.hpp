@@ -84,6 +84,9 @@ template <class DocumentT>
 void Curved(Auditor<DocumentT> &with);
 
 template <class DocumentT>
+void Led(Auditor<DocumentT> &with);
+
+template <class DocumentT>
 void Sequenced(Auditor<DocumentT> &with);
 
 template <class DocumentT>
