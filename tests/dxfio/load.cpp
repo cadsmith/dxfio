@@ -263,6 +263,19 @@ TEST_CASE("load: with no $ACADVER and no subclass marker, the file is R12, as it
   CHECK(read->Issues.empty());
 }
 
+TEST_CASE("load: a code page named as DWG names it reads its text")
+{
+  const auto read = Load("  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  9\n$DWGCODEPAGE\n  3\nksc5601\n"
+                         "  0\nENDSEC\n  0\nSECTION\n  2\nENTITIES\n  0\nTEXT\n100\nAcDbEntity\n  8\n0\n"
+                         "100\nAcDbText\n  1\n\xb0\xa1\n  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  CHECK(read->Issues.empty());
+  REQUIRE(read->Document.Entities.size() == 1);
+  const auto *text = std::get_if<Entities::Text>(&read->Document.Entities.front());
+  REQUIRE(text != nullptr);
+  CHECK(text->Lettering.Value == "\xea\xb0\x80");
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

@@ -14,6 +14,17 @@ TEST_CASE("codepage: a page found by its header name, whatever its case")
   CHECK(Standard().Name == "ANSI_1252");
 }
 
+TEST_CASE("codepage: the DWG names of the East Asian pages find them, whatever their case")
+{
+  CHECK(Find("ksc5601") == Find("ANSI_949"));
+  CHECK(Find("KSC5601") == Find("ANSI_949"));
+  CHECK(Find("big5") == Find("ANSI_950"));
+  CHECK(Find("johab") == Find("ANSI_1361"));
+  CHECK(Find("gb2312") == Find("ANSI_936"));
+  CHECK(Find("dos932") == Find("ANSI_932"));
+  CHECK(Find("ANSI_big5") == nullptr);
+}
+
 TEST_CASE("codepage: a page not carried is none")
 {
   CHECK(Find("ANSI_1200") == nullptr);
