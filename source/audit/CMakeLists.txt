@@ -5,6 +5,7 @@ target_sources(dxfio
     audit.cpp
     classes.cpp
     ellipses.cpp
+    groups.cpp
     handles.cpp
     leaders.cpp
     meshes.cpp

@@ -496,6 +496,34 @@ TEST_CASE("audit: a block holding attribute definitions and not flagged so is fl
   CHECK(Check(drawing).Findings.empty());
 }
 
+TEST_CASE("audit: a group of a code DXF does not define is left out, wherever it is kept")
+{
+  Document drawing = Fresh();
+  Entities::Line line{};
+  line.Record.Base.Extra.push_back(Group{.Code = 250, .Value = std::string{"2"}});
+  line.Record.Base.Extra.push_back(Group{.Code = 300, .Value = std::string{"kept"}});
+  line.Record.Base.Extended.push_back(Xdata{
+      .Application = "ACAD",
+      .Groups = {Group{.Code = 1080, .Value = std::string{"x"}}, Group{.Code = 1000, .Value = std::string{"kept"}}}});
+  REQUIRE(Edit::Add(drawing, line));
+  Unknown loose{};
+  loose.Type = Symbol{"CAMERA"};
+  loose.Groups = {Group{.Code = 83, .Value = std::string{"5"}}, Group{.Code = 100, .Value = std::string{"AcDbCamera"}}};
+  REQUIRE(Edit::Add(drawing, loose));
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Errors() == 3);
+  CHECK(seen.Findings.at(0).What == "group 250 is no DXF group, left out");
+  CHECK(seen.Findings.at(0).Subject == BaseOf(drawing.Entities.front()).Self);
+  CHECK(seen.Findings.at(1).What == "group 1080 is no DXF group, left out");
+  CHECK(seen.Findings.at(2).What == "group 83 is no DXF group, left out");
+  CHECK(Repair(drawing).Clean());
+  const Base &base = BaseOf(drawing.Entities.front());
+  CHECK(base.Extra == std::vector{Group{.Code = 300, .Value = std::string{"kept"}}});
+  CHECK(base.Extended.front().Groups == std::vector{Group{.Code = 1000, .Value = std::string{"kept"}}});
+  CHECK(std::get<Unknown>(drawing.Entities.back()).Groups.size() == 1);
+  CHECK(Check(drawing).Findings.empty());
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();

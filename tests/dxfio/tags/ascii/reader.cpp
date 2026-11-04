@@ -121,6 +121,15 @@ TEST_CASE("ascii: blanks around a group 0 value are trimmed and told, other valu
   CHECK(Told("  0\nSECTION\n").empty());
 }
 
+TEST_CASE("ascii: a group of a code DXF does not define is kept and told")
+{
+  std::vector<Issue> issues;
+  const std::vector<Tag> tags = Read("  0\nLINE\n250\n2\n", &issues);
+  REQUIRE(tags.size() == 2);
+  CHECK(tags.at(1) == Tag{.Code = 250, .Value = std::string_view{"2"}, .Line = 3});
+  CHECK(issues == std::vector{Issue{.Line = 3, .What = "group 250 is no DXF group, kept"}});
+}
+
 TEST_CASE("ascii: a failure names its line and what was found")
 {
   CHECK(Refused("  0\r\nSECTION\r\nabc\r\nx\r\n") == Failure{3, "group code expected, found \"abc\""});

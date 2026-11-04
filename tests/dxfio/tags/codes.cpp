@@ -43,4 +43,20 @@ TEST_CASE("codes: a code outside every range is text")
   CHECK(Of(2000) == Type::Text);
   CHECK(Of(-1) == Type::Text);
 }
+
+TEST_CASE("codes: a code is defined when the DXF reference gives it a type, 101 and 999 included")
+{
+  for (const int code : {0,   9,   10,  59,  79,  90,  99,  100, 101,  102,  105,  110,  149,  160,  169,
+                         179, 210, 239, 270, 299, 309, 319, 329, 369,  379,  389,  399,  409,  419,  429,
+                         439, 449, 459, 469, 479, 480, 481, 999, 1000, 1009, 1010, 1059, 1060, 1070, 1071})
+  {
+    CAPTURE(code);
+    CHECK(Defined(code));
+  }
+  for (const int code : {80, 89, 103, 104, 106, 109, 150, 159, 180, 209, 240, 269, 482, 998, 1072, -1})
+  {
+    CAPTURE(code);
+    CHECK_FALSE(Defined(code));
+  }
+}
 } // namespace DxfIO::Tags::Codes
