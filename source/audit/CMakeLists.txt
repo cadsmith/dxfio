@@ -1,6 +1,7 @@
 target_sources(dxfio
   PRIVATE
     applications.cpp
+    attributes.cpp
     audit.cpp
     classes.cpp
     ellipses.cpp

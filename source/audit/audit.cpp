@@ -37,6 +37,7 @@ auto Run(DocumentT &drawing) -> Report
   Curved(with);
   Led(with);
   Sequenced(with);
+  Attributed(with);
   Classed(with);
   if constexpr (Auditor<DocumentT>::Fix)
   {

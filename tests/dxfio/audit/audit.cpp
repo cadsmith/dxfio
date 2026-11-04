@@ -474,6 +474,28 @@ TEST_CASE("audit: a vertex flagged for another kind of polyline than its own is 
   CHECK(Check(drawing).Findings.empty());
 }
 
+TEST_CASE("audit: a block holding attribute definitions and not flagged so is flagged")
+{
+  Document drawing = Fresh();
+  REQUIRE(Edit::AddBlock(drawing, "TAGGED"));
+  REQUIRE(Edit::Add(drawing, Entities::Attdef{}, "TAGGED"));
+  REQUIRE(Edit::AddBlock(drawing, "FIXED"));
+  Entities::Attdef constant{};
+  constant.Flags = 2;
+  REQUIRE(Edit::Add(drawing, constant, "FIXED"));
+  Blocks::Block *tagged = Edit::FindBlock(drawing, "TAGGED");
+  tagged->Begin.Flags = 1;
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Warnings() == 1);
+  CHECK(seen.Findings.front().What == "block TAGGED holds attribute definitions, not flagged so");
+  CHECK(seen.Findings.front().Subject == tagged->Begin.Record.Base.Self);
+  CHECK(seen.Errors() == 0);
+  CHECK(Repair(drawing).Clean());
+  CHECK(tagged->Begin.Flags == 3);
+  CHECK(Edit::FindBlock(drawing, "FIXED")->Begin.Flags == 0);
+  CHECK(Check(drawing).Findings.empty());
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();
@@ -665,9 +687,10 @@ TEST_CASE("audit: an attribute definition's text style named nowhere becomes the
   size.Record.Base.Self = Past(drawing);
   size.Lettering->Style = Symbol{"Gone"};
   drawing.Entities.emplace_back(size);
-  CHECK(Check(drawing).Warnings() == 1);
-  REQUIRE(Repair(drawing).Warnings() == 1);
+  CHECK(Check(drawing).Warnings() == 2);
+  REQUIRE(Repair(drawing).Warnings() == 2);
   CHECK(std::get<Entities::Attdef>(drawing.Entities.back()).Lettering->Style == "Standard");
+  CHECK(Edit::FindBlock(drawing, "*Model_Space")->Begin.Flags == 2);
 }
 
 TEST_CASE("audit: an insert of no block is left out")
