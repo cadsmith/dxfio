@@ -7,6 +7,7 @@
 #include "fields/owned.hpp"
 #include "fields/text.hpp"
 #include "header/io.hpp"
+#include "lift/lift.hpp"
 #include "objects/io.hpp"
 #include "plan/foreign.hpp"
 #include "raw/io.hpp"
@@ -224,6 +225,10 @@ auto Written(const Document &drawing, const Options &with) -> std::expected<std:
 
 auto Moved(const Document &drawing, Version release, std::vector<Issue> *issues) -> Document
 {
+  if (release >= Version::R13 && Header::Declared(drawing.Header) < Version::R13)
+  {
+    return Lift::Lifted(drawing, release);
+  }
   Document out = Down::Narrowed(drawing, release, issues);
   if (release > Header::Declared(out.Header))
   {

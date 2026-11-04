@@ -8,4 +8,5 @@ target_sources(dxfio
     scales.cpp
     styles.cpp
     tables.cpp
+    whole.cpp
 )

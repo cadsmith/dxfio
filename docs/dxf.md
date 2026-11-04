@@ -113,6 +113,11 @@ or left out, and the issues the save returns name each entity changed so.
   either, they are left out and what names them is cleared, as a drawing
   AutoCAD writes without them.
 - A data table is ACDBDATATABLE in R2000 and DATATABLE after it.
+- An R10 or R12 drawing saved to R13 or later is given what the release
+  needs: a handle for every record that has none, a BLOCK_RECORD for each
+  block, the root dictionary and the layouts, the classes, and the ByLayer and
+  ByBlock linetypes. Entities keep their handles; a table record of a name the
+  release has, such as layer 0, takes the place of the release's own.
 
 ## Audit
 
