@@ -1,6 +1,6 @@
 # Getting started
 
-dxfio is a C++23 library that reads and writes AutoCAD DXF files: every release from R10 to R2018, ASCII and binary, saved back unchanged or to any other release.
+dxfio is a C++23 library that reads and writes AutoCAD DXF files: every release from R10 to R2018, ASCII and binary, read whole and saved back to the same release or to any other.
 
 ## Add it to a project {#add}
 

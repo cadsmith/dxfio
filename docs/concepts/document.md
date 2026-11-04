@@ -10,7 +10,7 @@ Each family is a `std::variant` of the kinds dxfio types, ending with `Unknown`:
 
 ## What is kept {#kept}
 
-- Reading and saving back the same release gives the same file: every group of every record, in its order.
+- Reading and saving back the same release keeps every group of every record, in its order. The bytes can differ: a real is written in the shortest form that reads back to the same value, and lines end in CR LF.
 - A record that does not fit its kind, a group out of place or a count that does not match, is kept as `Unknown`, whole, and an issue says so.
 - Groups a kind does not name stay with the record they came in, after its own fields.
 - Extended data, extension dictionaries, reactors and proxy graphics are kept as read.
