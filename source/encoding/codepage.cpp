@@ -72,6 +72,35 @@ auto Backs(const Codepage &page) -> const Reversed &
 }
 } // namespace
 
+namespace
+{
+// A name the DWG format gives a page, and the number of the page it is.
+struct Alias
+{
+  std::string_view Name;
+  std::string_view Number;
+};
+
+constexpr std::array Aliases{
+    Alias{.Name = "BIG5", .Number = "950"},   Alias{.Name = "KSC5601", .Number = "949"},
+    Alias{.Name = "JOHAB", .Number = "1361"}, Alias{.Name = "GB2312", .Number = "936"},
+    Alias{.Name = "DOS932", .Number = "932"},
+};
+
+// The number of the page a name means: after its ANSI_ prefix, or the number a DWG name stands for.
+auto Numbered(std::string_view name) -> std::string_view
+{
+  const auto *alias =
+      std::ranges::find_if(Aliases, [name](const Alias &one) -> bool { return DxfIO::Ascii::Same(one.Name, name); });
+  if (alias != Aliases.end())
+  {
+    return alias->Number;
+  }
+  const bool prefixed = DxfIO::Ascii::Same(name.substr(0, Prefix.size()), Prefix);
+  return prefixed ? name.substr(Prefix.size()) : name;
+}
+} // namespace
+
 auto Pages() -> std::span<const Codepage>
 {
   static const Table all = Carried();
@@ -80,8 +109,7 @@ auto Pages() -> std::span<const Codepage>
 
 auto Find(std::string_view name) -> const Codepage *
 {
-  const bool prefixed = DxfIO::Ascii::Same(name.substr(0, Prefix.size()), Prefix);
-  const std::string_view number = prefixed ? name.substr(Prefix.size()) : name;
+  const std::string_view number = Numbered(name);
   const std::span<const Codepage> all = Pages();
   const auto found = std::ranges::find_if(all, [number](const Codepage &one) -> bool
                                           { return DxfIO::Ascii::Same(one.Name.substr(Prefix.size()), number); });
