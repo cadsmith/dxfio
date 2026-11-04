@@ -10,4 +10,5 @@ target_sources(dxfio
     references.cpp
     sequences.cpp
     tables.cpp
+    unnamed.cpp
 )

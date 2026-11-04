@@ -362,6 +362,70 @@ TEST_CASE("audit: a dimension style named nowhere becomes the standard one, on e
   CHECK(Check(drawing).Findings.empty());
 }
 
+TEST_CASE("audit: a record or a block with no name is left out, what named it falls back")
+{
+  Document drawing = Fresh();
+  Tables::Layer nameless{};
+  nameless.Record.Base.Self = Handle{.Value = Past(drawing).Value + 1};
+  nameless.Record.Base.Owner = drawing.Layer.Head.Base.Self;
+  drawing.Layer.Records.push_back(nameless);
+  Tables::Ltype unlined{};
+  unlined.Record.Base.Self = Handle{.Value = Past(drawing).Value + 1};
+  drawing.Ltype.Records.push_back(unlined);
+  Tables::Style shape{};
+  shape.Record.Flags = 1;
+  shape.Record.Base.Self = Handle{.Value = Past(drawing).Value + 1};
+  drawing.Style.Records.push_back(shape);
+  Tables::Style unstyled{};
+  unstyled.Record.Base.Self = Handle{.Value = Past(drawing).Value + 1};
+  drawing.Style.Records.push_back(unstyled);
+  WriteSeed(drawing, Handle{.Value = Past(drawing).Value + 1});
+  REQUIRE(Edit::AddBlock(drawing, "PART"));
+  Edit::FindBlock(drawing, "PART")->Begin.Name.clear();
+  Edit::Find(drawing.BlockRecord, "PART")->Record.Name.clear();
+  Entities::Line line{};
+  line.Record.Layer = Symbol{""};
+  line.Record.Linetype = Symbol{""};
+  REQUIRE(Edit::Add(drawing, line));
+  Entities::Text text{};
+  text.Lettering.Style = Symbol{""};
+  REQUIRE(Edit::Add(drawing, text));
+  Entities::Leader leader{};
+  leader.Lead->Points = {Vector{}, Vector{.X = 1}};
+  REQUIRE(Edit::Add(drawing, leader));
+  Entities::Insert insert{};
+  REQUIRE(Edit::Add(drawing, insert));
+  const Report seen = Check(drawing);
+  CHECK(seen.Errors() == 7);
+  CHECK(seen.Warnings() == 3);
+  CHECK(seen.Findings.at(0).What == "linetype with no name, left out");
+  CHECK(seen.Findings.at(1).What == "layer with no name, left out");
+  CHECK(seen.Findings.at(2).What == "text style with no name, left out");
+  CHECK(seen.Findings.at(3).What == "block record with no name, left out");
+  CHECK(seen.Findings.at(4).What == "block with no name, left out");
+  CHECK(seen.Findings.at(5).What == "layer with no name, 0 taken");
+  CHECK(seen.Findings.at(6).What == "linetype with no name");
+  CHECK(seen.Findings.at(7).What == "text style with no name");
+  CHECK(seen.Findings.at(8).What == "dimension style with no name");
+  CHECK(seen.Findings.at(9).What == "block with no name, its insert left out");
+  CHECK(Repair(drawing).Clean());
+  CHECK(std::ranges::none_of(drawing.Layer.Records,
+                             [](const Tables::Layer &one) -> bool { return one.Record.Name.empty(); }));
+  CHECK(std::ranges::none_of(drawing.Ltype.Records,
+                             [](const Tables::Ltype &one) -> bool { return one.Record.Name.empty(); }));
+  CHECK(std::ranges::count_if(drawing.Style.Records,
+                              [](const Tables::Style &one) -> bool { return one.Record.Name.empty(); }) == 1);
+  CHECK(drawing.BlockRecord.Records.size() == 2);
+  CHECK(drawing.Blocks.size() == 2);
+  REQUIRE(drawing.Entities.size() == 3);
+  const auto &lined = std::get<Entities::Line>(drawing.Entities.at(0));
+  CHECK(lined.Record.Layer.View() == "0");
+  CHECK(lined.Record.Linetype.View() == "ByLayer");
+  CHECK(std::get<Entities::Text>(drawing.Entities.at(1)).Lettering.Style.View() == "Standard");
+  CHECK(std::get<Entities::Leader>(drawing.Entities.at(2)).Lead->Style.View() == "Standard");
+  CHECK(Check(drawing).Findings.empty());
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();

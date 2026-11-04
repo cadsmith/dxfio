@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <format>
+#include <string>
 #include <string_view>
 #include <type_traits>
 #include <variant>
@@ -34,9 +35,31 @@ struct Known
   Names Blocks;
 };
 
-template <class DocumentT>
-void Layered(Known<DocumentT> &known, const Entities::Record &one)
+// What a missing name is called: the name, or none.
+auto Absent(std::string_view kind, std::string_view name) -> std::string
 {
+  return name.empty() ? std::format("{} with no name", kind) : std::format("{} {} missing", kind, name);
+}
+
+// An entity on a layer with no name goes to layer 0: a layer cannot be made for a name AutoCAD refuses.
+template <class DocumentT>
+void Grounded(Known<DocumentT> &known, Part<DocumentT, Entities::Record> &one)
+{
+  known.With->Note(Severity::Error, "layer with no name, 0 taken", one.Base.Self);
+  if constexpr (Auditor<DocumentT>::Fix)
+  {
+    one.Layer = Symbol{"0"};
+  }
+}
+
+template <class DocumentT>
+void Layered(Known<DocumentT> &known, Part<DocumentT, Entities::Record> &one)
+{
+  if (one.Layer.View().empty())
+  {
+    Grounded(known, one);
+    return;
+  }
   if (known.Layers.contains(one.Layer.View()))
   {
     return;
@@ -68,7 +91,7 @@ void Lined(Known<DocumentT> &known, RecordT &one)
   {
     return;
   }
-  known.With->Note(Severity::Warning, std::format("linetype {} missing", name), one.Base.Self);
+  known.With->Note(Severity::Warning, Absent("linetype", name), one.Base.Self);
   if constexpr (Auditor<DocumentT>::Fix)
   {
     one.Linetype = Symbol{Bylayer};
@@ -82,7 +105,7 @@ void Styled(Known<DocumentT> &known, SymbolT &style, Handle self)
   {
     return;
   }
-  known.With->Note(Severity::Warning, std::format("text style {} missing", style.View()), self);
+  known.With->Note(Severity::Warning, Absent("text style", style.View()), self);
   if constexpr (Auditor<DocumentT>::Fix)
   {
     style = Symbol{Standard};
@@ -96,7 +119,7 @@ void Dimstyled(Known<DocumentT> &known, SymbolT &style, Handle self)
   {
     return;
   }
-  known.With->Note(Severity::Warning, std::format("dimension style {} missing", style.View()), self);
+  known.With->Note(Severity::Warning, Absent("dimension style", style.View()), self);
   if constexpr (Auditor<DocumentT>::Fix)
   {
     style = Symbol{Standard};
@@ -118,7 +141,7 @@ auto Orphan(Known<DocumentT> &known, const Entity &one) -> bool
   {
     return false;
   }
-  known.With->Note(Severity::Error, std::format("block {} missing, its insert left out", insert->Block.View()),
+  known.With->Note(Severity::Error, std::format("{}, its insert left out", Absent("block", insert->Block.View())),
                    insert->Record.Base.Self);
   return true;
 }
