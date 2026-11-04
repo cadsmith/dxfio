@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react'
 import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import { App } from './App'
@@ -13,6 +14,7 @@ const at = parse(window.location.pathname)
 const app = (
   <StrictMode>
     <App at={at} />
+    <Analytics />
   </StrictMode>
 )
 
