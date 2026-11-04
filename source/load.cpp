@@ -13,7 +13,10 @@
 #include "past.hpp"
 #include "raw/io.hpp"
 #include "tables/io.hpp"
+#include "tags/codes.hpp"
 #include "tags/tags.hpp"
+
+#include "dxfio/version.hpp"
 
 #include <algorithm>
 #include <array>
@@ -156,6 +159,36 @@ auto Seeded(Document &drawing) -> Handle *
   return std::get_if<Handle>(&found->Values.front().Value);
 }
 
+constexpr std::string_view Named = "$ACADVER";
+
+// Whether a file with no $ACADVER was written for R13 or later: a record of its carries a subclass marker, which
+// no earlier release has.
+auto Marked(std::span<const File::Section> all) -> bool
+{
+  return std::ranges::any_of(all, [](const File::Section &one) -> bool
+                             { return std::ranges::contains(one.Body, Tags::Codes::Marker, &Tags::Tag::Code); });
+}
+
+// Whether a file names no $ACADVER but its records carry subclass markers, so it is read as R2000, not R12.
+auto Inferred(std::span<const File::Variable> head, std::span<const File::Section> all) -> bool
+{
+  return !std::ranges::contains(head, Named, &File::Variable::Name) && Marked(all);
+}
+
+// Gives a drawing read as R2000 for its markers the $ACADVER it lacked, first in its header.
+void Dated(Loaded &into)
+{
+  into.Issues.push_back(Issue{
+      .Line = 0,
+      .What = "no $ACADVER, read as R2000 for the subclass markers its records carry",
+  });
+  into.Document.Header.insert(into.Document.Header.begin(),
+                              Header::Variable{
+                                  .Name = std::string{Named},
+                                  .Values = {Group{.Code = 1, .Value = std::string{Acadver(Version::R2000)}}},
+                              });
+}
+
 void Raised(Loaded &into)
 {
   Handle *seed = Seeded(into.Document);
@@ -194,7 +227,8 @@ auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
   {
     return std::unexpected{head.error()};
   }
-  const Version release = Header::Declared(*head);
+  const bool inferred = Inferred(*head, *sections);
+  const Version release = inferred ? Version::R2000 : Header::Declared(*head);
   const bool opaque = Header::Opaque(*head);
   const Fields::Reading with{
       .Release = release,
@@ -213,6 +247,10 @@ auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
   if (!filled)
   {
     return std::unexpected{filled.error()};
+  }
+  if (inferred)
+  {
+    Dated(out);
   }
   Raised(out);
   return out;
