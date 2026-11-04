@@ -190,6 +190,18 @@ TEST_CASE("load: text after EOF is left out and told")
   CHECK(read->Issues == std::vector{Issue{.Line = 9, .What = "what follows EOF, left out"}});
 }
 
+TEST_CASE("load: a file cut short keeps what it read, its last section closed at the end, told")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n 62\n");
+  REQUIRE(read);
+  REQUIRE(read->Document.Entities.size() == 1);
+  CHECK(std::holds_alternative<Entities::Line>(read->Document.Entities.front()));
+  CHECK(read->Issues == std::vector{
+                            Issue{.Line = 7, .What = "group 62 at the end of the file has no value, left out"},
+                            Issue{.Line = 1, .What = "ENDSEC of ENTITIES missing, closed at the end of the file"},
+                        });
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

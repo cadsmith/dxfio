@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <format>
 #include <optional>
+#include <string>
 #include <utility>
 #include <variant>
 
@@ -136,7 +137,7 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
   const std::optional<int> group = Code();
   if (!group)
   {
-    return std::unexpected{Failure{.What = "group code cut short"}};
+    return Ended("group code cut short, the file ends there");
   }
   if (*group > Codes::Last)
   {
@@ -146,7 +147,7 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
   const Decoded value = decode(m_Rest);
   if (!value)
   {
-    return std::unexpected{Failure{.What = std::format("group {} {}", *group, value.error())}};
+    return Ended(std::format("group {} {}, the file ends there", *group, value.error()));
   }
   if (Endless(*value))
   {
@@ -154,6 +155,14 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
     return std::optional<Tag>{};
   }
   return std::optional{Tag{.Code = *group, .Value = *value}};
+}
+
+// Ends the file where its bytes do, with what was cut told; the group begun there is left out.
+auto Reader::Ended(std::string what) -> std::expected<std::optional<Tag>, Failure>
+{
+  Tell(Issue{.Line = 0, .What = std::move(what)});
+  m_Rest = {};
+  return std::optional<Tag>{};
 }
 
 void Reader::Tell(Issue issue)

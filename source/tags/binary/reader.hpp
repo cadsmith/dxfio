@@ -9,6 +9,7 @@
 
 #include <expected>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -28,6 +29,7 @@ public:
 
 private:
   auto Code() -> std::optional<int>;
+  auto Ended(std::string what) -> std::expected<std::optional<Tag>, Failure>;
   void Tell(Issue issue);
 
   std::string_view m_Rest;
