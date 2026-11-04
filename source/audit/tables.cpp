@@ -89,7 +89,7 @@ void Unstyled(Auditor<DocumentT> &with)
   }
   for (auto &one : with.Drawing->Layer.Records)
   {
-    if (one.Style)
+    if (one.Style || one.Record.Name.empty())
     {
       continue;
     }

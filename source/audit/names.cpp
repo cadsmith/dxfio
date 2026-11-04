@@ -33,7 +33,10 @@ auto Defined(std::span<const Blocks::Block> blocks) -> Names
   out.reserve(blocks.size());
   for (const Blocks::Block &one : blocks)
   {
-    out.emplace(one.Begin.Name);
+    if (!one.Begin.Name.empty())
+    {
+      out.emplace(one.Begin.Name);
+    }
   }
   return out;
 }

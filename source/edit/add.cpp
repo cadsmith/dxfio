@@ -78,9 +78,13 @@ auto Owned(Document &drawing, Entity &one, Handle owner) -> std::expected<Handle
 }
 
 template <auto Member, class RecordT>
-auto Listed(Document &drawing, RecordT one) -> std::expected<Handle, Failure>
+auto Listed(Document &drawing, RecordT one, std::string_view kind) -> std::expected<Handle, Failure>
 {
   auto &table = drawing.*Member;
+  if (one.Record.Name.empty())
+  {
+    return std::unexpected{Failure{.Line = 0, .What = std::format("a {} needs a name", kind)}};
+  }
   if constexpr (!std::same_as<RecordT, Tables::Vport>)
   {
     if (Find(table, one.Record.Name) != nullptr)
@@ -155,6 +159,10 @@ auto Add(Document &drawing, Entity one, std::string_view block) -> std::expected
 
 auto AddBlock(Document &drawing, std::string_view name) -> std::expected<Handle, Failure>
 {
+  if (name.empty())
+  {
+    return std::unexpected{Failure{.Line = 0, .What = "a block needs a name"}};
+  }
   if (FindBlock(drawing, name) != nullptr)
   {
     return std::unexpected{Failure{.Line = 0, .What = std::format("a block named {} is there already", name)}};
@@ -190,12 +198,12 @@ auto AddBlock(Document &drawing, std::string_view name) -> std::expected<Handle,
 
 auto Add(Document &drawing, Tables::Vport one) -> std::expected<Handle, Failure>
 {
-  return Listed<&Document::Vport>(drawing, std::move(one));
+  return Listed<&Document::Vport>(drawing, std::move(one), "viewport");
 }
 
 auto Add(Document &drawing, Tables::Ltype one) -> std::expected<Handle, Failure>
 {
-  return Listed<&Document::Ltype>(drawing, std::move(one));
+  return Listed<&Document::Ltype>(drawing, std::move(one), "linetype");
 }
 
 auto Add(Document &drawing, Tables::Layer one) -> std::expected<Handle, Failure>
@@ -205,31 +213,31 @@ auto Add(Document &drawing, Tables::Layer one) -> std::expected<Handle, Failure>
     one.Style = one.Style ? one.Style : zero->Style;
     one.Material = one.Material ? one.Material : zero->Material;
   }
-  return Listed<&Document::Layer>(drawing, std::move(one));
+  return Listed<&Document::Layer>(drawing, std::move(one), "layer");
 }
 
 auto Add(Document &drawing, Tables::Style one) -> std::expected<Handle, Failure>
 {
-  return Listed<&Document::Style>(drawing, std::move(one));
+  return Listed<&Document::Style>(drawing, std::move(one), "text style");
 }
 
 auto Add(Document &drawing, Tables::View one) -> std::expected<Handle, Failure>
 {
-  return Listed<&Document::View>(drawing, std::move(one));
+  return Listed<&Document::View>(drawing, std::move(one), "view");
 }
 
 auto Add(Document &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>
 {
-  return Listed<&Document::Ucs>(drawing, std::move(one));
+  return Listed<&Document::Ucs>(drawing, std::move(one), "ucs");
 }
 
 auto Add(Document &drawing, Tables::Appid one) -> std::expected<Handle, Failure>
 {
-  return Listed<&Document::Appid>(drawing, std::move(one));
+  return Listed<&Document::Appid>(drawing, std::move(one), "application");
 }
 
 auto Add(Document &drawing, Tables::Dimstyle one) -> std::expected<Handle, Failure>
 {
-  return Listed<&Document::Dimstyle>(drawing, std::move(one));
+  return Listed<&Document::Dimstyle>(drawing, std::move(one), "dimension style");
 }
 } // namespace DxfIO::Edit

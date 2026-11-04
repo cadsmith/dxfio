@@ -24,11 +24,12 @@ DXFIO_API auto Add(Document &drawing, Entity one, Space space = Space::Model) ->
 DXFIO_API auto Add(Document &drawing, Entity one, std::string_view block) -> std::expected<Handle, Failure>;
 
 /// Adds a block of that name, with its BLOCK_RECORD where the drawing has block records,
-/// and returns the handle of its BLOCK. Fails when the drawing has a block of that name.
+/// and returns the handle of its BLOCK. Fails when the name is empty or the drawing has a block of that name.
 DXFIO_API auto AddBlock(Document &drawing, std::string_view name) -> std::expected<Handle, Failure>;
 
 /// Adds a record to its table, owned by the table, and returns its handle.
-/// Fails when the table holds a record of that name, but for VPORT, whose tiled viewports share one.
+/// Fails when the record has no name, or when the table holds a record of that name, but for VPORT, whose tiled
+/// viewports share one.
 DXFIO_API auto Add(Document &drawing, Tables::Vport one) -> std::expected<Handle, Failure>;
 
 /// Adds a linetype. Fails when the LTYPE table holds one of that name.

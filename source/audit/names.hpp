@@ -30,7 +30,7 @@ struct Alike
 // Names found as AutoCAD finds them, without case, in a time that does not grow with their number.
 using Names = std::unordered_set<std::string, Folded, Alike>;
 
-// The names of a table's records.
+// The names of a table's records; a record with no name, which nothing may name, gives none.
 template <class TableT>
 auto Named(const TableT &table) -> Names
 {
@@ -38,12 +38,15 @@ auto Named(const TableT &table) -> Names
   out.reserve(table.Records.size());
   for (const auto &one : table.Records)
   {
-    out.emplace(one.Record.Name);
+    if (!one.Record.Name.empty())
+    {
+      out.emplace(one.Record.Name);
+    }
   }
   return out;
 }
 
-// The names of the blocks.
+// The names of the blocks; one with no name gives none.
 auto Defined(std::span<const Blocks::Block> blocks) -> Names;
 } // namespace DxfIO::Audit
 

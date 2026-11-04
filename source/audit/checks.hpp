@@ -66,6 +66,9 @@ template <class DocumentT>
 void Handled(Auditor<DocumentT> &with);
 
 template <class DocumentT>
+void Unnamed(Auditor<DocumentT> &with);
+
+template <class DocumentT>
 void Tabled(Auditor<DocumentT> &with);
 
 template <class DocumentT>
