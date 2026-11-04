@@ -40,7 +40,7 @@ struct DXFIO_API Finding
 struct DXFIO_API Report
 {
   /// The findings, in the order the checks ran: handles, names, required records, applications, references,
-  /// meshes, ellipses, SEQENDs, classes.
+  /// meshes, ellipses, leaders, SEQENDs, classes.
   std::vector<Finding> Findings{};
 
   /// Whether no error is left unfixed: AutoCAD would open the drawing without recovering it.
@@ -62,7 +62,7 @@ struct DXFIO_API Report
 /// by extended data registered, a missing linetype, text style or dimension style set to ByLayer or Standard, an
 /// insert of a missing
 /// block left out, a mesh with no vertices or faces left out, one given one crease per edge, an ellipse's ratio
-/// brought between 0 and 1,
+/// brought between 0 and 1, a leader with fewer than two vertices left out,
 /// a POLYLINE or an INSERT with attributes given the SEQEND it lacks, an INSERT's attributes said to follow it, a
 /// kind of AutoCAD's own with no CLASS record given the one AutoCAD writes.
 /// A handle it gives comes past every handle in use, or, once the drawing holds the last handle there is, is the lowest

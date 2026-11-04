@@ -5,6 +5,7 @@ target_sources(dxfio
     classes.cpp
     ellipses.cpp
     handles.cpp
+    leaders.cpp
     meshes.cpp
     names.cpp
     references.cpp
