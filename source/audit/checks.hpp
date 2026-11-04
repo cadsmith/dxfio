@@ -81,6 +81,9 @@ template <class DocumentT>
 void Referred(Auditor<DocumentT> &with);
 
 template <class DocumentT>
+void Weighted(Auditor<DocumentT> &with);
+
+template <class DocumentT>
 void Meshed(Auditor<DocumentT> &with);
 
 template <class DocumentT>

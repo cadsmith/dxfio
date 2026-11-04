@@ -8,6 +8,7 @@ target_sources(dxfio
     groups.cpp
     handles.cpp
     leaders.cpp
+    lineweights.cpp
     meshes.cpp
     names.cpp
     references.cpp

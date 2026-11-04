@@ -34,6 +34,7 @@ auto Run(DocumentT &drawing) -> Report
   Tabled(with);
   Applied(with);
   Referred(with);
+  Weighted(with);
   Meshed(with);
   Curved(with);
   Led(with);
