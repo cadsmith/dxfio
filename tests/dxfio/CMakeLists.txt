@@ -42,6 +42,7 @@ add_subdirectory(objects)
 add_subdirectory(plan)
 add_subdirectory(tables)
 add_subdirectory(tags)
+add_subdirectory(lift)
 
 target_link_libraries(dxfio_tests
   PRIVATE
