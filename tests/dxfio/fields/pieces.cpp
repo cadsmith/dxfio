@@ -55,6 +55,30 @@ TEST_CASE("pieces: every 1 and 3 joined in the order of the file")
   }
 }
 
+TEST_CASE("pieces: before R2007 a piece ends before an escape it cannot hold whole")
+{
+  Sheet page{Version::R2000};
+  page.To.Text = Encoding::Of(Version::R2000, *Encoding::Find("ANSI_1252"));
+  const std::string text = std::string(248, 'a') + "\xe2\x82\xac" + "\xe4\xb8\xad" + std::string(300, 'b');
+  REQUIRE(Write(MText{.Contents = text}, page.To, Shapes));
+  CHECK(page.Out.starts_with("  3\r\n" + std::string(248, 'a') + "\x80\r\n  3\r\n\\U+4E2D" + std::string(243, 'b')));
+  const std::string mif = std::string(246, 'a') + "\xe8\xa3\x85" + std::string(10, 'b');
+  Sheet japanese{Version::R2000};
+  japanese.To.Text = Encoding::Of(Version::R2000, *Encoding::Find("ANSI_1252"));
+  REQUIRE(Write(MText{.Contents = mif}, japanese.To, Shapes));
+  CHECK(japanese.Out.starts_with("  3\r\n" + std::string(246, 'a') + "\r\n  1\r\n\\U+88C5"));
+  Sheet paired{Version::R2000};
+  paired.To.Text = Encoding::Of(Version::R2000, *Encoding::Find("ANSI_932"));
+  REQUIRE(Write(MText{.Contents = std::string(246, 'a') + "\xe2\x82\xac" + std::string(10, 'b')}, paired.To, Shapes));
+  CHECK(paired.Out.starts_with("  3\r\n" + std::string(246, 'a') + "\r\n  1\r\n\\U+20AC"));
+  Sheet opaque{Version::R2000, Encoding::Opaque()};
+  REQUIRE(Write(MText{.Contents = std::string(246, 'a') + "\xe4\xb8\xad" + std::string(10, 'b')}, opaque.To, Shapes));
+  CHECK(opaque.Out.starts_with("  3\r\n" + std::string(246, 'a') + "\r\n  1\r\n\\U+4E2D"));
+  Sheet later{Version::R2018};
+  REQUIRE(Write(MText{.Contents = std::string(245, 'x') + "\\U+0041" + std::string(10, 'b')}, later.To, Shapes));
+  CHECK(later.Out.starts_with("  3\r\n" + std::string(245, 'x') + "\r\n  1\r\n\\U+005CU+0041"));
+}
+
 TEST_CASE("pieces: the last piece may hold 250 itself")
 {
   Sheet page;
@@ -88,14 +112,14 @@ TEST_CASE("pieces: a caret pair is one character and never cut")
   CHECK(page.Out == "  3\r\n" + std::string(249, 'x') + "^J\r\n  1\r\n^Jy\r\n");
 }
 
-TEST_CASE("pieces: before R2007 by bytes, an escape cut where it falls")
+TEST_CASE("pieces: before R2007 by bytes, an escape moved whole to the next piece")
 {
   const Encoding::Codepage *latin = Encoding::Find("ANSI_1252");
   REQUIRE(latin != nullptr);
   Sheet page{Version::R2004, Encoding::Paged(*latin)};
   const std::string text = std::string(246, 'x') + "\xe4\xb8\xad";
   REQUIRE(Write(MText{.Contents = text}, page.To, Shapes));
-  CHECK(page.Out == "  3\r\n" + std::string(246, 'x') + "\\U+4\r\n  1\r\nE2D\r\n");
+  CHECK(page.Out == "  3\r\n" + std::string(246, 'x') + "\r\n  1\r\n\\U+4E2D\r\n");
   const auto all = Tags::All(page.Out);
   REQUIRE(all);
   Walk in{*all, Reading{.Release = Version::R2004, .Text = Encoding::Paged(*latin)}};

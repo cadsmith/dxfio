@@ -2,6 +2,7 @@
 
 #include "encoding/carets.hpp"
 #include "encoding/codepage.hpp"
+#include "encoding/escapes.hpp"
 #include "encoding/points.hpp"
 
 #include "dxfio/version.hpp"
@@ -9,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <optional>
 #include <string_view>
 
 namespace DxfIO::Fields
@@ -36,13 +38,32 @@ auto Bytes(std::string_view rest) -> std::size_t
   return Encoding::Caret(rest) ? 2 : 1;
 }
 
+// The stride of an escape at the front, \U+XXXX or \M+nXXXX, which no piece may cut: its bytes, counting as many.
+auto Escaped(std::string_view rest) -> std::optional<Stride>
+{
+  const std::optional<Encoding::Escape> found = Encoding::Leading(rest);
+  if (!found)
+  {
+    return std::nullopt;
+  }
+  return Stride{.Bytes = found->Length, .Counts = found->Length};
+}
+
 auto Characters(std::string_view rest, const Encoding::Codepage * /*unused*/) -> Stride
 {
+  if (const std::optional<Stride> escape = Escaped(rest))
+  {
+    return *escape;
+  }
   return Stride{.Bytes = Encoding::Caret(rest) ? 2 : Encoding::First(rest).Length, .Counts = 1};
 }
 
 auto Doubles(std::string_view rest, const Encoding::Codepage * /*unused*/) -> Stride
 {
+  if (const std::optional<Stride> escape = Escaped(rest))
+  {
+    return *escape;
+  }
   constexpr auto High = static_cast<unsigned char>(0x80);
   const bool pair = rest.size() > 1 && static_cast<unsigned char>(rest.front()) >= High;
   const std::size_t bytes = pair ? 2 : Bytes(rest);
@@ -51,6 +72,10 @@ auto Doubles(std::string_view rest, const Encoding::Codepage * /*unused*/) -> St
 
 auto Pairs(std::string_view rest, const Encoding::Codepage *page) -> Stride
 {
+  if (const std::optional<Stride> escape = Escaped(rest))
+  {
+    return *escape;
+  }
   const bool pair = rest.size() > 1 && Encoding::Paired(*page, static_cast<unsigned char>(rest.front()),
                                                         static_cast<unsigned char>(rest.at(1))) != 0;
   const std::size_t bytes = pair ? 2 : Bytes(rest);
