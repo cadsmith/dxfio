@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import { App } from './App'
@@ -15,6 +16,7 @@ const app = (
   <StrictMode>
     <App at={at} />
     <Analytics />
+    <SpeedInsights />
   </StrictMode>
 )
 
