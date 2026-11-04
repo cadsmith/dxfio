@@ -11,6 +11,7 @@ target_sources(dxfio
     meshes.cpp
     names.cpp
     references.cpp
+    seeds.cpp
     sequences.cpp
     tables.cpp
     unnamed.cpp

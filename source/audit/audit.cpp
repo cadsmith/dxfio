@@ -28,6 +28,7 @@ auto Run(DocumentT &drawing) -> Report
   {
     with.Handles = Seed{Past(drawing)};
   }
+  Seeded(with);
   Handled(with);
   Unnamed(with);
   Tabled(with);

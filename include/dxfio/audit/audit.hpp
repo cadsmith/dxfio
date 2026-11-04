@@ -39,7 +39,7 @@ struct DXFIO_API Finding
 /// What an audit found in a drawing.
 struct DXFIO_API Report
 {
-  /// The findings, in the order the checks ran: handles, names, required records, applications, references,
+  /// The findings, in the order the checks ran: $HANDSEED, handles, names, required records, applications, references,
   /// meshes, ellipses, leaders, SEQENDs, blocks with attribute definitions, groups of no DXF code, classes.
   std::vector<Finding> Findings{};
 

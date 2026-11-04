@@ -63,6 +63,9 @@ void Localized(RecordT & /*one*/, const Document & /*drawing*/)
 }
 
 template <class DocumentT>
+void Seeded(Auditor<DocumentT> &with);
+
+template <class DocumentT>
 void Handled(Auditor<DocumentT> &with);
 
 template <class DocumentT>
