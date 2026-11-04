@@ -39,7 +39,8 @@ struct DXFIO_API Finding
 /// What an audit found in a drawing.
 struct DXFIO_API Report
 {
-  /// The findings, in the order the checks ran: handles, required records, references, meshes, SEQENDs.
+  /// The findings, in the order the checks ran: handles, required records, applications, references, meshes,
+  /// SEQENDs.
   std::vector<Finding> Findings{};
 
   /// Whether no error is left unfixed: AutoCAD would open the drawing without recovering it.
@@ -56,8 +57,9 @@ struct DXFIO_API Report
 [[nodiscard]] DXFIO_API auto Check(const Document &drawing) -> Report;
 
 /// Runs the checks of Check and fixes what they find, in place: a missing or duplicate handle is replaced, a missing
-/// layer or required record made, a layer with no plot style given the drawing's default one, a missing linetype or
-/// text style set to ByLayer or Standard, an insert of a missing block left out, a mesh given one crease per edge,
+/// layer or required record made, a layer with no plot style given the drawing's default one, an application named
+/// by extended data registered, a missing linetype or text style set to ByLayer or Standard, an insert of a missing
+/// block left out, a mesh given one crease per edge,
 /// a POLYLINE or an INSERT with attributes given the SEQEND it lacks, an INSERT's attributes said to follow it.
 /// A handle it gives comes past every handle in use, or, once the drawing holds the last handle there is, is the lowest
 /// one no record holds. It then moves $HANDSEED past the handles in use, adding it when the header has none.

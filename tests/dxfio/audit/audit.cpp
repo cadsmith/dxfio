@@ -17,6 +17,7 @@
 #include <format>
 #include <limits>
 #include <string>
+#include <string_view>
 #include <variant>
 
 namespace DxfIO::Audit
@@ -129,6 +130,61 @@ TEST_CASE("audit: R12 carries no handles, none asked")
   Document drawing = Fresh(Version::R12);
   drawing.Entities.emplace_back(Lined(Handle{}));
   CHECK(Check(drawing).Findings.empty());
+}
+
+TEST_CASE("audit: extended data of an application not registered, wherever it hangs, its APPID made")
+{
+  Document drawing = Fresh();
+  const auto named = [](std::string_view application) -> Xdata
+  {
+    return Xdata{.Application = std::string{application}};
+  };
+  Entities::Polyline polyline{};
+  polyline.Record.Base.Extended.push_back(named("SOUTH"));
+  polyline.Record.Base.Extended.push_back(named("acad"));
+  polyline.Vertices.Children.push_back(Entities::Vertex{});
+  polyline.Vertices.Children.front().Record.Base.Extended.push_back(named("EAST"));
+  REQUIRE(Edit::Add(drawing, polyline));
+  Tables::Layer layer{};
+  layer.Record.Name = "WALLS";
+  layer.Record.Base.Extended.push_back(named("NORTH"));
+  REQUIRE(Edit::Add(drawing, layer));
+  REQUIRE(Edit::AddBlock(drawing, "PART"));
+  Edit::FindBlock(drawing, "PART")->Begin.Record.Base.Extended.push_back(named("WEST"));
+  std::get<Objects::Dictionary>(drawing.Objects.front()).Base.Extended.push_back(named("south"));
+  Tables::Table<Unknown> loose{};
+  loose.Head.Name = "VX_TABLE";
+  loose.Records.push_back(Unknown{.Type = Symbol{"VX_TABLE"}});
+  loose.Records.front().Base.Extended.push_back(named("LOOSE"));
+  drawing.Loose.push_back(loose);
+  const Report seen = Check(drawing);
+  CHECK(seen.Errors() == 5);
+  CHECK(seen.Findings.front().What == "application NORTH not registered");
+  CHECK(seen.Findings.front().Subject == Edit::Find(drawing.Layer, "WALLS")->Record.Base.Self);
+  const Report fixed = Repair(drawing);
+  CHECK(fixed.Clean());
+  for (const std::string_view application : {"SOUTH", "EAST", "NORTH", "WEST", "LOOSE"})
+  {
+    CAPTURE(application);
+    const Tables::Appid *made = Edit::Find(drawing.Appid, application);
+    REQUIRE(made != nullptr);
+    CHECK(made->Record.Base.Self);
+    CHECK(made->Record.Base.Owner == drawing.Appid.Head.Base.Self);
+  }
+  CHECK(drawing.Appid.Records.size() == 6);
+  CHECK(Check(drawing).Findings.empty());
+}
+
+TEST_CASE("audit: R12 applications made carry no handle")
+{
+  Document drawing = Fresh(Version::R12);
+  Entities::Line line{};
+  line.Record.Base.Extended.push_back(Xdata{.Application = "SOUTH"});
+  REQUIRE(Edit::Add(drawing, line));
+  REQUIRE(Repair(drawing).Clean());
+  const Tables::Appid *made = Edit::Find(drawing.Appid, "SOUTH");
+  REQUIRE(made != nullptr);
+  CHECK_FALSE(made->Record.Base.Self);
 }
 
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")

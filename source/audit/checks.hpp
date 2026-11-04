@@ -69,6 +69,9 @@ template <class DocumentT>
 void Tabled(Auditor<DocumentT> &with);
 
 template <class DocumentT>
+void Applied(Auditor<DocumentT> &with);
+
+template <class DocumentT>
 void Referred(Auditor<DocumentT> &with);
 
 template <class DocumentT>
