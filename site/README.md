@@ -44,13 +44,16 @@ host serves `dist/`, and `dist/404.html` is the page for an address with no
 file. Build with the address the site is served at:
 
 ```sh
-SITE_URL=https://dxfio.dev/ npm run build
+SITE_URL=https://dxfio.vercel.app/ npm run build
 ```
 
 Each page then names its full address as canonical, carries link previews
 and breadcrumbs for search results, and `dist/sitemap.xml` lists them all. A
 path in `SITE_URL`, as in `https://someone.github.io/dxfio/`, is where every
 link starts.
+
+Vercel needs no setting: with `SITE_URL` unset, the build takes the
+project's production address, the custom domain once it has one.
 
 ## The examples
 

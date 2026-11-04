@@ -3,6 +3,8 @@
 A C++23 library that reads and writes AutoCAD DXF files: every release from
 R10 to R2018, ASCII and binary, saved back unchanged, or to any other release.
 
+Its guide, tutorials and reference: <https://dxfio.vercel.app>.
+
 ```cpp
 #include "dxfio/dxfio.hpp"
 

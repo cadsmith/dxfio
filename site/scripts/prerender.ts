@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { origin } from './origin.ts'
 
 type Crumb = { name: string; path: string }
 type Head = { title: string; description: string; path: string; trail: Crumb[] }
@@ -17,8 +18,6 @@ const { base, lost, pages, parse, render } = (await import(pathToFileURL(join(bu
   render: (path: string) => Promise<string>
 }
 
-// SITE_URL, such as https://dxfio.dev/, gives each page the full address search engines index it by.
-const origin = process.env.SITE_URL?.replace(/\/?$/, '/')
 const at = (path: string) => new URL(path, origin).href
 
 const escape = (text: string) =>
@@ -116,4 +115,4 @@ writeFileSync(join(dist, 'llms.txt'), `# dxfio\n\n> ${home?.description}\n\n${li
 
 rmSync(built, { recursive: true })
 console.log(`${pages.length} pages prerendered${origin ? ', each listed in sitemap.xml' : ''}`)
-if (!origin) console.log('SITE_URL unset: no canonical addresses, link previews or sitemap')
+if (!origin) console.log('SITE_URL unset, and not built by Vercel: no canonical addresses, link previews or sitemap')
