@@ -103,6 +103,21 @@ TEST_CASE("ascii: a value that does not parse is left out and told, the rest rea
         });
 }
 
+TEST_CASE("ascii: blanks around a group 0 value are trimmed and told, other values keep theirs")
+{
+  std::vector<Issue> issues;
+  const std::vector<Tag> tags = Read("  0\nSECTION \n  2\n HEADER \n  0\n\tEOF\n", &issues);
+  REQUIRE(tags.size() == 3);
+  CHECK(tags.at(0) == Tag{.Code = 0, .Value = std::string_view{"SECTION"}, .Line = 1});
+  CHECK(tags.at(1) == Tag{.Code = 2, .Value = std::string_view{" HEADER "}, .Line = 3});
+  CHECK(tags.at(2) == Tag{.Code = 0, .Value = std::string_view{"EOF"}, .Line = 5});
+  CHECK(issues == std::vector{
+                      Issue{.Line = 2, .What = "group 0 holds \"SECTION \" with blanks, trimmed"},
+                      Issue{.Line = 6, .What = "group 0 holds \"\tEOF\" with blanks, trimmed"},
+                  });
+  CHECK(Told("  0\nSECTION\n").empty());
+}
+
 TEST_CASE("ascii: a failure names its line and what was found")
 {
   CHECK(Refused("  0\r\nSECTION\r\nabc\r\nx\r\n") == Failure{3, "group code expected, found \"abc\""});
