@@ -15,8 +15,9 @@
 
 namespace DxfIO::Tags
 {
-// Every tag of a file, ASCII or binary, with the comments left out; a group whose value does not parse is left out
-// and told to issues, when given. Fails where the file cannot be read on.
+// Every tag of a file, ASCII or binary, up to its EOF, with the comments left out; a group whose value does not
+// parse, and whatever follows the EOF, are left out and told to issues, when given. Fails where the file cannot be
+// read on.
 [[nodiscard]] DXFIO_API auto All(std::string_view bytes, std::vector<Issue> *issues = nullptr)
     -> std::expected<std::vector<Tag>, Failure>;
 

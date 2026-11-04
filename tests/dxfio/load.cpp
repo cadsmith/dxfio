@@ -182,6 +182,14 @@ TEST_CASE("load: a blank after a section word or a record name is trimmed and to
   CHECK(read->Issues.front() == Issue{.Line = 2, .What = "group 0 holds \"SECTION \" with blanks, trimmed"});
 }
 
+TEST_CASE("load: text after EOF is left out and told")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n  0\nEOF\ngarbage\n");
+  REQUIRE(read);
+  CHECK(read->Document.Order == std::vector<std::string>{"ENTITIES"});
+  CHECK(read->Issues == std::vector{Issue{.Line = 9, .What = "what follows EOF, left out"}});
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

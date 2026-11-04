@@ -52,6 +52,27 @@ TEST_CASE("tags: what a reader leaves out is told to the issues asked for")
   CHECK(All("  0\nSECTION\n 40\nnope\n")->size() == 1);
 }
 
+TEST_CASE("tags: reading stops at EOF, and what follows it is told")
+{
+  std::vector<Issue> issues;
+  const auto tags = All("  0\nSECTION\n  0\nEOF\ngarbage\n  0\nSECTION\n", &issues);
+  REQUIRE(tags);
+  CHECK(tags->size() == 2);
+  CHECK(issues == std::vector{Issue{.Line = 5, .What = "what follows EOF, left out"}});
+  CHECK(All("  0\nEOF\ngarbage\n")->size() == 1);
+  std::vector<Issue> none;
+  CHECK(All("  0\nEOF\n\n   \n", &none)->size() == 1);
+  CHECK(none.empty());
+  std::string bytes{Sentinel()};
+  bytes.append(std::string_view{"\x00\x00"
+                                "EOF\x00\x00\x00"
+                                "SECTION\x00",
+                                16});
+  std::vector<Issue> binary;
+  CHECK(All(bytes, &binary)->size() == 1);
+  CHECK(binary == std::vector{Issue{.Line = 0, .What = "what follows EOF, left out"}});
+}
+
 TEST_CASE("tags: the failure that stops the file is handed back")
 {
   CHECK(All("  0\nSECTION\nabc\n") == std::unexpected{Failure{3, "group code expected, found \"abc\""}});
