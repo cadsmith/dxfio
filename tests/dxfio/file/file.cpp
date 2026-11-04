@@ -57,6 +57,26 @@ TEST_CASE("file: the last section cut before its ENDSEC closes at the end of the
   CHECK(Framed("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n")->size() == 1);
 }
 
+TEST_CASE("file: a TABLE outside a TABLES section opens one that runs to the next section, told")
+{
+  std::vector<Issue> issues;
+  const auto sections = Framed("  0\nSECTION\n  2\nHEADER\n  0\nENDSEC\n"
+                               "  0\nTABLE\n  2\nLAYER\n 70\n1\n  0\nENDTAB\n"
+                               "  0\nTABLE\n  2\nSTYLE\n  0\nENDTAB\n"
+                               "  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n  0\nEOF\n",
+                               &issues);
+  REQUIRE(sections);
+  REQUIRE(sections->size() == 3);
+  CHECK(sections->at(1).Name == "TABLES");
+  CHECK(sections->at(1).Body.size() == 7);
+  CHECK(sections->at(2).Name == "ENTITIES");
+  CHECK(issues == std::vector{Issue{.Line = 7, .What = "TABLE outside a TABLES section, taken as one"}});
+  const auto last = Framed("  0\nTABLE\n  2\nLAYER\n  0\nENDTAB\n  0\nEOF\n");
+  REQUIRE(last);
+  REQUIRE(last->size() == 1);
+  CHECK(last->front().Body.size() == 3);
+}
+
 TEST_CASE("file: a file without its EOF ends with its last section")
 {
   const auto sections = Framed("  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n");

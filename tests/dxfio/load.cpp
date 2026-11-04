@@ -202,6 +202,22 @@ TEST_CASE("load: a file cut short keeps what it read, its last section closed at
                         });
 }
 
+TEST_CASE("load: tables outside a TABLES section are read as one, which the save then writes")
+{
+  const auto read = Load("  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1009\n  0\nENDSEC\n"
+                         "  0\nTABLE\n  2\nLAYER\n 70\n     1\n  0\nLAYER\n  2\nWALLS\n 70\n     0\n"
+                         " 62\n     1\n  6\nCONTINUOUS\n  0\nENDTAB\n"
+                         "  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  CHECK(read->Document.Order == std::vector<std::string>{"HEADER", "TABLES", "ENTITIES"});
+  REQUIRE(read->Document.Layer.Records.size() == 1);
+  CHECK(read->Document.Layer.Records.front().Record.Name == "WALLS");
+  CHECK(read->Issues == std::vector{Issue{.Line = 11, .What = "TABLE outside a TABLES section, taken as one"}});
+  const auto saved = Tests::Written(read->Document, {.Release = Version::R12});
+  REQUIRE(saved);
+  CHECK(saved->contains("SECTION\r\n  2\r\nTABLES\r\n  0\r\nTABLE\r\n"));
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

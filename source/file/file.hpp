@@ -15,7 +15,8 @@
 namespace DxfIO::File
 {
 // The sections of a file, each its groups between its name and its ENDSEC, up to EOF. A last section with no ENDSEC
-// is closed at the end of the file and told to issues, when given.
+// is closed at the end of the file, and a TABLE outside a TABLES section opens one; each is told to issues, when
+// given.
 [[nodiscard]] DXFIO_API auto Read(std::span<const Tags::Tag> all, std::vector<Issue> *issues = nullptr)
     -> std::expected<std::vector<Section>, Failure>;
 } // namespace DxfIO::File
