@@ -94,6 +94,9 @@ TEST_CASE("ascii: a value that does not parse is left out and told, the rest rea
                       Issue{.Line = 6, .What = "integer expected for group 70, found \"1e300\", left out"},
                   });
   CHECK(Read(" 40\nnope\n").empty());
+  CHECK(Told("  0\nSECTION\n  2") ==
+        std::vector{Issue{.Line = 3, .What = "group 2 at the end of the file has no value, left out"}});
+  CHECK(Read("  0\nSECTION\n  2").size() == 1);
   CHECK(Told("310\nxyz\n") ==
         std::vector{Issue{.Line = 2, .What = "hex expected for group 310, found \"xyz\", left out"}});
   CHECK(Told(" 70\n100000\n 90\n3000000000\n") ==
@@ -123,7 +126,6 @@ TEST_CASE("ascii: a failure names its line and what was found")
   CHECK(Refused("  0\r\nSECTION\r\nabc\r\nx\r\n") == Failure{3, "group code expected, found \"abc\""});
   CHECK(Refused("  0\nSECTION\n1072\nx\n") == Failure{3, "group code expected, found \"1072\""});
   CHECK(Refused("  0\nSECTION\n -1\nx\n") == Failure{3, "group code expected, found \"-1\""});
-  CHECK(Refused("  0\nSECTION\n  2") == Failure{3, "value missing after the last group code"});
   CHECK(Refused("  0\nSECTION\n\n  2\nHEADER\n") == Failure{3, "blank line where a group code is expected"});
 }
 

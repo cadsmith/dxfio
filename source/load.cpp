@@ -184,7 +184,7 @@ auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
   {
     return std::unexpected{all.error()};
   }
-  const auto sections = File::Read(*all);
+  const auto sections = File::Read(*all, &out.Issues);
   if (!sections)
   {
     return std::unexpected{sections.error()};

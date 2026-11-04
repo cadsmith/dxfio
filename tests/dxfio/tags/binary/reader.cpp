@@ -5,6 +5,7 @@
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <format>
 #include <limits>
 #include <optional>
 #include <string>
@@ -124,12 +125,16 @@ TEST_CASE("binary: codes of two bytes and of one read the same tags")
   }
 }
 
-TEST_CASE("binary: bytes cut short are a failure")
+TEST_CASE("binary: bytes cut short end the file there, told")
 {
   std::string bytes = Sample(true);
   bytes.resize(bytes.size() - 2);
-  CHECK(Refused(bytes) == Failure{0, "group 0 cut short"});
-  CHECK(Refused(std::string_view{"\xff", 1}) == Failure{0, "group code cut short"});
+  std::vector<Issue> issues;
+  CHECK(Read(bytes, &issues).size() == 9);
+  CHECK(issues == std::vector{Issue{.Line = 0, .What = "group 0 cut short, the file ends there"}});
+  std::vector<Issue> code;
+  CHECK(Read(std::string_view{"\xff", 1}, &code).empty());
+  CHECK(code == std::vector{Issue{.Line = 0, .What = "group code cut short, the file ends there"}});
 }
 
 TEST_CASE("binary: a real that is not finite is left out and told, the rest read on")
@@ -161,7 +166,7 @@ TEST_CASE("binary: a code past the last there is is a failure")
   CHECK(Refused(bytes) == Failure{0, "group code expected, found 4000"});
 }
 
-TEST_CASE("binary: a value cut short is a failure, whatever its type")
+TEST_CASE("binary: a value cut short ends the file there, whatever its type")
 {
   for (const int group : {70, 90, 160, 40, 290, 310})
   {
@@ -170,7 +175,10 @@ TEST_CASE("binary: a value cut short is a failure, whatever its type")
     Code(bytes, true, 0);
     Put(bytes, std::string_view{"LINE"});
     Code(bytes, true, group);
-    CHECK(Refused(bytes).What.ends_with("cut short"));
+    std::vector<Issue> issues;
+    CHECK(Read(bytes, &issues).size() == 1);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues.front().What == std::format("group {} cut short, the file ends there", group));
   }
   std::string chunk;
   Code(chunk, true, 0);
@@ -178,6 +186,8 @@ TEST_CASE("binary: a value cut short is a failure, whatever its type")
   Code(chunk, true, 310);
   Put(chunk, std::uint8_t{4});
   chunk.append("\xff\xff");
-  CHECK(Refused(chunk).What.ends_with("cut short"));
+  std::vector<Issue> issues;
+  CHECK(Read(chunk, &issues).size() == 1);
+  CHECK(issues == std::vector{Issue{.Line = 0, .What = "group 310 cut short, the file ends there"}});
 }
 } // namespace DxfIO::Tags::Binary

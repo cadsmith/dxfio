@@ -11,11 +11,11 @@ namespace DxfIO::File
 {
 namespace
 {
-auto Framed(std::string_view text) -> std::expected<std::vector<Section>, Failure>
+auto Framed(std::string_view text, std::vector<Issue> *issues = nullptr) -> std::expected<std::vector<Section>, Failure>
 {
   const auto all = Tags::All(text);
   REQUIRE(all);
-  return Read(*all);
+  return Read(*all, issues);
 }
 } // namespace
 
@@ -43,8 +43,18 @@ TEST_CASE("file: what stands outside a section is a failure")
   CHECK(Framed("  0\nLINE\n") == std::unexpected{Failure{1, "SECTION expected, found group 0"}});
   CHECK(Framed("  0\nSECTION\n  0\nENDSEC\n") == std::unexpected{Failure{1, "section without a name"}});
   CHECK(Framed("  0\nSECTION\n") == std::unexpected{Failure{1, "section without a name"}});
-  CHECK(Framed("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n") ==
-        std::unexpected{Failure{1, "ENDSEC of ENTITIES missing"}});
+}
+
+TEST_CASE("file: the last section cut before its ENDSEC closes at the end of the file, told")
+{
+  std::vector<Issue> issues;
+  const auto sections = Framed("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n", &issues);
+  REQUIRE(sections);
+  REQUIRE(sections->size() == 1);
+  CHECK(sections->front().Name == "ENTITIES");
+  CHECK(sections->front().Body.size() == 1);
+  CHECK(issues == std::vector{Issue{.Line = 1, .What = "ENDSEC of ENTITIES missing, closed at the end of the file"}});
+  CHECK(Framed("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n")->size() == 1);
 }
 
 TEST_CASE("file: a file without its EOF ends with its last section")

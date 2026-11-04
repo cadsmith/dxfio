@@ -72,7 +72,8 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
   }
   if (m_At >= m_Text.size())
   {
-    return std::unexpected{Failure{.Line = at, .What = "value missing after the last group code"}};
+    Tell(Issue{.Line = at, .What = std::format("group {} at the end of the file has no value, left out", *code)});
+    return std::optional<Tag>{};
   }
   const std::string_view text = *code == 0 ? Bare(Line(), at + 1) : Line();
   const std::expected<Content, std::string_view> value = Parse(Codes::Of(*code), text);
