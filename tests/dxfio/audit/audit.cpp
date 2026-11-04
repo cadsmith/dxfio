@@ -104,6 +104,7 @@ TEST_CASE("audit: no handle at all, one given, its vertices follow")
   heavy.Vertices.Children.push_back(point);
   heavy.Vertices.Closing = Boxed{Entities::Seqend{.Record = {.Base = {.Self = Handle{.Value = 0x501}}}}};
   drawing.Entities.emplace_back(heavy);
+  WriteSeed(drawing, Past(drawing));
   const Report fixed = Repair(drawing);
   REQUIRE(fixed.Errors() == 1);
   CHECK(fixed.Findings.front().What == "a POLYLINE has no handle");
@@ -123,6 +124,7 @@ TEST_CASE("audit: a vertex sharing a handle moves, not what it shares with")
   heavy.Vertices.Children.push_back(point);
   heavy.Vertices.Closing = Boxed{Entities::Seqend{.Record = {.Base = {.Self = Handle{.Value = 0x601}}}}};
   drawing.Entities.emplace_back(heavy);
+  WriteSeed(drawing, Past(drawing));
   REQUIRE(Repair(drawing).Errors() == 1);
   const auto &made = std::get<Entities::Polyline>(drawing.Entities.back());
   CHECK(made.Vertices.Children.front().Record.Base.Self != held);
@@ -524,6 +526,29 @@ TEST_CASE("audit: a group of a code DXF does not define is left out, wherever it
   CHECK(Check(drawing).Findings.empty());
 }
 
+TEST_CASE("audit: a $HANDSEED behind the handles in use, or none, is an error that Repair moves past them")
+{
+  Document drawing = Fresh();
+  REQUIRE(Edit::Add(drawing, Entities::Line{}));
+  BaseOf(drawing.Entities.front()).Self = Handle{.Value = 0xABCDE};
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Errors() == 1);
+  CHECK(seen.Findings.front().What == std::format("$HANDSEED {} behind the handles in use", Hex(Seed(drawing))));
+  CHECK(Repair(drawing).Clean());
+  CHECK(Seed(drawing) == Handle{.Value = 0xABCDF});
+  CHECK(Check(drawing).Findings.empty());
+  std::erase_if(drawing.Header, [](const Header::Variable &one) -> bool { return one.Name == "$HANDSEED"; });
+  const Report missing = Check(drawing);
+  REQUIRE(missing.Errors() == 1);
+  CHECK(missing.Findings.front().What == "no $HANDSEED");
+  CHECK(Repair(drawing).Clean());
+  CHECK(Check(drawing).Findings.empty());
+  Document bare{};
+  bare.Entities.push_back(Entities::Line{});
+  CHECK(std::ranges::none_of(Check(bare).Findings,
+                             [](const Finding &one) -> bool { return one.What.contains("$HANDSEED"); }));
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();
@@ -612,6 +637,7 @@ TEST_CASE("audit: a layer named nowhere is made, its case aside")
   Document drawing = Fresh();
   drawing.Entities.emplace_back(Lined(Past(drawing), "Walls"));
   drawing.Entities.emplace_back(Lined(Past(drawing), "WALLS"));
+  WriteSeed(drawing, Past(drawing));
   CHECK(Check(drawing).Errors() == 2);
   const Report fixed = Repair(drawing);
   CHECK(fixed.Errors() == 1);
@@ -624,6 +650,7 @@ TEST_CASE("audit: a layer made from layer 0, its material and plot style")
 {
   Document drawing = Fresh();
   drawing.Entities.emplace_back(Lined(Past(drawing), "Walls"));
+  WriteSeed(drawing, Past(drawing));
   REQUIRE(Repair(drawing).Errors() == 1);
   const Tables::Layer &made = drawing.Layer.Records.back();
   CHECK(made.Record.Name == "Walls");
@@ -639,6 +666,7 @@ TEST_CASE("audit: a layer made from layer 0, wherever layer 0 stands")
   walls.Record.Base.Self = Past(drawing);
   drawing.Layer.Records.insert(drawing.Layer.Records.begin(), walls);
   drawing.Entities.emplace_back(Lined(Past(drawing), "Doors"));
+  WriteSeed(drawing, Past(drawing));
   REQUIRE(Repair(drawing).Errors() == 1);
   const Tables::Layer &made = drawing.Layer.Records.back();
   CHECK(made.Record.Name == "Doors");
@@ -678,6 +706,7 @@ TEST_CASE("audit: an unknown linetype falls back to the layer's")
   Entities::Line two = Lined(Past(drawing));
   two.Record.Linetype = Symbol{"BYBLOCK"};
   drawing.Entities.emplace_back(two);
+  WriteSeed(drawing, Past(drawing));
   const Report seen = Check(drawing);
   REQUIRE(seen.Warnings() == 1);
   CHECK(seen.Clean());
@@ -702,6 +731,7 @@ TEST_CASE("audit: a text style named nowhere becomes the standard one")
   kept.Record.Base.Self = Handle{.Value = Past(drawing).Value};
   kept.Lettering.Style = Symbol{"STANDARD"};
   drawing.Entities.insert(drawing.Entities.begin(), kept);
+  WriteSeed(drawing, Past(drawing));
   REQUIRE(Repair(drawing).Warnings() == 2);
   CHECK(std::get<Entities::Text>(drawing.Entities.front()).Lettering.Style == "STANDARD");
   CHECK(std::get<Entities::Text>(drawing.Entities.at(drawing.Entities.size() - 2)).Lettering.Style == "Standard");
@@ -715,6 +745,7 @@ TEST_CASE("audit: an attribute definition's text style named nowhere becomes the
   size.Record.Base.Self = Past(drawing);
   size.Lettering->Style = Symbol{"Gone"};
   drawing.Entities.emplace_back(size);
+  WriteSeed(drawing, Past(drawing));
   CHECK(Check(drawing).Warnings() == 2);
   REQUIRE(Repair(drawing).Warnings() == 2);
   CHECK(std::get<Entities::Attdef>(drawing.Entities.back()).Lettering->Style == "Standard");
@@ -733,6 +764,7 @@ TEST_CASE("audit: an insert of no block is left out")
   kept.Block = Symbol{"*model_space"};
   drawing.Entities.emplace_back(kept);
   const std::size_t before = drawing.Entities.size();
+  WriteSeed(drawing, Past(drawing));
   CHECK(Check(drawing).Errors() == 1);
   CHECK(drawing.Entities.size() == before);
   REQUIRE(Repair(drawing).Errors() == 1);
@@ -779,6 +811,7 @@ TEST_CASE("audit: a mesh with a crease short is given one")
   whole.Record.Base.Self = Handle{.Value = mesh.Record.Base.Self.Value + 1};
   drawing.Blocks.front().Entities.emplace_back(whole);
   drawing.Entities.emplace_back(Lined(Handle{.Value = mesh.Record.Base.Self.Value + 2}));
+  WriteSeed(drawing, Past(drawing));
   const Report seen = Check(drawing);
   REQUIRE(seen.Warnings() == 1);
   CHECK(seen.Findings.front().What == "mesh with 1 creases for 2 edges");
@@ -814,6 +847,7 @@ TEST_CASE("audit: checked only, what has no handle or style stays as it is")
   text.Lettering.Style = Symbol{"Gone"};
   drawing.Entities.emplace_back(text);
   drawing.Entities.emplace_back(Entities::Polyline{});
+  WriteSeed(drawing, Past(drawing));
   const Report seen = Check(drawing);
   CHECK(seen.Errors() == 2);
   CHECK(seen.Warnings() == 1);
@@ -838,6 +872,7 @@ TEST_CASE("audit: a vertex owned elsewhere keeps its owner when its polyline mov
   heavy.Vertices.Children = {mine, other};
   heavy.Vertices.Closing = Boxed{Entities::Seqend{.Record = {.Base = {.Self = Handle{.Value = next.Value + 2}}}}};
   drawing.Entities.emplace_back(heavy);
+  WriteSeed(drawing, Past(drawing));
   REQUIRE(Repair(drawing).Errors() == 1);
   const auto &made = std::get<Entities::Polyline>(drawing.Entities.back());
   CHECK(made.Vertices.Children.front().Record.Base.Owner == made.Record.Base.Self);
