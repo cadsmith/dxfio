@@ -9,7 +9,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <format>
+#include <optional>
 #include <utility>
+#include <variant>
 
 namespace DxfIO::Tags::Binary
 {
@@ -77,10 +79,6 @@ auto Measure(std::string_view &rest) -> Decoded
   {
     return std::unexpected{Cut};
   }
-  if (!std::isfinite(*number))
-  {
-    return std::unexpected{"is no finite number"};
-  }
   return Content{*number};
 }
 
@@ -115,16 +113,25 @@ auto Widened(std::uint16_t code) -> int
 {
   return int{code};
 }
+
+auto Endless(const Content &value) -> bool
+{
+  const auto *number = std::get_if<double>(&value);
+  return number != nullptr && !std::isfinite(*number);
+}
 } // namespace
 
-Reader::Reader(std::string_view bytes) : m_Rest(bytes), m_Wide(bytes.starts_with(std::string_view{"\0\0", 2})) {}
+Reader::Reader(std::string_view bytes, std::vector<Issue> *issues)
+    : m_Rest(bytes), m_Issues(issues), m_Wide(bytes.starts_with(std::string_view{"\0\0", 2}))
+{
+}
 
 auto Reader::Done() const -> bool
 {
   return m_Rest.empty();
 }
 
-auto Reader::Next() -> std::expected<Tag, Failure>
+auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
 {
   const std::optional<int> group = Code();
   if (!group)
@@ -141,7 +148,20 @@ auto Reader::Next() -> std::expected<Tag, Failure>
   {
     return std::unexpected{Failure{.What = std::format("group {} {}", *group, value.error())}};
   }
-  return Tag{.Code = *group, .Value = *value};
+  if (Endless(*value))
+  {
+    Tell(Issue{.Line = 0, .What = std::format("group {} is no finite number, left out", *group)});
+    return std::optional<Tag>{};
+  }
+  return std::optional{Tag{.Code = *group, .Value = *value}};
+}
+
+void Reader::Tell(Issue issue)
+{
+  if (m_Issues != nullptr)
+  {
+    m_Issues->push_back(std::move(issue));
+  }
 }
 
 auto Reader::Code() -> std::optional<int>

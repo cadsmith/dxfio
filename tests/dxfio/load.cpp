@@ -137,6 +137,17 @@ TEST_CASE("load: what is read past is told, what stops the file handed back")
   CHECK(Load("  0\nLINE\n") == std::unexpected{Failure{1, "SECTION expected, found group 0"}});
 }
 
+TEST_CASE("load: a value that does not parse is left out and told, the record read without it")
+{
+  const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n 39\nabc\n  0\nENDSEC\n  0\nEOF\n");
+  REQUIRE(read);
+  REQUIRE(read->Document.Entities.size() == 1);
+  const auto *line = std::get_if<Entities::Line>(&read->Document.Entities.front());
+  REQUIRE(line != nullptr);
+  CHECK(line->Thickness == 0.0);
+  CHECK(read->Issues == std::vector{Issue{.Line = 8, .What = "number expected for group 39, found \"abc\", left out"}});
+}
+
 TEST_CASE("load: a section whose parts do not hold together stops the file")
 {
   CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n") ==

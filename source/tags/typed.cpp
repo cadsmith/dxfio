@@ -63,6 +63,13 @@ auto Bound(Codes::Type is) -> std::pair<std::int64_t, std::int64_t>
   return {Huge::min(), Huge::max()};
 }
 
+// The value the text spells for the type, when it spells one.
+auto Spelled(Codes::Type is, std::string_view text) -> std::optional<Content>
+{
+  const std::expected<Content, std::string_view> parsed = Parse(is, text);
+  return parsed ? std::optional{*parsed} : std::nullopt;
+}
+
 auto Refused(int code) -> Failure
 {
   return Failure{.Line = 0, .What = std::format("group {} holds no value of its type", code)};
@@ -102,7 +109,7 @@ auto Typed(int code, const Content &held) -> std::expected<Content, Failure>
     return std::holds_alternative<double>(held) ? Measured(code, held) : Converted{held};
   }
   const auto *text = std::get_if<std::string_view>(&held);
-  const std::optional<Content> parsed = text == nullptr ? std::nullopt : Parse(is, *text);
+  const std::optional<Content> parsed = text == nullptr ? std::nullopt : Spelled(is, *text);
   const Content &value = parsed ? *parsed : held;
   if (is == Codes::Type::Binary)
   {

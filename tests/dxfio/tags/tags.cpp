@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace DxfIO::Tags
 {
@@ -38,6 +39,17 @@ TEST_CASE("tags: a binary file is read after its sentinel")
   REQUIRE(tags);
   REQUIRE(tags->size() == 2);
   CHECK(tags->at(1) == Tag{.Code = 2, .Value = std::string_view{"HEADER"}});
+}
+
+TEST_CASE("tags: what a reader leaves out is told to the issues asked for")
+{
+  std::vector<Issue> issues;
+  const auto tags = All("  0\nSECTION\n 40\nnope\n  2\nHEADER\n", &issues);
+  REQUIRE(tags);
+  REQUIRE(tags->size() == 2);
+  CHECK(tags->at(1).Line == 5);
+  CHECK(issues == std::vector{Issue{.Line = 4, .What = "number expected for group 40, found \"nope\", left out"}});
+  CHECK(All("  0\nSECTION\n 40\nnope\n")->size() == 1);
 }
 
 TEST_CASE("tags: the failure that stops the file is handed back")

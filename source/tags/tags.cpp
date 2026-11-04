@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <utility>
 
 namespace DxfIO::Tags
@@ -21,14 +22,14 @@ auto Gathered(ReaderT in, std::size_t room) -> std::expected<std::vector<Tag>, F
   out.reserve(room);
   while (!in.Done())
   {
-    std::expected<Tag, Failure> one = in.Next();
+    std::expected<std::optional<Tag>, Failure> one = in.Next();
     if (!one)
     {
       return std::unexpected{std::move(one.error())};
     }
-    if (one->Code != Comment)
+    if (*one && (*one)->Code != Comment)
     {
-      out.push_back(*one);
+      out.push_back(**one);
     }
   }
   return out;
@@ -40,12 +41,12 @@ auto Lines(std::string_view text) -> std::size_t
 }
 } // namespace
 
-auto All(std::string_view bytes) -> std::expected<std::vector<Tag>, Failure>
+auto All(std::string_view bytes, std::vector<Issue> *issues) -> std::expected<std::vector<Tag>, Failure>
 {
   if (Marked(bytes))
   {
-    return Gathered(Binary::Reader{bytes.substr(Sentinel().size())}, 0);
+    return Gathered(Binary::Reader{bytes.substr(Sentinel().size()), issues}, 0);
   }
-  return Gathered(Ascii::Reader{bytes}, Lines(bytes));
+  return Gathered(Ascii::Reader{bytes, issues}, Lines(bytes));
 }
 } // namespace DxfIO::Tags

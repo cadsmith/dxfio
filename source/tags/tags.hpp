@@ -5,6 +5,7 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/failure.hpp"
+#include "dxfio/issue.hpp"
 
 #include <concepts>
 #include <expected>
@@ -14,11 +15,14 @@
 
 namespace DxfIO::Tags
 {
-[[nodiscard]] DXFIO_API auto All(std::string_view bytes) -> std::expected<std::vector<Tag>, Failure>;
+// Every tag of a file, ASCII or binary, with the comments left out; a group whose value does not parse is left out
+// and told to issues, when given. Fails where the file cannot be read on.
+[[nodiscard]] DXFIO_API auto All(std::string_view bytes, std::vector<Issue> *issues = nullptr)
+    -> std::expected<std::vector<Tag>, Failure>;
 
 template <class BufferT>
   requires std::same_as<BufferT, std::string>
-auto All(BufferT &&dying) -> std::expected<std::vector<Tag>, Failure> = delete;
+auto All(BufferT &&dying, std::vector<Issue> *issues = nullptr) -> std::expected<std::vector<Tag>, Failure> = delete;
 } // namespace DxfIO::Tags
 
 #endif /* DXFIO_TAGS_TAGS_HPP */

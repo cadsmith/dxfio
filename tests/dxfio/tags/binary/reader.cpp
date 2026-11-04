@@ -6,6 +6,7 @@
 #include <bit>
 #include <cstdint>
 #include <limits>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -70,25 +71,28 @@ auto Sample(bool wide) -> std::string
   return out;
 }
 
-auto Read(std::string_view bytes) -> std::vector<Tag>
+auto Read(std::string_view bytes, std::vector<Issue> *issues = nullptr) -> std::vector<Tag>
 {
-  Reader in{bytes};
+  Reader in{bytes, issues};
   std::vector<Tag> out;
   while (!in.Done())
   {
-    const std::expected<Tag, Failure> one = in.Next();
+    const std::expected<std::optional<Tag>, Failure> one = in.Next();
     REQUIRE(one);
-    out.push_back(*one);
+    if (*one)
+    {
+      out.push_back(**one);
+    }
   }
   return out;
 }
 
 auto Refused(std::string_view bytes) -> Failure
 {
-  Reader in{bytes};
+  Reader in{bytes, nullptr};
   while (!in.Done())
   {
-    const std::expected<Tag, Failure> one = in.Next();
+    const std::expected<std::optional<Tag>, Failure> one = in.Next();
     if (!one)
     {
       return one.error();
@@ -128,7 +132,7 @@ TEST_CASE("binary: bytes cut short are a failure")
   CHECK(Refused(std::string_view{"\xff", 1}) == Failure{0, "group code cut short"});
 }
 
-TEST_CASE("binary: a real that is not finite is a failure")
+TEST_CASE("binary: a real that is not finite is left out and told, the rest read on")
 {
   for (const double odd : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity()})
   {
@@ -137,7 +141,14 @@ TEST_CASE("binary: a real that is not finite is a failure")
     Put(bytes, std::string_view{"SECTION"});
     Code(bytes, true, 40);
     Put(bytes, odd);
-    CHECK(Refused(bytes) == Failure{0, "group 40 is no finite number"});
+    Code(bytes, true, 70);
+    Put(bytes, std::int16_t{3});
+    std::vector<Issue> issues;
+    const std::vector<Tag> tags = Read(bytes, &issues);
+    REQUIRE(tags.size() == 2);
+    CHECK(tags.at(1) == Tag{.Code = 70, .Value = std::int64_t{3}});
+    CHECK(issues == std::vector{Issue{.Line = 0, .What = "group 40 is no finite number, left out"}});
+    CHECK(Read(bytes).size() == 2);
   }
 }
 

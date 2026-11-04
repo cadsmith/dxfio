@@ -6,7 +6,9 @@
 #include <array>
 #include <charconv>
 #include <cstdint>
+#include <expected>
 #include <memory>
+#include <optional>
 #include <system_error>
 #include <utility>
 
@@ -52,37 +54,43 @@ auto Integral(std::string_view word) -> std::optional<std::int64_t>
   return static_cast<std::int64_t>(*loose);
 }
 
-auto Verbatim(std::string_view text) -> std::optional<Content>
+using Parsed = std::expected<Content, std::string_view>;
+
+constexpr std::string_view Number = "number";
+
+constexpr std::string_view Integer = "integer";
+
+auto Verbatim(std::string_view text) -> Parsed
 {
   return Content{text};
 }
 
-auto Measured(std::string_view text) -> std::optional<Content>
+auto Measured(std::string_view text) -> Parsed
 {
   const std::optional<double> number = Decimal(Bare(text));
-  return number ? std::optional{Content{*number}} : std::nullopt;
+  return number ? Parsed{Content{*number}} : std::unexpected{Number};
 }
 
-auto Counted(std::string_view text) -> std::optional<Content>
+auto Counted(std::string_view text) -> Parsed
 {
   const std::optional<std::int64_t> number = Integral(Bare(text));
-  return number ? std::optional{Content{*number}} : std::nullopt;
+  return number ? Parsed{Content{*number}} : std::unexpected{Integer};
 }
 
-auto Flagged(std::string_view text) -> std::optional<Content>
+auto Flagged(std::string_view text) -> Parsed
 {
   const std::optional<std::int64_t> number = Integral(Bare(text));
-  return number ? std::optional{Content{*number != 0}} : std::nullopt;
+  return number ? Parsed{Content{*number != 0}} : std::unexpected{Integer};
 }
 
-using Reading = std::optional<Content> (*)(std::string_view text);
+using Reading = Parsed (*)(std::string_view text);
 
 constexpr std::array<Reading, 8> Readings{
     Verbatim, Counted, Counted, Counted, Measured, Flagged, Verbatim, Verbatim,
 };
 } // namespace
 
-auto Parse(Codes::Type is, std::string_view text) -> std::optional<Content>
+auto Parse(Codes::Type is, std::string_view text) -> std::expected<Content, std::string_view>
 {
   return Readings.at(std::to_underlying(is))(text);
 }
