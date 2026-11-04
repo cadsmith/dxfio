@@ -1,4 +1,5 @@
 #include "checks.hpp"
+#include "entities/io.hpp"
 #include "walk.hpp"
 
 #include <format>
@@ -74,6 +75,28 @@ void Ended(Auditor<DocumentT> &with, KindT &kind, std::string_view name)
     chain.Closing = Boxed{Entities::Seqend{.Record = std::move(record)}};
   }
 }
+
+// A vertex flagged for another kind of polyline than its own is written under the wrong subclass, which AutoCAD
+// refuses: an error, and the flags its polyline asks when the checks fix.
+template <class DocumentT, class PolylineT>
+void Reflagged(Auditor<DocumentT> &with, PolylineT &polyline)
+{
+  for (auto &vertex : polyline.Vertices.Children)
+  {
+    const int asked = Entities::Asked(polyline, vertex);
+    if (vertex.Flags == asked)
+    {
+      continue;
+    }
+    with.Note(Severity::Error, std::format("vertex flagged {} where its polyline asks {}", vertex.Flags, asked),
+              vertex.Record.Base.Self);
+    if constexpr (Auditor<DocumentT>::Fix)
+    {
+      vertex.Flags = asked;
+    }
+  }
+}
+
 } // namespace
 
 template <class DocumentT>
@@ -94,6 +117,7 @@ void Sequenced(Auditor<DocumentT> &with)
                   }
                   if constexpr (requires { kind.Vertices.Children; })
                   {
+                    Reflagged(with, kind);
                     Ended(with, kind, "POLYLINE");
                   }
                 },

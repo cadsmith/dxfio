@@ -453,6 +453,27 @@ TEST_CASE("audit: a leader with fewer than two vertices is left out")
   CHECK(Check(drawing).Findings.empty());
 }
 
+TEST_CASE("audit: a vertex flagged for another kind of polyline than its own is reflagged")
+{
+  Document drawing = Fresh();
+  Entities::Polyline spatial{};
+  spatial.Flags = 8;
+  spatial.Vertices.Children = {Entities::Vertex{}, Entities::Vertex{}};
+  REQUIRE(Edit::Add(drawing, spatial));
+  auto &vertices = std::get<Entities::Polyline>(drawing.Entities.front()).Vertices.Children;
+  vertices.front().Flags = 0;
+  vertices.back().Flags = 64 + 1;
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Errors() == 2);
+  CHECK(seen.Findings.front().What == "vertex flagged 0 where its polyline asks 32");
+  CHECK(seen.Findings.front().Subject == vertices.front().Record.Base.Self);
+  CHECK(seen.Findings.back().What == "vertex flagged 65 where its polyline asks 33");
+  CHECK(Repair(drawing).Clean());
+  CHECK(vertices.front().Flags == 32);
+  CHECK(vertices.back().Flags == 33);
+  CHECK(Check(drawing).Findings.empty());
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();

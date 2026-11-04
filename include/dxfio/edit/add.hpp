@@ -16,7 +16,8 @@ namespace DxfIO::Edit
 /// Adds an entity to model or paper space and returns its handle.
 /// The entity, and the vertices or attributes it carries, take new handles where they have none,
 /// and are owned by the space's block record. A POLYLINE, and an INSERT with attributes, are given the SEQEND that
-/// closes them when they have none, on their own layer, and an INSERT with attributes says they follow it.
+/// closes them when they have none, on their own layer, and an INSERT with attributes says they follow it. A
+/// POLYLINE's vertices take the flags its kind asks: 32 of a 3D polyline, 64 of a polygon mesh, 128 for a face.
 DXFIO_API auto Add(Document &drawing, Entity one, Space space = Space::Model) -> std::expected<Handle, Failure>;
 
 /// Adds an entity to the block of that name, as the other Add does to a space, and returns its handle.

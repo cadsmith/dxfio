@@ -63,7 +63,8 @@ struct DXFIO_API Report
 /// insert of a missing
 /// block left out, a mesh with no vertices or faces left out, one given one crease per edge, an ellipse's ratio
 /// brought between 0 and 1, a leader with fewer than two vertices left out,
-/// a POLYLINE or an INSERT with attributes given the SEQEND it lacks, an INSERT's attributes said to follow it, a
+/// a POLYLINE or an INSERT with attributes given the SEQEND it lacks, its vertices the flags its kind asks, an
+/// INSERT's attributes said to follow it, a
 /// kind of AutoCAD's own with no CLASS record given the one AutoCAD writes.
 /// A handle it gives comes past every handle in use, or, once the drawing holds the last handle there is, is the lowest
 /// one no record holds. It then moves $HANDSEED past the handles in use, adding it when the header has none.
