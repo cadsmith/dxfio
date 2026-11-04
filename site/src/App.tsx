@@ -1,8 +1,9 @@
 import { lazy, memo, Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import { MenuIcon, MoonIcon, SearchIcon, SunIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
+import { GitHubIcon } from './components/GitHub'
 import { Mark } from './components/Mark'
 import { Missing } from './components/Missing'
 import { link, useRoute } from './route'
@@ -20,6 +21,8 @@ const pages = [
   { id: 'concepts', label: 'Concepts', href: start('concepts') },
   { id: 'reference', label: 'Reference', href: link('reference') },
 ]
+
+const repository = 'https://github.com/cadsmith/dxfio'
 
 type Theme = 'dark' | 'light'
 
@@ -183,6 +186,9 @@ export function App({ at }: { at: string[] }) {
                 <Kbd>K</Kbd>
               </KbdGroup>
             </Button>
+            <a className={buttonVariants({ variant: 'ghost', size: 'icon' })} href={repository} aria-label="dxfio on GitHub">
+              <GitHubIcon />
+            </a>
             <Button variant="ghost" size="icon" className="theme-toggle" onClick={flip} aria-label={`Use the ${next} theme`}>
               <SunIcon className="theme-sun" />
               <MoonIcon className="theme-moon" />
