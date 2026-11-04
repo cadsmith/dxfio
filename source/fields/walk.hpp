@@ -75,7 +75,7 @@ public:
 
   void Spend();
 
-  [[nodiscard]] auto Kept() const -> std::vector<Group>;
+  [[nodiscard]] auto Kept() -> std::vector<Group>;
 
 private:
   struct Standing
@@ -86,7 +86,7 @@ private:
 
   [[nodiscard]] auto At(std::size_t index) const -> const Tags::Tag &;
 
-  [[nodiscard]] auto Dropped(std::size_t at, int code, Standing where) const -> std::optional<std::string>;
+  [[nodiscard]] auto Dropped(std::size_t at, int code, Standing where) -> std::optional<std::string>;
   void Judge(int code, Test fits);
   [[nodiscard]] auto Chosen(int code) const -> std::optional<std::size_t>;
   auto Ordered(int code) -> const Tags::Tag *;

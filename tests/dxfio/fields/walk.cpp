@@ -214,7 +214,7 @@ TEST_CASE("walk: what no field took is handed back, a repeat told")
   CHECK(issues.front().What == "group 40 given again, one kept");
 }
 
-TEST_CASE("walk: a group before its subclass the last fields read dropped")
+TEST_CASE("walk: a group before its subclass the last fields read dropped, the record not whole")
 {
   const auto all = Tags::All(" 70\n3\n100\nAcDbSymbolTable\n 70\n0\n");
   REQUIRE(all);
@@ -222,7 +222,9 @@ TEST_CASE("walk: a group before its subclass the last fields read dropped")
   Walk in{*all, Reading{.Issues = &issues}};
   CHECK(in.Subclass("AcDbSymbolTable"));
   CHECK(in.Take(70) != nullptr);
+  CHECK(in.Whole());
   CHECK(in.Kept().empty());
+  CHECK_FALSE(in.Whole());
   REQUIRE(issues.size() == 1);
   CHECK(issues.front().Line == 1);
   CHECK(issues.front().What == "group 70 out of its place, dropped");
@@ -243,6 +245,7 @@ TEST_CASE("walk: before R13 a group any field read is dropped, not the last")
   CHECK_FALSE(in.Subclass("AcDbDictionaryWithDefault"));
   CHECK(in.Take(340) == nullptr);
   CHECK(in.Kept().empty());
+  CHECK_FALSE(in.Whole());
   REQUIRE(issues.size() == 1);
   CHECK(issues.front().What == "group 350 out of its place, dropped");
 }
@@ -256,6 +259,7 @@ TEST_CASE("walk: a group after a marker no field took is kept")
   CHECK(in.Subclass("AcDbLine"));
   CHECK(in.Take(39) != nullptr);
   CHECK(in.Kept().size() == 2);
+  CHECK(in.Whole());
   CHECK(issues.empty());
 }
 

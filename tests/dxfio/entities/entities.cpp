@@ -400,6 +400,26 @@ TEST_CASE("entities: in R12 a kind R12 has not stays as it came, its codes its o
   CHECK(std::holds_alternative<Unknown>(read.front()));
   CHECK(std::holds_alternative<Line>(read.back()));
 }
+
+TEST_CASE("entities: a group outside the part that names it keeps the record as it came")
+{
+  const auto all = Tags::All("  0\nLINE\n  5\n2A\n330\n1F\n100\nAcDbEntity\n  8\n0\n"
+                             " 11\n1.0\n 21\n1.0\n 31\n0.0\n"
+                             "100\nAcDbLine\n 10\n0.0\n 20\n0.0\n 30\n0.0\n");
+  REQUIRE(all);
+  const auto records = File::Sections::Records(*all);
+  REQUIRE(records);
+  std::vector<Issue> issues;
+  const List read = Entities::Read(*records, Fields::Reading{.Text = Encoding::Utf8(), .Issues = &issues});
+  REQUIRE(read.size() == 1);
+  REQUIRE(std::holds_alternative<Unknown>(read.front()));
+  const auto &kept = std::get<Unknown>(read.front());
+  CHECK(kept.Type == "LINE");
+  CHECK(std::ranges::count(kept.Groups, 11, &Group::Code) == 1);
+  REQUIRE(issues.size() == 1);
+  CHECK(issues.front().Line == 1);
+  CHECK(issues.front().What == "a record out of its order, kept as it came");
+}
 } // namespace DxfIO::Entities
 
 namespace DxfIO::Entities
