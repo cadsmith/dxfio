@@ -17,9 +17,9 @@ namespace DxfIO::Entities
 struct DXFIO_API Strand
 {
   /// The parameters of the line's pieces along the segment; group 74 counts them. Group 41.
-  std::vector<double> Spans;
+  std::vector<double> Spans{};
   /// The parameters of the line's area fill; group 75 counts them. Group 42.
-  std::vector<double> Fills;
+  std::vector<double> Fills{};
 
   auto operator==(const Strand &) const -> bool = default;
 };
@@ -34,7 +34,7 @@ struct DXFIO_API Joint
   /// The direction of the miter at the vertex. Groups 13, 23, 33.
   Vector Miter{};
   /// How each line of the style runs along the segment, in the style's order.
-  std::vector<Strand> Strands;
+  std::vector<Strand> Strands{};
 
   auto operator==(const Joint &) const -> bool = default;
 };
@@ -43,7 +43,7 @@ struct DXFIO_API Joint
 struct DXFIO_API Web
 {
   /// The name of the multiline style. Group 2.
-  Symbol Style;
+  Symbol Style{};
   /// The MLINESTYLE object. Group 340.
   Handle Styled{};
   /// The scale of the style's offsets. Group 40.
@@ -59,7 +59,7 @@ struct DXFIO_API Web
   /// The normal of the plane the entity is drawn in. Groups 210, 220, 230.
   Vector Normal{Up};
   /// The vertices; group 72 counts them.
-  std::vector<Joint> Joints;
+  std::vector<Joint> Joints{};
 
   auto operator==(const Web &) const -> bool = default;
 };
@@ -70,7 +70,7 @@ struct DXFIO_API MLine
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The style, justification and vertices, from the AcDbMline subclass.
-  Boxed<Entities::Web> Web;
+  Boxed<Entities::Web> Web{};
 
   auto operator==(const MLine &) const -> bool = default;
 };

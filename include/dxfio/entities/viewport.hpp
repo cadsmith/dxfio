@@ -67,14 +67,14 @@ struct DXFIO_API Port
   /// The circle zoom percent. Group 72, from R2000.
   int Zoom{Roundness};
   /// The layers frozen in this viewport alone. Group 341 before R2004, 331 from it.
-  std::vector<Handle> Frozen;
+  std::vector<Handle> Frozen{};
   /// 1 perspective, 2 front clip, 4 back clip, 8 UCS follows, 256 snap, 512 grid, 16384 scale locked,
   /// 65536 clipped by an entity, 131072 off, among others; 32768 always set. Group 90, from R2000.
   int Flags{Unflagged};
   /// The entity that clips the viewport when it is not rectangular. Group 340, from R2000.
   Handle Clip{};
   /// The name of the plot style sheet. Group 1, from R2000.
-  std::string Sheet;
+  std::string Sheet{};
   /// The render mode: 0 2D wireframe, 1 3D wireframe, 2 hidden line, 3 flat shaded, 4 Gouraud shaded,
   /// 5 and 6 the same with wireframe. Group 281, from R2000.
   int Render{};
@@ -105,9 +105,9 @@ struct DXFIO_API Port
   /// The ambient light color, as an AutoCAD Color Index. Group 63, from R2007.
   int Ambient{Ambience};
   /// The ambient light's true color, as 0xRRGGBB. Group 421, from R2007.
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
   /// The color book of the ambient light, joined to the color's name by a $. Group 431, from R2007.
-  std::string Book;
+  std::string Book{};
   /// The SUN that lights the viewport. Group 361, from R2007.
   Handle Sun{};
 
@@ -120,7 +120,7 @@ struct DXFIO_API Viewport
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The window and the view, from the AcDbViewport subclass.
-  Boxed<Entities::Port> Port;
+  Boxed<Entities::Port> Port{};
 
   auto operator==(const Viewport &) const -> bool = default;
 };

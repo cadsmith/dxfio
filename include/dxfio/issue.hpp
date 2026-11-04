@@ -17,7 +17,7 @@ struct DXFIO_API Issue
   /// The handle of the record it concerns; null when it concerns no one record, or the record has no handle.
   Handle Record{};
   /// What was noted, in a sentence such as "group 330 given again, one kept".
-  std::string What;
+  std::string What{};
 
   auto operator==(const Issue &) const -> bool = default;
 };

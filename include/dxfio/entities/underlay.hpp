@@ -48,7 +48,7 @@ struct DXFIO_API Overlaid
   /// The fade, 0 to 80. Group 282.
   int Fade{};
   /// The vertices of the clipping boundary, two opposite corners for a rectangle.
-  std::vector<Bound> Clip;
+  std::vector<Bound> Clip{};
 
   auto operator==(const Overlaid &) const -> bool = default;
 };
@@ -60,9 +60,9 @@ struct UnderlayOf
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// Where the underlay lies and how it is shown, from the AcDbUnderlayReference subclass.
-  Boxed<Entities::Overlaid> Overlaid;
+  Boxed<Entities::Overlaid> Overlaid{};
 
   auto operator==(const UnderlayOf &) const -> bool = default;
 };

@@ -17,13 +17,13 @@ struct DXFIO_API Attdef
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The default value, where it is drawn, and in which style, kept on the heap and reached with ->.
-  Boxed<Entities::Lettering> Lettering;
+  Boxed<Entities::Lettering> Lettering{};
   /// The version of the attribute's layout. The first group 280, from R2010.
   int Revision{};
   /// The prompt shown when the block is inserted. Group 3.
-  std::string Prompt;
+  std::string Prompt{};
   /// The tag that names the attribute in its block. Group 2.
-  Symbol Tag;
+  Symbol Tag{};
   /// 1 invisible, 2 constant, 4 verified on entry, 8 preset. Group 70.
   int Flags{};
   /// The field length, which AutoCAD does not use. Group 73.

@@ -104,7 +104,7 @@ struct DXFIO_API Vport
   /// The AutoCAD Color Index of the ambient light. Group 63, from R2007.
   int Ambient{Ambience};
   /// The ambient light as a true color 0xRRGGBB, when it has one. Group 421, from R2007.
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
   /// The background object. Group 332, from R2007.
   Handle Background{};
   /// The shade plot object. Group 333, from R2007.

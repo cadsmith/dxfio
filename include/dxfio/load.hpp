@@ -20,7 +20,7 @@ struct DXFIO_API Loaded
   /// The drawing, every section and every group the file held.
   DxfIO::Document Document{};
   /// What the reader kept, mended or left out, with the line it found it on.
-  std::vector<Issue> Issues;
+  std::vector<Issue> Issues{};
 };
 
 /// Reads a drawing from the bytes of a DXF file, ASCII or binary, of any release from R10 to R2018.

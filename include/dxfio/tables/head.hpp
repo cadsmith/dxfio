@@ -14,7 +14,7 @@ struct DXFIO_API Head
   /// The handle, owner, reactors and extended data.
   DxfIO::Base Base{};
   /// The name of the table, such as "LAYER". Group 2.
-  std::string Name;
+  std::string Name{};
   /// The most entries the table holds, as the file gives it. Group 70.
   int Count{};
 

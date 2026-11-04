@@ -18,14 +18,14 @@ namespace DxfIO::Entities
 struct DXFIO_API Geometry
 {
   /// The version of the modeler's format. Group 70.
-  std::optional<int> Version;
+  std::optional<int> Version{};
   /// The lines of the ACIS body, as DXF encodes them, kept as groups; empty when the body is in ACDSDATA.
   /// Groups 1 and 3.
-  std::vector<Group> Lines;
+  std::vector<Group> Lines{};
   /// A flag of the R2013 layout, which DXF does not document. Group 290.
-  std::optional<bool> Stored;
+  std::optional<bool> Stored{};
   /// The GUID of the body, in the R2013 layout. Group 2.
-  std::optional<std::string> Guid;
+  std::optional<std::string> Guid{};
 
   auto operator==(const Geometry &) const -> bool = default;
 };
@@ -36,9 +36,9 @@ struct DXFIO_API Region
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The ACIS body, from the AcDbModelerGeometry subclass.
-  Boxed<Entities::Geometry> Geometry;
+  Boxed<Entities::Geometry> Geometry{};
 
   auto operator==(const Region &) const -> bool = default;
 };
@@ -49,9 +49,9 @@ struct DXFIO_API Body
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The ACIS body, from the AcDbModelerGeometry subclass.
-  Boxed<Entities::Geometry> Geometry;
+  Boxed<Entities::Geometry> Geometry{};
 
   auto operator==(const Body &) const -> bool = default;
 };
@@ -62,9 +62,9 @@ struct DXFIO_API Solid3d
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The ACIS body, from the AcDbModelerGeometry subclass.
-  Boxed<Entities::Geometry> Geometry;
+  Boxed<Entities::Geometry> Geometry{};
   /// The history of how the solid was made. Group 350, from R2007.
   Handle History{};
 
@@ -97,15 +97,15 @@ struct SurfaceOf
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The ACIS body, from the AcDbModelerGeometry subclass.
-  Boxed<Entities::Geometry> Geometry;
+  Boxed<Entities::Geometry> Geometry{};
   /// The number of isolines drawn across the surface along U. Group 71.
   int Across{6};
   /// The number of isolines drawn across the surface along V. Group 72.
   int Along{6};
   /// The groups that follow the isolines, the kind's own data, kept as they came.
-  std::vector<Group> Tail;
+  std::vector<Group> Tail{};
 
   auto operator==(const SurfaceOf &) const -> bool = default;
 };

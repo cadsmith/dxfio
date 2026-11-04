@@ -62,7 +62,7 @@ struct DXFIO_API Raster
   /// The shape of the clipping boundary: 1 a rectangle, as for a new one, 2 a polygon. Group 71.
   int Kind{1};
   /// The vertices of the clipping boundary, two opposite corners for a rectangle; group 91 counts them.
-  std::vector<Pixel> Corners;
+  std::vector<Pixel> Corners{};
 
   auto operator==(const Raster &) const -> bool = default;
 };
@@ -73,9 +73,9 @@ struct DXFIO_API Image
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// Where the picture lies, how it is shown and how it is clipped, from the AcDbRasterImage subclass.
-  Boxed<Entities::Raster> Raster;
+  Boxed<Entities::Raster> Raster{};
 
   auto operator==(const Image &) const -> bool = default;
 };
@@ -86,9 +86,9 @@ struct DXFIO_API Wipeout
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// Where the area lies and the boundary that shapes it, from the AcDbWipeout subclass.
-  Boxed<Entities::Raster> Raster;
+  Boxed<Entities::Raster> Raster{};
 
   auto operator==(const Wipeout &) const -> bool = default;
 };

@@ -17,7 +17,7 @@ struct DXFIO_API Node
   /// The location, in the hatch's own coordinate system. Groups 10, 20.
   Vector Position{};
   /// The bulge of the segment to the next vertex, or the weight of the control point, when it has one. Group 42.
-  std::optional<double> Weight;
+  std::optional<double> Weight{};
 
   auto operator==(const Node &) const -> bool = default;
 };
@@ -88,11 +88,11 @@ struct DXFIO_API Spline
   /// 1 when the spline is periodic. Group 74.
   int Periodic{};
   /// The knot values; group 95 counts them. Group 40.
-  std::vector<double> Knots;
+  std::vector<double> Knots{};
   /// The control points, with their weights when the spline is rational; group 96 counts them.
-  std::vector<Node> Poles;
+  std::vector<Node> Poles{};
   /// The points the spline passes through; group 97 counts them. From R2010.
-  std::vector<Place> Fits;
+  std::vector<Place> Fits{};
   /// The tangent at the start, when the spline has fit points. Groups 12, 22, from R2010.
   Vector Start{};
   /// The tangent at the end, when the spline has fit points. Groups 13, 23, from R2010.

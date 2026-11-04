@@ -40,7 +40,7 @@ struct DXFIO_API Polyline
   /// The normal of the plane the entity is drawn in. Groups 210, 220, 230.
   Vector Extrusion{Up};
   /// The vertices that follow it in the file, closed by a SEQEND.
-  Sequence<Vertex> Vertices;
+  Sequence<Vertex> Vertices{};
 
   auto operator==(const Polyline &) const -> bool = default;
 };

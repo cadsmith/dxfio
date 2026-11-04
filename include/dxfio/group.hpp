@@ -14,7 +14,7 @@ namespace DxfIO
 struct DXFIO_API Chunk
 {
   /// The bytes, of any value, zero included.
-  std::string Bytes;
+  std::string Bytes{};
 
   auto operator==(const Chunk &) const -> bool = default;
 };
@@ -29,7 +29,7 @@ struct DXFIO_API Group
   /// The group code, such as 8 for a layer name or 10 for an x coordinate.
   int Code{};
   /// The value, of the type its code calls for.
-  Content Value;
+  Content Value{};
 
   auto operator==(const Group &) const -> bool = default;
 };

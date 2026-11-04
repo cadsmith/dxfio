@@ -31,11 +31,11 @@ inline constexpr double Jog = 45;
 struct DXFIO_API Arrows
 {
   /// DIMBLK: the block drawn at both ends; empty for the closed filled arrow. Group 5.
-  std::string Dimblk;
+  std::string Dimblk{};
   /// DIMBLK1: the block at the first end when DIMSAH is on. Group 6.
-  std::string Dimblk1;
+  std::string Dimblk1{};
   /// DIMBLK2: the block at the second end when DIMSAH is on. Group 7.
-  std::string Dimblk2;
+  std::string Dimblk2{};
 
   auto operator==(const Arrows &) const -> bool = default;
 };
@@ -48,9 +48,9 @@ struct DXFIO_API Dimstyle
   /// The arrow blocks by name, written up to R14; later releases give them as handles.
   Tables::Arrows Arrows{};
   /// DIMPOST: the prefix and suffix of measurements, with <> where the measurement goes. Group 3.
-  std::string Dimpost;
+  std::string Dimpost{};
   /// DIMAPOST: the prefix and suffix of alternate measurements. Group 4.
-  std::string Dimapost;
+  std::string Dimapost{};
   /// DIMSCALE: the factor every size of the style is scaled by. Group 40.
   double Dimscale{1};
   /// DIMASZ: the size of arrowheads. Group 41.

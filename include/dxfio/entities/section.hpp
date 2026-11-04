@@ -21,7 +21,7 @@ struct DXFIO_API Cut
   /// Bits of the section's settings, which DXF does not spell out. Group 91.
   int Flags{};
   /// The name of the section. Group 1.
-  std::string Name;
+  std::string Name{};
   /// The vertical direction of the section plane. Groups 10, 20, 30.
   Vector Vertical{Up};
   /// The height of the top of the section's volume. Group 40.
@@ -33,11 +33,11 @@ struct DXFIO_API Cut
   /// The AutoCAD Color Index of the plane's indicator. Group 62, from R2004.
   int Color{};
   /// The true color of the plane's indicator, as 0xRRGGBB. Group 420, from R2004.
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
   /// The vertices of the section line; group 92 counts them. Groups 11, 21, 31.
-  std::vector<Vector> Vertices;
+  std::vector<Vector> Vertices{};
   /// The vertices of the back line; group 93 counts them. Groups 12, 22, 32.
-  std::vector<Vector> Back;
+  std::vector<Vector> Back{};
   /// The SECTIONSETTINGS object that sets how the section is drawn. Group 360.
   Handle Settings{};
 
@@ -50,9 +50,9 @@ struct DXFIO_API SectionObject
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010, then 310.
-  std::string Picture;
+  std::string Picture{};
   /// The plane, its line and its indicator, from the AcDbSection subclass.
-  Boxed<Entities::Cut> Cut;
+  Boxed<Entities::Cut> Cut{};
 
   auto operator==(const SectionObject &) const -> bool = default;
 };

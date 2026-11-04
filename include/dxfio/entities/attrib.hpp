@@ -18,7 +18,7 @@ struct DXFIO_API Attrib
   /// The version of the attribute's layout. The first group 280, from R2010.
   int Revision{};
   /// The tag that names the attribute in its block. Group 2.
-  Symbol Tag;
+  Symbol Tag{};
   /// 1 invisible, 2 constant, 4 verified on entry, 8 preset. Group 70.
   int Flags{};
   /// The field length, which AutoCAD does not use. Group 73.

@@ -16,7 +16,7 @@ struct DXFIO_API Scale
   /// Flags, 0 in what AutoCAD writes. Group 70.
   int Flags{};
   /// The name of the scale, such as "1:50". Group 300.
-  std::string Name;
+  std::string Name{};
   /// The paper units of the scale, 1 in 1:50. Group 140.
   double Paper{1};
   /// The drawing units of the scale, 50 in 1:50. Group 141.

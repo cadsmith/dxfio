@@ -39,7 +39,7 @@ struct DXFIO_API Border
 struct DXFIO_API Cell
 {
   /// The name of the text style. Group 7.
-  std::string Style;
+  std::string Style{};
   /// The height of the text. Group 140.
   double Height{Table::Height};
   /// Where text stands in the cell: 1 to 3 top left to top right, 4 to 6 middle, 7 to 9 bottom. Group 170.
@@ -55,7 +55,7 @@ struct DXFIO_API Cell
   /// The unit of the cell's data. Group 91, from R2007.
   int Unit{};
   /// The format of the cell's data. Group 1, from R2007.
-  std::string Format;
+  std::string Format{};
   /// The top border.
   Border Top{};
   /// The horizontal borders between rows.
@@ -84,7 +84,7 @@ struct DXFIO_API TableStyle
   /// A version number, 0 as AutoCAD writes it. Group 280, the first, from R2010.
   int Revision{};
   /// The style's description; AutoCAD writes its name here. Group 3.
-  std::string Description;
+  std::string Description{};
   /// Which way the table grows: 0 down, 1 up. Group 70.
   int Flow{};
   /// Flags, 0 in what AutoCAD writes. Group 71.
@@ -98,7 +98,7 @@ struct DXFIO_API TableStyle
   /// Whether the header row is left out. Group 281.
   bool Headless{};
   /// The cell styles of the data, title and header rows, in that order.
-  std::vector<Table::Cell> Cells;
+  std::vector<Table::Cell> Cells{};
 
   auto operator==(const TableStyle &) const -> bool = default;
 };

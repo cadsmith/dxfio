@@ -27,13 +27,13 @@ inline constexpr int Dpi = 300;
 struct DXFIO_API Plot
 {
   /// The name of the page setup. Group 1.
-  std::string Name;
+  std::string Name{};
   /// The printer or plot configuration file. Group 2.
-  std::string Device;
+  std::string Device{};
   /// The paper size, as the device names it. Group 4.
-  std::string Size;
+  std::string Size{};
   /// The view plotted when Type is 3. Group 6.
-  std::string View;
+  std::string View{};
   /// The unprintable margin on the left of the paper, in millimeters. Group 40.
   double Left{};
   /// The unprintable margin at the bottom, in millimeters. Group 41.
@@ -68,7 +68,7 @@ struct DXFIO_API Plot
   /// 5 the layout. Group 74.
   int Type{PlotLayout};
   /// The plot style table, such as "acad.ctb". Group 7.
-  std::string Style;
+  std::string Style{};
   /// The standard scale: 0 scaled to fit, 16 1:1, others for the scales AutoCAD lists. Group 75.
   int Standard{Actual};
   /// The standard scale as a number. Group 147.

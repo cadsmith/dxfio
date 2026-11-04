@@ -14,7 +14,7 @@ namespace DxfIO::Objects
 struct DXFIO_API Entry
 {
   /// The name the object is found by. Group 3.
-  std::string Name;
+  std::string Name{};
   /// The object, when the dictionary does not own it hard. Group 350.
   Handle Soft{};
   /// The object, when the dictionary owns it hard. Group 360.
@@ -34,7 +34,7 @@ struct DXFIO_API Dictionary
   /// 3 to 5 rename it. Group 281, from R2000.
   int Cloning{1};
   /// The entries, in the order the file gives them.
-  std::vector<Objects::Entry> Entries;
+  std::vector<Objects::Entry> Entries{};
 
   auto operator==(const Dictionary &) const -> bool = default;
 };

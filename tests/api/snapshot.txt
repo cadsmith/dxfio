@@ -34,14 +34,14 @@ enum class Severity : std::uint8_t
 struct DXFIO_API Finding
 {
   Severity Level{};
-  std::string What;
+  std::string What{};
   Handle Subject{};
   bool Fixed{};
   auto operator==(const Finding &) const -> bool = default;
 };
 struct DXFIO_API Report
 {
-  std::vector<Finding> Findings;
+  std::vector<Finding> Findings{};
   [[nodiscard]] auto Clean() const -> bool;
   [[nodiscard]] auto Errors() const -> std::size_t;
   [[nodiscard]] auto Warnings() const -> std::size_t;
@@ -63,10 +63,10 @@ struct DXFIO_API Base
   Handle Self{};
   Handle Owner{};
   Handle Dictionary{};
-  std::vector<Handle> Reactors;
-  std::vector<Brace> Braces;
-  std::vector<Xdata> Extended;
-  std::vector<Group> Extra;
+  std::vector<Handle> Reactors{};
+  std::vector<Brace> Braces{};
+  std::vector<Xdata> Extended{};
+  std::vector<Group> Extra{};
   auto operator==(const Base &) const -> bool = default;
 };
 }
@@ -80,11 +80,11 @@ namespace DxfIO::Blocks
 struct DXFIO_API Begin
 {
   Entities::Record Record{};
-  std::string Name;
+  std::string Name{};
   int Flags{};
   Vector Origin{};
-  std::string Path;
-  std::string Description;
+  std::string Path{};
+  std::string Description{};
   auto operator==(const Begin &) const -> bool = default;
 };
 }
@@ -98,7 +98,7 @@ namespace DxfIO::Blocks
 struct DXFIO_API Block
 {
   Blocks::Begin Begin{};
-  DxfIO::Entities::List Entities;
+  DxfIO::Entities::List Entities{};
   Blocks::End End{};
   auto operator==(const Block &) const -> bool = default;
 };
@@ -206,8 +206,8 @@ namespace DxfIO
 {
 struct DXFIO_API Brace
 {
-  std::string Name;
-  std::vector<Group> Groups;
+  std::string Name{};
+  std::vector<Group> Groups{};
   auto operator==(const Brace &) const -> bool = default;
 };
 }
@@ -258,23 +258,23 @@ namespace DxfIO
 {
 struct DXFIO_API Document
 {
-  std::vector<std::string> Order;
-  std::vector<Header::Variable> Header;
-  std::vector<Raw> Classes;
-  Tables::Table<Tables::Vport> Vport;
-  Tables::Table<Tables::Ltype> Ltype;
-  Tables::Table<Tables::Layer> Layer;
-  Tables::Table<Tables::Style> Style;
-  Tables::Table<Tables::View> View;
-  Tables::Table<Tables::Ucs> Ucs;
-  Tables::Table<Tables::Appid> Appid;
-  Tables::Table<Tables::Dimstyle> Dimstyle;
-  Tables::Table<Tables::BlockRecord> BlockRecord;
-  std::vector<Tables::Table<Unknown>> Loose;
-  std::vector<Blocks::Block> Blocks;
-  DxfIO::Entities::List Entities;
-  std::vector<Object> Objects;
-  std::vector<Section> Sections;
+  std::vector<std::string> Order{};
+  std::vector<Header::Variable> Header{};
+  std::vector<Raw> Classes{};
+  Tables::Table<Tables::Vport> Vport{};
+  Tables::Table<Tables::Ltype> Ltype{};
+  Tables::Table<Tables::Layer> Layer{};
+  Tables::Table<Tables::Style> Style{};
+  Tables::Table<Tables::View> View{};
+  Tables::Table<Tables::Ucs> Ucs{};
+  Tables::Table<Tables::Appid> Appid{};
+  Tables::Table<Tables::Dimstyle> Dimstyle{};
+  Tables::Table<Tables::BlockRecord> BlockRecord{};
+  std::vector<Tables::Table<Unknown>> Loose{};
+  std::vector<Blocks::Block> Blocks{};
+  DxfIO::Entities::List Entities{};
+  std::vector<Object> Objects{};
+  std::vector<Section> Sections{};
   auto operator==(const Document &) const -> bool = default;
 };
 }
@@ -399,10 +399,10 @@ namespace DxfIO::Entities
 struct DXFIO_API Attdef
 {
   Entities::Record Record{};
-  Boxed<Entities::Lettering> Lettering;
+  Boxed<Entities::Lettering> Lettering{};
   int Revision{};
-  std::string Prompt;
-  Symbol Tag;
+  std::string Prompt{};
+  Symbol Tag{};
   int Flags{};
   int Length{};
   int Vertical{};
@@ -422,7 +422,7 @@ struct DXFIO_API Attrib
   Entities::Record Record{};
   Entities::Lettering Lettering{};
   int Revision{};
-  Symbol Tag;
+  Symbol Tag{};
   int Flags{};
   int Length{};
   int Vertical{};
@@ -510,13 +510,13 @@ using Form = std::variant<Linear, Aligned, Angular, Diameter, Radial, Points, Or
 struct DXFIO_API Figure
 {
   Entities::Measure Measure{};
-  Forms::Form Form;
+  Forms::Form Form{};
   auto operator==(const Figure &) const -> bool = default;
 };
 struct DXFIO_API Dimension
 {
   Entities::Record Record{};
-  Boxed<Entities::Figure> Figure;
+  Boxed<Entities::Figure> Figure{};
   auto operator==(const Dimension &) const -> bool = default;
 };
 struct DXFIO_API Bend
@@ -536,8 +536,8 @@ struct DXFIO_API Bend
 struct DXFIO_API ArcDimension
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Bend> Bend;
+  std::string Picture{};
+  Boxed<Entities::Bend> Bend{};
   auto operator==(const ArcDimension &) const -> bool = default;
 };
 struct DXFIO_API Jog
@@ -552,8 +552,8 @@ struct DXFIO_API Jog
 struct DXFIO_API LargeRadialDimension
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Jog> Jog;
+  std::string Picture{};
+  Boxed<Entities::Jog> Jog{};
   auto operator==(const LargeRadialDimension &) const -> bool = default;
 };
 }
@@ -570,25 +570,25 @@ inline constexpr double Unmeasured = -1;
 struct DXFIO_API Measure
 {
   int Version{};
-  Symbol Block;
+  Symbol Block{};
   Vector Point{};
   Vector Middle{};
-  std::optional<Vector> Clone;
+  std::optional<Vector> Clone{};
   int Flags{};
-  std::string Text;
+  std::string Text{};
   int Attachment{MiddleCenter};
-  std::optional<int> Spacing;
-  std::optional<double> Factor;
+  std::optional<int> Spacing{};
+  std::optional<double> Factor{};
   double Measured{Unmeasured};
   int Above{};
   int First{};
   int Second{};
-  std::optional<double> Oblique;
-  std::optional<double> Rotation;
-  std::optional<double> Turned;
-  std::optional<double> Horizontal;
+  std::optional<double> Oblique{};
+  std::optional<double> Rotation{};
+  std::optional<double> Turned{};
+  std::optional<double> Horizontal{};
   Vector Normal{Up};
-  Symbol Style;
+  Symbol Style{};
   auto operator==(const Measure &) const -> bool = default;
 };
 }
@@ -638,7 +638,7 @@ namespace DxfIO::Entities::Edges
 struct DXFIO_API Node
 {
   Vector Position{};
-  std::optional<double> Weight;
+  std::optional<double> Weight{};
   auto operator==(const Node &) const -> bool = default;
 };
 struct DXFIO_API Place
@@ -676,9 +676,9 @@ struct DXFIO_API Spline
   int Degree{3};
   int Rational{};
   int Periodic{};
-  std::vector<double> Knots;
-  std::vector<Node> Poles;
-  std::vector<Place> Fits;
+  std::vector<double> Knots{};
+  std::vector<Node> Poles{};
+  std::vector<Place> Fits{};
   Vector Start{};
   Vector End{};
   auto operator==(const Spline &) const -> bool = default;
@@ -695,8 +695,8 @@ namespace DxfIO::Entities
 struct DXFIO_API Stop
 {
   double Place{};
-  std::optional<int> Color;
-  std::optional<int> Rgb;
+  std::optional<int> Color{};
+  std::optional<int> Rgb{};
   auto operator==(const Stop &) const -> bool = default;
 };
 struct DXFIO_API Gradient
@@ -707,8 +707,8 @@ struct DXFIO_API Gradient
   double Shift{};
   int Single{};
   double Tint{};
-  std::vector<Stop> Stops;
-  std::string Name;
+  std::vector<Stop> Stops{};
+  std::string Name{};
   auto operator==(const Gradient &) const -> bool = default;
 };
 }
@@ -732,7 +732,7 @@ struct DXFIO_API Stripe
   double Y{};
   double Run{};
   double Rise{};
-  std::vector<double> Dashes;
+  std::vector<double> Dashes{};
   auto operator==(const Stripe &) const -> bool = default;
 };
 struct DXFIO_API Fill
@@ -742,22 +742,22 @@ struct DXFIO_API Fill
   std::string Name{"SOLID"};
   int Solid{1};
   int Associative{};
-  std::vector<Path> Paths;
+  std::vector<Path> Paths{};
   int Style{};
   int Kind{1};
   double Angle{};
   double Scale{1};
   int Doubled{};
-  std::vector<Stripe> Stripes;
-  std::optional<double> Pixel;
-  std::vector<Edges::Place> Seeds;
-  std::optional<Entities::Gradient> Gradient;
+  std::vector<Stripe> Stripes{};
+  std::optional<double> Pixel{};
+  std::vector<Edges::Place> Seeds{};
+  std::optional<Entities::Gradient> Gradient{};
   auto operator==(const Fill &) const -> bool = default;
 };
 struct DXFIO_API Hatch
 {
   Entities::Record Record{};
-  Boxed<Entities::Fill> Fill;
+  Boxed<Entities::Fill> Fill{};
   auto operator==(const Hatch &) const -> bool = default;
 };
 }
@@ -773,9 +773,9 @@ struct DXFIO_API Path
   int Flags{};
   int Bulged{};
   int Closed{};
-  std::vector<Edges::Node> Vertices;
-  std::vector<Edges::Edge> Edges;
-  std::vector<Handle> Sources;
+  std::vector<Edges::Node> Vertices{};
+  std::vector<Edges::Edge> Edges{};
+  std::vector<Handle> Sources{};
   auto operator==(const Path &) const -> bool = default;
 };
 }
@@ -805,8 +805,8 @@ struct DXFIO_API Coil
 struct DXFIO_API Helix
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Curve> Curve;
+  std::string Picture{};
+  Boxed<Entities::Curve> Curve{};
   Entities::Coil Coil{};
   auto operator==(const Helix &) const -> bool = default;
 };
@@ -825,16 +825,16 @@ struct DXFIO_API Insert
 {
   Entities::Record Record{};
   bool Follows{};
-  Symbol Block;
+  Symbol Block{};
   Vector Position{};
   Vector Scale{.X = 1, .Y = 1, .Z = 1};
   double Rotation{};
-  std::optional<int> Columns;
-  std::optional<int> Rows;
+  std::optional<int> Columns{};
+  std::optional<int> Rows{};
   double Across{};
   double Down{};
   Vector Extrusion{Up};
-  Sequence<Attrib> Attributes;
+  Sequence<Attrib> Attributes{};
   auto operator==(const Insert &) const -> bool = default;
 };
 }
@@ -853,16 +853,16 @@ namespace DxfIO::Entities
 inline constexpr int Unannotated = 3;
 struct DXFIO_API Lead
 {
-  Symbol Style;
+  Symbol Style{};
   int Arrow{1};
   int Path{};
   int Annotation{Unannotated};
   int Direction{1};
   int Hook{};
-  std::optional<double> Height;
-  std::optional<double> Width;
-  std::vector<Vector> Points;
-  std::optional<int> Color;
+  std::optional<double> Height{};
+  std::optional<double> Width{};
+  std::vector<Vector> Points{};
+  std::optional<int> Color{};
   Handle Note{};
   Vector Normal{Up};
   Vector Horizontal{.X = 1};
@@ -873,7 +873,7 @@ struct DXFIO_API Lead
 struct DXFIO_API Leader
 {
   Entities::Record Record{};
-  Boxed<Entities::Lead> Lead;
+  Boxed<Entities::Lead> Lead{};
   auto operator==(const Leader &) const -> bool = default;
 };
 }
@@ -890,14 +890,14 @@ struct DXFIO_API Lettering
   double Thickness{};
   Vector Position{};
   double Height{};
-  std::string Value;
+  std::string Value{};
   double Rotation{};
   double Width{1};
   double Oblique{};
   Symbol Style{"Standard"};
   int Generation{};
   int Horizontal{};
-  std::optional<Vector> Alignment;
+  std::optional<Vector> Alignment{};
   Vector Extrusion{Up};
   auto operator==(const Lettering &) const -> bool = default;
 };
@@ -914,7 +914,7 @@ inline constexpr int Lamplight = 0xFFFFFF;
 struct DXFIO_API Lamp
 {
   int Version{1};
-  std::string Name;
+  std::string Name{};
   int Kind{2};
   bool Lit{true};
   int Color{7};
@@ -938,8 +938,8 @@ struct DXFIO_API Lamp
 struct DXFIO_API Light
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Lamp> Lamp;
+  std::string Picture{};
+  Boxed<Entities::Lamp> Lamp{};
   auto operator==(const Light &) const -> bool = default;
 };
 }
@@ -973,7 +973,7 @@ struct DXFIO_API LwPolyline
   struct Vertex
   {
     Vector Position{};
-    std::optional<DxfIO::Widths> Widths;
+    std::optional<DxfIO::Widths> Widths{};
     double Bulge{};
     int Id{};
     auto operator==(const Vertex &) const -> bool = default;
@@ -983,7 +983,7 @@ struct DXFIO_API LwPolyline
   std::optional<double> Width{0.0};
   double Elevation{};
   double Thickness{};
-  std::vector<Vertex> Vertices;
+  std::vector<Vertex> Vertices{};
   Vector Extrusion{Up};
   auto operator==(const LwPolyline &) const -> bool = default;
 };
@@ -1003,19 +1003,19 @@ struct DXFIO_API Net
   int Version{2};
   int Blend{};
   int Level{};
-  std::vector<Vector> Vertices;
-  std::vector<int> Faces;
-  std::vector<int> Edges;
-  std::vector<double> Creases;
+  std::vector<Vector> Vertices{};
+  std::vector<int> Faces{};
+  std::vector<int> Edges{};
+  std::vector<double> Creases{};
   int Overridden{};
-  std::vector<Group> Overrides;
+  std::vector<Group> Overrides{};
   auto operator==(const Net &) const -> bool = default;
 };
 struct DXFIO_API Mesh
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Net> Net;
+  std::string Picture{};
+  Boxed<Entities::Net> Net{};
   auto operator==(const Mesh &) const -> bool = default;
 };
 }
@@ -1032,8 +1032,8 @@ namespace DxfIO::Entities
 {
 struct DXFIO_API Strand
 {
-  std::vector<double> Spans;
-  std::vector<double> Fills;
+  std::vector<double> Spans{};
+  std::vector<double> Fills{};
   auto operator==(const Strand &) const -> bool = default;
 };
 struct DXFIO_API Joint
@@ -1041,12 +1041,12 @@ struct DXFIO_API Joint
   Vector Position{};
   Vector Direction{};
   Vector Miter{};
-  std::vector<Strand> Strands;
+  std::vector<Strand> Strands{};
   auto operator==(const Joint &) const -> bool = default;
 };
 struct DXFIO_API Web
 {
-  Symbol Style;
+  Symbol Style{};
   Handle Styled{};
   double Scale{1};
   int Justification{};
@@ -1054,13 +1054,13 @@ struct DXFIO_API Web
   int Lines{};
   Vector Start{};
   Vector Normal{Up};
-  std::vector<Joint> Joints;
+  std::vector<Joint> Joints{};
   auto operator==(const Web &) const -> bool = default;
 };
 struct DXFIO_API MLine
 {
   Entities::Record Record{};
-  Boxed<Entities::Web> Web;
+  Boxed<Entities::Web> Web{};
   auto operator==(const MLine &) const -> bool = default;
 };
 }
@@ -1078,31 +1078,31 @@ namespace DxfIO::Entities
 {
 struct DXFIO_API Geometry
 {
-  std::optional<int> Version;
-  std::vector<Group> Lines;
-  std::optional<bool> Stored;
-  std::optional<std::string> Guid;
+  std::optional<int> Version{};
+  std::vector<Group> Lines{};
+  std::optional<bool> Stored{};
+  std::optional<std::string> Guid{};
   auto operator==(const Geometry &) const -> bool = default;
 };
 struct DXFIO_API Region
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Geometry> Geometry;
+  std::string Picture{};
+  Boxed<Entities::Geometry> Geometry{};
   auto operator==(const Region &) const -> bool = default;
 };
 struct DXFIO_API Body
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Geometry> Geometry;
+  std::string Picture{};
+  Boxed<Entities::Geometry> Geometry{};
   auto operator==(const Body &) const -> bool = default;
 };
 struct DXFIO_API Solid3d
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Geometry> Geometry;
+  std::string Picture{};
+  Boxed<Entities::Geometry> Geometry{};
   Handle History{};
   auto operator==(const Solid3d &) const -> bool = default;
 };
@@ -1120,11 +1120,11 @@ template <Sheet KindV>
 struct SurfaceOf
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Geometry> Geometry;
+  std::string Picture{};
+  Boxed<Entities::Geometry> Geometry{};
   int Across{6};
   int Along{6};
-  std::vector<Group> Tail;
+  std::vector<Group> Tail{};
   auto operator==(const SurfaceOf &) const -> bool = default;
 };
 using Surface = SurfaceOf<Sheet::Plain>;
@@ -1161,7 +1161,7 @@ struct DXFIO_API Columns
   double Gutter{};
   bool Automatic{};
   bool Reversed{};
-  std::vector<double> Heights;
+  std::vector<double> Heights{};
   auto operator==(const Columns &) const -> bool = default;
 };
 inline constexpr int Styled = 5;
@@ -1173,26 +1173,26 @@ struct DXFIO_API Paragraph
   double Defined{};
   int Attachment{1};
   int Flow{Styled};
-  std::string Value;
+  std::string Value{};
   Symbol Style{"Standard"};
   Vector Extrusion{Up};
-  std::optional<Vector> Direction;
-  std::optional<double> Rotation;
+  std::optional<Vector> Direction{};
+  std::optional<double> Rotation{};
   int Spacing{1};
   double Factor{1};
   int Fill{};
-  std::optional<int> Color;
-  std::optional<int> Rgb;
-  std::optional<std::string> Book;
-  std::optional<double> Margin;
-  std::optional<int> Transparency;
-  std::optional<Entities::Columns> Columns;
+  std::optional<int> Color{};
+  std::optional<int> Rgb{};
+  std::optional<std::string> Book{};
+  std::optional<double> Margin{};
+  std::optional<int> Transparency{};
+  std::optional<Entities::Columns> Columns{};
   auto operator==(const Paragraph &) const -> bool = default;
 };
 struct DXFIO_API MText
 {
   Entities::Record Record{};
-  Boxed<Entities::Paragraph> Paragraph;
+  Boxed<Entities::Paragraph> Paragraph{};
   auto operator==(const MText &) const -> bool = default;
 };
 }
@@ -1218,16 +1218,16 @@ struct DXFIO_API Gap
 };
 struct DXFIO_API Stem
 {
-  std::vector<Vector> Points;
-  std::vector<Gap> Gaps;
+  std::vector<Vector> Points{};
+  std::vector<Gap> Gaps{};
   int Index{};
-  std::optional<int> Color;
-  std::optional<int> Kind;
+  std::optional<int> Color{};
+  std::optional<int> Kind{};
   Handle Linetype{};
-  std::optional<int> Lineweight;
-  std::optional<double> Arrow;
+  std::optional<int> Lineweight{};
+  std::optional<double> Arrow{};
   Handle Head{};
-  std::optional<int> Overrides;
+  std::optional<int> Overrides{};
   auto operator==(const Stem &) const -> bool = default;
 };
 struct DXFIO_API Span
@@ -1242,10 +1242,10 @@ struct DXFIO_API Branch
   bool Bent{true};
   Vector Last{};
   Vector Dogleg{.X = 1};
-  std::vector<Span> Spans;
+  std::vector<Span> Spans{};
   int Index{};
   double Length{};
-  std::vector<Stem> Stems;
+  std::vector<Stem> Stems{};
   int Attachment{};
   auto operator==(const Branch &) const -> bool = default;
 };
@@ -1261,7 +1261,7 @@ struct DXFIO_API Note
   int Align{};
   int Attach{};
   bool Texted{};
-  std::string Text;
+  std::string Text{};
   Vector Normal{Up};
   Handle Style{};
   Vector Location{};
@@ -1284,7 +1284,7 @@ struct DXFIO_API Note
   double Column{};
   double Gutter{};
   bool Reversed{};
-  std::vector<double> Heights;
+  std::vector<double> Heights{};
   bool Breaks{};
   bool Blocked{};
   Handle Block{};
@@ -1298,7 +1298,7 @@ struct DXFIO_API Note
   Vector Across{.X = 1};
   Vector Along{.Y = 1};
   bool Flipped{};
-  std::vector<Branch> Branches;
+  std::vector<Branch> Branches{};
   int Bottom{9};
   int Top{9};
   auto operator==(const Note &) const -> bool = default;
@@ -1314,7 +1314,7 @@ struct DXFIO_API Label
   Handle Definition{};
   int Index{};
   double Width{};
-  std::string Text;
+  std::string Text{};
   auto operator==(const Label &) const -> bool = default;
 };
 struct DXFIO_API Callout
@@ -1346,8 +1346,8 @@ struct DXFIO_API Callout
   double Turned{};
   int Connection{};
   bool Annotative{};
-  std::vector<Tip> Tips;
-  std::vector<Label> Labels;
+  std::vector<Tip> Tips{};
+  std::vector<Label> Labels{};
   bool Negative{};
   int Pinned{};
   int Point{1};
@@ -1361,8 +1361,8 @@ struct DXFIO_API Callout
 struct DXFIO_API MultiLeader
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Callout> Callout;
+  std::string Picture{};
+  Boxed<Entities::Callout> Callout{};
   auto operator==(const MultiLeader &) const -> bool = default;
 };
 }
@@ -1378,18 +1378,18 @@ inline constexpr int Embedded = 2;
 struct DXFIO_API Frame
 {
   int Version{2};
-  std::string Description;
+  std::string Description{};
   Vector Upper{};
   Vector Lower{};
   int Kind{Embedded};
   int Space{};
-  std::string Data;
+  std::string Data{};
   auto operator==(const Frame &) const -> bool = default;
 };
 struct DXFIO_API Ole2Frame
 {
   Entities::Record Record{};
-  Boxed<Entities::Frame> Frame;
+  Boxed<Entities::Frame> Frame{};
   auto operator==(const Ole2Frame &) const -> bool = default;
 };
 }
@@ -1443,7 +1443,7 @@ struct DXFIO_API Polyline
   int Depth{};
   int Curve{};
   Vector Extrusion{Up};
-  Sequence<Vertex> Vertices;
+  Sequence<Vertex> Vertices{};
   auto operator==(const Polyline &) const -> bool = default;
 };
 }
@@ -1480,21 +1480,21 @@ struct DXFIO_API Raster
   bool Outside{};
   Handle Reactor{};
   int Kind{1};
-  std::vector<Pixel> Corners;
+  std::vector<Pixel> Corners{};
   auto operator==(const Raster &) const -> bool = default;
 };
 struct DXFIO_API Image
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Raster> Raster;
+  std::string Picture{};
+  Boxed<Entities::Raster> Raster{};
   auto operator==(const Image &) const -> bool = default;
 };
 struct DXFIO_API Wipeout
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Raster> Raster;
+  std::string Picture{};
+  Boxed<Entities::Raster> Raster{};
   auto operator==(const Wipeout &) const -> bool = default;
 };
 }
@@ -1531,9 +1531,9 @@ struct DXFIO_API Record
   Symbol Linetype{"ByLayer"};
   Handle Material{};
   int Color{Colors::Bylayer};
-  std::optional<int> Rgb;
-  std::optional<std::string> Book;
-  std::optional<int> Transparency;
+  std::optional<int> Rgb{};
+  std::optional<std::string> Book{};
+  std::optional<int> Transparency{};
   double Scale{1};
   bool Hidden{};
   int Lineweight{Lineweights::Bylayer};
@@ -1557,23 +1557,23 @@ struct DXFIO_API Cut
 {
   int State{1};
   int Flags{};
-  std::string Name;
+  std::string Name{};
   Vector Vertical{Up};
   double Top{};
   double Bottom{};
   int Transparency{};
   int Color{};
-  std::optional<int> Rgb;
-  std::vector<Vector> Vertices;
-  std::vector<Vector> Back;
+  std::optional<int> Rgb{};
+  std::vector<Vector> Vertices{};
+  std::vector<Vector> Back{};
   Handle Settings{};
   auto operator==(const Cut &) const -> bool = default;
 };
 struct DXFIO_API SectionObject
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Cut> Cut;
+  std::string Picture{};
+  Boxed<Entities::Cut> Cut{};
   auto operator==(const SectionObject &) const -> bool = default;
 };
 }
@@ -1598,8 +1598,8 @@ namespace DxfIO::Entities
 template <class ChildT>
 struct Sequence
 {
-  std::vector<ChildT> Children;
-  std::optional<Boxed<Entities::Seqend>> Closing;
+  std::vector<ChildT> Children{};
+  std::optional<Boxed<Entities::Seqend>> Closing{};
   auto operator==(const Sequence &) const -> bool = default;
 };
 }
@@ -1653,24 +1653,24 @@ inline constexpr double Knotting = 1e-9;
 inline constexpr double Framing = 1e-10;
 struct DXFIO_API Curve
 {
-  std::optional<Vector> Normal;
+  std::optional<Vector> Normal{};
   int Flags{};
   int Degree{3};
   double Knotted{Knotting};
   double Framed{Framing};
-  std::optional<double> Fitted;
-  std::optional<Vector> Start;
-  std::optional<Vector> End;
-  std::vector<double> Knots;
-  std::vector<Vector> Poles;
-  std::vector<double> Weights;
-  std::vector<Vector> Fits;
+  std::optional<double> Fitted{};
+  std::optional<Vector> Start{};
+  std::optional<Vector> End{};
+  std::vector<double> Knots{};
+  std::vector<Vector> Poles{};
+  std::vector<double> Weights{};
+  std::vector<Vector> Fits{};
   auto operator==(const Curve &) const -> bool = default;
 };
 struct DXFIO_API Spline
 {
   Entities::Record Record{};
-  Boxed<Entities::Curve> Curve;
+  Boxed<Entities::Curve> Curve{};
   auto operator==(const Spline &) const -> bool = default;
 };
 }
@@ -1687,13 +1687,13 @@ namespace DxfIO::Entities
 struct DXFIO_API AcadTable
 {
   Entities::Record Record{};
-  std::string Picture;
+  std::string Picture{};
   Symbol Block{""};
   Vector Position{};
   Vector Scale{.X = 1, .Y = 1, .Z = 1};
   double Rotation{};
   Vector Extrusion{Up};
-  std::vector<Group> Body;
+  std::vector<Group> Body{};
   auto operator==(const AcadTable &) const -> bool = default;
 };
 }
@@ -1723,9 +1723,9 @@ namespace DxfIO::Entities
 struct DXFIO_API Tolerance
 {
   Entities::Record Record{};
-  Symbol Style;
+  Symbol Style{};
   Vector Position{};
-  std::string Text;
+  std::string Text{};
   Vector Direction{.X = 1};
   Vector Normal{Up};
   auto operator==(const Tolerance &) const -> bool = default;
@@ -1775,15 +1775,15 @@ struct DXFIO_API Overlaid
   int Flags{Visible};
   int Contrast{Whole};
   int Fade{};
-  std::vector<Bound> Clip;
+  std::vector<Bound> Clip{};
   auto operator==(const Overlaid &) const -> bool = default;
 };
 template <Overlay KindV>
 struct UnderlayOf
 {
   Entities::Record Record{};
-  std::string Picture;
-  Boxed<Entities::Overlaid> Overlaid;
+  std::string Picture{};
+  Boxed<Entities::Overlaid> Overlaid{};
   auto operator==(const UnderlayOf &) const -> bool = default;
 };
 using PdfUnderlay = UnderlayOf<Overlay::Pdf>;
@@ -1801,8 +1801,8 @@ struct DXFIO_API Vertex
 {
   Entities::Record Record{};
   Vector Position{};
-  std::optional<double> Start;
-  std::optional<double> End;
+  std::optional<double> Start{};
+  std::optional<double> End{};
   double Bulge{};
   int Id{};
   int Flags{};
@@ -1850,10 +1850,10 @@ struct DXFIO_API Port
   double Angle{};
   double Twist{};
   int Zoom{Roundness};
-  std::vector<Handle> Frozen;
+  std::vector<Handle> Frozen{};
   int Flags{Unflagged};
   Handle Clip{};
-  std::string Sheet;
+  std::string Sheet{};
   int Render{};
   int Follows{1};
   int Icon{};
@@ -1868,15 +1868,15 @@ struct DXFIO_API Port
   double Brightness{};
   double Contrast{};
   int Ambient{Ambience};
-  std::optional<int> Rgb;
-  std::string Book;
+  std::optional<int> Rgb{};
+  std::string Book{};
   Handle Sun{};
   auto operator==(const Port &) const -> bool = default;
 };
 struct DXFIO_API Viewport
 {
   Entities::Record Record{};
-  Boxed<Entities::Port> Port;
+  Boxed<Entities::Port> Port{};
   auto operator==(const Viewport &) const -> bool = default;
 };
 }
@@ -1965,7 +1965,7 @@ namespace DxfIO
 struct DXFIO_API Failure
 {
   std::size_t Line{};
-  std::string What;
+  std::string What{};
   auto operator==(const Failure &) const -> bool = default;
 };
 }
@@ -1979,14 +1979,14 @@ namespace DxfIO
 {
 struct DXFIO_API Chunk
 {
-  std::string Bytes;
+  std::string Bytes{};
   auto operator==(const Chunk &) const -> bool = default;
 };
 using Content = std::variant<std::string, std::int64_t, double, bool, Handle, Chunk>;
 struct DXFIO_API Group
 {
   int Code{};
-  Content Value;
+  Content Value{};
   auto operator==(const Group &) const -> bool = default;
 };
 }
@@ -2024,8 +2024,8 @@ namespace DxfIO::Header
 {
 struct DXFIO_API Variable
 {
-  std::string Name;
-  std::vector<Group> Values;
+  std::string Name{};
+  std::vector<Group> Values{};
   auto operator==(const Variable &) const -> bool = default;
 };
 }
@@ -2040,7 +2040,7 @@ struct DXFIO_API Issue
 {
   std::size_t Line{};
   Handle Record{};
-  std::string What;
+  std::string What{};
   auto operator==(const Issue &) const -> bool = default;
 };
 }
@@ -2066,7 +2066,7 @@ namespace DxfIO
 struct DXFIO_API Loaded
 {
   DxfIO::Document Document{};
-  std::vector<Issue> Issues;
+  std::vector<Issue> Issues{};
 };
 [[nodiscard]] DXFIO_API auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>;
 [[nodiscard]] DXFIO_API auto Load(std::istream &from) -> std::expected<Loaded, Failure>;
@@ -2138,8 +2138,8 @@ namespace DxfIO::Objects
 struct DXFIO_API Column
 {
   int Kind{};
-  std::string Name;
-  std::vector<DxfIO::Group> Cells;
+  std::string Name{};
+  std::vector<DxfIO::Group> Cells{};
   auto operator==(const Column &) const -> bool = default;
 };
 enum class Edition : std::uint8_t
@@ -2153,8 +2153,8 @@ struct DataTableOf
   DxfIO::Base Base{};
   int Version{2};
   int Rows{};
-  std::string Name;
-  std::vector<Column> Columns;
+  std::string Name{};
+  std::vector<Column> Columns{};
   auto operator==(const DataTableOf &) const -> bool = default;
 };
 using DataTable = DataTableOf<Edition::Current>;
@@ -2183,7 +2183,7 @@ namespace DxfIO::Objects
 {
 struct DXFIO_API Entry
 {
-  std::string Name;
+  std::string Name{};
   Handle Soft{};
   Handle Hard{};
   auto operator==(const Entry &) const -> bool = default;
@@ -2193,7 +2193,7 @@ struct DXFIO_API Dictionary
   DxfIO::Base Base{};
   bool Hard{};
   int Cloning{1};
-  std::vector<Objects::Entry> Entries;
+  std::vector<Objects::Entry> Entries{};
   auto operator==(const Dictionary &) const -> bool = default;
 };
 }
@@ -2207,7 +2207,7 @@ struct DXFIO_API DictionaryVar
 {
   DxfIO::Base Base{};
   int Schema{};
-  std::string Value;
+  std::string Value{};
   auto operator==(const DictionaryVar &) const -> bool = default;
 };
 }
@@ -2222,10 +2222,10 @@ namespace DxfIO::Objects
 struct DXFIO_API Group
 {
   DxfIO::Base Base{};
-  std::string Description;
+  std::string Description{};
   int Unnamed{};
   int Selectable{1};
-  std::vector<Handle> Members;
+  std::vector<Handle> Members{};
   auto operator==(const Group &) const -> bool = default;
 };
 }
@@ -2240,7 +2240,7 @@ struct DXFIO_API ImageDef
 {
   DxfIO::Base Base{};
   int Version{};
-  std::string File;
+  std::string File{};
   Vector Size{.X = 1, .Y = 1};
   Vector Pixel{};
   int Loaded{};
@@ -2279,8 +2279,8 @@ inline constexpr Vector Limits{.X = 12, .Y = 9, .Z = 0};
 struct DXFIO_API Layout
 {
   DxfIO::Base Base{};
-  Boxed<Objects::Plot> Plot;
-  std::string Name;
+  Boxed<Objects::Plot> Plot{};
+  std::string Name{};
   int Flags{1};
   int Order{};
   Vector Limmin{};
@@ -2321,7 +2321,7 @@ struct DXFIO_API Map
 {
   double Blend{1};
   int Source{Bitmap};
-  std::string File;
+  std::string File{};
   int Projection{Box};
   int Tiling{Tiled};
   int Automatic{Manual};
@@ -2349,20 +2349,20 @@ struct DXFIO_API Maps
 struct DXFIO_API Material
 {
   DxfIO::Base Base{};
-  std::string Name;
-  std::string Description;
+  std::string Name{};
+  std::string Description{};
   Shade Ambient{};
   Shade Diffuse{};
   double Gloss{Glossy};
   Shade Specular{};
   double Opacity{1};
   double Refraction{1};
-  Boxed<Objects::Maps> Maps;
+  Boxed<Objects::Maps> Maps{};
   double Translucence{};
   double Illumination{};
   double Reflectivity{};
   int Model{};
-  std::optional<int> Channels;
+  std::optional<int> Channels{};
   int Mode{};
   auto operator==(const Material &) const -> bool = default;
 };
@@ -2403,7 +2403,7 @@ struct DXFIO_API Leader
 };
 struct DXFIO_API Text
 {
-  std::string Content;
+  std::string Content{};
   Handle Style{};
   int Left{1};
   int Right{1};
@@ -2439,10 +2439,10 @@ struct DXFIO_API MLeaderStyle
   int Revision{2};
   int Content{2};
   int Order{1};
-  std::string Description;
-  Boxed<Mleader::Leader> Leader;
-  Boxed<Mleader::Text> Text;
-  Boxed<Mleader::Block> Block;
+  std::string Description{};
+  Boxed<Mleader::Leader> Leader{};
+  Boxed<Mleader::Text> Text{};
+  Boxed<Mleader::Block> Block{};
   double Scale{1};
   bool Overwrite{};
   bool Annotative{};
@@ -2473,13 +2473,13 @@ namespace DxfIO::Objects
 struct DXFIO_API MLineStyle
 {
   DxfIO::Base Base{};
-  std::string Name;
+  std::string Name{};
   int Flags{};
-  std::string Description;
+  std::string Description{};
   int Fill{Colors::Bylayer};
   double Start{Mline::Square};
   double End{Mline::Square};
-  std::vector<Mline::Element> Elements;
+  std::vector<Mline::Element> Elements{};
   auto operator==(const MLineStyle &) const -> bool = default;
 };
 }
@@ -2507,10 +2507,10 @@ inline constexpr int Normal = 2;
 inline constexpr int Dpi = 300;
 struct DXFIO_API Plot
 {
-  std::string Name;
-  std::string Device;
-  std::string Size;
-  std::string View;
+  std::string Name{};
+  std::string Device{};
+  std::string Size{};
+  std::string View{};
   double Left{};
   double Bottom{};
   double Right{};
@@ -2526,7 +2526,7 @@ struct DXFIO_API Plot
   int Units{};
   int Rotation{};
   int Type{PlotLayout};
-  std::string Style;
+  std::string Style{};
   int Standard{Actual};
   double Factor{1};
   int Shading{};
@@ -2546,7 +2546,7 @@ namespace DxfIO::Objects
 struct DXFIO_API PlotSettings
 {
   DxfIO::Base Base{};
-  Boxed<Objects::Plot> Plot;
+  Boxed<Objects::Plot> Plot{};
   auto operator==(const PlotSettings &) const -> bool = default;
 };
 }
@@ -2560,7 +2560,7 @@ struct DXFIO_API Scale
 {
   DxfIO::Base Base{};
   int Flags{};
-  std::string Name;
+  std::string Name{};
   double Paper{1};
   double Drawing{1};
   bool Unit{};
@@ -2578,7 +2578,7 @@ namespace DxfIO::Objects::Sortents
 struct DXFIO_API Entry
 {
   Handle Entity{};
-  std::optional<Handle> Key;
+  std::optional<Handle> Key{};
   auto operator==(const Entry &) const -> bool = default;
 };
 }
@@ -2588,7 +2588,7 @@ struct DXFIO_API SortEntsTable
 {
   DxfIO::Base Base{};
   Handle Block{};
-  std::vector<Sortents::Entry> Entries;
+  std::vector<Sortents::Entry> Entries{};
   auto operator==(const SortEntsTable &) const -> bool = default;
 };
 }
@@ -2613,7 +2613,7 @@ struct DXFIO_API Border
 };
 struct DXFIO_API Cell
 {
-  std::string Style;
+  std::string Style{};
   double Height{Table::Height};
   int Alignment{1};
   int Color{};
@@ -2621,7 +2621,7 @@ struct DXFIO_API Cell
   bool Filled{};
   int Type{General};
   int Unit{};
-  std::string Format;
+  std::string Format{};
   Border Top{};
   Border Middle{};
   Border Bottom{};
@@ -2637,14 +2637,14 @@ struct DXFIO_API TableStyle
 {
   DxfIO::Base Base{};
   int Revision{};
-  std::string Description;
+  std::string Description{};
   int Flow{};
   int Flags{};
   double Horizontal{Table::Margin};
   double Vertical{Table::Margin};
   bool Untitled{};
   bool Headless{};
-  std::vector<Table::Cell> Cells;
+  std::vector<Table::Cell> Cells{};
   auto operator==(const TableStyle &) const -> bool = default;
 };
 }
@@ -2658,8 +2658,8 @@ template <Entities::Overlay KindV>
 struct UnderlayDefinition
 {
   DxfIO::Base Base{};
-  std::string File;
-  std::string Name;
+  std::string File{};
+  std::string Name{};
   auto operator==(const UnderlayDefinition &) const -> bool = default;
 };
 using PdfDefinition = UnderlayDefinition<Entities::Overlay::Pdf>;
@@ -2678,11 +2678,11 @@ namespace DxfIO::Objects
 struct DXFIO_API VisualStyle
 {
   DxfIO::Base Base{};
-  std::string Name;
+  std::string Name{};
   int Kind{};
-  std::optional<int> Version;
-  std::optional<bool> Internal;
-  std::vector<DxfIO::Group> Properties;
+  std::optional<int> Version{};
+  std::optional<bool> Internal{};
+  std::vector<DxfIO::Group> Properties{};
   auto operator==(const VisualStyle &) const -> bool = default;
 };
 }
@@ -2709,7 +2709,7 @@ struct DXFIO_API XRecord
 {
   DxfIO::Base Base{};
   int Cloning{1};
-  std::vector<DxfIO::Group> Data;
+  std::vector<DxfIO::Group> Data{};
   auto operator==(const XRecord &) const -> bool = default;
 };
 }
@@ -2722,8 +2722,8 @@ namespace DxfIO
 {
 struct DXFIO_API Raw
 {
-  std::string Type;
-  std::vector<Group> Groups;
+  std::string Type{};
+  std::vector<Group> Groups{};
   auto operator==(const Raw &) const -> bool = default;
 };
 }
@@ -2743,13 +2743,13 @@ namespace DxfIO
 struct DXFIO_API Options
 {
   Version Release{Version::R2018};
-  std::string Codepage;
+  std::string Codepage{};
   bool Binary{};
 };
 struct DXFIO_API Saved
 {
-  std::string Bytes;
-  std::vector<Issue> Issues;
+  std::string Bytes{};
+  std::vector<Issue> Issues{};
 };
 [[nodiscard]] DXFIO_API auto Save(const Document &drawing, const Options &with = {}) -> std::expected<Saved, Failure>;
 [[nodiscard]] DXFIO_API auto Save(const Document &drawing, std::ostream &to, const Options &with = {})
@@ -2766,8 +2766,8 @@ namespace DxfIO
 {
 struct DXFIO_API Section
 {
-  std::string Name;
-  std::vector<Group> Groups;
+  std::string Name{};
+  std::vector<Group> Groups{};
   auto operator==(const Section &) const -> bool = default;
 };
 }
@@ -2853,7 +2853,7 @@ struct DXFIO_API BlockRecord
 {
   Tables::Record Record{};
   Handle Layout{};
-  std::vector<Handle> Inserts;
+  std::vector<Handle> Inserts{};
   int Units{};
   bool Explodable{true};
   bool Uniform{};
@@ -2875,17 +2875,17 @@ inline constexpr double Inch = 25.4;
 inline constexpr double Jog = 45;
 struct DXFIO_API Arrows
 {
-  std::string Dimblk;
-  std::string Dimblk1;
-  std::string Dimblk2;
+  std::string Dimblk{};
+  std::string Dimblk1{};
+  std::string Dimblk2{};
   auto operator==(const Arrows &) const -> bool = default;
 };
 struct DXFIO_API Dimstyle
 {
   Tables::Record Record{};
   Tables::Arrows Arrows{};
-  std::string Dimpost;
-  std::string Dimapost;
+  std::string Dimpost{};
+  std::string Dimapost{};
   double Dimscale{1};
   double Dimasz{Size};
   double Dimexo{Offset};
@@ -2970,7 +2970,7 @@ namespace DxfIO::Tables
 {
 struct DXFIO_API Face
 {
-  std::string Family;
+  std::string Family{};
   std::int64_t Flags{};
   auto operator==(const Face &) const -> bool = default;
 };
@@ -2985,7 +2985,7 @@ namespace DxfIO::Tables
 struct DXFIO_API Head
 {
   DxfIO::Base Base{};
-  std::string Name;
+  std::string Name{};
   int Count{};
   auto operator==(const Head &) const -> bool = default;
 };
@@ -3011,8 +3011,8 @@ struct DXFIO_API Layer
   int Lineweight{Lineweights::Standard};
   Handle Style{};
   Handle Material{};
-  std::optional<int> Rgb;
-  std::optional<std::string> Book;
+  std::optional<int> Rgb{};
+  std::optional<std::string> Book{};
   Handle Spare{};
   auto operator==(const Layer &) const -> bool = default;
 };
@@ -3036,16 +3036,16 @@ struct DXFIO_API Dash
   double Rotation{};
   double Along{};
   double Across{};
-  std::string Text;
+  std::string Text{};
   auto operator==(const Dash &) const -> bool = default;
 };
 struct DXFIO_API Ltype
 {
   Tables::Record Record{};
-  std::string Description;
+  std::string Description{};
   int Alignment{Aligned};
   double Length{};
-  std::vector<Tables::Dash> Dashes;
+  std::vector<Tables::Dash> Dashes{};
   auto operator==(const Ltype &) const -> bool = default;
 };
 }
@@ -3058,7 +3058,7 @@ namespace DxfIO::Tables
 struct DXFIO_API Record
 {
   DxfIO::Base Base{};
-  std::string Name;
+  std::string Name{};
   int Flags{};
   auto operator==(const Record &) const -> bool = default;
 };
@@ -3079,7 +3079,7 @@ struct DXFIO_API Style
   int Generation{};
   double Previous{Last};
   std::string Font{"txt"};
-  std::string Bigfont;
+  std::string Bigfont{};
   auto operator==(const Style &) const -> bool = default;
 };
 }
@@ -3092,7 +3092,7 @@ template <class RecordT>
 struct Table
 {
   Tables::Head Head{};
-  std::vector<RecordT> Records;
+  std::vector<RecordT> Records{};
   auto operator==(const Table &) const -> bool = default;
 };
 }
@@ -3199,7 +3199,7 @@ struct DXFIO_API Vport
   double Brightness{};
   double Contrast{};
   int Ambient{Ambience};
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
   Handle Background{};
   Handle Shadow{};
   auto operator==(const Vport &) const -> bool = default;
@@ -3215,9 +3215,9 @@ namespace DxfIO
 {
 struct DXFIO_API Unknown
 {
-  Symbol Type;
+  Symbol Type{};
   DxfIO::Base Base{};
-  std::vector<Group> Groups;
+  std::vector<Group> Groups{};
   auto operator==(const Unknown &) const -> bool = default;
 };
 }
@@ -3279,8 +3279,8 @@ namespace DxfIO
 {
 struct DXFIO_API Xdata
 {
-  std::string Application;
-  std::vector<Group> Groups;
+  std::string Application{};
+  std::vector<Group> Groups{};
   auto operator==(const Xdata &) const -> bool = default;
 };
 }

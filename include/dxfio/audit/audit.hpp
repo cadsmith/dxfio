@@ -27,7 +27,7 @@ struct DXFIO_API Finding
   /// Whether AutoCAD would open the drawing with it.
   Severity Level{};
   /// What is wrong, in a few words, such as "layer walls missing".
-  std::string What;
+  std::string What{};
   /// The record found at fault, or the table a needed record is missing from; none when it has no handle.
   Handle Subject{};
   /// Whether Repair fixed it; a Check leaves it false.
@@ -40,7 +40,7 @@ struct DXFIO_API Finding
 struct DXFIO_API Report
 {
   /// The findings, in the order the checks ran: handles, required records, references, meshes, SEQENDs.
-  std::vector<Finding> Findings;
+  std::vector<Finding> Findings{};
 
   /// Whether no error is left unfixed: AutoCAD would open the drawing without recovering it.
   [[nodiscard]] auto Clean() const -> bool;

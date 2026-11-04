@@ -22,7 +22,7 @@ struct DXFIO_API Options
   Version Release{Version::R2018};
   /// The code page for text before R2007, such as "ANSI_1252"; empty keeps the drawing's $DWGCODEPAGE.
   /// A name no code page has makes Save fail.
-  std::string Codepage;
+  std::string Codepage{};
   /// Writes binary DXF instead of ASCII.
   bool Binary{};
 };
@@ -31,9 +31,9 @@ struct DXFIO_API Options
 struct DXFIO_API Saved
 {
   /// The bytes of the file.
-  std::string Bytes;
+  std::string Bytes{};
   /// What the release asked for could not hold, and how it was kept or left out.
-  std::vector<Issue> Issues;
+  std::vector<Issue> Issues{};
 };
 
 /// Writes a drawing as the bytes of a DXF file.

@@ -22,9 +22,9 @@ struct DXFIO_API Layout
   /// The handle, owner, reactors and extended data.
   DxfIO::Base Base{};
   /// How the layout plots, as a PLOTSETTINGS gives it; kept on the heap, so every object stays small.
-  Boxed<Objects::Plot> Plot;
+  Boxed<Objects::Plot> Plot{};
   /// The name on the layout's tab, such as "Model" or "Layout1". Group 1.
-  std::string Name;
+  std::string Name{};
   /// Bits: 1 to scale linetypes by the viewport, as $PSLTSCALE; 2 to keep drawing within the limits, as
   /// $LIMCHECK. Group 70.
   int Flags{1};

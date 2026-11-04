@@ -21,7 +21,7 @@ inline constexpr int Unannotated = 3;
 struct DXFIO_API Lead
 {
   /// The name of the dimension style. Group 3.
-  Symbol Style;
+  Symbol Style{};
   /// 1 when the leader has an arrowhead, 0 when it has none. Group 71.
   int Arrow{1};
   /// The path: 0 straight segments, 1 a spline. Group 72.
@@ -33,13 +33,13 @@ struct DXFIO_API Lead
   /// 1 when the leader ends in a hookline, 0 when it does not. Group 75.
   int Hook{};
   /// The height of the text annotation. Group 40.
-  std::optional<double> Height;
+  std::optional<double> Height{};
   /// The width of the text annotation. Group 41.
-  std::optional<double> Width;
+  std::optional<double> Width{};
   /// The vertices, in world coordinates; group 76 counts them. Groups 10, 20, 30.
-  std::vector<Vector> Points;
+  std::vector<Vector> Points{};
   /// The color of the leader when its dimension style's DIMCLRD is ByBlock. Group 77.
-  std::optional<int> Color;
+  std::optional<int> Color{};
   /// The annotation: an MTEXT, a TOLERANCE or an INSERT. Group 340.
   Handle Note{};
   /// The normal of the plane the entity is drawn in. Groups 210, 220, 230.
@@ -61,7 +61,7 @@ struct DXFIO_API Leader
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The vertices, arrowhead and annotation, from the AcDbLeader subclass.
-  Boxed<Entities::Lead> Lead;
+  Boxed<Entities::Lead> Lead{};
 
   auto operator==(const Leader &) const -> bool = default;
 };

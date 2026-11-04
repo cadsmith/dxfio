@@ -29,7 +29,7 @@ struct DXFIO_API Stripe
   /// The Y of the offset from one line to the next. Group 46.
   double Rise{};
   /// The lengths of the dashes, positive for a dash and negative for a gap; group 79 counts them. Group 49.
-  std::vector<double> Dashes;
+  std::vector<double> Dashes{};
 
   auto operator==(const Stripe &) const -> bool = default;
 };
@@ -48,7 +48,7 @@ struct DXFIO_API Fill
   /// 1 when the hatch follows the entities its boundary was made from. Group 71.
   int Associative{};
   /// The boundary paths; group 91 counts them.
-  std::vector<Path> Paths;
+  std::vector<Path> Paths{};
   /// Which areas are hatched: 0 odd parity, 1 the outermost only, 2 all of it. Group 75.
   int Style{};
   /// Where the pattern comes from: 0 user-defined, 1 predefined, as SOLID is, 2 custom. Group 76.
@@ -60,13 +60,13 @@ struct DXFIO_API Fill
   /// 1 when a user-defined pattern is crosshatched, for a pattern fill. Group 77.
   int Doubled{};
   /// The line families of the pattern, for a pattern fill; group 78 counts them.
-  std::vector<Stripe> Stripes;
+  std::vector<Stripe> Stripes{};
   /// The pixel size AutoCAD computed the hatch with. Group 47.
-  std::optional<double> Pixel;
+  std::optional<double> Pixel{};
   /// The seed points, in the hatch's own coordinate system; group 98 counts them.
-  std::vector<Edges::Place> Seeds;
+  std::vector<Edges::Place> Seeds{};
   /// The gradient, when the hatch has one, opened by group 450. From R2004.
-  std::optional<Entities::Gradient> Gradient;
+  std::optional<Entities::Gradient> Gradient{};
 
   auto operator==(const Fill &) const -> bool = default;
 };
@@ -77,7 +77,7 @@ struct DXFIO_API Hatch
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The boundaries and how they are filled, from the AcDbHatch subclass.
-  Boxed<Entities::Fill> Fill;
+  Boxed<Entities::Fill> Fill{};
 
   auto operator==(const Hatch &) const -> bool = default;
 };

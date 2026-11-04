@@ -17,7 +17,7 @@ struct DXFIO_API ImageDef
   /// The version of the object, 0 as AutoCAD writes it. Group 90.
   int Version{};
   /// The path of the image file. Group 1.
-  std::string File;
+  std::string File{};
   /// The width and height of the image, in pixels. Groups 10, 20.
   Vector Size{.X = 1, .Y = 1};
   /// The width and height of one pixel, in drawing units. Groups 11, 21.

@@ -17,9 +17,9 @@ struct DXFIO_API Column
   /// The type of the column's values, such as 1 for integers or 2 for reals. Group 92.
   int Kind{};
   /// The name of the column. Group 2.
-  std::string Name;
+  std::string Name{};
   /// The cells of the column, top to bottom, as groups whose code tells the type of each value.
-  std::vector<DxfIO::Group> Cells;
+  std::vector<DxfIO::Group> Cells{};
 
   auto operator==(const Column &) const -> bool = default;
 };
@@ -44,9 +44,9 @@ struct DataTableOf
   /// The number of rows. Group 91.
   int Rows{};
   /// The name of the table. Group 1.
-  std::string Name;
+  std::string Name{};
   /// The columns, left to right; their count is group 90.
-  std::vector<Column> Columns;
+  std::vector<Column> Columns{};
 
   auto operator==(const DataTableOf &) const -> bool = default;
 };

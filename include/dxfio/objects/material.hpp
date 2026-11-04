@@ -54,7 +54,7 @@ struct DXFIO_API Map
   /// Where the map comes from: 0 the current scene, 1 an image file. Group 72, 77, 171, 175, 179 or 273.
   int Source{Bitmap};
   /// The image file; empty for none. Group 3, 4, 6, 7, 8 or 9.
-  std::string File;
+  std::string File{};
   /// How the map is projected: 1 planar, 2 box, 3 cylinder, 4 sphere. Group 73, 78, 172, 176, 270 or 274.
   int Projection{Box};
   /// How the map fills the surface: 1 tile, 2 crop, 3 clamp. Group 74, 79, 173, 177, 271 or 275.
@@ -101,9 +101,9 @@ struct DXFIO_API Material
   /// The handle, owner, reactors and extended data.
   DxfIO::Base Base{};
   /// The name of the material, such as "Global". Group 1.
-  std::string Name;
+  std::string Name{};
   /// The material's description. Group 2.
-  std::string Description;
+  std::string Description{};
   /// The color in ambient light. Groups 70, 40, 90.
   Shade Ambient{};
   /// The color under direct light. Groups 71, 41, 91.
@@ -117,7 +117,7 @@ struct DXFIO_API Material
   /// The index of refraction. Group 145.
   double Refraction{1};
   /// The maps laid over its channels, kept on the heap: six maps would make every object as large.
-  Boxed<Objects::Maps> Maps;
+  Boxed<Objects::Maps> Maps{};
   /// How much light passes through the material, from 0 to 1. Group 148, from R2007.
   double Translucence{};
   /// How much light the material gives off itself. Group 149, from R2007.
@@ -127,7 +127,7 @@ struct DXFIO_API Material
   /// The illumination model it is shaded with. Group 93, from R2007.
   int Model{};
   /// Bits for the channels in use, one per map in the order of Maps; 63 for all six. Group 94, from R2007.
-  std::optional<int> Channels;
+  std::optional<int> Channels{};
   /// The material's rendering mode. Group 282, from R2007.
   int Mode{};
 

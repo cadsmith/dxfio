@@ -20,7 +20,7 @@ struct DXFIO_API LwPolyline
     /// The location, in the polyline's own coordinate system. Groups 10, 20.
     Vector Position{};
     /// The widths the segment starts and ends with, when it has its own. Groups 40, 41.
-    std::optional<DxfIO::Widths> Widths;
+    std::optional<DxfIO::Widths> Widths{};
     /// The bulge of the segment to the next vertex: the tangent of a quarter of its arc's angle, 0 when straight.
     /// Group 42.
     double Bulge{};
@@ -42,7 +42,7 @@ struct DXFIO_API LwPolyline
   /// How far the entity is extruded along its normal. Group 39.
   double Thickness{};
   /// The vertices, in order; group 90 counts them.
-  std::vector<Vertex> Vertices;
+  std::vector<Vertex> Vertices{};
   /// The normal of the plane the entity is drawn in. Groups 210, 220, 230.
   Vector Extrusion{Up};
 

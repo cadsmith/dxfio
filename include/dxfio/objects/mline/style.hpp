@@ -35,12 +35,12 @@ struct DXFIO_API MLineStyle
   /// The handle, owner, reactors and extended data.
   DxfIO::Base Base{};
   /// The name of the style, such as "Standard". Group 2.
-  std::string Name;
+  std::string Name{};
   /// Bits: 1 filled, 2 miters shown, 16, 32 and 64 a line, inner arc or outer arc capping the start, 256, 512 and
   /// 1024 the same at the end. Group 70.
   int Flags{};
   /// The style's description. Group 3.
-  std::string Description;
+  std::string Description{};
   /// The AutoCAD Color Index of the fill. Group 62.
   int Fill{Colors::Bylayer};
   /// The angle of the start cap, in degrees. Group 51.
@@ -48,7 +48,7 @@ struct DXFIO_API MLineStyle
   /// The angle of the end cap, in degrees. Group 52.
   double End{Mline::Square};
   /// The lines, in order; their count is group 71.
-  std::vector<Mline::Element> Elements;
+  std::vector<Mline::Element> Elements{};
 
   auto operator==(const MLineStyle &) const -> bool = default;
 };

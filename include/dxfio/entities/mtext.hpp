@@ -43,7 +43,7 @@ struct DXFIO_API Columns
   /// Whether the text flows through the columns in reverse. Group 74.
   bool Reversed{};
   /// The height of each column, when the columns differ. Group 46.
-  std::vector<double> Heights;
+  std::vector<double> Heights{};
 
   auto operator==(const Columns &) const -> bool = default;
 };
@@ -67,16 +67,16 @@ struct DXFIO_API Paragraph
   /// The drawing direction: 1 left to right, 3 top to bottom, 5 as the text style has it. Group 72.
   int Flow{Styled};
   /// What the text says, with its formatting codes. Group 3 for each 250 characters but the last, then group 1.
-  std::string Value;
+  std::string Value{};
   /// The name of the text style. Group 7.
   Symbol Style{"Standard"};
   /// The normal of the plane the entity is drawn in. Groups 210, 220, 230.
   Vector Extrusion{Up};
   /// The direction of the text's X axis, in world coordinates, when the file gives it rather than a rotation.
   /// Groups 11, 21, 31.
-  std::optional<Vector> Direction;
+  std::optional<Vector> Direction{};
   /// The rotation, when the file gives it rather than a direction. Group 50.
-  std::optional<double> Rotation;
+  std::optional<double> Rotation{};
   /// The line spacing style: 1 at least, 2 exactly. Group 73.
   int Spacing{1};
   /// The line spacing, as a factor of the default. Group 44.
@@ -85,18 +85,18 @@ struct DXFIO_API Paragraph
   /// Group 90, from R2004.
   int Fill{};
   /// The AutoCAD Color Index of the background. Group 63, from R2004.
-  std::optional<int> Color;
+  std::optional<int> Color{};
   /// The true color of the background, as 0xRRGGBB. Group 421, from R2004.
-  std::optional<int> Rgb;
+  std::optional<int> Rgb{};
   /// The color book of the background and the color's name in it, joined by a $, when the color comes from one.
   /// Group 431, from R2004.
-  std::optional<std::string> Book;
+  std::optional<std::string> Book{};
   /// How far the background reaches past the text, as a factor of the letter height. Group 45, from R2004.
-  std::optional<double> Margin;
+  std::optional<double> Margin{};
   /// The transparency of the background. Group 441, from R2004.
-  std::optional<int> Transparency;
+  std::optional<int> Transparency{};
   /// The columns, when the text has some. From R2018.
-  std::optional<Entities::Columns> Columns;
+  std::optional<Entities::Columns> Columns{};
 
   auto operator==(const Paragraph &) const -> bool = default;
 };
@@ -107,7 +107,7 @@ struct DXFIO_API MText
   /// The layer, linetype, color and the rest every entity carries.
   Entities::Record Record{};
   /// The text, its frame and its background, from the AcDbMText subclass.
-  Boxed<Entities::Paragraph> Paragraph;
+  Boxed<Entities::Paragraph> Paragraph{};
 
   auto operator==(const MText &) const -> bool = default;
 };

@@ -70,7 +70,7 @@ struct DXFIO_API Leader
 struct DXFIO_API Text
 {
   /// The text a new multileader starts with. Group 300.
-  std::string Content;
+  std::string Content{};
   /// The text style. Group 342.
   Handle Style{};
   /// Where a leader from the left meets the text, such as 1 at the middle of its top line. Group 174.
@@ -138,13 +138,13 @@ struct DXFIO_API MLeaderStyle
   /// What is drawn first: 0 the content, 1 the leader. Group 171.
   int Order{1};
   /// The style's description. Group 3.
-  std::string Description;
+  std::string Description{};
   /// How the leader lines are drawn, kept on the heap as the text and block are, so every object stays small.
-  Boxed<Mleader::Leader> Leader;
+  Boxed<Mleader::Leader> Leader{};
   /// How the text is drawn.
-  Boxed<Mleader::Text> Text;
+  Boxed<Mleader::Text> Text{};
   /// How the block is drawn.
-  Boxed<Mleader::Block> Block;
+  Boxed<Mleader::Block> Block{};
   /// The factor the whole multileader is scaled by. Group 142.
   double Scale{1};
   /// Whether a property of the style was overridden. Group 295.

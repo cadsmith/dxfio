@@ -13,9 +13,9 @@ namespace DxfIO
 struct DXFIO_API Raw
 {
   /// The name its 0 group gives, such as "CLASS".
-  std::string Type;
+  std::string Type{};
   /// The groups after the 0, in their order.
-  std::vector<Group> Groups;
+  std::vector<Group> Groups{};
 
   auto operator==(const Raw &) const -> bool = default;
 };

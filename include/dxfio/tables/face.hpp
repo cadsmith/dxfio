@@ -14,7 +14,7 @@ namespace DxfIO::Tables
 struct DXFIO_API Face
 {
   /// The font family, such as "Arial". Extended data group 1000.
-  std::string Family;
+  std::string Family{};
   /// The face's bold, italic, character set and pitch, packed as AutoCAD writes them. Extended data group 1071.
   std::int64_t Flags{};
 
