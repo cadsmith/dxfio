@@ -35,6 +35,7 @@ auto Run(DocumentT &drawing) -> Report
   Meshed(with);
   Curved(with);
   Sequenced(with);
+  Classed(with);
   if constexpr (Auditor<DocumentT>::Fix)
   {
     const Handle past = Past(drawing);

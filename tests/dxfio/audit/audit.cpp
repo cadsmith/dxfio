@@ -1,7 +1,9 @@
 #include "dxfio/audit/audit.hpp"
 
 #include "../disk.hpp"
+#include "../written.hpp"
 #include "entities/io.hpp"
+#include "handseed.hpp"
 #include "past.hpp"
 
 #include "dxfio/create.hpp"
@@ -13,6 +15,7 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <limits>
@@ -252,6 +255,78 @@ TEST_CASE("audit: an ellipse whose ratio is 0 or less, or no number, takes the l
   CHECK(Check(drawing).Findings.empty());
 }
 
+TEST_CASE("audit: a kind the CLASSES section does not declare, its CLASS made as AutoCAD writes it")
+{
+  Document drawing = Fresh();
+  Entities::Mesh mesh{};
+  mesh.Net->Vertices = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+  mesh.Net->Faces = {3, 0, 1, 2};
+  REQUIRE(Edit::Add(drawing, Entities::Wipeout{}));
+  REQUIRE(Edit::Add(drawing, mesh));
+  REQUIRE(Edit::Add(drawing, mesh));
+  REQUIRE(Edit::Add(drawing, Entities::Line{}));
+  REQUIRE(Edit::AddBlock(drawing, "PART"));
+  REQUIRE(Edit::Add(drawing, Entities::Helix{}, "PART"));
+  Objects::DictionaryVar variable{};
+  variable.Base.Self = Handle{.Value = Past(drawing).Value + 1};
+  drawing.Objects.push_back(variable);
+  WriteSeed(drawing, Handle{.Value = Past(drawing).Value + 1});
+  drawing.Classes.push_back(Raw{.Type = "CLASS", .Groups = {Group{.Code = 2, .Value = std::string{"AcDbThing"}}}});
+  drawing.Classes.push_back(Raw{.Type = "CLASS", .Groups = {Group{.Code = 1, .Value = std::int64_t{5}}}});
+  const Report seen = Check(drawing);
+  REQUIRE(seen.Errors() == 4);
+  CHECK(seen.Findings.at(0).What == "no CLASS for WIPEOUT");
+  CHECK(seen.Findings.at(1).What == "no CLASS for MESH");
+  CHECK(seen.Findings.at(2).What == "no CLASS for HELIX");
+  CHECK(seen.Findings.at(3).What == "no CLASS for DICTIONARYVAR");
+  const std::size_t before = drawing.Classes.size();
+  CHECK(Repair(drawing).Clean());
+  REQUIRE(drawing.Classes.size() == before + 4);
+  CHECK(drawing.Classes.at(before) ==
+        Raw{.Type = "CLASS",
+            .Groups = {
+                Group{.Code = 1, .Value = std::string{"WIPEOUT"}},
+                Group{.Code = 2, .Value = std::string{"AcDbWipeout"}},
+                Group{.Code = 3,
+                      .Value = std::string{"WipeOut|Product Desc: Object Enabler for WipeOut entity | Company: "
+                                           "Autodesk, Inc. | WEB Address: www.autodesk.com"}},
+                Group{.Code = 90, .Value = std::int64_t{2175}},
+                Group{.Code = 91, .Value = std::int64_t{1}},
+                Group{.Code = 280, .Value = std::int64_t{0}},
+                Group{.Code = 281, .Value = std::int64_t{1}},
+            }});
+  CHECK(drawing.Classes.at(before + 1).Groups.at(4) == Group{.Code = 91, .Value = std::int64_t{2}});
+  CHECK(drawing.Classes.at(before + 3).Groups.at(6) == Group{.Code = 281, .Value = std::int64_t{0}});
+  CHECK(Check(drawing).Findings.empty());
+  const auto saved = Tests::Written(drawing);
+  REQUIRE(saved);
+  const auto back = Load(*saved);
+  REQUIRE(back);
+  CHECK(back->Issues.empty());
+  CHECK(back->Document.Classes.size() == drawing.Classes.size());
+}
+
+TEST_CASE("audit: a kind's CLASS is asked for in the releases AutoCAD writes it, and before R13 never")
+{
+  Document early = Fresh(Version::R2000);
+  std::erase_if(early.Classes, [](const Raw &one) -> bool
+                { return one.Groups.front() == Group{.Code = 1, .Value = std::string{"LAYOUT"}}; });
+  const Report seen = Check(early);
+  REQUIRE(seen.Errors() == 1);
+  CHECK(seen.Findings.front().What == "no CLASS for LAYOUT");
+  CHECK(Repair(early).Clean());
+  CHECK(early.Classes.back().Groups.size() == 6);
+  Objects::DataTable later{};
+  later.Base.Self = Handle{.Value = Past(early).Value + 1};
+  early.Objects.push_back(later);
+  WriteSeed(early, Handle{.Value = Past(early).Value + 1});
+  CHECK(Check(early).Findings.empty());
+  CHECK(Check(Fresh(Version::R2004)).Findings.empty());
+  Document old = Fresh(Version::R12);
+  REQUIRE(Edit::Add(old, Entities::Line{}));
+  CHECK(Check(old).Findings.empty());
+}
+
 TEST_CASE("audit: the records AutoCAD needs, put back with their defaults")
 {
   Document drawing = Fresh();
@@ -478,10 +553,11 @@ TEST_CASE("audit: a mesh with no vertices or no faces is left out")
   REQUIRE(Edit::AddBlock(drawing, "PART"));
   REQUIRE(Edit::Add(drawing, pointless, "PART"));
   const Report seen = Check(drawing);
-  REQUIRE(seen.Errors() == 2);
+  REQUIRE(seen.Errors() == 3);
   CHECK(seen.Findings.at(0).What == "mesh with no faces, left out");
   CHECK(seen.Findings.at(0).Subject == BaseOf(drawing.Entities.front()).Self);
   CHECK(seen.Findings.at(1).What == "mesh with no vertices, left out");
+  CHECK(seen.Findings.at(2).What == "no CLASS for MESH");
   CHECK(drawing.Entities.size() == 2);
   CHECK(Repair(drawing).Clean());
   REQUIRE(drawing.Entities.size() == 1);

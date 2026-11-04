@@ -72,7 +72,7 @@ TEST_CASE("classes: each as AutoCAD declares it, but for its count")
       CAPTURE(name);
       Raw uncounted = one;
       std::erase_if(uncounted.Groups, [](const Group &held) -> bool { return held.Code == 91; });
-      std::string theirs = Declared(source, name);
+      std::string theirs = DxfIO::Declared(source, name);
       const std::size_t at = theirs.find(" 91\r\n");
       if (at != std::string::npos)
       {
