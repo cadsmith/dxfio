@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# generated from ../include by scripts/api.ts
+src/headers.json
+src/kinds.json
+src/version.json

@@ -1,0 +1,21 @@
+target_sources(dxfio
+  PRIVATE
+    budget.cpp
+    corners.cpp
+    embedded.cpp
+    handles.cpp
+    joined.cpp
+    kept.cpp
+    matrices.cpp
+    numbers.cpp
+    owned.cpp
+    picture.cpp
+    pieces.cpp
+    points.cpp
+    repeats.cpp
+    sequence.cpp
+    subclass.cpp
+    text.cpp
+    walk.cpp
+    widths.cpp
+)

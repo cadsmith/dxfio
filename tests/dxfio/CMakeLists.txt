@@ -1,0 +1,49 @@
+target_sources(dxfio_tests
+  PRIVATE
+    ascii.cpp
+    base.cpp
+    boxed.cpp
+    brace.cpp
+    chained.cpp
+    create.cpp
+    entity.cpp
+    family.cpp
+    group.cpp
+    handle.cpp
+    handseed.cpp
+    head.cpp
+    load.cpp
+    match.cpp
+    object.cpp
+    matrix.cpp
+    past.cpp
+    raw.cpp
+    save.cpp
+    seed.cpp
+    symbol.cpp
+    tail.cpp
+    unknown.cpp
+    vector.cpp
+    version.cpp
+    xdata.cpp
+)
+
+add_subdirectory(audit)
+add_subdirectory(blocks)
+add_subdirectory(down)
+add_subdirectory(edit)
+add_subdirectory(empty)
+add_subdirectory(encoding)
+add_subdirectory(entities)
+add_subdirectory(fields)
+add_subdirectory(file)
+add_subdirectory(header)
+add_subdirectory(objects)
+add_subdirectory(plan)
+add_subdirectory(tables)
+add_subdirectory(tags)
+
+target_link_libraries(dxfio_tests
+  PRIVATE
+    dxfio::dxfio
+)

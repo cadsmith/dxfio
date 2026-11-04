@@ -1,0 +1,21 @@
+target_sources(dxfio_tests
+  PRIVATE
+    data.cpp
+    defaulted.cpp
+    dictionary.cpp
+    gathered.cpp
+    layout.cpp
+    look.cpp
+    material.cpp
+    objects.cpp
+    placeholder.cpp
+    scale.cpp
+    settings.cpp
+)
+
+add_subdirectory(mleader)
+add_subdirectory(mline)
+add_subdirectory(sortents)
+add_subdirectory(table)
+add_subdirectory(underlay)
+add_subdirectory(wipeout)

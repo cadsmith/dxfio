@@ -1,0 +1,64 @@
+FILEDIA 0
+OSMODE 0
+CMDECHO 0
+(command "_.BOX" "0,0,0" "10,10,10")
+(command "_.SPHERE" "30,0,5" "5")
+(command "_.RECTANG" "50,0" "60,10")
+(command "_.REGION" (entlast) "")
+(command "_.HELIX" "80,0,0" "5" "3" "10")
+(command "_.MESH" "_BOX" "100,0,0" "110,10,0" "10")
+(command "_.PLANESURF" "120,0" "130,10")
+SURFACEMODELINGMODE 1
+(command "_.LINE" "140,0" "150,0" "")
+(command "_.EXTRUDE" (entlast) "" "10")
+(command "_.LINE" "160,2" "165,2" "")
+(command "_.REVOLVE" (entlast) "" "_X" "360")
+(command "_.CIRCLE" "180,0,0" "3")
+(setq a (entlast))
+(command "_.CIRCLE" "180,0,10" "5")
+(command "_.LOFT" a (entlast) "" "")
+(command "_.LINE" "200,0,0" "200,0,10" "")
+(setq p (entlast))
+(command "_.LINE" "195,0,0" "205,0,0" "")
+(command "_.SWEEP" (entlast) "" p)
+SURFACEMODELINGMODE 0
+(command "_.MLEADER" "220,0" "230,10" "note")
+(command "_.SECTIONPLANE" "240,0" "250,0")
+(setvar "DEFAULTLIGHTING" 0)
+(command "_.POINTLIGHT" "260,0,5" "_X")
+(command "_.SPOTLIGHT" "270,0,5" "270,0,0" "_X")
+(command "_.DISTANTLIGHT" "280,0,50" "280,0,0" "_X")
+(defun underlay (book kind definition file page at / nod d def)
+  (setq nod (namedobjdict) d (cdr (assoc -1 (dictsearch nod book))))
+  (if (not d)
+    (dictadd nod book (setq d (entmakex
+      (list (cons 0 "DICTIONARY") (cons 100 "AcDbDictionary"))))))
+  (setq def (entmakex (list (cons 0 definition)
+    (cons 100 "AcDbUnderlayDefinition") (cons 1 file) (cons 2 page))))
+  (dictadd d file def)
+  (entmake (list (cons 0 kind) (cons 8 "0") (cons 100 "AcDbEntity")
+    (cons 100 "AcDbUnderlayReference") (cons 340 def) (cons 10 at)
+    (cons 41 1.0) (cons 42 1.0) (cons 43 1.0) (cons 50 0.0)
+    (list 210 0.0 0.0 1.0) (cons 280 2) (cons 281 100) (cons 282 0))))
+(underlay "ACAD_PDFDEFINITIONS" "PDFUNDERLAY" "PDFDEFINITION" "leve.pdf" "1" (list 300.0 0.0 0.0))
+(underlay "ACAD_DWFDEFINITIONS" "DWFUNDERLAY" "DWFDEFINITION" "reseau.dwf" "Reseau" (list 320.0 0.0 0.0))
+(underlay "ACAD_DGNDEFINITIONS" "DGNUNDERLAY" "DGNDEFINITION" "voirie.dgn" "Default" (list 340.0 0.0 0.0))
+(command "_.LINE" "360,0" "370,0" "")
+(command "_.EXTRUDE" (entlast) "" "10")
+(command "_.LINE" "380,2" "385,2" "")
+(command "_.REVOLVE" (entlast) "" "_X" "360")
+(command "_.LINE" "400,0,0" "410,0,0" "")
+(setq a (entlast))
+(command "_.LINE" "400,0,10" "410,0,10" "")
+(command "_.LOFT" a (entlast) "" "")
+(command "_.LINE" "420,0,0" "420,0,10" "")
+(setq p (entlast))
+(command "_.LINE" "415,0,0" "425,0,0" "")
+(command "_.SWEEP" (entlast) "" p)
+_.DXFOUT "kinds-r2018.dxf" _V _2018 16
+_.DXFOUT "kinds-r2013.dxf" _V _2013 16
+_.DXFOUT "kinds-r2010.dxf" _V _2010 16
+_.DXFOUT "kinds-r2007.dxf" _V _2007 16
+_.DXFOUT "kinds-r2004.dxf" _V _2004 16
+_.DXFOUT "kinds-r2000.dxf" _V _2000 16
+_.QUIT _Y

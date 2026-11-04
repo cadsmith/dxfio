@@ -1,0 +1,44 @@
+target_sources(dxfio_tests
+  PRIVATE
+    arc.cpp
+    attdef.cpp
+    attrib.cpp
+    circle.cpp
+    ellipse.cpp
+    entities.cpp
+    face.cpp
+    helix.cpp
+    insert.cpp
+    leader.cpp
+    lettering.cpp
+    light.cpp
+    line.cpp
+    lwpolyline.cpp
+    mesh.cpp
+    mleader.cpp
+    mline.cpp
+    modeler.cpp
+    mtext.cpp
+    ole.cpp
+    point.cpp
+    polyline.cpp
+    raster.cpp
+    ray.cpp
+    record.cpp
+    seqend.cpp
+    shape.cpp
+    slice.cpp
+    solid.cpp
+    spline.cpp
+    table.cpp
+    text.cpp
+    tolerance.cpp
+    trace.cpp
+    underlay.cpp
+    vertex.cpp
+    viewport.cpp
+    xline.cpp
+)
+
+add_subdirectory(dimension)
+add_subdirectory(hatch)

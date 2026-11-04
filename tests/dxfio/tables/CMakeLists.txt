@@ -1,0 +1,14 @@
+target_sources(dxfio_tests
+  PRIVATE
+    appid.cpp
+    block.cpp
+    dimstyle.cpp
+    face.cpp
+    layer.cpp
+    linetype.cpp
+    style.cpp
+    tables.cpp
+    ucs.cpp
+    view.cpp
+    viewport.cpp
+)

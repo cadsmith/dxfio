@@ -1,0 +1,9 @@
+# folders
+build/
+*.trace/
+*.trace
+
+# files
+.DS_Store
+*.profraw
+*.profdata

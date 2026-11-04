@@ -1,0 +1,41 @@
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: Latest
+ColumnLimit: 120
+IndentWidth: 2
+AccessModifierOffset: -2
+BreakBeforeBraces: Allman
+NamespaceIndentation: None
+FixNamespaceComments: true
+IndentPPDirectives: AfterHash
+BreakTemplateDeclarations: Yes
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+QualifierAlignment: Left
+InsertBraces: true
+InsertNewlineAtEOF: true
+SeparateDefinitionBlocks: Always
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: None
+AlignConsecutiveBitFields: None
+AlignTrailingComments:
+  Kind: Always
+IncludeBlocks: Regroup
+SortIncludes: CaseSensitive
+IncludeCategories:
+  - Regex: '^"dxfio/'
+    Priority: 3
+  - Regex: '^"'
+    Priority: 2
+  - Regex: '^<doctest/'
+    Priority: 4
+  - Regex: '^<'
+    Priority: 5

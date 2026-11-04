@@ -1,0 +1,26 @@
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1032
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+FOO
+102
+\U+007BX
+  1
+y
+102
+}
+  0
+ENDSEC
+  0
+EOF

@@ -1,0 +1,36 @@
+target_sources(dxfio_tests
+  PRIVATE
+    budget.cpp
+    corners.cpp
+    count.cpp
+    custom.cpp
+    each.cpp
+    either.cpp
+    embedded.cpp
+    every.cpp
+    field.cpp
+    first.cpp
+    flat.cpp
+    handles.cpp
+    joined.cpp
+    many.cpp
+    matrices.cpp
+    maybe.cpp
+    numbers.cpp
+    optional.cpp
+    owned.cpp
+    part.cpp
+    picture.cpp
+    pieces.cpp
+    points.cpp
+    repeats.cpp
+    sequence.cpp
+    since.cpp
+    subclass.cpp
+    tally.cpp
+    text.cpp
+    until.cpp
+    walk.cpp
+    when.cpp
+    widths.cpp
+)

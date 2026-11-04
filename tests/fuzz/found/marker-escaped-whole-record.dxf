@@ -1,0 +1,32 @@
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1032
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+TEXT
+  5
+2A
+100
+AcDbEntity
+  8
+0
+100
+\U+0041cDbText
+ 40
+2.0
+  1
+x
+  0
+ENDSEC
+  0
+EOF

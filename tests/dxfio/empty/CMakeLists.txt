@@ -1,0 +1,11 @@
+target_sources(dxfio_tests
+  PRIVATE
+    blocks.cpp
+    classes.cpp
+    layouts.cpp
+    objects.cpp
+    roots.cpp
+    scales.cpp
+    styles.cpp
+    tables.cpp
+)

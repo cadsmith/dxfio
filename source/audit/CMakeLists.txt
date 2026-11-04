@@ -1,0 +1,10 @@
+target_sources(dxfio
+  PRIVATE
+    audit.cpp
+    handles.cpp
+    meshes.cpp
+    names.cpp
+    references.cpp
+    sequences.cpp
+    tables.cpp
+)
