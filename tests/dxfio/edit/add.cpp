@@ -63,6 +63,50 @@ void Listed(Document &drawing, Tables::Table<RecordT> &table, std::string_view n
 }
 } // namespace
 
+TEST_CASE("add: a polyline's vertices take the flags its kind asks, their own fitting bits kept")
+{
+  Document drawing = Create();
+  Entities::Vertex plain{};
+  Entities::Vertex fitted{};
+  fitted.Flags = 1 + 32;
+  Entities::Vertex first{};
+  first.First = 1;
+  Entities::Vertex second{};
+  second.Second = -2;
+  Entities::Vertex third{};
+  third.Third = 3;
+  Entities::Vertex fourth{};
+  fourth.Fourth = 4;
+  Entities::Polyline flat{};
+  flat.Vertices.Children = {plain, fitted};
+  Entities::Polyline spatial{};
+  spatial.Flags = 8;
+  spatial.Vertices.Children = {plain, fitted};
+  Entities::Polyline meshed{};
+  meshed.Flags = 16;
+  meshed.Vertices.Children = {plain};
+  Entities::Polyline faced{};
+  faced.Flags = 64;
+  faced.Vertices.Children = {plain, first, second, third, fourth};
+  for (const auto &one : {flat, spatial, meshed, faced})
+  {
+    REQUIRE(Add(drawing, one));
+  }
+  const auto flags = [&drawing](std::size_t at) -> std::vector<int>
+  {
+    std::vector<int> out;
+    for (const Entities::Vertex &one : std::get<Entities::Polyline>(drawing.Entities.at(at)).Vertices.Children)
+    {
+      out.push_back(one.Flags);
+    }
+    return out;
+  };
+  CHECK(flags(0) == std::vector{0, 1});
+  CHECK(flags(1) == std::vector{32, 33});
+  CHECK(flags(2) == std::vector{64});
+  CHECK(flags(3) == std::vector{192, 128, 128, 128, 128});
+}
+
 TEST_CASE("add: a record or a block with no name is refused")
 {
   Document drawing = Create();
@@ -90,15 +134,6 @@ TEST_CASE("edit: an entity added to model space takes the seed and the space's r
   CHECK(Audit::Check(drawing).Clean());
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: an entity added to paper space is flagged so, and owned by its record")
 {
   Document drawing = Create();
@@ -108,15 +143,6 @@ TEST_CASE("edit: an entity added to paper space is flagged so, and owned by its 
   CHECK(added.Record.Paper);
   CHECK(added.Record.Base.Owner == Recorded(drawing, "*Paper_Space"));
   CHECK(Audit::Check(drawing).Clean());
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: the vertices an entity carries take handles, owned by the entity")
@@ -133,15 +159,6 @@ TEST_CASE("edit: the vertices an entity carries take handles, owned by the entit
     CHECK(one.Record.Base.Owner == *self);
   }
   CHECK(Seed(drawing).Value == self->Value + 5);
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: a polyline added with vertices and no SEQEND is given one, as AutoCAD needs")
@@ -169,15 +186,6 @@ TEST_CASE("edit: a polyline added with vertices and no SEQEND is given one, as A
   CHECK(std::get<Entities::Polyline>(read->Document.Entities.front()).Vertices.Closing);
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: an insert added with attributes says they follow, and is given its SEQEND")
 {
   Document drawing = Create();
@@ -201,15 +209,6 @@ TEST_CASE("edit: an insert added with attributes says they follow, and is given 
   CHECK(std::get<Entities::Insert>(read->Document.Entities.front()).Attributes.Children.size() == 2);
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: an insert with no attributes takes no SEQEND, a polyline always one, its own kept")
 {
   Document drawing = Create();
@@ -230,15 +229,6 @@ TEST_CASE("edit: an insert with no attributes takes no SEQEND, a polyline always
   CHECK(Audit::Check(drawing).Clean());
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: an entity that brings its own handle keeps it, and the seed moves past it")
 {
   Document drawing = Create();
@@ -246,15 +236,6 @@ TEST_CASE("edit: an entity that brings its own handle keeps it, and the seed mov
   line.Record.Base.Self = Handle{.Value = 0x5000};
   CHECK(Add(drawing, line) == Handle{.Value = 0x5000});
   CHECK(Seed(drawing) == Handle{.Value = 0x5001});
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: an entity added to a block is owned by the block's record")
@@ -283,15 +264,6 @@ TEST_CASE("edit: an entity added to a block is owned by the block's record")
   CHECK(FindEntity(read->Document, *self) != nullptr);
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: the spaces' own blocks take entities as the spaces do")
 {
   Document drawing = Create();
@@ -301,15 +273,6 @@ TEST_CASE("edit: the spaces' own blocks take entities as the spaces do")
   CHECK_FALSE(std::get<Entities::Line>(drawing.Entities[0]).Record.Paper);
   CHECK(std::get<Entities::Line>(drawing.Entities[1]).Record.Paper);
   CHECK(FindBlock(drawing, "*Model_Space")->Entities.empty());
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: a block of a layout's paper space flags what it takes")
@@ -322,15 +285,6 @@ TEST_CASE("edit: a block of a layout's paper space flags what it takes")
   CHECK(std::get<Entities::Line>(sheet->Entities.front()).Record.Paper);
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: a block missing, or one named twice, is refused")
 {
   Document drawing = Create();
@@ -341,15 +295,6 @@ TEST_CASE("edit: a block missing, or one named twice, is refused")
   const auto twice = AddBlock(drawing, "DOOR");
   REQUIRE_FALSE(twice);
   CHECK(twice.error().What == "a block named DOOR is there already");
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: an R12 drawing has no block records, and its blocks and entities are owned by none")
@@ -366,15 +311,6 @@ TEST_CASE("edit: an R12 drawing has no block records, and its blocks and entitie
   CHECK(Load(saved->Bytes));
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: every table takes a record, owned by the table, its count kept")
 {
   Document drawing = Create();
@@ -387,15 +323,6 @@ TEST_CASE("edit: every table takes a record, owned by the table, its count kept"
   Listed(drawing, drawing.Appid, "DXFIO");
   Listed(drawing, drawing.Dimstyle, "Metric2");
   CHECK(Audit::Check(drawing).Clean());
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: a layer takes layer 0's plot style and material, unless it names its own")
@@ -419,15 +346,6 @@ TEST_CASE("edit: a layer takes layer 0's plot style and material, unless it name
   CHECK_FALSE(drawing.Layer.Records.back().Style);
 }
 
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
-}
-
 TEST_CASE("edit: a record whose name the table holds is refused, but for a viewport")
 {
   Document drawing = Create();
@@ -436,15 +354,6 @@ TEST_CASE("edit: a record whose name the table holds is refused, but for a viewp
   CHECK(twice.error().What == "a record named 0 is there already");
   CHECK_FALSE(Add(drawing, Called<Tables::Ltype>("continuous")));
   CHECK(Add(drawing, Called<Tables::Vport>("*ACTIVE")));
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: a record that brings its own handle keeps it, and a count past the records stays")
@@ -456,15 +365,6 @@ TEST_CASE("edit: a record that brings its own handle keeps it, and a count past 
   CHECK(Add(drawing, walls) == Handle{.Value = 0x6000});
   CHECK(Seed(drawing) == Handle{.Value = 0x6001});
   CHECK(drawing.Layer.Head.Count == 40);
-}
-
-TEST_CASE("add: a record or a block with no name is refused")
-{
-  Document drawing = Create();
-  CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-  CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-  CHECK(AddBlock(drawing, "") == std::unexpected{Failure{0, "a block needs a name"}});
-  CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
 }
 
 TEST_CASE("edit: past the last handle there is, nothing is added")

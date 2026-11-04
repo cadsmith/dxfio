@@ -43,7 +43,8 @@ void Sealed(const Entities::Record &parent, Entities::Sequence<ChildT> &chain)
 }
 
 // Gives a POLYLINE, and an INSERT whose attributes follow it, the SEQEND the file needs after them when they have
-// none, on their own layer, and says an INSERT's attributes follow it: else the file reads them on their own.
+// none, on their own layer, and says an INSERT's attributes follow it: else the file reads them on their own. A
+// POLYLINE's vertices take the flags its kind asks, else AutoCAD reads them as another kind's.
 void Closed(Entity &one)
 {
   std::visit(
@@ -59,6 +60,10 @@ void Closed(Entity &one)
         }
         if constexpr (requires { kind.Vertices.Children; })
         {
+          for (Entities::Vertex &vertex : kind.Vertices.Children)
+          {
+            vertex.Flags = Entities::Asked(kind, vertex);
+          }
           Sealed(kind.Record, kind.Vertices);
         }
       },

@@ -1,5 +1,6 @@
 #include "../family.hpp"
 #include "entities/io.hpp"
+#include "masked.hpp"
 #include "match.hpp"
 #include "shapes/arc.hpp"
 #include "shapes/attdef.hpp"
@@ -198,6 +199,27 @@ auto Top(const Entity &one) -> Handle
   };
   std::visit([&higher](const auto &kind) -> auto { Children(kind, higher); }, one);
   return out;
+}
+
+auto Asked(const Polyline &parent, const Vertex &one) -> int
+{
+  constexpr int Spatial = 8;
+  constexpr int Meshed = 16;
+  constexpr int Faced = 64;
+  constexpr int Space = 32;
+  constexpr int Mesh = 64;
+  constexpr int Face = 128;
+  const int kept = one.Flags - Masked(one.Flags, Space + Mesh + Face);
+  if (Masked(parent.Flags, Faced) != 0)
+  {
+    const bool face = one.First != 0 || one.Second != 0 || one.Third != 0 || one.Fourth != 0;
+    return kept + (face ? Face : Mesh + Face);
+  }
+  if (Masked(parent.Flags, Meshed) != 0)
+  {
+    return kept + Mesh;
+  }
+  return Masked(parent.Flags, Spatial) != 0 ? kept + Space : kept;
 }
 
 void Claim(Entity &one, Handle owner)
