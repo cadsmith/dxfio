@@ -78,27 +78,50 @@ auto Counted(std::string_view text) -> Parsed
   return number ? Parsed{Content{*number}} : std::unexpected{Integer};
 }
 
-// An integer within the range the group's width holds: the writer refuses one past it.
-template <std::int64_t Low, std::int64_t High, const std::string_view &Expected>
-auto Bounded(std::string_view text) -> Parsed
+// The range a group of some width holds, and what to call an integer past it.
+struct Width
+{
+  std::int64_t Low{};
+  std::int64_t High{};
+  std::string_view Expected;
+};
+
+constexpr Width Short{
+    .Low = std::numeric_limits<std::int16_t>::min(),
+    .High = std::numeric_limits<std::uint16_t>::max(),
+    .Expected = "integer of 16 bits",
+};
+
+constexpr Width Long{
+    .Low = std::numeric_limits<std::int32_t>::min(),
+    .High = std::numeric_limits<std::int32_t>::max(),
+    .Expected = "integer of 32 bits",
+};
+
+// An integer within the range of its width: the writer refuses one past it.
+auto Bounded(std::string_view text, const Width &width) -> Parsed
 {
   const std::optional<std::int64_t> number = Integral(Bare(text));
   if (!number)
   {
     return std::unexpected{Integer};
   }
-  return *number >= Low && *number <= High ? Parsed{Content{*number}} : std::unexpected{Expected};
+  if (*number < width.Low || *number > width.High)
+  {
+    return std::unexpected{width.Expected};
+  }
+  return Content{*number};
 }
 
-constexpr std::string_view Short = "integer of 16 bits";
+auto Counted16(std::string_view text) -> Parsed
+{
+  return Bounded(text, Short);
+}
 
-constexpr std::string_view Long = "integer of 32 bits";
-
-constexpr auto Counted16 =
-    Bounded<std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::uint16_t>::max(), Short>;
-
-constexpr auto Counted32 =
-    Bounded<std::numeric_limits<std::int32_t>::min(), std::numeric_limits<std::int32_t>::max(), Long>;
+auto Counted32(std::string_view text) -> Parsed
+{
+  return Bounded(text, Long);
+}
 
 auto Flagged(std::string_view text) -> Parsed
 {
