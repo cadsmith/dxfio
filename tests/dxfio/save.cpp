@@ -7,6 +7,7 @@
 #include "written.hpp"
 
 #include "dxfio/create.hpp"
+#include "dxfio/edit/add.hpp"
 #include "dxfio/load.hpp"
 
 #include <doctest/doctest.h>
@@ -258,6 +259,48 @@ TEST_CASE("save: the options keep their own code page name")
   const auto arabic = Tests::Written(read->Document, with);
   REQUIRE(arabic);
   CHECK(arabic->find('\xc7') != std::string::npos);
+}
+
+TEST_CASE("save: a section that holds something is written where DXF puts it, named in the order or not")
+{
+  std::string text = Acad("empty-r2000.dxf");
+  const std::size_t name = text.find("  2\r\nENTITIES\r\n");
+  const std::size_t start = text.rfind("  0\r\nSECTION\r\n", name);
+  const std::size_t end = text.find("  0\r\nENDSEC\r\n", name) + 13;
+  text.erase(start, end - start);
+  auto read = Load(text);
+  REQUIRE(read);
+  CHECK_FALSE(std::ranges::contains(read->Document.Order, "ENTITIES"));
+  REQUIRE(Edit::Add(read->Document, Entities::Line{}));
+  const auto saved = Tests::Written(read->Document, {.Release = Version::R2000});
+  REQUIRE(saved);
+  const std::size_t blocks = saved->find("  2\r\nBLOCKS\r\n");
+  const std::size_t entities = saved->find("  2\r\nENTITIES\r\n");
+  const std::size_t objects = saved->find("  2\r\nOBJECTS\r\n");
+  REQUIRE(entities != std::string::npos);
+  CHECK(blocks < entities);
+  CHECK(entities < objects);
+  CHECK(saved->find("  0\r\nLINE\r\n", entities) < objects);
+  CHECK_FALSE(std::ranges::contains(read->Document.Order, "ENTITIES"));
+}
+
+TEST_CASE("save: a drawing made by hand writes its sections in DXF's order, and a table its records hold")
+{
+  Document drawing{};
+  drawing.Entities.push_back(Entities::Line{});
+  Tables::Layer layer{};
+  layer.Record.Name = "WALLS";
+  drawing.Layer.Records.push_back(layer);
+  drawing.Sections.push_back(Section{.Name = "THUMBNAILIMAGE", .Groups = {}});
+  const auto saved = Tests::Written(drawing, {.Release = Version::R12});
+  REQUIRE(saved);
+  CHECK(*saved ==
+        "  0\r\nSECTION\r\n  2\r\nTABLES\r\n  0\r\nTABLE\r\n  2\r\nLAYER\r\n 70\r\n     0\r\n"
+        "  0\r\nLAYER\r\n  2\r\nWALLS\r\n 70\r\n     0\r\n 62\r\n     7\r\n  6\r\nContinuous\r\n  0\r\nENDTAB\r\n"
+        "  0\r\nENDSEC\r\n"
+        "  0\r\nSECTION\r\n  2\r\nENTITIES\r\n  0\r\nLINE\r\n  8\r\n0\r\n 10\r\n0.0\r\n 20\r\n0.0\r\n"
+        " 30\r\n0.0\r\n 11\r\n0.0\r\n 21\r\n0.0\r\n 31\r\n0.0\r\n  0\r\nENDSEC\r\n"
+        "  0\r\nSECTION\r\n  2\r\nTHUMBNAILIMAGE\r\n  0\r\nENDSEC\r\n  0\r\nEOF\r\n");
 }
 
 TEST_CASE("save: a section named in the order but held nowhere stays empty")
