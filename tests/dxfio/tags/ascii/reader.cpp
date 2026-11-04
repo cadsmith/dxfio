@@ -3,6 +3,7 @@
 #include <doctest/doctest.h>
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -11,25 +12,28 @@ namespace DxfIO::Tags::Ascii
 {
 namespace
 {
-auto Read(std::string_view text) -> std::vector<Tag>
+auto Read(std::string_view text, std::vector<Issue> *issues = nullptr) -> std::vector<Tag>
 {
-  Reader in{text};
+  Reader in{text, issues};
   std::vector<Tag> out;
   while (!in.Done())
   {
-    const std::expected<Tag, Failure> one = in.Next();
+    const std::expected<std::optional<Tag>, Failure> one = in.Next();
     REQUIRE(one);
-    out.push_back(*one);
+    if (*one)
+    {
+      out.push_back(**one);
+    }
   }
   return out;
 }
 
 auto Refused(std::string_view text) -> Failure
 {
-  Reader in{text};
+  Reader in{text, nullptr};
   while (!in.Done())
   {
-    const std::expected<Tag, Failure> one = in.Next();
+    const std::expected<std::optional<Tag>, Failure> one = in.Next();
     if (!one)
     {
       return one.error();
@@ -37,6 +41,13 @@ auto Refused(std::string_view text) -> Failure
   }
   FAIL("the text was read whole");
   return {};
+}
+
+auto Told(std::string_view text) -> std::vector<Issue>
+{
+  std::vector<Issue> issues;
+  Read(text, &issues);
+  return issues;
 }
 } // namespace
 
@@ -72,13 +83,24 @@ TEST_CASE("ascii: blank lines after the last tag end the file")
   CHECK(Read("").empty());
 }
 
+TEST_CASE("ascii: a value that does not parse is left out and told, the rest read on")
+{
+  std::vector<Issue> issues;
+  const std::vector<Tag> tags = Read("  0\nLINE\n 40\nnope\n 70\n1e300\n 62\n     1\n", &issues);
+  REQUIRE(tags.size() == 2);
+  CHECK(tags.at(1) == Tag{.Code = 62, .Value = std::int64_t{1}, .Line = 7});
+  CHECK(issues == std::vector{
+                      Issue{.Line = 4, .What = "number expected for group 40, found \"nope\", left out"},
+                      Issue{.Line = 6, .What = "integer expected for group 70, found \"1e300\", left out"},
+                  });
+  CHECK(Read(" 40\nnope\n").empty());
+}
+
 TEST_CASE("ascii: a failure names its line and what was found")
 {
   CHECK(Refused("  0\r\nSECTION\r\nabc\r\nx\r\n") == Failure{3, "group code expected, found \"abc\""});
   CHECK(Refused("  0\nSECTION\n1072\nx\n") == Failure{3, "group code expected, found \"1072\""});
   CHECK(Refused("  0\nSECTION\n -1\nx\n") == Failure{3, "group code expected, found \"-1\""});
-  CHECK(Refused("  0\nSECTION\n 40\nnope\n") == Failure{4, "number expected for group 40, found \"nope\""});
-  CHECK(Refused(" 70\n1e300\n") == Failure{2, "integer expected for group 70, found \"1e300\""});
   CHECK(Refused("  0\nSECTION\n  2") == Failure{3, "value missing after the last group code"});
   CHECK(Refused("  0\nSECTION\n\n  2\nHEADER\n") == Failure{3, "blank line where a group code is expected"});
 }
@@ -88,7 +110,8 @@ TEST_CASE("ascii: a failure shows no more than the start of a long line")
   const std::string line(100000, 'x');
   const std::string shown = std::string(64, 'x') + "...";
   CHECK(Refused(line + "\n  0\n") == Failure{1, "group code expected, found \"" + shown + "\""});
-  CHECK(Refused(" 40\n" + line + "\n") == Failure{2, "number expected for group 40, found \"" + shown + "\""});
+  CHECK(Told(" 40\n" + line + "\n") ==
+        std::vector{Issue{.Line = 2, .What = "number expected for group 40, found \"" + shown + "\", left out"}});
   const std::string exact(64, 'y');
   CHECK(Refused(exact + "\n") == Failure{1, "group code expected, found \"" + exact + "\""});
 }

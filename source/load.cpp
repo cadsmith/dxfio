@@ -178,7 +178,8 @@ void Raised(Loaded &into)
 
 auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
 {
-  const auto all = Tags::All(bytes);
+  Loaded out;
+  const auto all = Tags::All(bytes, &out.Issues);
   if (!all)
   {
     return std::unexpected{all.error()};
@@ -195,7 +196,6 @@ auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
   }
   const Version release = Header::Declared(*head);
   const bool opaque = Header::Opaque(*head);
-  Loaded out;
   const Fields::Reading with{
       .Release = release,
       .Text = opaque ? Encoding::Opaque() : Encoding::Of(release, Header::Named(*head)),

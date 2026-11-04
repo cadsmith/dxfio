@@ -11,6 +11,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace DxfIO::Tags::Ascii
 {
@@ -37,11 +38,6 @@ auto Group(std::string_view head) -> std::optional<int>
   return code;
 }
 
-auto Noun(Codes::Type is) -> std::string_view
-{
-  return is == Codes::Type::Real ? "number" : "integer";
-}
-
 constexpr std::size_t Echoed = 64;
 
 auto Glimpse(std::string_view line) -> std::string
@@ -50,14 +46,17 @@ auto Glimpse(std::string_view line) -> std::string
 }
 } // namespace
 
-Reader::Reader(std::string_view text) : m_Text(text.starts_with(Mark) ? text.substr(Mark.size()) : text) {}
+Reader::Reader(std::string_view text, std::vector<Issue> *issues)
+    : m_Text(text.starts_with(Mark) ? text.substr(Mark.size()) : text), m_Issues(issues)
+{
+}
 
 auto Reader::Done() const -> bool
 {
   return m_Text.find_first_not_of(" \t\r\n", m_At) == std::string_view::npos;
 }
 
-auto Reader::Next() -> std::expected<Tag, Failure>
+auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
 {
   const std::size_t at = m_Line + 1;
   const std::string_view head = Trimmed(Line());
@@ -76,16 +75,16 @@ auto Reader::Next() -> std::expected<Tag, Failure>
     return std::unexpected{Failure{.Line = at, .What = "value missing after the last group code"}};
   }
   const std::string_view text = Line();
-  const Codes::Type is = Codes::Of(*code);
-  const std::optional<Content> value = Parse(is, text);
+  const std::expected<Content, std::string_view> value = Parse(Codes::Of(*code), text);
   if (!value)
   {
-    return std::unexpected{Failure{
+    Tell(Issue{
         .Line = at + 1,
-        .What = std::format("{} expected for group {}, found \"{}\"", Noun(is), *code, Glimpse(text)),
-    }};
+        .What = std::format("{} expected for group {}, found \"{}\", left out", value.error(), *code, Glimpse(text)),
+    });
+    return std::optional<Tag>{};
   }
-  return Tag{.Code = *code, .Value = *value, .Line = at};
+  return std::optional{Tag{.Code = *code, .Value = *value, .Line = at}};
 }
 
 auto Reader::Line() -> std::string_view
@@ -95,5 +94,13 @@ auto Reader::Line() -> std::string_view
   m_At += end + Ending(rest.substr(end));
   ++m_Line;
   return rest.substr(0, end);
+}
+
+void Reader::Tell(Issue issue)
+{
+  if (m_Issues != nullptr)
+  {
+    m_Issues->push_back(std::move(issue));
+  }
 }
 } // namespace DxfIO::Tags::Ascii

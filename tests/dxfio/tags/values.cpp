@@ -22,7 +22,7 @@ TEST_CASE("values: a real is read whole, its blanks and one plus aside")
   CHECK(Parse(Codes::Type::Real, "  -0.25 ") == Content{-0.25});
   CHECK(Parse(Codes::Type::Real, "+2") == Content{2.0});
   CHECK(Parse(Codes::Type::Real, "1e3") == Content{1000.0});
-  CHECK_FALSE(Parse(Codes::Type::Real, "1.5x"));
+  CHECK(Parse(Codes::Type::Real, "1.5x").error() == "number");
   CHECK_FALSE(Parse(Codes::Type::Real, "++1"));
   CHECK_FALSE(Parse(Codes::Type::Real, "+-1"));
   CHECK_FALSE(Parse(Codes::Type::Real, ""));
@@ -36,7 +36,7 @@ TEST_CASE("values: an integer is read whole, as AutoCAD pads it")
   CHECK(Parse(Codes::Type::Int16, "     1") == Content{std::int64_t{1}});
   CHECK(Parse(Codes::Type::Int32, "-42") == Content{std::int64_t{-42}});
   CHECK(Parse(Codes::Type::Int64, "9223372036854775807") == Content{std::int64_t{9223372036854775807}});
-  CHECK_FALSE(Parse(Codes::Type::Int16, "1x"));
+  CHECK(Parse(Codes::Type::Int16, "1x").error() == "integer");
   CHECK_FALSE(Parse(Codes::Type::Int16, ""));
 }
 
