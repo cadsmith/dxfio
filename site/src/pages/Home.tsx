@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react'
 import { BracesIcon, FileCheckIcon, HistoryIcon, ShieldCheckIcon } from 'lucide-react'
 import home from '../../../docs/home.md'
-import { Button } from '@/components/ui/button'
+import { cn } from 'cn'
+import { buttonVariants } from '@/components/ui/button'
 import { Stage } from '../components/Hero'
 import { Showcase } from '../components/Showcase'
 import { Timeline } from '../components/Timeline'
@@ -83,19 +84,16 @@ export default function Home() {
           </p>
           <div className="hero-actions">
             <span className="shine">
-              <Button size="lg" className="h-11 rounded-full px-6 text-[15px]" nativeButton={false} render={<a href={start('guide')} />}>
+              <a className={cn(buttonVariants({ size: 'lg', className: 'h-11 rounded-full px-6 text-[15px]' }))} href={start('guide')}>
                 Get started
-              </Button>
+              </a>
             </span>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-11 rounded-full px-6 text-[15px]"
-              nativeButton={false}
-              render={<a href={link('reference')} />}
+            <a
+              className={cn(buttonVariants({ size: 'lg', variant: 'outline', className: 'h-11 rounded-full px-6 text-[15px]' }))}
+              href={link('reference')}
             >
               Reference
-            </Button>
+            </a>
           </div>
           <div className="hero-install" dangerouslySetInnerHTML={{ __html: part('install') }} />
         </div>
