@@ -18,6 +18,7 @@ Checks: >
   performance-*,
   portability-*,
   readability-*,
+  -readability-redundant-member-init,
   -readability-trailing-comma,
   -readability-magic-numbers
 
