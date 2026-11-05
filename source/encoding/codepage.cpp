@@ -2,6 +2,7 @@
 
 #include "ascii.hpp"
 #include "pages.hpp"
+#include "seek.hpp"
 
 #include <algorithm>
 #include <array>
@@ -90,9 +91,8 @@ constexpr std::array Aliases{
 // The number of the page a name means: after its ANSI_ prefix, or the number a DWG name stands for.
 auto Numbered(std::string_view name) -> std::string_view
 {
-  const auto *alias =
-      std::ranges::find_if(Aliases, [name](const Alias &one) -> bool { return DxfIO::Ascii::Same(one.Name, name); });
-  if (alias != Aliases.end())
+  const auto *alias = SeekIf(Aliases, [name](const Alias &one) -> bool { return DxfIO::Ascii::Same(one.Name, name); });
+  if (alias != nullptr)
   {
     return alias->Number;
   }
