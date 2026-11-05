@@ -12,6 +12,7 @@ target_compile_features(dxfio_tests PRIVATE cxx_std_23)
 
 target_compile_definitions(dxfio_tests
   PRIVATE
+    DOCTEST_CONFIG_USE_STD_HEADERS
     DXFIO_FIXTURES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
     DXFIO_FUZZ_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fuzz"
 )
