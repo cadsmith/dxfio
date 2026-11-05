@@ -69,4 +69,4 @@ ctest --preset memory
 
 The libc++ for `memory` comes from LLVM's own sources, built as
 [ci.yml](../.github/workflows/ci.yml) builds it: the `runtimes` directory
-of the `llvmorg-22.1.2` tag with `LLVM_USE_SANITIZER=MemoryWithOrigins`.
+of the `llvmorg-23.1.5` tag with `LLVM_USE_SANITIZER=MemoryWithOrigins`.

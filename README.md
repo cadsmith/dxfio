@@ -64,7 +64,7 @@ ctest --preset debug
 `main`: clang-format, the CMake guidelines, the public interface's snapshot
 and the pull request's title; the `release` preset built and tested with GCC,
 Clang, Apple Clang and MSVC; `sanitize`, `thread`, `memory` and `coverage`
-with Clang; `tidy` with LLVM 23; and every fuzz target for a minute on the
+with Clang 23; `tidy` with clang-tidy 23; and every fuzz target for a minute on the
 corpus the nightly runs grow. Each job keeps a ccache that a push to `main`
 saves, so a pull request compiles only what it changed, and one that
 changes only `docs`, `site` or Markdown runs the checks alone.
