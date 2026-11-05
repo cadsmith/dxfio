@@ -20,6 +20,13 @@
 | `sanitize` | `Debug` at `-O1` | ASan and UBSan instrumented build |
 | `tidy` | `Debug` | The library built through clang-tidy |
 | `fuzz` | `RelWithDebInfo` | libFuzzer targets, needs LLVM clang on the path |
+| `thread` | `Debug` at `-O1` | TSan instrumented build of the tests |
+| `memory` | `Debug` at `-O1` | MSan instrumented build of the tests, Linux only; needs LLVM clang on the path and `DXFIO_MEMORY_LIBCXX` set to a libc++ built with MSan |
+
+Every build when dxfio is the top level project defines `_GLIBCXX_ASSERTIONS`
+and libc++'s debug hardening mode, so the standard library checks its
+preconditions. The `sanitize`, `thread` and `memory` test presets set the
+sanitizers' strictest runtime options.
 
 ## Targets
 
@@ -50,4 +57,16 @@ cmake --build --preset tidy
 cmake --preset fuzz
 cmake --build --preset fuzz
 ./build/fuzz/bin/dxfio_fuzz_dxf -dict=tests/fuzz/dxf.dict tests/fuzz/corpus
+
+cmake --preset thread
+cmake --build --preset thread
+ctest --preset thread
+
+DXFIO_MEMORY_LIBCXX=/opt/msan-libcxx cmake --preset memory
+cmake --build --preset memory
+ctest --preset memory
 ```
+
+The libc++ for `memory` comes from LLVM's own sources, built as
+[ci.yml](../.github/workflows/ci.yml) builds it: the `runtimes` directory
+of the `llvmorg-22.1.2` tag with `LLVM_USE_SANITIZER=MemoryWithOrigins`.

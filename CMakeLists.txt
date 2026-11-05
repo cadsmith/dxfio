@@ -28,15 +28,60 @@ endif()
 
 option(DXFIO_ENABLE_SANITIZE "Instrument for ASan and UBSan" OFF)
 if (DXFIO_ENABLE_SANITIZE)
+  set(DXFIO_SANITIZERS address,undefined,float-divide-by-zero)
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    string(APPEND DXFIO_SANITIZERS
+      ,implicit-conversion,local-bounds,nullability)
+    add_compile_options(
+      -fsanitize-ignorelist=${PROJECT_SOURCE_DIR}/tests/ignorelist.txt
+    )
+  endif()
   add_compile_options(
-    -fsanitize=address,undefined
+    -fsanitize=${DXFIO_SANITIZERS}
     -fno-sanitize-recover=all
     -fno-omit-frame-pointer
   )
-  add_link_options(-fsanitize=address,undefined)
+  add_link_options(-fsanitize=${DXFIO_SANITIZERS})
+endif()
+
+option(DXFIO_ENABLE_THREAD "Instrument for TSan" OFF)
+if (DXFIO_ENABLE_THREAD)
+  add_compile_options(
+    -fsanitize=thread
+    -fno-sanitize-recover=all
+    -fno-omit-frame-pointer
+  )
+  add_link_options(-fsanitize=thread)
+endif()
+
+option(DXFIO_ENABLE_MEMORY "Instrument for MSan, with DXFIO_MEMORY_LIBCXX" OFF)
+set(DXFIO_MEMORY_LIBCXX "" CACHE PATH "A libc++ built with MSan")
+if (DXFIO_ENABLE_MEMORY)
+  add_compile_options(
+    -fsanitize=memory
+    -fsanitize-memory-track-origins
+    -fno-sanitize-recover=all
+    -fno-omit-frame-pointer
+    -nostdinc++
+    -isystem ${DXFIO_MEMORY_LIBCXX}/include/c++/v1
+  )
+  add_link_options(
+    -fsanitize=memory
+    -stdlib=libc++
+    -L${DXFIO_MEMORY_LIBCXX}/lib
+    -Wl,-rpath,${DXFIO_MEMORY_LIBCXX}/lib
+    -lc++abi
+  )
 endif()
 
 option(DXFIO_ENABLE_TIDY "Run clang-tidy on the library as it builds" OFF)
+
+if (PROJECT_IS_TOP_LEVEL)
+  add_compile_definitions(
+    _GLIBCXX_ASSERTIONS
+    _LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG
+  )
+endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   add_compile_options(
@@ -55,7 +100,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if (MSVC)
-  add_compile_options(/utf-8)
+  add_compile_options(/W4 /utf-8)
 endif()
 
 if (PROJECT_IS_TOP_LEVEL)

@@ -71,6 +71,28 @@
         "DXFIO_ENABLE_FUZZ": "ON",
         "DXFIO_ENABLE_SANITIZE": "ON"
       }
+    },
+    {
+      "name": "thread",
+      "displayName": "Thread",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O1 -g",
+        "DXFIO_ENABLE_THREAD": "ON"
+      }
+    },
+    {
+      "name": "memory",
+      "displayName": "Memory",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O1 -g",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "DXFIO_ENABLE_MEMORY": "ON",
+        "DXFIO_MEMORY_LIBCXX": "$env{DXFIO_MEMORY_LIBCXX}"
+      }
     }
   ],
   "buildPresets": [
@@ -98,6 +120,16 @@
     {
       "name": "fuzz",
       "configurePreset": "fuzz"
+    },
+    {
+      "name": "thread",
+      "configurePreset": "thread",
+      "targets": ["dxfio_tests"]
+    },
+    {
+      "name": "memory",
+      "configurePreset": "memory",
+      "targets": ["dxfio_tests"]
     }
   ],
   "testPresets": [
@@ -138,6 +170,38 @@
       "name": "sanitize",
       "displayName": "Sanitize Tests",
       "configurePreset": "sanitize",
+      "environment": {
+        "ASAN_OPTIONS": "detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:strict_init_order=1",
+        "UBSAN_OPTIONS": "print_stacktrace=1"
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "thread",
+      "displayName": "Thread Tests",
+      "configurePreset": "thread",
+      "environment": {
+        "TSAN_OPTIONS": "halt_on_error=1:second_deadlock_stack=1"
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "memory",
+      "displayName": "Memory Tests",
+      "configurePreset": "memory",
+      "environment": {
+        "MSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
       "output": {
         "outputOnFailure": true
       },
