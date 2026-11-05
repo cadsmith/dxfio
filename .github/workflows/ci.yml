@@ -15,6 +15,7 @@ concurrency:
 
 env:
   CCACHE_COMPILERCHECK: content
+  CCACHE_DEPEND: true
 
 jobs:
   check:
@@ -112,12 +113,14 @@ jobs:
             cxx: /usr/lib/llvm-22/bin/clang++
             launcher: ccache
             packages: libclang-rt-22-dev
+            target: dxfio_tests
           - name: coverage
             os: ubuntu-26.04
             preset: coverage
             cxx: /usr/lib/llvm-22/bin/clang++
             launcher: ccache
             packages: libclang-rt-22-dev llvm-22
+            target: coverage
     env:
       CXX: ${{ matrix.cxx }}
       CMAKE_CXX_COMPILER_LAUNCHER: ${{ matrix.launcher }}
@@ -146,16 +149,17 @@ jobs:
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
 
+      # The release jobs build everything, the headers-alone check included;
+      # sanitize builds the tests alone, and coverage the target that runs
+      # them and gates the result.
       - name: Build
-        run: cmake --build --preset ${{ matrix.preset }}
+        run: >
+          cmake --build --preset ${{ matrix.preset }}
+          ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
 
       - name: Test
-        if: matrix.preset != 'coverage'
+        if: matrix.target != 'coverage'
         run: ctest --preset ${{ matrix.preset }} --parallel 4
-
-      - name: Coverage
-        if: matrix.preset == 'coverage'
-        run: cmake --build --preset coverage --target coverage
 
   tidy:
     name: tidy
