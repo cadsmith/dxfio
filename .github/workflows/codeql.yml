@@ -14,7 +14,7 @@ jobs:
   analyze:
     name: analyze
     runs-on: ubuntu-26.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: read
       security-events: write
@@ -29,10 +29,12 @@ jobs:
           build-mode: manual
           queries: security-and-quality
 
+      # The library alone: CodeQL traces every compile, and the tests would
+      # triple the time for queries on doctest macros.
       - name: Build
         run: |
           cmake --preset release
-          cmake --build --preset release --target dxfio dxfio_tests
+          cmake --build --preset release --target dxfio
 
       - uses: github/codeql-action/analyze@v4
         with:
