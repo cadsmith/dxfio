@@ -1,0 +1,133 @@
+set(DXFIO_HEADERS
+  dxfio/api.hpp
+  dxfio/audit/audit.hpp
+  dxfio/base.hpp
+  dxfio/blocks/begin.hpp
+  dxfio/blocks/blocks.hpp
+  dxfio/blocks/end.hpp
+  dxfio/boxed.hpp
+  dxfio/brace.hpp
+  dxfio/colors.hpp
+  dxfio/corners.hpp
+  dxfio/create.hpp
+  dxfio/document.hpp
+  dxfio/dxfio.hpp
+  dxfio/edit/add.hpp
+  dxfio/edit/find.hpp
+  dxfio/edit/handles.hpp
+  dxfio/edit/space.hpp
+  dxfio/entities/arc.hpp
+  dxfio/entities/attdef.hpp
+  dxfio/entities/attrib.hpp
+  dxfio/entities/circle.hpp
+  dxfio/entities/dimension/dimension.hpp
+  dxfio/entities/dimension/measure.hpp
+  dxfio/entities/ellipse.hpp
+  dxfio/entities/face.hpp
+  dxfio/entities/hatch/edge.hpp
+  dxfio/entities/hatch/gradient.hpp
+  dxfio/entities/hatch/hatch.hpp
+  dxfio/entities/hatch/path.hpp
+  dxfio/entities/helix.hpp
+  dxfio/entities/insert.hpp
+  dxfio/entities/leader.hpp
+  dxfio/entities/lettering.hpp
+  dxfio/entities/light.hpp
+  dxfio/entities/line.hpp
+  dxfio/entities/lwpolyline.hpp
+  dxfio/entities/mesh.hpp
+  dxfio/entities/mline.hpp
+  dxfio/entities/modeler.hpp
+  dxfio/entities/mtext.hpp
+  dxfio/entities/multileader.hpp
+  dxfio/entities/ole2frame.hpp
+  dxfio/entities/overlay.hpp
+  dxfio/entities/point.hpp
+  dxfio/entities/polyline.hpp
+  dxfio/entities/raster.hpp
+  dxfio/entities/ray.hpp
+  dxfio/entities/record.hpp
+  dxfio/entities/section.hpp
+  dxfio/entities/seqend.hpp
+  dxfio/entities/sequence.hpp
+  dxfio/entities/shape.hpp
+  dxfio/entities/solid.hpp
+  dxfio/entities/spline.hpp
+  dxfio/entities/table.hpp
+  dxfio/entities/text.hpp
+  dxfio/entities/tolerance.hpp
+  dxfio/entities/trace.hpp
+  dxfio/entities/underlay.hpp
+  dxfio/entities/vertex.hpp
+  dxfio/entities/viewport.hpp
+  dxfio/entities/xline.hpp
+  dxfio/entity.hpp
+  dxfio/failure.hpp
+  dxfio/group.hpp
+  dxfio/handle.hpp
+  dxfio/header/header.hpp
+  dxfio/issue.hpp
+  dxfio/lineweights.hpp
+  dxfio/load.hpp
+  dxfio/matrix.hpp
+  dxfio/object.hpp
+  dxfio/objects/datatable.hpp
+  dxfio/objects/defaulted.hpp
+  dxfio/objects/dictionary.hpp
+  dxfio/objects/dictionaryvar.hpp
+  dxfio/objects/group.hpp
+  dxfio/objects/image/definition.hpp
+  dxfio/objects/layout.hpp
+  dxfio/objects/material.hpp
+  dxfio/objects/mleader/style.hpp
+  dxfio/objects/mline/style.hpp
+  dxfio/objects/placeholder.hpp
+  dxfio/objects/plot.hpp
+  dxfio/objects/plotsettings.hpp
+  dxfio/objects/scale.hpp
+  dxfio/objects/sortents/table.hpp
+  dxfio/objects/table/style.hpp
+  dxfio/objects/underlay/definition.hpp
+  dxfio/objects/visualstyle.hpp
+  dxfio/objects/wipeout/variables.hpp
+  dxfio/objects/xrecord.hpp
+  dxfio/raw.hpp
+  dxfio/save.hpp
+  dxfio/section.hpp
+  dxfio/symbol.hpp
+  dxfio/tables/appid.hpp
+  dxfio/tables/axes.hpp
+  dxfio/tables/block.hpp
+  dxfio/tables/dimstyle.hpp
+  dxfio/tables/face.hpp
+  dxfio/tables/head.hpp
+  dxfio/tables/layer.hpp
+  dxfio/tables/ltype.hpp
+  dxfio/tables/record.hpp
+  dxfio/tables/style.hpp
+  dxfio/tables/table.hpp
+  dxfio/tables/ucs.hpp
+  dxfio/tables/view.hpp
+  dxfio/tables/vport.hpp
+  dxfio/unknown.hpp
+  dxfio/vector.hpp
+  dxfio/version.hpp
+  dxfio/widths.hpp
+  dxfio/xdata.hpp
+)
+
+target_sources(dxfio
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+    FILES ${DXFIO_HEADERS}
+)
+
+file(GLOB_RECURSE found RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  CONFIGURE_DEPENDS dxfio/*.hpp)
+
+foreach(header IN LISTS found)
+  if (NOT header IN_LIST DXFIO_HEADERS)
+    message(FATAL_ERROR "${header} is not listed in include/CMakeLists.txt")
+  endif()
+endforeach()

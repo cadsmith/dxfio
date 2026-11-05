@@ -34,8 +34,23 @@ and its limits: [docs/dxf.md](docs/dxf.md).
 
 ## Use in a project
 
+As a subdirectory of the project:
+
 ```cmake
 add_subdirectory(dxfio)
+target_link_libraries(app PRIVATE dxfio::dxfio)
+```
+
+Or installed, then found:
+
+```sh
+cmake --preset release
+cmake --build --preset release
+cmake --install build/release --prefix /some/prefix
+```
+
+```cmake
+find_package(dxfio CONFIG REQUIRED)
 target_link_libraries(app PRIVATE dxfio::dxfio)
 ```
 
@@ -89,11 +104,13 @@ queries.
 | `source` | The implementation and the layout of each kind |
 | `tests/dxfio` | Unit tests |
 | `tests/api` | The public interface's snapshot, and a check that each header compiles alone |
+| `tests/package` | A program that finds the installed library, built by CI against a fresh install |
 | `tests/fixtures/acad` | Drawings AutoCAD 2026 wrote for each release |
 | `tests/fuzz` | Fuzz targets, their corpus and the inputs they found |
 | `tools/acad` | The AutoCAD console scripts that made the fixtures, and a verifier |
 | `tools/dxf` | The generator of the code page tables |
-| `vendor` | Where doctest is fetched from |
+| `vendor` | Where doctest is fetched from, when `find_package` does not find it |
+| `cmake` | The package's config file, installed beside its targets |
 | `docs` | The documentation's pages, notes on DXF and on dxfio, and the guidelines |
 | `site` | The documentation website that renders `docs`, its examples built and run by `npm run examples` |
 

@@ -9,6 +9,7 @@ FetchContent_Declare(
   GIT_SHALLOW    TRUE
   GIT_PROGRESS   TRUE
   SYSTEM
+  FIND_PACKAGE_ARGS
 )
 
 FetchContent_MakeAvailable(doctest)

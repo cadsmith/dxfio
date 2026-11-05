@@ -109,6 +109,31 @@ endif()
 
 add_subdirectory(vendor SYSTEM)
 add_subdirectory(source)
+add_subdirectory(include)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(TARGETS dxfio EXPORT dxfioTargets FILE_SET HEADERS)
+
+install(EXPORT dxfioTargets
+  NAMESPACE dxfio::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/dxfio
+)
+
+write_basic_package_version_file(
+  ${PROJECT_BINARY_DIR}/dxfioConfigVersion.cmake
+  COMPATIBILITY SameMajorVersion
+)
+
+install(FILES ${PROJECT_SOURCE_DIR}/cmake/config.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/dxfio
+  RENAME dxfioConfig.cmake
+)
+
+install(FILES ${PROJECT_BINARY_DIR}/dxfioConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/dxfio
+)
 
 if (BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
   add_subdirectory(tests)
