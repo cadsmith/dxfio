@@ -42,6 +42,7 @@ The fix comes with a test that pins the input, and the input joins
 
 ## Reports from tools
 
-Reports produced by static analysers, fuzzers or AI tools are welcome when
-they come with a file that reproduces the problem. A report without one is a
-bug report, not a vulnerability, and is handled in the open.
+A report from a static analyser, a fuzzer or an AI tool goes through the
+same private channel, and is most useful with a file that reproduces the
+problem. Triage asks for one when it is missing, and a report that nothing
+reproduces is closed, still in private.
