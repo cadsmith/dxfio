@@ -54,6 +54,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
+if (MSVC)
+  add_compile_options(/utf-8)
+endif()
+
 if (PROJECT_IS_TOP_LEVEL)
   include(CTest)
 endif()

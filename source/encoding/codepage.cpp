@@ -166,13 +166,12 @@ auto Encoded(const Codepage &page, char32_t point) -> std::optional<char>
   {
     return static_cast<char>(point);
   }
-  const auto *const found =
-      std::ranges::find_if(*page.High, [point](char16_t one) -> bool { return char32_t{one} == point; });
-  if (found == page.High->end())
+  const auto *const found = SeekIf(*page.High, [point](char16_t one) -> bool { return char32_t{one} == point; });
+  if (found == nullptr)
   {
     return std::nullopt;
   }
-  const auto at = static_cast<std::size_t>(found - page.High->begin());
+  const auto at = static_cast<std::size_t>(found - page.High->data());
   const auto byte = static_cast<unsigned char>(Half + at);
   if (Leading(page, byte))
   {
