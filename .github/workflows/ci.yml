@@ -280,7 +280,7 @@ jobs:
           done
           exit "$failed"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: fuzz-findings
