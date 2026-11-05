@@ -1,0 +1,44 @@
+name: Fuzz
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    name: fuzz
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install the libFuzzer runtime
+        run: sudo apt-get install -y -q --no-install-recommends libclang-rt-22-dev
+
+      - name: Configure
+        run: cmake --preset fuzz -DCMAKE_CXX_COMPILER=/usr/lib/llvm-22/bin/clang++
+
+      - name: Build
+        run: cmake --build --preset fuzz
+
+      - name: Fuzz each target for five minutes
+        run: |
+          mkdir -p "$RUNNER_TEMP/found"
+          for target in dxf escapes tags; do
+            "build/fuzz/bin/dxfio_fuzz_$target" \
+              -max_total_time=300 \
+              -dict=tests/fuzz/dxf.dict \
+              -artifact_prefix="$RUNNER_TEMP/found/$target-" \
+              tests/fuzz/corpus tests/fuzz/found
+          done
+
+      - uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: fuzz-findings
+          path: ${{ runner.temp }}/found
+          if-no-files-found: ignore

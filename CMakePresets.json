@@ -38,6 +38,7 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O1",
         "DXFIO_ENABLE_COVERAGE": "ON"
       }
     },
@@ -47,6 +48,7 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O1 -g",
         "DXFIO_ENABLE_SANITIZE": "ON"
       }
     },
