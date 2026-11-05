@@ -364,3 +364,18 @@ jobs:
 
       - name: Build
         run: cmake --build --preset tidy
+
+  # The one check to require: green when every job passed or was skipped
+  # by the changes gate, whose skipped matrix jobs report no names of
+  # their own.
+  ok:
+    name: ok
+    needs: [changes, check, build, memory, fuzz, tidy]
+    if: always()
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - run: |
+          echo '${{ toJSON(needs) }}' | jq -e '
+            to_entries
+            | all(.value.result == "success" or .value.result == "skipped")'
