@@ -66,7 +66,8 @@ and the pull request's title; the `release` preset built and tested with GCC,
 Clang, Apple Clang and MSVC; `sanitize`, `thread`, `memory` and `coverage`
 with Clang; `tidy` with LLVM 23; and every fuzz target for a minute on the
 corpus the nightly runs grow. Each job keeps a ccache that a push to `main`
-saves, so a pull request compiles only what it changed.
+saves, so a pull request compiles only what it changed, and one that
+changes only `docs`, `site` or Markdown runs the checks alone.
 [fuzz.yml](.github/workflows/fuzz.yml) fuzzes for twenty minutes a target
 every night and keeps what it finds, and
 [codeql.yml](.github/workflows/codeql.yml) runs CodeQL's security and quality
