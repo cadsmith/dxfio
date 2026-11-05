@@ -1,0 +1,39 @@
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: analyze
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      CXX: g++-15
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: c-cpp
+          build-mode: manual
+          queries: security-and-quality
+
+      - name: Build
+        run: |
+          cmake --preset release
+          cmake --build --preset release --target dxfio dxfio_tests
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:c-cpp

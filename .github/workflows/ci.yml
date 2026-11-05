@@ -114,6 +114,13 @@ jobs:
             launcher: ccache
             packages: libclang-rt-22-dev
             target: dxfio_tests
+          - name: thread
+            os: ubuntu-26.04
+            preset: thread
+            cxx: /usr/lib/llvm-22/bin/clang++
+            launcher: ccache
+            packages: libclang-rt-22-dev
+            target: dxfio_tests
           - name: coverage
             os: ubuntu-26.04
             preset: coverage
@@ -160,6 +167,115 @@ jobs:
       - name: Test
         if: matrix.target != 'coverage'
         run: ctest --preset ${{ matrix.preset }} --parallel 4
+
+  memory:
+    name: memory
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    env:
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      DXFIO_MEMORY_LIBCXX: ${{ github.workspace }}/../msan-libcxx
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install the sanitizer runtimes
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libclang-rt-22-dev
+
+      # MSan needs every C++ library instrumented, so libc++ is built from
+      # the compiler's own release once and kept.
+      - uses: actions/cache@v6.1.0
+        id: libcxx
+        with:
+          path: ${{ github.workspace }}/../msan-libcxx
+          key: msan-libcxx-llvmorg-22.1.2-${{ runner.os }}
+
+      - name: Build a libc++ with MSan
+        if: steps.libcxx.outputs.cache-hit != 'true'
+        run: |
+          git clone -q --depth 1 --branch llvmorg-22.1.2 \
+            https://github.com/llvm/llvm-project "$RUNNER_TEMP/llvm-project"
+          cmake -G Ninja -S "$RUNNER_TEMP/llvm-project/runtimes" \
+            -B "$RUNNER_TEMP/msan-runtimes" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=/usr/lib/llvm-22/bin/clang \
+            -DCMAKE_CXX_COMPILER=/usr/lib/llvm-22/bin/clang++ \
+            -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+            -DLLVM_USE_SANITIZER=MemoryWithOrigins \
+            -DLIBCXX_INCLUDE_TESTS=OFF -DLIBCXXABI_INCLUDE_TESTS=OFF \
+            -DLIBUNWIND_INCLUDE_TESTS=OFF -DLIBCXX_INCLUDE_BENCHMARKS=OFF \
+            -DCMAKE_INSTALL_PREFIX="$DXFIO_MEMORY_LIBCXX"
+          ninja -C "$RUNNER_TEMP/msan-runtimes" \
+            install-cxx install-cxxabi install-unwind
+
+      - uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: memory
+          max-size: 300M
+          save: ${{ github.event_name == 'push' }}
+
+      - name: Configure
+        run: cmake --preset memory -DCMAKE_CXX_COMPILER=/usr/lib/llvm-22/bin/clang++
+
+      - name: Build
+        run: cmake --build --preset memory
+
+      - name: Test
+        run: ctest --preset memory --parallel 4
+
+  fuzz:
+    name: fuzz
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    env:
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install the libFuzzer runtime
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libclang-rt-22-dev
+
+      - uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: fuzz
+          max-size: 300M
+          save: ${{ github.event_name == 'push' }}
+
+      - name: Configure
+        run: cmake --preset fuzz -DCMAKE_CXX_COMPILER=/usr/lib/llvm-22/bin/clang++
+
+      - name: Build
+        run: cmake --build --preset fuzz
+
+      # The corpus the scheduled runs grow; a pull request reads it, main's
+      # runs save it (see fuzz.yml).
+      - uses: actions/cache/restore@v6.1.0
+        with:
+          path: corpus
+          key: fuzz-corpus-${{ github.run_id }}
+          restore-keys: fuzz-corpus-
+
+      - name: Fuzz each target for a minute
+        run: |
+          mkdir -p "$RUNNER_TEMP/found"
+          for target in dxf escapes tags; do
+            mkdir -p "corpus/$target"
+            "build/fuzz/bin/dxfio_fuzz_$target" \
+              -max_total_time=60 \
+              -dict=tests/fuzz/dxf.dict \
+              -artifact_prefix="$RUNNER_TEMP/found/$target-" \
+              "corpus/$target" tests/fuzz/corpus tests/fuzz/found
+          done
+
+      - uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: fuzz-findings
+          path: ${{ runner.temp }}/found
+          if-no-files-found: ignore
 
   tidy:
     name: tidy

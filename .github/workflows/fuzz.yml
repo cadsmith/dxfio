@@ -2,7 +2,7 @@ name: Fuzz
 
 on:
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -12,12 +12,14 @@ jobs:
   fuzz:
     name: fuzz
     runs-on: ubuntu-26.04
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7.0.1
 
       - name: Install the libFuzzer runtime
-        run: sudo apt-get install -y -q --no-install-recommends libclang-rt-22-dev
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libclang-rt-22-dev
 
       - name: Configure
         run: cmake --preset fuzz -DCMAKE_CXX_COMPILER=/usr/lib/llvm-22/bin/clang++
@@ -25,16 +27,31 @@ jobs:
       - name: Build
         run: cmake --build --preset fuzz
 
-      - name: Fuzz each target for five minutes
+      - uses: actions/cache/restore@v6.1.0
+        with:
+          path: corpus
+          key: fuzz-corpus-${{ github.run_id }}
+          restore-keys: fuzz-corpus-
+
+      - name: Fuzz each target for twenty minutes
         run: |
           mkdir -p "$RUNNER_TEMP/found"
           for target in dxf escapes tags; do
+            mkdir -p "corpus/$target"
             "build/fuzz/bin/dxfio_fuzz_$target" \
-              -max_total_time=300 \
+              -max_total_time=1200 \
               -dict=tests/fuzz/dxf.dict \
               -artifact_prefix="$RUNNER_TEMP/found/$target-" \
-              tests/fuzz/corpus tests/fuzz/found
+              "corpus/$target" tests/fuzz/corpus tests/fuzz/found
           done
+
+      # Keep what the run found: a new cache entry each time, the newest
+      # restored by every later run, pull requests included.
+      - uses: actions/cache/save@v6.1.0
+        if: always()
+        with:
+          path: corpus
+          key: fuzz-corpus-${{ github.run_id }}
 
       - uses: actions/upload-artifact@v5
         if: failure()
