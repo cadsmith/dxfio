@@ -193,6 +193,8 @@ jobs:
 
       - name: Build a libc++ with MSan
         if: steps.libcxx.outputs.cache-hit != 'true'
+        env:
+          CMAKE_CXX_COMPILER_LAUNCHER: ""
         run: |
           git clone -q --depth 1 --branch llvmorg-22.1.2 \
             https://github.com/llvm/llvm-project "$RUNNER_TEMP/llvm-project"
