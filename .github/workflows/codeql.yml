@@ -1,0 +1,43 @@
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: analyze
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      CXX: g++-15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: c-cpp
+          build-mode: manual
+          queries: security-and-quality
+
+      # The library alone: CodeQL traces every compile, and the tests would
+      # triple the time for queries on doctest macros.
+      - name: Build
+        run: |
+          cmake --preset release
+          cmake --build --preset release --target dxfio
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:c-cpp

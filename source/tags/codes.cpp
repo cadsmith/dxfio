@@ -1,5 +1,7 @@
 #include "tags/codes.hpp"
 
+#include "seek.hpp"
+
 #include <algorithm>
 #include <array>
 #include <utility>
@@ -47,7 +49,7 @@ auto Defined(int code) -> bool
 auto Of(int code) -> Type
 {
   const auto *found =
-      std::ranges::find_if(Ranges, [code](const Range &one) -> bool { return code >= one.First && code <= one.Last; });
-  return found == Ranges.end() ? Type::Text : found->Is;
+      SeekIf(Ranges, [code](const Range &one) -> bool { return code >= one.First && code <= one.Last; });
+  return found == nullptr ? Type::Text : found->Is;
 }
 } // namespace DxfIO::Tags::Codes

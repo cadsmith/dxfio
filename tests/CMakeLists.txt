@@ -12,6 +12,7 @@ target_compile_features(dxfio_tests PRIVATE cxx_std_23)
 
 target_compile_definitions(dxfio_tests
   PRIVATE
+    DOCTEST_CONFIG_USE_STD_HEADERS
     DXFIO_FIXTURES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
     DXFIO_FUZZ_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fuzz"
 )
@@ -24,7 +25,21 @@ target_include_directories(dxfio_tests
 add_subdirectory(api)
 add_subdirectory(dxfio)
 
-add_test(NAME dxfio_tests COMMAND dxfio_tests)
+get_target_property(units dxfio_tests SOURCES)
+
+foreach(unit IN LISTS units)
+  cmake_path(ABSOLUTE_PATH unit BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  file(RELATIVE_PATH name ${CMAKE_CURRENT_SOURCE_DIR}/dxfio ${unit})
+  if (name MATCHES "^\\.\\.")
+    continue()
+  endif()
+  string(REGEX REPLACE "\\.cpp$" "" name ${name})
+  string(REPLACE "/" "?" file ${name})
+  add_test(NAME dxfio/${name}
+    COMMAND dxfio_tests "-sf=*tests?dxfio?${file}.cpp")
+  set_tests_properties(dxfio/${name} PROPERTIES
+    FAIL_REGULAR_EXPRESSION "test cases: +0 \\|")
+endforeach()
 
 if (DXFIO_ENABLE_FUZZ)
   add_subdirectory(fuzz)

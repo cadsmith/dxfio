@@ -16,17 +16,24 @@
 | :--- | :--- | :--- |
 | `debug` | `Debug` | Development with symbols and assertions |
 | `release` | `Release` | Optimized build |
-| `coverage` | `Debug` | Instrumented build for LLVM coverage |
-| `sanitize` | `Debug` | ASan and UBSan instrumented build |
+| `coverage` | `Debug` at `-O1` | Instrumented build for LLVM coverage |
+| `sanitize` | `Debug` at `-O1` | ASan and UBSan instrumented build |
 | `tidy` | `Debug` | The library built through clang-tidy |
 | `fuzz` | `RelWithDebInfo` | libFuzzer targets, needs LLVM clang on the path |
+| `thread` | `Debug` at `-O1` | TSan instrumented build of the tests |
+| `memory` | `Debug` at `-O1` | MSan instrumented build of the tests, Linux only; needs LLVM clang on the path and `DXFIO_MEMORY_LIBCXX` set to a libc++ built with MSan |
+
+Every build when dxfio is the top level project defines `_GLIBCXX_ASSERTIONS`
+and libc++'s debug hardening mode, so the standard library checks its
+preconditions. The `sanitize`, `thread` and `memory` test presets set the
+sanitizers' strictest runtime options.
 
 ## Targets
 
 | Target | Alias | Type | Description |
 | :--- | :--- | :--- | :--- |
 | `dxfio` | `dxfio::dxfio` | Static | DXF format: tags, records, every kind, load and save |
-| `dxfio_tests` | - | Executable | Doctest test suite |
+| `dxfio_tests` | - | Executable | Doctest test suite; CTest runs it once per test file, as `dxfio/<file>` |
 | `dxfio_headers` | - | Object | Each public header compiled on its own, twice |
 | `dxfio_api` | - | Custom, test | Takes the public interface's snapshot; the test compares it |
 | `dxfio_fuzz_dxf`, `dxfio_fuzz_tags`, `dxfio_fuzz_escapes` | - | Executable | libFuzzer targets |
@@ -38,6 +45,7 @@
 cmake --preset debug
 cmake --build --preset debug
 ctest --preset debug
+ctest --preset debug -j 8 -R dxfio/tags/
 ./build/debug/bin/dxfio_tests -tc="hatch*"
 
 cmake --preset coverage
@@ -49,4 +57,16 @@ cmake --build --preset tidy
 cmake --preset fuzz
 cmake --build --preset fuzz
 ./build/fuzz/bin/dxfio_fuzz_dxf -dict=tests/fuzz/dxf.dict tests/fuzz/corpus
+
+cmake --preset thread
+cmake --build --preset thread
+ctest --preset thread
+
+DXFIO_MEMORY_LIBCXX=/opt/msan-libcxx cmake --preset memory
+cmake --build --preset memory
+ctest --preset memory
 ```
+
+The libc++ for `memory` comes from LLVM's own sources, built as
+[ci.yml](../.github/workflows/ci.yml) builds it: the `runtimes` directory
+of the `llvmorg-22.1.2` tag with `LLVM_USE_SANITIZER=MemoryWithOrigins`.

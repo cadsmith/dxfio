@@ -1,6 +1,7 @@
 #include "../filing.hpp"
 #include "chained.hpp"
 #include "heading.hpp"
+#include "seek.hpp"
 #include "shapes/appid.hpp"
 #include "shapes/block.hpp"
 #include "shapes/dimstyle.hpp"
@@ -140,8 +141,7 @@ constexpr std::array Kinds{
 
 auto Named(std::string_view name) -> const Kind *
 {
-  const auto *found = std::ranges::find(Kinds, name, &Kind::Name);
-  return found == Kinds.end() ? nullptr : found;
+  return Seek(Kinds, name, &Kind::Name);
 }
 
 auto Strangers(Fields::Writing &to, const Document &drawing) -> std::expected<void, Failure>

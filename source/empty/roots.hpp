@@ -13,7 +13,7 @@ struct Spaces
   Handle Paper{};
 };
 
-struct Materials
+struct Stock
 {
   Handle Byblock{};
   Handle Bylayer{};
@@ -25,7 +25,7 @@ struct Roots
   Handle Dictionary{};
   Spaces Records{};
   Spaces Layouts{};
-  Empty::Materials Materials{};
+  Stock Materials{};
   Handle Normal{};
   Handle Linetype{};
   Handle Style{};

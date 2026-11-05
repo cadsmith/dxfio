@@ -1,6 +1,7 @@
 #include "classes.hpp"
 
 #include "objects/io.hpp"
+#include "seek.hpp"
 
 #include <algorithm>
 #include <array>
@@ -139,8 +140,8 @@ auto Declared(const Class &one, Version release, std::int64_t count) -> Raw
 
 auto Known(std::string_view name, Version release) -> const Class *
 {
-  const auto *found = std::ranges::find(Kinds, name, &Class::Name);
-  return found == Kinds.end() || release < found->Since || release > found->Until ? nullptr : found;
+  const auto *found = Seek(Kinds, name, &Class::Name);
+  return found == nullptr || release < found->Since || release > found->Until ? nullptr : found;
 }
 
 auto Classes(Version release, std::span<const Object> all) -> std::vector<Raw>

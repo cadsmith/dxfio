@@ -52,10 +52,11 @@ auto Place(Base &into, std::string_view name, std::vector<Group> groups) -> std:
   }
   auto backward = groups | std::views::reverse;
   const auto last = std::ranges::find_if(backward, Handled);
-  if (name == Extension && last != backward.end())
+  const Handle *handle = last == backward.end() ? nullptr : Handled(*last);
+  if (name == Extension && handle != nullptr)
   {
     const std::size_t lost = groups.size() - (into.Dictionary ? 0 : 1);
-    into.Dictionary = *Handled(*last);
+    into.Dictionary = *handle;
     return lost;
   }
   into.Braces.push_back(Brace{.Name = std::string{name}, .Groups = std::move(groups)});

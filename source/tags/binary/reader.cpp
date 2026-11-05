@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <format>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <utility>
 #include <variant>
@@ -46,7 +47,7 @@ auto Little(std::string_view &rest) -> std::optional<NumberT>
     return std::nullopt;
   }
   std::array<char, sizeof(NumberT)> raw{};
-  std::ranges::copy(*piece, raw.begin());
+  std::ranges::copy_n(piece->begin(), std::ranges::ssize(raw), raw.begin());
   return std::bit_cast<NumberT>(raw);
 }
 

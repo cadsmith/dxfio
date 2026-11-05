@@ -33,6 +33,6 @@ void WriteSeed(Document &drawing, Handle next)
     drawing.Header.push_back(Header::Variable{.Name = std::string{Variable}, .Values = {value}});
     return;
   }
-  found->Values = {value};
+  found->Values.assign(1, value);
 }
 } // namespace DxfIO

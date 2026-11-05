@@ -48,10 +48,29 @@ ctest --preset debug
 | :--- | :--- |
 | `debug` | Development build and tests |
 | `release` | Optimized build |
-| `sanitize` | ASan and UBSan |
-| `coverage` | LLVM coverage, `--target coverage` fails below 100% of lines, functions, regions and branches |
+| `sanitize` | ASan and UBSan, at `-O1` |
+| `thread` | TSan, at `-O1` |
+| `memory` | MSan, at `-O1`; Linux only, needs a libc++ built with MSan |
+| `coverage` | LLVM coverage at `-O1`, `--target coverage` fails below 100% of lines, functions, regions and branches |
 | `tidy` | Builds the library through clang-tidy, every finding an error |
 | `fuzz` | libFuzzer targets under `build/fuzz/bin`, needs LLVM clang on the path |
+
+`ctest` runs `dxfio_tests` once per test file, named `dxfio/<file>`, so
+`ctest --preset debug -j 8` spreads them and `-R dxfio/tags/` runs one area.
+
+## Continuous integration
+
+[ci.yml](.github/workflows/ci.yml) runs on every pull request and push to
+`main`: clang-format, the CMake guidelines, the public interface's snapshot
+and the pull request's title; the `release` preset built and tested with GCC,
+Clang, Apple Clang and MSVC; `sanitize`, `thread`, `memory` and `coverage`
+with Clang; `tidy` with LLVM 23; and every fuzz target for a minute on the
+corpus the nightly runs grow. Each job keeps a ccache that a push to `main`
+saves, so a pull request compiles only what it changed.
+[fuzz.yml](.github/workflows/fuzz.yml) fuzzes for twenty minutes a target
+every night and keeps what it finds, and
+[codeql.yml](.github/workflows/codeql.yml) runs CodeQL's security and quality
+queries.
 
 ## Layout
 

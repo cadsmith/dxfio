@@ -1,5 +1,7 @@
 #include "dxfio/symbol.hpp"
 
+#include "seek.hpp"
+
 #include <algorithm>
 #include <array>
 #include <iterator>
@@ -47,9 +49,8 @@ auto Interned(std::string_view text) -> const std::string *
     return &empty;
   }
   thread_local std::array<const std::string *, Remembered> recent{};
-  const auto *known =
-      std::ranges::find_if(recent, [text](const std::string *one) -> bool { return one != nullptr && *one == text; });
-  if (known != recent.end())
+  const auto *known = SeekIf(recent, [text](const std::string *one) -> bool { return one != nullptr && *one == text; });
+  if (known != nullptr)
   {
     return *known;
   }

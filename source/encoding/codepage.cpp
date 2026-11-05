@@ -2,6 +2,7 @@
 
 #include "ascii.hpp"
 #include "pages.hpp"
+#include "seek.hpp"
 
 #include <algorithm>
 #include <array>
@@ -90,9 +91,8 @@ constexpr std::array Aliases{
 // The number of the page a name means: after its ANSI_ prefix, or the number a DWG name stands for.
 auto Numbered(std::string_view name) -> std::string_view
 {
-  const auto *alias =
-      std::ranges::find_if(Aliases, [name](const Alias &one) -> bool { return DxfIO::Ascii::Same(one.Name, name); });
-  if (alias != Aliases.end())
+  const auto *alias = SeekIf(Aliases, [name](const Alias &one) -> bool { return DxfIO::Ascii::Same(one.Name, name); });
+  if (alias != nullptr)
   {
     return alias->Number;
   }
@@ -166,13 +166,12 @@ auto Encoded(const Codepage &page, char32_t point) -> std::optional<char>
   {
     return static_cast<char>(point);
   }
-  const auto *const found =
-      std::ranges::find_if(*page.High, [point](char16_t one) -> bool { return char32_t{one} == point; });
-  if (found == page.High->end())
+  const auto *const found = SeekIf(*page.High, [point](char16_t one) -> bool { return char32_t{one} == point; });
+  if (found == nullptr)
   {
     return std::nullopt;
   }
-  const auto at = static_cast<std::size_t>(found - page.High->begin());
+  const auto at = static_cast<std::size_t>(found - page.High->data());
   const auto byte = static_cast<unsigned char>(Half + at);
   if (Leading(page, byte))
   {

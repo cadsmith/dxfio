@@ -1,0 +1,4 @@
+# The standard library's own conversions, checked in dxfio's code alone.
+[implicit-conversion]
+src:*/include/c++/*
+src:*/c++/v1/*

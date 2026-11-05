@@ -7,6 +7,7 @@
 #include "objects/io.hpp"
 #include "past.hpp"
 #include "seed.hpp"
+#include "seek.hpp"
 
 #include "dxfio/header/header.hpp"
 
@@ -520,8 +521,8 @@ void Loosen(Entities::List &all, const std::set<Handle> &gone)
 
 auto Space(std::string_view name) -> std::string_view
 {
-  const auto *found = std::ranges::find(Spaces, name, &std::pair<std::string_view, std::string_view>::first);
-  return found == Spaces.end() ? std::string_view{} : found->second;
+  const auto *found = Seek(Spaces, name, &std::pair<std::string_view, std::string_view>::first);
+  return found == nullptr ? std::string_view{} : found->second;
 }
 
 auto Sheet(std::string_view name) -> bool

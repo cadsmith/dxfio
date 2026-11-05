@@ -44,7 +44,7 @@ inline constexpr auto Shapes<Entities::LwPolyline> = std::tuple{
     Fields::Field{
         .Code = 43,
         .Member = &Entities::LwPolyline::Width,
-        .Fallback = std::nullopt,
+        .Fallback = Fields::Empty{},
     },
     Fields::Field{
         .Code = 38,

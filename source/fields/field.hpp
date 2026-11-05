@@ -19,6 +19,10 @@ struct DXFIO_API None
 {
 };
 
+struct DXFIO_API Empty
+{
+};
+
 template <class OwnerT, class MemberT, class FallbackT = None>
 struct Field
 {
@@ -33,6 +37,12 @@ void Fall(MemberT & /*unused*/, const None & /*unused*/)
 {
 }
 
+template <class MemberT>
+void Fall(std::optional<MemberT> &held, const Empty & /*unused*/)
+{
+  held.reset();
+}
+
 template <class MemberT, class FallbackT>
 void Fall(MemberT &held, const FallbackT &to)
 {
@@ -43,6 +53,12 @@ template <class MemberT>
 auto Fallen(const MemberT & /*unused*/, const None & /*unused*/) -> bool
 {
   return false;
+}
+
+template <class MemberT>
+auto Fallen(const std::optional<MemberT> &held, const Empty & /*unused*/) -> bool
+{
+  return !held.has_value();
 }
 
 template <class MemberT, class FallbackT>
