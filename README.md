@@ -4,9 +4,8 @@
 [![CodeQL](https://github.com/cadsmith/dxfio/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/cadsmith/dxfio/security/code-scanning)
 [![Fuzz](https://github.com/cadsmith/dxfio/actions/workflows/fuzz.yml/badge.svg)](https://github.com/cadsmith/dxfio/actions/workflows/fuzz.yml)
 [![Coverage](https://coveralls.io/repos/github/cadsmith/dxfio/badge.svg?branch=main)](https://coveralls.io/github/cadsmith/dxfio?branch=main)
-[![Release](https://img.shields.io/github/v/release/cadsmith/dxfio)](https://github.com/cadsmith/dxfio/releases)
 [![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)](docs/cpp.md)
-[![License: MIT](https://img.shields.io/github/license/cadsmith/dxfio)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-dxfio.dev-blue)](https://dxfio.dev)
 
 A C++23 library that reads and writes AutoCAD DXF files: every release from
