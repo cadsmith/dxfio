@@ -1,7 +1,7 @@
 # dxfio
 
 [![CI](https://github.com/cadsmith/dxfio/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cadsmith/dxfio/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/cadsmith/dxfio/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/cadsmith/dxfio/security/code-scanning)
+[![CodeQL](https://github.com/cadsmith/dxfio/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/cadsmith/dxfio/actions/workflows/codeql.yml)
 [![Fuzz](https://github.com/cadsmith/dxfio/actions/workflows/fuzz.yml/badge.svg)](https://github.com/cadsmith/dxfio/actions/workflows/fuzz.yml)
 [![Coverage](https://coveralls.io/repos/github/cadsmith/dxfio/badge.svg?branch=main)](https://coveralls.io/github/cadsmith/dxfio?branch=main)
 [![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)](docs/cpp.md)
