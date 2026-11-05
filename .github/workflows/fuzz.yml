@@ -56,7 +56,7 @@ jobs:
           path: corpus
           key: fuzz-corpus-${{ github.run_id }}
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7.0.2
         if: failure()
         with:
           name: fuzz-findings
