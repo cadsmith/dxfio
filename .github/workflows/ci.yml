@@ -27,6 +27,8 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install clang-format 23
         run: |
@@ -131,6 +133,8 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ${{ matrix.launcher }}
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ilammy/msvc-dev-cmd@v1.13.0
         if: runner.os == 'Windows'
@@ -175,6 +179,8 @@ jobs:
       DXFIO_MEMORY_LIBCXX: ${{ github.workspace }}/../msan-libcxx
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install the sanitizer runtimes
         run: |
@@ -232,6 +238,8 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install the libFuzzer runtime
         run: |
@@ -261,14 +269,16 @@ jobs:
       - name: Fuzz each target for a minute
         run: |
           mkdir -p "$RUNNER_TEMP/found"
+          failed=0
           for target in dxf escapes tags; do
             mkdir -p "corpus/$target"
             "build/fuzz/bin/dxfio_fuzz_$target" \
               -max_total_time=60 \
               -dict=tests/fuzz/dxf.dict \
               -artifact_prefix="$RUNNER_TEMP/found/$target-" \
-              "corpus/$target" tests/fuzz/corpus tests/fuzz/found
+              "corpus/$target" tests/fuzz/corpus tests/fuzz/found || failed=1
           done
+          exit "$failed"
 
       - uses: actions/upload-artifact@v5
         if: failure()
@@ -286,6 +296,8 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       # The same major as the Homebrew LLVM used locally: .clang-tidy names
       # checks that older releases do not have.
