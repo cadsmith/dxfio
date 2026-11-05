@@ -205,6 +205,22 @@ jobs:
         if: matrix.target != 'coverage'
         run: ctest --preset ${{ matrix.preset }} --parallel 4
 
+      # The figure the gate measured, published so the README's badge shows
+      # it rather than claims it.
+      - name: Export the coverage
+        if: matrix.target == 'coverage'
+        run: |
+          /usr/lib/llvm-23/bin/llvm-cov export build/coverage/bin/dxfio_tests \
+            -instr-profile=build/coverage/tests/dxfio_tests.profdata \
+            -format=lcov include source \
+            | sed "s#^SF:$GITHUB_WORKSPACE/#SF:#" > coverage.lcov
+
+      - uses: coverallsapp/github-action@v2.3.8
+        if: matrix.target == 'coverage'
+        with:
+          file: coverage.lcov
+          format: lcov
+
   memory:
     name: memory
     needs: changes
