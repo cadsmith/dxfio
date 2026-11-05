@@ -1,0 +1,29 @@
+name: ccache
+description: Installs ccache's current release, checked against its checksum
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        version=4.14.2
+        case "$RUNNER_OS" in
+          Linux)
+            asset="ccache-$version-linux-x86_64-glibc.tar.xz"
+            sum=bd1313f5316f594443dcb4113a4191c666ac6450e0cf016ff8cb8b080f46c160
+            ;;
+          macOS)
+            asset="ccache-$version-darwin.tar.gz"
+            sum=cf240009630b605b775c7c5c7b7105a3b196c79f31af322c1557969aa28003fc
+            ;;
+          *)
+            echo "no ccache for $RUNNER_OS" >&2
+            exit 1
+            ;;
+        esac
+        curl -sSL -o "$RUNNER_TEMP/$asset" \
+          "https://github.com/ccache/ccache/releases/download/v$version/$asset"
+        echo "$sum  $RUNNER_TEMP/$asset" | shasum -a 256 -c -
+        tar -xf "$RUNNER_TEMP/$asset" -C "$RUNNER_TEMP"
+        sudo install -m 755 "$RUNNER_TEMP/${asset%%.tar.*}/ccache" /usr/local/bin/ccache
+        ccache --version | head -1
