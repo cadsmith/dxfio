@@ -35,7 +35,8 @@ inline constexpr int Titled = 2;
 inline auto Columned(std::vector<DxfIO::Group> all) -> std::optional<std::vector<Column>>
 {
   std::vector<Column> out;
-  for (std::size_t at = 0; at < all.size(); ++at)
+  std::size_t at = 0;
+  while (at < all.size())
   {
     DxfIO::Group &one = all.at(at);
     const bool opens = one.Code == Typed && at + 1 < all.size() && all.at(at + 1).Code == Titled;
@@ -51,7 +52,7 @@ inline auto Columned(std::vector<DxfIO::Group> all) -> std::optional<std::vector
           .Name = std::move(std::get<std::string>(all.at(at + 1).Value)),
           .Cells = {},
       });
-      ++at;
+      at += 2;
     }
     else if (out.empty())
     {
@@ -60,6 +61,7 @@ inline auto Columned(std::vector<DxfIO::Group> all) -> std::optional<std::vector
     else
     {
       out.back().Cells.push_back(std::move(one));
+      ++at;
     }
   }
   return out;
