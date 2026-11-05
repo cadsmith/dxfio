@@ -42,8 +42,16 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   add_compile_options(
     -Wall -Wextra -Wpedantic -Wshadow
     -Wconversion -Wsign-conversion -Wold-style-cast
-    -Wnon-virtual-dtor -Woverloaded-virtual -Wnull-dereference
+    -Wnon-virtual-dtor -Woverloaded-virtual
   )
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wnull-dereference)
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
 if (PROJECT_IS_TOP_LEVEL)

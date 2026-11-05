@@ -12,6 +12,7 @@
 #include "objects/io.hpp"
 #include "past.hpp"
 #include "raw/io.hpp"
+#include "seek.hpp"
 #include "tables/io.hpp"
 #include "tags/codes.hpp"
 #include "tags/tags.hpp"
@@ -120,8 +121,8 @@ auto Foreign(const File::Section &from, Loaded &into, const Fields::Reading &wit
 
 auto Filler(std::string_view name) -> Filling
 {
-  const auto *found = std::ranges::find(Knowns, name, &Known::Name);
-  return found == Knowns.end() ? Foreign : found->Fill;
+  const auto *found = Seek(Knowns, name, &Known::Name);
+  return found == nullptr ? Foreign : found->Fill;
 }
 
 auto Variables(std::span<const File::Section> all) -> std::expected<std::vector<File::Variable>, Failure>

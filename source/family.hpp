@@ -5,6 +5,7 @@
 #include "fields/context.hpp"
 #include "file/record.hpp"
 #include "filing.hpp"
+#include "seek.hpp"
 #include "shapes.hpp"
 #include "tags/tag.hpp"
 #include "unknown/io.hpp"
@@ -112,8 +113,8 @@ auto Named(const File::Record &one) -> const Kind<VariantT> &
 {
   const std::string_view type = Tags::Text(one.Tags.front());
   const auto &all = Kinds<VariantT>;
-  const auto *found = std::ranges::find(all, type, &Kind<VariantT>::Type);
-  return found == all.end() || type.empty() ? all.back() : *found;
+  const auto *found = Seek(all, type, &Kind<VariantT>::Type);
+  return found == nullptr || type.empty() ? all.back() : *found;
 }
 
 template <class VariantT>

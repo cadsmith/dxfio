@@ -11,6 +11,7 @@
 #include "objects/io.hpp"
 #include "plan/foreign.hpp"
 #include "raw/io.hpp"
+#include "seek.hpp"
 #include "tables/io.hpp"
 #include "tags/sentinel.hpp"
 #include "tags/writer.hpp"
@@ -163,8 +164,8 @@ auto Planned(const Document &drawing) -> std::vector<std::string>
 
 auto Pick(std::string_view name) -> Writing
 {
-  const auto *found = std::ranges::find(Knowns, name, &Known::Name);
-  return found == Knowns.end() ? Foreign : found->Write;
+  const auto *found = Seek(Knowns, name, &Known::Name);
+  return found == nullptr ? Foreign : found->Write;
 }
 
 auto Named(Fields::Writing &to, std::string_view text) -> std::expected<void, Failure>

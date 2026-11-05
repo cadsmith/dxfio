@@ -2,6 +2,8 @@
 
 #include <doctest/doctest.h>
 
+#include <initializer_list>
+
 namespace DxfIO::Tags::Codes
 {
 TEST_CASE("codes: a code's type follows Autodesk's ranges")

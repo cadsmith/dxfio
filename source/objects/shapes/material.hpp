@@ -126,7 +126,7 @@ inline constexpr auto Added = std::tuple{
     Fields::Field{
         .Code = 94,
         .Member = &Material::Channels,
-        .Fallback = std::nullopt,
+        .Fallback = Fields::Empty{},
     },
     Fields::Field{.Code = 282, .Member = &Material::Mode, .Fallback = 0},
 };
