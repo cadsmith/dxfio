@@ -18,6 +18,36 @@ env:
   CCACHE_DEPEND: true
 
 jobs:
+  # Which files a pull request touches: docs, the site and Markdown alone
+  # need no C++ job. A job skipped by its condition still reports success,
+  # so it can be required; a workflow filtered by paths could not.
+  changes:
+    name: changes
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: dorny/paths-filter@v4.0.3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            code:
+              - CMakeLists.txt
+              - CMakePresets.json
+              - .clang-format
+              - .clang-tidy
+              - .github/workflows/ci.yml
+              - include/**
+              - source/**
+              - tests/**
+              - vendor/**
+
   check:
     name: check
     runs-on: ubuntu-26.04
@@ -81,6 +111,8 @@ jobs:
 
   build:
     name: ${{ matrix.name }}
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.code == 'true'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
@@ -172,6 +204,8 @@ jobs:
 
   memory:
     name: memory
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.code == 'true'
     runs-on: ubuntu-26.04
     timeout-minutes: 40
     env:
@@ -232,6 +266,8 @@ jobs:
 
   fuzz:
     name: fuzz
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.code == 'true'
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     env:
@@ -289,6 +325,8 @@ jobs:
 
   tidy:
     name: tidy
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.code == 'true'
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     env:
