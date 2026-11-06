@@ -37,8 +37,6 @@ add_subdirectory(lift)
 add_library(dxfio::dxfio ALIAS dxfio)
 
 target_include_directories(dxfio
-  PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
   PRIVATE
     ${PROJECT_SOURCE_DIR}/source
 )
@@ -48,6 +46,7 @@ target_compile_features(dxfio PUBLIC cxx_std_23)
 set_target_properties(dxfio PROPERTIES
   CXX_VISIBILITY_PRESET hidden
   VISIBILITY_INLINES_HIDDEN YES
+  POSITION_INDEPENDENT_CODE ON
 )
 
 get_target_property(dxf_type dxfio TYPE)

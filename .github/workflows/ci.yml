@@ -118,6 +118,7 @@ jobs:
             preset: release
             cxx: g++-15
             launcher: ccache
+            package: true
           - name: linux-clang
             os: ubuntu-26.04
             preset: release
@@ -204,6 +205,17 @@ jobs:
       - name: Test
         if: matrix.target != 'coverage'
         run: ctest --preset ${{ matrix.preset }} --parallel 4
+
+      # The installed package, used the way a consumer would.
+      - name: Install and consume
+        if: matrix.package
+        run: |
+          cmake --install build/release --prefix "$RUNNER_TEMP/dxfio"
+          cmake -S tests/package -B "$RUNNER_TEMP/consumer" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/dxfio"
+          cmake --build "$RUNNER_TEMP/consumer"
+          "$RUNNER_TEMP/consumer/dxfio_package" tests/fixtures/acad/entities-r2018.dxf
 
       # The figure the gate measured, published so the README's badge shows
       # it rather than claims it.

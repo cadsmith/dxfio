@@ -9,6 +9,8 @@
 - Libraries must be placed in `lib/` and executables in `bin/`.
 - All targets must require C++23 (`cxx_std_23`).
 - Configuration, building, and testing must use CMake presets.
+- Every public header must be listed in `include/CMakeLists.txt`; configuring
+  fails on one that is not.
 
 ## Presets
 
@@ -38,6 +40,13 @@ sanitizers' strictest runtime options.
 | `dxfio_api` | - | Custom, test | Takes the public interface's snapshot; the test compares it |
 | `dxfio_fuzz_dxf`, `dxfio_fuzz_tags`, `dxfio_fuzz_escapes` | - | Executable | libFuzzer targets |
 | `coverage` | - | Custom | Runs the tests and gates lines, functions, regions and branches at 100% |
+
+## Install
+
+`cmake --install` puts the library, its headers and a package under a
+prefix, where `find_package(dxfio CONFIG)` finds the `dxfio::dxfio` target
+with the same usage requirements the subdirectory gives. `tests/package`
+is a program built that way, by CI against a fresh install.
 
 ## Commands
 
