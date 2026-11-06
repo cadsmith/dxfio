@@ -21,6 +21,11 @@ auto Real(const Tags::Tag *one) -> double
   REQUIRE(one != nullptr);
   return std::get<double>(one->Value);
 }
+
+auto Large(const Tags::Tag &one) -> bool
+{
+  return std::get<double>(one.Value) > 5.0;
+}
 } // namespace
 
 TEST_CASE("walk: a field takes the next group of its code, wrapping round")
@@ -198,6 +203,68 @@ TEST_CASE("walk: a list's elements in their order, each its own fence")
   CHECK(seen == "AxBy");
 }
 
+TEST_CASE("walk: the rest leaves out a repeat of a code the part's fields took, told")
+{
+  const auto all = Tags::All("  8\nwalls\n 40\n1.0\n 40\n9.0\n  3\nnote\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Issues = &issues}};
+  CHECK(in.Take(8) != nullptr);
+  CHECK(in.Take(40) != nullptr);
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 1);
+  CHECK(rest.front().Code == 3);
+  REQUIRE(issues.size() == 1);
+  CHECK(issues.front().Line == 5);
+  CHECK(issues.front().What == "group 40 given again, one kept");
+}
+
+TEST_CASE("walk: the rest keeps a repeat of a code an earlier part took")
+{
+  const auto all = Tags::All("  8\nwalls\n100\nAcDbLine\n 40\n1.0\n  8\nagain\n  3\nnote\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Issues = &issues}};
+  CHECK(in.Take(8) != nullptr);
+  REQUIRE(in.Subclass("AcDbLine"));
+  CHECK(in.Take(40) != nullptr);
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 2);
+  CHECK(rest.front().Code == 8);
+  CHECK(rest.back().Code == 3);
+  CHECK(issues.empty());
+}
+
+TEST_CASE("walk: the rest keeps a repeat its field found unfit")
+{
+  const auto all = Tags::All("  8\nwalls\n 40\n1.0\n 40\n9.0\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Issues = &issues}};
+  CHECK(in.Take(8) != nullptr);
+  CHECK(Real(in.Take(40, Large)) == 9.0);
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 1);
+  CHECK(rest.front().Code == 40);
+  CHECK(issues.empty());
+}
+
+TEST_CASE("walk: read in order, the rest keeps a repeat of a code a field took")
+{
+  const auto all = Tags::All("100\nAcDbVisualStyle\n  2\nnamed\n 70\n4\n 70\n58\n 90\n1\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Issues = &issues}};
+  in.Sequence("AcDbVisualStyle");
+  CHECK(in.Take(2) != nullptr);
+  CHECK(in.Take(70) != nullptr);
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 2);
+  CHECK(rest.front().Code == 70);
+  CHECK(rest.back().Code == 90);
+  CHECK(issues.empty());
+}
+
 TEST_CASE("walk: what no field took is handed back, a repeat told")
 {
   const auto all = Tags::All("  8\nwalls\n 40\n1.0\n 40\n9.0\n999\nnote\n");
@@ -206,7 +273,6 @@ TEST_CASE("walk: what no field took is handed back, a repeat told")
   Walk in{*all, Reading{.Issues = &issues}};
   CHECK(in.Take(8) != nullptr);
   CHECK(in.Take(40) != nullptr);
-  CHECK(in.Rest().size() == 1);
   const std::vector<Group> kept = in.Kept();
   REQUIRE(kept.empty());
   REQUIRE(issues.size() == 1);

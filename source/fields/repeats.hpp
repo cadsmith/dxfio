@@ -19,6 +19,8 @@ public:
 
   [[nodiscard]] auto Trails(int code) const -> bool;
 
+  [[nodiscard]] auto Trailing(std::size_t at, int code) const -> bool;
+
 private:
   struct Ask
   {
@@ -27,6 +29,8 @@ private:
     int Code{};
 
     auto operator==(const Ask &) const -> bool = default;
+
+    [[nodiscard]] auto Covers(std::size_t at, int code) const -> bool;
   };
 
   std::vector<Ask> m_Asked;
