@@ -30,6 +30,7 @@ public:
 private:
   auto Code() -> std::optional<int>;
   auto Ended(std::string what) -> std::expected<std::optional<Tag>, Failure>;
+  auto Bare(Content value) -> Content;
   void Tell(Issue issue);
 
   std::string_view m_Rest;

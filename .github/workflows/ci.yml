@@ -250,7 +250,7 @@ jobs:
 
       - uses: ./.github/actions/llvm
         with:
-          packages: clang-23 libclang-rt-23-dev
+          packages: clang-23 libclang-rt-23-dev llvm-23
 
       # MSan needs every C++ library instrumented, so libc++ is built from
       # the compiler's own release once and kept.
@@ -313,7 +313,7 @@ jobs:
 
       - uses: ./.github/actions/llvm
         with:
-          packages: clang-23 libclang-rt-23-dev
+          packages: clang-23 libclang-rt-23-dev llvm-23
 
       - uses: ./.github/actions/ccache
 
@@ -339,6 +339,8 @@ jobs:
           restore-keys: fuzz-corpus-
 
       - name: Fuzz each target for a minute
+        env:
+          LLVM_SYMBOLIZER_PATH: /usr/lib/llvm-23/bin/llvm-symbolizer
         run: |
           mkdir -p "$RUNNER_TEMP/found"
           failed=0

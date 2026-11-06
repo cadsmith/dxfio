@@ -9,7 +9,7 @@ FetchContent_Declare(
   GIT_SHALLOW    TRUE
   GIT_PROGRESS   TRUE
   SYSTEM
-  FIND_PACKAGE_ARGS GLOBAL
+  FIND_PACKAGE_ARGS 2.5.3 GLOBAL
 )
 
 FetchContent_MakeAvailable(doctest)

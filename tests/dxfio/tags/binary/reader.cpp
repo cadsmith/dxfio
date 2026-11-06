@@ -169,6 +169,18 @@ TEST_CASE("binary: a group of a code DXF does not define is kept and told")
   CHECK(issues == std::vector{Issue{.Line = 0, .What = "group 250 is no DXF group, kept"}});
 }
 
+TEST_CASE("binary: a group 0 with blanks around it is trimmed and told")
+{
+  std::string bytes;
+  Code(bytes, true, 0);
+  Put(bytes, std::string_view{"  SECTION  "});
+  std::vector<Issue> issues;
+  const std::vector<Tag> tags = Read(bytes, &issues);
+  REQUIRE(tags.size() == 1);
+  CHECK(tags.at(0) == Tag{.Code = 0, .Value = std::string_view{"SECTION"}});
+  CHECK(issues == std::vector{Issue{.Line = 0, .What = "group 0 holds \"  SECTION  \" with blanks, trimmed"}});
+}
+
 TEST_CASE("binary: a code past the last there is is a failure")
 {
   std::string bytes;

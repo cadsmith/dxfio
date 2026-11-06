@@ -1,6 +1,8 @@
 #include "tags/binary/reader.hpp"
 
+#include "tags/blanks.hpp"
 #include "tags/codes.hpp"
+#include "tags/glimpse.hpp"
 
 #include <algorithm>
 #include <array>
@@ -159,7 +161,19 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
   {
     Tell(Issue{.Line = 0, .What = std::format("group {} is no DXF group, kept", *group)});
   }
-  return std::optional{Tag{.Code = *group, .Value = *value}};
+  return std::optional{Tag{.Code = *group, .Value = *group == 0 ? Bare(*value) : *value}};
+}
+
+// A group 0 value trimmed of the blanks around it, told, as the ASCII reader reads one.
+auto Reader::Bare(Content value) -> Content
+{
+  const std::string_view text = std::get<std::string_view>(value);
+  const std::string_view word = Trimmed(text);
+  if (word.size() != text.size())
+  {
+    Tell(Issue{.Line = 0, .What = std::format("group 0 holds \"{}\" with blanks, trimmed", Glimpse(text))});
+  }
+  return word;
 }
 
 // Ends the file where its bytes do, with what was cut told; the group begun there is left out.

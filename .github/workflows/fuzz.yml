@@ -32,7 +32,7 @@ jobs:
 
       - uses: ./.github/actions/llvm
         with:
-          packages: clang-23 libclang-rt-23-dev
+          packages: clang-23 libclang-rt-23-dev llvm-23
 
       # The compiler cache a push to main saves in ci.yml, so the build is
       # minutes at most and the twenty minutes go to fuzzing.
@@ -64,6 +64,8 @@ jobs:
             fuzz-corpus-
 
       - name: Fuzz the ${{ matrix.target }} target for twenty minutes
+        env:
+          LLVM_SYMBOLIZER_PATH: /usr/lib/llvm-23/bin/llvm-symbolizer
         run: |
           mkdir -p "$RUNNER_TEMP/found"
           mkdir -p "corpus/${{ matrix.target }}"
