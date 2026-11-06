@@ -313,7 +313,7 @@ jobs:
 
       - uses: ./.github/actions/llvm
         with:
-          packages: clang-23 libclang-rt-23-dev
+          packages: clang-23 libclang-rt-23-dev llvm-23
 
       - uses: ./.github/actions/ccache
 
