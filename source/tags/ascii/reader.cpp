@@ -3,6 +3,7 @@
 #include "../blanks.hpp"
 #include "../whole.hpp"
 #include "tags/codes.hpp"
+#include "tags/glimpse.hpp"
 #include "tags/values.hpp"
 
 #include <algorithm>
@@ -38,12 +39,6 @@ auto Group(std::string_view head) -> std::optional<int>
   return code;
 }
 
-constexpr std::size_t Echoed = 64;
-
-auto Glimpse(std::string_view line) -> std::string
-{
-  return line.size() > Echoed ? std::format("{}...", line.substr(0, Echoed)) : std::string{line};
-}
 } // namespace
 
 Reader::Reader(std::string_view text, std::vector<Issue> *issues)

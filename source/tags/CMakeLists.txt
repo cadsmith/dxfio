@@ -3,6 +3,7 @@ target_sources(dxfio
     blanks.cpp
     codes.cpp
     decimal.cpp
+    glimpse.cpp
     real.cpp
     sentinel.cpp
     tag.cpp
