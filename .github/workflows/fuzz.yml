@@ -8,11 +8,23 @@ on:
 permissions:
   contents: read
 
+env:
+  CCACHE_COMPILERCHECK: content
+  CCACHE_DEPEND: true
+
 jobs:
   fuzz:
-    name: fuzz
+    name: fuzz (${{ matrix.target }})
     runs-on: ubuntu-26.04
-    timeout-minutes: 90
+    timeout-minutes: 40
+    strategy:
+      # One target finding a crash must not stop the other two from finishing
+      # their twenty minutes.
+      fail-fast: false
+      matrix:
+        target: [dxf, escapes, tags]
+    env:
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -22,31 +34,44 @@ jobs:
         with:
           packages: clang-23 libclang-rt-23-dev
 
+      # The compiler cache a push to main saves in ci.yml, so the build is
+      # minutes at most and the twenty minutes go to fuzzing.
+      - uses: ./.github/actions/ccache
+
+      # The three jobs build the same objects, so only one of them saves.
+      - uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: fuzz
+          install: no
+          max-size: 300M
+          save: ${{ github.event_name == 'schedule' && matrix.target == 'dxf' }}
+
       - name: Configure
         run: cmake --preset fuzz -DCMAKE_CXX_COMPILER=/usr/lib/llvm-23/bin/clang++
 
       - name: Build
         run: cmake --build --preset fuzz
 
+      # The corpus the earlier runs grew, one entry per target so the three
+      # jobs never overwrite one another's; a shared entry of an old run
+      # still seeds the first per-target ones.
       - uses: actions/cache/restore@v6.1.0
         with:
           path: corpus
-          key: fuzz-corpus-${{ github.run_id }}
-          restore-keys: fuzz-corpus-
+          key: fuzz-corpus-${{ matrix.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            fuzz-corpus-${{ matrix.target }}-
+            fuzz-corpus-
 
-      - name: Fuzz each target for twenty minutes
+      - name: Fuzz the ${{ matrix.target }} target for twenty minutes
         run: |
           mkdir -p "$RUNNER_TEMP/found"
-          failed=0
-          for target in dxf escapes tags; do
-            mkdir -p "corpus/$target"
-            "build/fuzz/bin/dxfio_fuzz_$target" \
-              -max_total_time=1200 \
-              -dict=tests/fuzz/dxf.dict \
-              -artifact_prefix="$RUNNER_TEMP/found/$target-" \
-              "corpus/$target" tests/fuzz/corpus tests/fuzz/found || failed=1
-          done
-          exit "$failed"
+          mkdir -p "corpus/${{ matrix.target }}"
+          "build/fuzz/bin/dxfio_fuzz_${{ matrix.target }}" \
+            -max_total_time=1200 \
+            -dict=tests/fuzz/dxf.dict \
+            -artifact_prefix="$RUNNER_TEMP/found/${{ matrix.target }}-" \
+            "corpus/${{ matrix.target }}" tests/fuzz/corpus tests/fuzz/found
 
       # Keep what the run found: a new cache entry each time, the newest
       # restored by every later run, pull requests included.
@@ -54,11 +79,11 @@ jobs:
         if: always()
         with:
           path: corpus
-          key: fuzz-corpus-${{ github.run_id }}
+          key: fuzz-corpus-${{ matrix.target }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - uses: actions/upload-artifact@v7.0.2
         if: failure()
         with:
-          name: fuzz-findings
+          name: fuzz-findings-${{ matrix.target }}
           path: ${{ runner.temp }}/found
           if-no-files-found: ignore
