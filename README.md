@@ -54,6 +54,10 @@ find_package(dxfio CONFIG REQUIRED)
 target_link_libraries(app PRIVATE dxfio::dxfio)
 ```
 
+```sh
+cmake -S . -B build -DCMAKE_PREFIX_PATH=/some/prefix
+```
+
 It needs nothing but the standard library: tests and doctest only when dxfio is
 the top level project. That library must read a `double` with `std::from_chars`:
 libc++ 20, libstdc++ 11 and MSVC 19.24 (Visual Studio 2019 16.4) are the first
