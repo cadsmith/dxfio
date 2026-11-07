@@ -60,7 +60,8 @@ def main():
     if len(sys.argv) != 4:
         raise SystemExit(__doc__)
     source, megabytes, target = sys.argv[1], float(sys.argv[2]), sys.argv[3]
-    bytes_ = open(source, "rb").read()
+    with open(source, "rb") as file:
+        bytes_ = file.read()
     newline = b"\r\n" if b"\r\n" in bytes_[:200] else b"\n"
     lines = bytes_.split(newline)
     begin = section(lines, b"ENTITIES") + 4
@@ -82,7 +83,8 @@ def main():
     for at, line in enumerate(head):
         if line == b"$HANDSEED":
             head[at + 2] = format(handle, "X").encode()
-    open(target, "wb").write(newline.join(head + out + lines[end:]))
+    with open(target, "wb") as file:
+        file.write(newline.join(head + out + lines[end:]))
     print(f"{target}: {sum(counts.values())} entities, {size / 1048576:.1f} MB of them", counts)
 
 
