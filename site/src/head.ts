@@ -8,9 +8,23 @@ type Crumb = { name: string; path: string }
 // What a page tells a search engine: its title, a summary, its one address and where it sits.
 export type Head = { title: string; description: string; path: string; trail: Crumb[] }
 
+// The text without its tags, each from its < to the > that closes it.
+const untagged = (html: string): string => {
+  let out = ''
+  let at = 0
+  while (at < html.length) {
+    const open = html.indexOf('<', at)
+    if (open < 0) break
+    const close = html.indexOf('>', open + 1)
+    if (close < 0) break
+    out += html.slice(at, open)
+    at = close + 1
+  }
+  return out + html.slice(at)
+}
+
 const plain = (html: string) =>
-  html
-    .replace(/<[^>]+>/g, '')
+  untagged(html)
     .replace(/\s+/g, ' ')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')

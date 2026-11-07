@@ -14,8 +14,16 @@ const element = (tagName: string, properties: Element['properties'], children: E
 
 const text = (value: string): ElementContent => ({ type: 'text', value })
 
+// What stands between two marks in the meta, as [a label] or title="a title"; nothing when it is empty or absent.
+const between = (meta: string, open: string, close: string): string | undefined => {
+  const from = meta.indexOf(open)
+  if (from < 0) return undefined
+  const to = meta.indexOf(close, from + open.length)
+  return to > from + open.length ? meta.slice(from + open.length, to) : undefined
+}
+
 export const labelOf = (lang: string, meta: string): string =>
-  /\[([^\]]+)\]/.exec(meta)?.[1] ?? /title="([^"]+)"/.exec(meta)?.[1] ?? labels[lang] ?? lang
+  between(meta, '[', ']') ?? between(meta, 'title="', '"') ?? labels[lang] ?? lang
 
 export const figure: ShikiTransformer = {
   name: 'dxfio-figure',
@@ -42,7 +50,7 @@ export const highlighter = await createHighlighter({
 
 const channels = (hex: string) => {
   const full = hex.length <= 5 ? `#${[...hex.slice(1)].map((digit) => digit + digit).join('')}` : hex
-  return [1, 3, 5, 7].map((at, index) => (index < 3 || full.length > 7 ? parseInt(full.slice(at, at + 2), 16) : 255))
+  return [1, 3, 5, 7].map((at, index) => (index < 3 || full.length > 7 ? Number.parseInt(full.slice(at, at + 2), 16) : 255))
 }
 
 const linear = (channel: number) => {
