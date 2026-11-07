@@ -31,6 +31,7 @@ public:
 private:
   void Spell(int code, const Content &value);
   auto Pack(int code, const Content &value) -> std::expected<void, Failure>;
+  void Padded(int code, std::int64_t number);
   void Pair(int code, std::string_view text);
   void Coded(int code);
 

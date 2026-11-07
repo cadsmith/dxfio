@@ -2,16 +2,15 @@
 
 #include "whole.hpp"
 
-#include <algorithm>
 #include <array>
 #include <charconv>
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <format>
 #include <memory>
+#include <span>
+#include <string>
 #include <string_view>
-#include <utility>
 
 namespace DxfIO::Tags
 {
@@ -25,55 +24,87 @@ constexpr std::size_t Fractional = 15;
 
 constexpr std::size_t Room = 32;
 
+// The shortest digits that read back as the value, as to_chars writes them in scientific form: the leading
+// digit, the fraction after the point, and the exponent, views into the buffer given.
 struct Shortest
 {
-  bool Negative{};
-  std::string Digits;
+  std::string_view Lead;
+  std::string_view Fraction;
   int Exponent{};
+  bool Negative{};
 };
 
-auto Decomposed(double value) -> Shortest
+auto Decomposed(std::span<char> buffer, double value) -> Shortest
 {
-  std::array<char, Room> buffer{};
   const std::to_chars_result written =
       std::to_chars(buffer.data(), std::to_address(buffer.end()), value, std::chars_format::scientific);
-  const std::string_view text{buffer.data(), written.ptr};
+  std::string_view text{buffer.data(), written.ptr};
+  const bool negative = text.starts_with('-');
+  if (negative)
+  {
+    text.remove_prefix(1);
+  }
   const std::size_t power = text.find('e');
-  std::string digits{text.substr(0, power)};
-  const bool negative = digits.starts_with('-');
-  std::erase(digits, '-');
-  std::erase(digits, '.');
+  const std::string_view mantissa = text.substr(0, power);
   std::string_view exponent = text.substr(power + 1);
   if (exponent.starts_with('+'))
   {
     exponent.remove_prefix(1);
   }
-  return {.Negative = negative, .Digits = std::move(digits), .Exponent = Whole(exponent).value_or(0)};
+  return {
+      .Lead = mantissa.substr(0, 1),
+      .Fraction = mantissa.size() > 2 ? mantissa.substr(2) : std::string_view{},
+      .Exponent = Whole(exponent).value_or(0),
+      .Negative = negative,
+  };
 }
 
-auto Fixed(const Shortest &number) -> std::string
+// The digits laid out around a point, as AutoCAD writes a real: a point always given, except on a whole
+// number of sixteen digits, which AutoCAD writes without one.
+void Fixed(std::string &out, const Shortest &number)
 {
   if (number.Exponent < 0)
   {
-    const auto zeros = static_cast<std::size_t>(-number.Exponent - 1);
-    return "0." + std::string(zeros, '0') + number.Digits;
+    out += "0.";
+    out.append(static_cast<std::size_t>(-number.Exponent - 1), '0');
+    out += number.Lead;
+    out += number.Fraction;
+    return;
   }
   const auto units = static_cast<std::size_t>(number.Exponent) + 1;
-  std::string out = number.Digits.substr(0, units);
-  out.resize(units, '0');
-  if (number.Digits.size() > units)
+  const std::size_t count = 1 + number.Fraction.size();
+  out += number.Lead;
+  if (count > units)
   {
-    return out + "." + number.Digits.substr(units);
+    out += number.Fraction.substr(0, units - 1);
+    out += '.';
+    out += number.Fraction.substr(units - 1);
+    return;
   }
-  return number.Exponent + 1 < Highest ? out + ".0" : out;
+  out += number.Fraction;
+  out.append(units - count, '0');
+  if (number.Exponent + 1 < Highest)
+  {
+    out += ".0";
+  }
 }
 
-auto Exponential(const Shortest &number) -> std::string
+// The exponent is at least sixteen either way here, so it always has its two digits.
+void Exponential(std::string &out, const Shortest &number)
 {
-  std::string fraction = number.Digits.substr(1);
-  fraction.resize(std::max(fraction.size(), Fractional), '0');
-  return std::format("{}.{}E{}{:02}", number.Digits.front(), fraction, number.Exponent < 0 ? '-' : '+',
-                     std::abs(number.Exponent));
+  out += number.Lead;
+  out += '.';
+  out += number.Fraction;
+  if (number.Fraction.size() < Fractional)
+  {
+    out.append(Fractional - number.Fraction.size(), '0');
+  }
+  out += 'E';
+  out += number.Exponent < 0 ? '-' : '+';
+  std::array<char, Room> digits{};
+  const std::to_chars_result written =
+      std::to_chars(digits.data(), std::to_address(digits.end()), std::abs(number.Exponent));
+  out.append(digits.data(), written.ptr);
 }
 } // namespace
 
@@ -83,9 +114,21 @@ auto Real(double value) -> std::optional<std::string>
   {
     return std::nullopt;
   }
-  const Shortest number = Decomposed(value);
-  const bool plain = number.Exponent >= Lowest && number.Exponent < Highest;
-  const std::string body = plain ? Fixed(number) : Exponential(number);
-  return number.Negative ? "-" + body : body;
+  std::array<char, Room> buffer{};
+  const Shortest number = Decomposed(buffer, value);
+  std::string out;
+  if (number.Negative)
+  {
+    out += '-';
+  }
+  if (number.Exponent >= Lowest && number.Exponent < Highest)
+  {
+    Fixed(out, number);
+  }
+  else
+  {
+    Exponential(out, number);
+  }
+  return out;
 }
 } // namespace DxfIO::Tags
