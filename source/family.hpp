@@ -3,6 +3,7 @@
 
 #include "chained.hpp"
 #include "fields/context.hpp"
+#include "fields/scratch.hpp"
 #include "file/record.hpp"
 #include "filing.hpp"
 #include "seek.hpp"
@@ -117,14 +118,18 @@ auto Named(const File::Record &one) -> const Kind<VariantT> &
   return found == nullptr || type.empty() ? all.back() : *found;
 }
 
+// The records of a family, each read with the room the ones before it found.
 template <class VariantT>
 auto Read(std::span<const File::Record> all, const Fields::Reading &with) -> std::vector<VariantT>
 {
+  Fields::Scratch scratch;
+  Fields::Reading reusing = with;
+  reusing.Reuse = &scratch;
   std::vector<VariantT> out;
   out.reserve(all.size());
   while (!all.empty())
   {
-    out.push_back(Named<VariantT>(all.front()).Read(all, with));
+    out.push_back(Named<VariantT>(all.front()).Read(all, reusing));
   }
   return out;
 }

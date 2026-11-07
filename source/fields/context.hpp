@@ -13,11 +13,15 @@
 
 namespace DxfIO::Fields
 {
+struct Scratch;
+
 struct DXFIO_API Reading
 {
   Version Release{Version::R2018};
   Encoding::Scheme Text{Encoding::Utf8()};
   std::vector<Issue> *Issues{nullptr};
+  // Room kept from one record to the next, none when each record finds its own.
+  Scratch *Reuse{nullptr};
 
   void Tell(Issue issue) const
   {

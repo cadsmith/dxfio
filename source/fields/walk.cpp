@@ -6,13 +6,39 @@
 #include <iterator>
 #include <optional>
 #include <ranges>
+#include <utility>
 
 namespace DxfIO::Fields
 {
+// The flags and the asks come from the scratch when one is given and free, their room found by the records
+// before; a walk made while another holds them finds its own.
 Walk::Walk(std::span<const Tags::Tag> body, const Reading &with)
-    : m_Body(body), m_With(with), m_Used(body.size(), false), m_Unfit(body.size(), false),
-      m_Fence{.Begin = 0, .End = body.size(), .Cursor = 0}, m_Budget(body.size())
+    : m_Body(body), m_With(with), m_Fence{.Begin = 0, .End = body.size(), .Cursor = 0}, m_Budget(body.size())
 {
+  if (with.Reuse != nullptr && !with.Reuse->Busy)
+  {
+    m_Lease = Lease{with.Reuse};
+    with.Reuse->Busy = true;
+    m_Used = std::move(with.Reuse->Used);
+    m_Unfit = std::move(with.Reuse->Unfit);
+    m_Repeats = std::move(with.Reuse->Asked);
+    m_Repeats.Clear();
+  }
+  m_Used.assign(body.size(), false);
+  m_Unfit.assign(body.size(), false);
+}
+
+// Gives the room back to the scratch held, for the next walk.
+Walk::~Walk()
+{
+  Scratch *from = m_Lease.From();
+  if (from != nullptr)
+  {
+    from->Used = std::move(m_Used);
+    from->Unfit = std::move(m_Unfit);
+    from->Asked = std::move(m_Repeats);
+    from->Busy = false;
+  }
 }
 
 auto Walk::Take(int code, Test fits) -> const Tags::Tag *

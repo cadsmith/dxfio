@@ -7,6 +7,13 @@
 
 namespace DxfIO::Fields
 {
+// Forgets every ask, the room kept for the next record's.
+void Repeats::Clear()
+{
+  m_Asked.clear();
+  m_Last = 0;
+}
+
 void Repeats::Asked(std::size_t begin, std::size_t end, int code)
 {
   const Ask one{.Begin = begin, .End = end, .Code = code};

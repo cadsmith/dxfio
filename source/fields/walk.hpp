@@ -4,6 +4,7 @@
 #include "fields/budget.hpp"
 #include "fields/context.hpp"
 #include "fields/repeats.hpp"
+#include "fields/scratch.hpp"
 #include "tags/tag.hpp"
 #include "unknown/io.hpp"
 
@@ -32,6 +33,11 @@ public:
   };
 
   Walk(std::span<const Tags::Tag> body, const Reading &with);
+  Walk(const Walk &) = default;
+  Walk(Walk &&) = default;
+  auto operator=(const Walk &) -> Walk & = default;
+  auto operator=(Walk &&) -> Walk & = default;
+  ~Walk();
 
   [[nodiscard]] auto With() const -> const Reading & { return m_With; }
 
@@ -113,6 +119,7 @@ private:
   std::size_t m_Stop{};
   Fields::Budget m_Budget;
   Fields::Repeats m_Repeats;
+  Lease m_Lease;
 };
 } // namespace DxfIO::Fields
 

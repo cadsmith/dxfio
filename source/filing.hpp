@@ -5,6 +5,7 @@
 #include "fields/context.hpp"
 #include "fields/owned.hpp"
 #include "fields/read.hpp"
+#include "fields/scratch.hpp"
 #include "fields/text.hpp"
 #include "fields/walk.hpp"
 #include "file/record.hpp"
@@ -22,6 +23,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace DxfIO
@@ -35,12 +37,14 @@ auto Filled(const File::Record &one, const Fields::Reading &with, bool &whole) -
   KindT out{};
   const std::span<const Tags::Tag> body = one.Tags.subspan(1);
   const std::size_t at = Trailing(body);
-  const std::vector<Tags::Tag> rest =
-      DxfIO::Head(body.first(at), Heading{.Into = &Based(out), .Code = Self<KindT>}, with);
-  Fields::Walk in{rest, with};
-  Fields::Read(out, in, Shapes<KindT>);
-  Based(out).Extra = in.Kept();
-  whole = in.Whole();
+  std::vector<Tags::Tag> rest = DxfIO::Head(body.first(at), Heading{.Into = &Based(out), .Code = Self<KindT>}, with);
+  {
+    Fields::Walk in{rest, with};
+    Fields::Read(out, in, Shapes<KindT>);
+    Based(out).Extra = in.Kept();
+    whole = in.Whole();
+  }
+  Fields::Returned(with, std::move(rest));
   Tail(body.subspan(at), Based(out), with);
   return out;
 }
