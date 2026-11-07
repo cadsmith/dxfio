@@ -13,6 +13,7 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <thread>
 #include <utility>
 
 #if defined(_WIN32)
@@ -65,12 +66,12 @@ void Timed(std::string_view what, std::size_t bytes, int runs, StepT &&step)
               static_cast<double>(bytes) / best / Mega, Peak());
 }
 
-// The runs asked for, the default when the argument is no count or none.
-auto Count(std::string_view text) -> int
+// The count asked for, the fallback when the argument is no count.
+auto Count(std::string_view text, int fallback) -> int
 {
   int value = 0;
   const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
-  return error == std::errc{} && end == text.data() + text.size() && value > 0 ? value : Runs;
+  return error == std::errc{} && end == text.data() + text.size() && value > 0 ? value : fallback;
 }
 } // namespace
 
@@ -78,7 +79,7 @@ auto main(int argc, char **argv) -> int
 {
   if (argc < 2)
   {
-    std::fprintf(stderr, "usage: dxfio_bench <drawing.dxf> [runs]\n");
+    std::fprintf(stderr, "usage: dxfio_bench <drawing.dxf> [runs] [threads]\n");
     return 2;
   }
   std::ifstream in{argv[1], std::ios::binary};
@@ -88,10 +89,13 @@ auto main(int argc, char **argv) -> int
     std::fprintf(stderr, "%s: not read\n", argv[1]);
     return 2;
   }
-  const int runs = argc > 2 ? Count(argv[2]) : Runs;
-  std::printf("%s: %.1f MB, best of %d runs\n", argv[1], static_cast<double>(bytes.size()) / Mega, runs);
+  const int runs = argc > 2 ? Count(argv[2], Runs) : Runs;
+  const int threads = argc > 3 ? Count(argv[3], 0) : 0;
+  const DxfIO::Loading loading{.Threads = threads};
+  std::printf("%s: %.1f MB, best of %d runs, %u thread(s)\n", argv[1], static_cast<double>(bytes.size()) / Mega, runs,
+              threads > 0 ? static_cast<unsigned>(threads) : std::thread::hardware_concurrency());
   std::expected<DxfIO::Loaded, DxfIO::Failure> loaded;
-  Timed("load", bytes.size(), runs, [&] -> void { loaded = DxfIO::Load(bytes); });
+  Timed("load", bytes.size(), runs, [&] -> void { loaded = DxfIO::Load(bytes, loading); });
   if (!loaded)
   {
     std::fprintf(stderr, "load: %s\n", loaded.error().What.c_str());
@@ -100,7 +104,8 @@ auto main(int argc, char **argv) -> int
   std::printf("  %zu entities, %zu objects, %zu issues\n", loaded->Document.Entities.size(),
               loaded->Document.Objects.size(), loaded->Issues.size());
   std::expected<DxfIO::Saved, DxfIO::Failure> ascii;
-  Timed("save", bytes.size(), runs, [&] -> void { ascii = DxfIO::Save(loaded->Document); });
+  Timed("save", bytes.size(), runs,
+        [&] -> void { ascii = DxfIO::Save(loaded->Document, DxfIO::Options{.Threads = threads}); });
   if (!ascii)
   {
     std::fprintf(stderr, "save: %s\n", ascii.error().What.c_str());
@@ -108,7 +113,7 @@ auto main(int argc, char **argv) -> int
   }
   std::expected<DxfIO::Saved, DxfIO::Failure> binary;
   Timed("save binary", bytes.size(), runs,
-        [&] -> void { binary = DxfIO::Save(loaded->Document, DxfIO::Options{.Binary = true}); });
+        [&] -> void { binary = DxfIO::Save(loaded->Document, DxfIO::Options{.Binary = true, .Threads = threads}); });
   if (!binary)
   {
     std::fprintf(stderr, "save binary: %s\n", binary.error().What.c_str());
@@ -116,6 +121,6 @@ auto main(int argc, char **argv) -> int
   }
   std::printf("  %.1f MB as ASCII, %.1f MB as binary\n", static_cast<double>(ascii->Bytes.size()) / Mega,
               static_cast<double>(binary->Bytes.size()) / Mega);
-  Timed("load binary", binary->Bytes.size(), runs, [&] -> void { loaded = DxfIO::Load(binary->Bytes); });
+  Timed("load binary", binary->Bytes.size(), runs, [&] -> void { loaded = DxfIO::Load(binary->Bytes, loading); });
   return loaded ? 0 : 1;
 }

@@ -9,6 +9,7 @@
 #include "header/io.hpp"
 #include "lift/lift.hpp"
 #include "objects/io.hpp"
+#include "parallel.hpp"
 #include "plan/foreign.hpp"
 #include "raw/io.hpp"
 #include "seek.hpp"
@@ -207,6 +208,7 @@ auto Written(const Document &drawing, const Options &with) -> std::expected<std:
       .Release = with.Release,
       .Text = Text(drawing, with),
       .From = Header::Declared(drawing.Header),
+      .Threads = Threads(with.Threads),
   };
   return Chained(Planned(drawing),
                  [&](const std::string &name) -> std::expected<void, Failure>

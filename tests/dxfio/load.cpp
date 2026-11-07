@@ -294,6 +294,81 @@ TEST_CASE("load: a section whose parts do not hold together stops the file")
         std::unexpected{Failure{13, "ENDTAB missing"}});
 }
 
+namespace
+{
+// Two thousand R12 entities laid so that the cuts between the parts read on threads fall on an ATTRIB, a
+// VERTEX, a SEQEND, plain lines and the end: 250 lines, an INSERT with 400 attributes across two cuts, a
+// POLYLINE with 300 vertices across one, lines, an INSERT whose SEQEND stands on a cut, lines, and an INSERT
+// whose attributes run from the last cut to the end; each line gives its layer twice so that every one tells
+// an issue. Then six hundred objects.
+auto Spanning() -> std::string
+{
+  std::string out = "  0\nSECTION\n  2\nENTITIES\n";
+  const auto lines = [&out](int from, int to) -> void
+  {
+    for (int at = from; at < to; ++at)
+    {
+      out += std::format("  0\nLINE\n  8\nL{}\n  8\nM{}\n 10\n{}\n 20\n0.0\n 11\n1.0\n 21\n{}\n", at, at, at, at);
+    }
+  };
+  const auto insert = [&out](int attributes) -> void
+  {
+    out += "  0\nINSERT\n  8\nI\n 66\n1\n  2\nBLOCK\n 10\n0.0\n 20\n0.0\n";
+    for (int at = 0; at < attributes; ++at)
+    {
+      out += std::format("  0\nATTRIB\n  8\nI\n 10\n{}\n 20\n0.0\n 40\n1.0\n  1\nv{}\n  2\nT{}\n", at, at, at);
+    }
+    out += "  0\nSEQEND\n  8\nI\n";
+  };
+  lines(0, 250);
+  insert(400);
+  out += "  0\nPOLYLINE\n  8\nP\n 66\n1\n 70\n0\n";
+  for (int at = 0; at < 300; ++at)
+  {
+    out += std::format("  0\nVERTEX\n  8\nP\n 10\n{}\n 20\n{}\n", at, at * 2);
+  }
+  out += "  0\nSEQEND\n  8\nP\n";
+  lines(250, 396);
+  insert(43);
+  lines(396, 951);
+  insert(298);
+  out += "  0\nENDSEC\n  0\nSECTION\n  2\nOBJECTS\n";
+  for (int at = 0; at < 600; ++at)
+  {
+    out += std::format("  0\nXRECORD\n  5\n{:X}\n280\n1\n  1\nx{}\n", 0x1000 + at, at);
+  }
+  return out + "  0\nENDSEC\n  0\nEOF\n";
+}
+} // namespace
+
+TEST_CASE("load: a drawing read on several threads is the drawing read on one, issues and all")
+{
+  const std::string text = Spanning();
+  const auto alone = Load(text, Loading{.Threads = 1});
+  REQUIRE(alone);
+  REQUIRE(alone->Document.Entities.size() == 955);
+  CHECK(alone->Document.Objects.size() == 600);
+  CHECK(alone->Issues.size() == 951);
+  const auto *insert = std::get_if<Entities::Insert>(&alone->Document.Entities.at(250));
+  REQUIRE(insert != nullptr);
+  CHECK(insert->Attributes.Children.size() == 400);
+  const auto *polyline = std::get_if<Entities::Polyline>(&alone->Document.Entities.at(251));
+  REQUIRE(polyline != nullptr);
+  CHECK(polyline->Vertices.Children.size() == 300);
+  for (const int threads : {0, 2, 8})
+  {
+    CAPTURE(threads);
+    const auto together = Load(text, Loading{.Threads = threads});
+    REQUIRE(together);
+    CHECK(together->Document == alone->Document);
+    CHECK(together->Issues == alone->Issues);
+  }
+  std::istringstream from{text};
+  const auto streamed = Load(from, Loading{.Threads = 4});
+  REQUIRE(streamed);
+  CHECK(streamed->Document == alone->Document);
+}
+
 TEST_CASE("load: a drawing reads from a stream and from a file")
 {
   const std::filesystem::path file = std::filesystem::path{DXFIO_FUZZ_DIR} / "corpus" / "sample-r2018.dxf";

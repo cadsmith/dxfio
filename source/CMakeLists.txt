@@ -8,6 +8,7 @@ add_library(dxfio
   head.cpp
   load.cpp
   object.cpp
+  parallel.cpp
   past.cpp
   raw.cpp
   save.cpp

@@ -10,6 +10,7 @@
 #include "file/sections/records.hpp"
 #include "header/io.hpp"
 #include "objects/io.hpp"
+#include "parallel.hpp"
 #include "past.hpp"
 #include "raw/io.hpp"
 #include "seek.hpp"
@@ -210,7 +211,7 @@ void Raised(Loaded &into)
 }
 } // namespace
 
-auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
+auto Load(std::string_view bytes, const Loading &with) -> std::expected<Loaded, Failure>
 {
   Loaded out;
   const auto all = Tags::All(bytes, &out.Issues);
@@ -231,10 +232,11 @@ auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
   const bool inferred = Inferred(*head, *sections);
   const Version release = inferred ? Version::R2000 : Header::Declared(*head);
   const bool opaque = Header::Opaque(*head);
-  const Fields::Reading with{
+  const Fields::Reading reading{
       .Release = release,
       .Text = opaque ? Encoding::Opaque() : Encoding::Of(release, Header::Named(*head)),
       .Issues = &out.Issues,
+      .Threads = Threads(with.Threads),
   };
   if (opaque)
   {
@@ -244,7 +246,7 @@ auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
     });
   }
   const Filled filled =
-      Chained(*sections, [&out, &with](const File::Section &one) -> Filled { return Taken(one, out, with); });
+      Chained(*sections, [&out, &reading](const File::Section &one) -> Filled { return Taken(one, out, reading); });
   if (!filled)
   {
     return std::unexpected{filled.error()};
@@ -257,17 +259,17 @@ auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>
   return out;
 }
 
-auto Load(std::istream &from) -> std::expected<Loaded, Failure>
+auto Load(std::istream &from, const Loading &with) -> std::expected<Loaded, Failure>
 {
   if (from.fail())
   {
     return std::unexpected{Failure{.Line = 0, .What = "the stream could not be read"}};
   }
   const std::string bytes{std::istreambuf_iterator<char>{from}, std::istreambuf_iterator<char>{}};
-  return Load(bytes);
+  return Load(bytes, with);
 }
 
-auto LoadFile(const std::filesystem::path &file) -> std::expected<Loaded, Failure>
+auto LoadFile(const std::filesystem::path &file, const Loading &with) -> std::expected<Loaded, Failure>
 {
   std::ifstream from{file, std::ios::binary};
   if (!from)
@@ -278,7 +280,7 @@ auto LoadFile(const std::filesystem::path &file) -> std::expected<Loaded, Failur
   const std::uintmax_t size = std::filesystem::file_size(file, unsized);
   if (unsized)
   {
-    return Load(from);
+    return Load(from, with);
   }
   std::string bytes;
   bytes.resize_and_overwrite(static_cast<std::size_t>(size),
@@ -288,6 +290,6 @@ auto LoadFile(const std::filesystem::path &file) -> std::expected<Loaded, Failur
                                return static_cast<std::size_t>(from.gcount());
                              });
   bytes.append(std::istreambuf_iterator<char>{from}, std::istreambuf_iterator<char>{});
-  return Load(bytes);
+  return Load(bytes, with);
 }
 } // namespace DxfIO

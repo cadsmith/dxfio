@@ -15,6 +15,7 @@ target_sources(dxfio_tests
     load.cpp
     match.cpp
     object.cpp
+    parallel.cpp
     matrix.cpp
     past.cpp
     raw.cpp

@@ -91,6 +91,14 @@ inline constexpr bool Ancient<Entities::Dimension> = true;
 
 template <>
 inline constexpr bool Ancient<Entities::Viewport> = true;
+
+// An INSERT's ATTRIBs, a POLYLINE's VERTEXes, and the SEQEND that closes either.
+template <>
+auto Trails<Entity>(std::string_view name) -> bool
+{
+  return name == DxfIO::Type<Entities::Attrib> || name == DxfIO::Type<Entities::Vertex> ||
+         name == DxfIO::Type<Entities::Seqend>;
+}
 } // namespace DxfIO::Family
 
 namespace DxfIO::Entities
