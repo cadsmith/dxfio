@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <format>
 #include <optional>
 #include <string>
@@ -73,7 +74,7 @@ auto Reader::Done() const -> bool
 
 auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
 {
-  const std::size_t at = m_Line + 1;
+  const std::uint32_t at = m_Line + 1;
   const std::string_view head = Trimmed(Line());
   if (head.empty())
   {
@@ -104,7 +105,7 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
   {
     Tell(Issue{.Line = at, .What = std::format("group {} is no DXF group, kept", *code)});
   }
-  return std::optional{Tag{.Code = *code, .Value = *value, .Line = at}};
+  return std::optional{Tag{.Code = *code, .Line = at, .Value = *value}};
 }
 
 auto Reader::Line() -> std::string_view

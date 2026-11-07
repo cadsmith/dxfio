@@ -8,6 +8,7 @@
 #include "dxfio/issue.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <optional>
 #include <string_view>
@@ -35,7 +36,7 @@ private:
   std::string_view m_Text;
   std::vector<Issue> *m_Issues;
   std::size_t m_At{};
-  std::size_t m_Line{};
+  std::uint32_t m_Line{};
 };
 } // namespace DxfIO::Tags::Ascii
 

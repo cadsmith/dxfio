@@ -88,7 +88,7 @@ TEST_CASE("ascii: a value that does not parse is left out and told, the rest rea
   std::vector<Issue> issues;
   const std::vector<Tag> tags = Read("  0\nLINE\n 40\nnope\n 70\n1e300\n 62\n     1\n", &issues);
   REQUIRE(tags.size() == 2);
-  CHECK(tags.at(1) == Tag{.Code = 62, .Value = std::int64_t{1}, .Line = 7});
+  CHECK(tags.at(1) == Tag{.Code = 62, .Line = 7, .Value = std::int64_t{1}});
   CHECK(issues == std::vector{
                       Issue{.Line = 4, .What = "number expected for group 40, found \"nope\", left out"},
                       Issue{.Line = 6, .What = "integer expected for group 70, found \"1e300\", left out"},
@@ -111,9 +111,9 @@ TEST_CASE("ascii: blanks around a group 0 value are trimmed and told, other valu
   std::vector<Issue> issues;
   const std::vector<Tag> tags = Read("  0\nSECTION \n  2\n HEADER \n  0\n\tEOF\n", &issues);
   REQUIRE(tags.size() == 3);
-  CHECK(tags.at(0) == Tag{.Code = 0, .Value = std::string_view{"SECTION"}, .Line = 1});
-  CHECK(tags.at(1) == Tag{.Code = 2, .Value = std::string_view{" HEADER "}, .Line = 3});
-  CHECK(tags.at(2) == Tag{.Code = 0, .Value = std::string_view{"EOF"}, .Line = 5});
+  CHECK(tags.at(0) == Tag{.Code = 0, .Line = 1, .Value = std::string_view{"SECTION"}});
+  CHECK(tags.at(1) == Tag{.Code = 2, .Line = 3, .Value = std::string_view{" HEADER "}});
+  CHECK(tags.at(2) == Tag{.Code = 0, .Line = 5, .Value = std::string_view{"EOF"}});
   CHECK(issues == std::vector{
                       Issue{.Line = 2, .What = "group 0 holds \"SECTION \" with blanks, trimmed"},
                       Issue{.Line = 6, .What = "group 0 holds \"\tEOF\" with blanks, trimmed"},
@@ -145,7 +145,7 @@ TEST_CASE("ascii: a group of a code DXF does not define is kept and told")
   std::vector<Issue> issues;
   const std::vector<Tag> tags = Read("  0\nLINE\n250\n2\n", &issues);
   REQUIRE(tags.size() == 2);
-  CHECK(tags.at(1) == Tag{.Code = 250, .Value = std::string_view{"2"}, .Line = 3});
+  CHECK(tags.at(1) == Tag{.Code = 250, .Line = 3, .Value = std::string_view{"2"}});
   CHECK(issues == std::vector{Issue{.Line = 3, .What = "group 250 is no DXF group, kept"}});
 }
 

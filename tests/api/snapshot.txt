@@ -1431,19 +1431,19 @@ namespace DxfIO::Entities
 struct DXFIO_API Polyline
 {
   Entities::Record Record{};
-  bool Follows{true};
   Vector Position{};
+  Vector Extrusion{Up};
+  Sequence<Vertex> Vertices{};
   double Thickness{};
-  int Flags{};
   double Start{};
   double End{};
+  int Flags{};
   int Rows{};
   int Columns{};
   int Density{};
   int Depth{};
   int Curve{};
-  Vector Extrusion{Up};
-  Sequence<Vertex> Vertices{};
+  bool Follows{true};
   auto operator==(const Polyline &) const -> bool = default;
 };
 }
@@ -1526,19 +1526,19 @@ namespace DxfIO::Entities
 struct DXFIO_API Record
 {
   DxfIO::Base Base{};
-  bool Paper{};
   Symbol Layer{"0"};
   Symbol Linetype{"ByLayer"};
   Handle Material{};
-  int Color{Colors::Bylayer};
-  std::optional<int> Rgb{};
-  std::optional<std::string> Book{};
-  std::optional<int> Transparency{};
-  double Scale{1};
-  bool Hidden{};
-  int Lineweight{Lineweights::Bylayer};
   Handle Style{};
+  double Scale{1};
+  std::optional<std::string> Book{};
+  std::optional<int> Rgb{};
+  std::optional<int> Transparency{};
+  int Color{Colors::Bylayer};
+  int Lineweight{Lineweights::Bylayer};
   int Shadow{};
+  bool Paper{};
+  bool Hidden{};
   auto operator==(const Record &) const -> bool = default;
 };
 }
