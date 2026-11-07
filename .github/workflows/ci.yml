@@ -46,6 +46,8 @@ jobs:
               - include/**
               - source/**
               - tests/**
+              - tools/tidy/**
+              - cmake/**
               - vendor/**
 
   check:
@@ -414,8 +416,8 @@ jobs:
           else
             base=""
           fi
-          python3 tools/tidy/touched.py build/tidy/compile_commands.json $base \
-            > "$RUNNER_TEMP/touched"
+          python3 tools/tidy/touched.py build/tidy/compile_commands.json \
+            ${base:+"$base"} > "$RUNNER_TEMP/touched"
           if [ ! -s "$RUNNER_TEMP/touched" ]; then
             echo "the change reaches no source of the library"
             exit 0

@@ -29,7 +29,7 @@ def changed(root, base):
 def whole(touched):
     """Whether the change reaches every source: the tidy configuration, a CMake file or this tool."""
     return any(path in EVERYTHING or path.startswith("tools/tidy/") or path.endswith("CMakeLists.txt")
-               for path in touched)
+               or path.endswith(".cmake") for path in touched)
 
 
 def sources(commands, root):
