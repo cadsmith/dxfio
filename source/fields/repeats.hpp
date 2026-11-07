@@ -11,6 +11,8 @@ namespace DxfIO::Fields
 class DXFIO_API Repeats
 {
 public:
+  void Clear();
+
   void Asked(std::size_t begin, std::size_t end, int code);
 
   [[nodiscard]] auto Repeated(std::size_t at, int code) const -> bool;

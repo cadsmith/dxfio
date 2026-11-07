@@ -2,12 +2,14 @@
 
 #include "braces.hpp"
 #include "fields/handles.hpp"
+#include "fields/scratch.hpp"
 #include "tags/codes.hpp"
 
 #include "dxfio/handle.hpp"
 
 #include <format>
 #include <optional>
+#include <utility>
 
 namespace DxfIO
 {
@@ -46,9 +48,15 @@ auto Took(const Tags::Tag &one, const Heading &to, const Fields::Reading &with) 
 }
 } // namespace
 
+// The rest's room comes from the scratch when one is given, found by the records before.
 auto Head(std::span<const Tags::Tag> body, const Heading &to, const Fields::Reading &with) -> std::vector<Tags::Tag>
 {
   std::vector<Tags::Tag> rest;
+  if (with.Reuse != nullptr)
+  {
+    rest = std::move(with.Reuse->Rest);
+    rest.clear();
+  }
   const bool modern = with.Release >= Version::R13;
   bool marked = false;
   while (!body.empty())

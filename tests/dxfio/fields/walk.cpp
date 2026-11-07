@@ -1,6 +1,7 @@
 #include "fields/walk.hpp"
 
 #include "fields/elements.hpp"
+#include "fields/scratch.hpp"
 #include "tags/tags.hpp"
 #include "unknown/io.hpp"
 
@@ -10,6 +11,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace DxfIO::Fields
@@ -27,6 +29,72 @@ auto Large(const Tags::Tag &one) -> bool
   return std::get<double>(one.Value) > 5.0;
 }
 } // namespace
+
+TEST_CASE("walk: a scratch lends its room to one walk at a time, the next finds its own")
+{
+  const auto all = Tags::All("  8\nwalls\n 40\n1.0\n 40\n9.0\n");
+  REQUIRE(all);
+  Scratch scratch;
+  const Reading with{.Reuse = &scratch};
+  {
+    Walk first{*all, with};
+    CHECK(scratch.Busy);
+    CHECK(Real(first.Take(40)) == 1.0);
+    Walk second{*all, with};
+    CHECK(Real(second.Take(40)) == 1.0);
+    CHECK(Real(second.Take(40)) == 9.0);
+    CHECK(Real(first.Take(40)) == 9.0);
+  }
+  CHECK_FALSE(scratch.Busy);
+  CHECK(scratch.Used.capacity() >= all->size());
+  Walk again{*all, with};
+  CHECK(scratch.Busy);
+  CHECK(again.Take(8) != nullptr);
+  CHECK(again.Rest().size() == 2);
+}
+
+TEST_CASE("lease: assigned to itself, through another name, a lease keeps its hold")
+{
+  Scratch scratch;
+  Lease held{&scratch};
+  Lease &same = held;
+  held = same;
+  CHECK(held.From() == &scratch);
+  held = std::move(same);
+  CHECK(held.From() == &scratch);
+  Lease none;
+  Lease &alias = none;
+  none = std::move(alias);
+  CHECK(none.From() == nullptr);
+}
+
+TEST_CASE("walk: a copy holds no scratch, a move carries the hold, an assigned walk keeps its own")
+{
+  const auto all = Tags::All("  8\nwalls\n 40\n1.0\n");
+  REQUIRE(all);
+  Scratch scratch;
+  const Reading with{.Reuse = &scratch};
+  {
+    Walk held{*all, with};
+    {
+      const Walk copy = held;
+      CHECK(scratch.Busy);
+    }
+    CHECK(scratch.Busy);
+    Walk other{*all, Reading{}};
+    other = held;
+    other = std::move(held);
+    CHECK(scratch.Busy);
+    held = std::move(other);
+    CHECK(scratch.Busy);
+    Walk moved{std::move(held)};
+    Walk plain{*all, Reading{}};
+    moved = std::move(plain);
+    CHECK(scratch.Busy);
+    CHECK(Real(moved.Take(40)) == 1.0);
+  }
+  CHECK_FALSE(scratch.Busy);
+}
 
 TEST_CASE("walk: a field takes the next group of its code, wrapping round")
 {
