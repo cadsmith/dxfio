@@ -10,7 +10,7 @@
 // of its "Output" blocks, and every DXF it writes loads back with no issue and passes
 // dxfio's audit (and AutoCAD's, with --acad).
 import { execFileSync, spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -107,7 +107,7 @@ for (const slug of pages) {
   const code = [...text.matchAll(/```cpp[^\n]*\n([^]*?)```/g)].map((one) => one[1]).join('\n')
   const expected = [...text.matchAll(/```text \[Output\]\n([^]*?)```/g)].map((one) => one[1]).join('')
   const place = join(work, slug)
-  execFileSync('mkdir', ['-p', place])
+  mkdirSync(place, { recursive: true })
   copyFileSync(sample, join(place, 'plan.dxf'))
   const built = join(place, 'example')
   writeFileSync(`${built}.cpp`, code.includes('auto main(') ? code : program(code))

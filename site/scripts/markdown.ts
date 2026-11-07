@@ -30,8 +30,23 @@ const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;
 
 let groups = 0
 
+// Each fenced block of the body: the whole of it, its language and its meta, found fence by fence.
+const fenced = (body: string): [string, string, string][] => {
+  const out: [string, string, string][] = []
+  let at = body.indexOf('```')
+  while (at >= 0) {
+    const line = body.indexOf('\n', at)
+    const end = line < 0 ? -1 : body.indexOf('```', line + 1)
+    if (end < 0) break
+    const [lang, ...meta] = body.slice(at + 3, line).split(' ')
+    out.push([body.slice(at, end + 3), lang, meta.length ? ` ${meta.join(' ')}` : ''])
+    at = body.indexOf('```', end + 3)
+  }
+  return out
+}
+
 const group = (body: string): string => {
-  const fences = [...body.matchAll(/```(\w+)([^\n]*)\n([^]*?)```/g)]
+  const fences = fenced(body)
   const id = `group-${++groups}`
   const tabs = fences
     .map(
@@ -65,10 +80,12 @@ export const page = (source: string) => {
   }
   for (const line of lines) {
     if (line.startsWith('# ')) continue
-    const heading = /^## (.+?)(?:\s+\{#([\w-]+)\})?\s*$/.exec(line)
-    if (heading) {
+    if (line.startsWith('## ')) {
       close()
-      current = { id: heading[2] ?? slug(heading[1]), title: heading[1], lines: [] }
+      let title = line.slice(3).trim()
+      const tagged = /\s\{#([\w-]+)\}$/.exec(title)
+      if (tagged) title = title.slice(0, tagged.index).trimEnd()
+      current = { id: tagged?.[1] ?? slug(title), title, lines: [] }
       continue
     }
     if (current) current.lines.push(line)

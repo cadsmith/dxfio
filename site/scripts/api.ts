@@ -68,10 +68,12 @@ const docBefore = (text: string, at: number): string => {
 
 const closing = (text: string, open: number): number => {
   let depth = 0
-  for (let at = open; at < text.length; at += 1) {
+  let at = open
+  while (at < text.length) {
     if (text[at] === '/' && text[at + 1] === '/') {
-      at = text.indexOf('\n', at)
-      if (at < 0) return text.length
+      const end = text.indexOf('\n', at)
+      if (end < 0) return text.length
+      at = end + 1
       continue
     }
     if (text[at] === '{') depth += 1
@@ -79,8 +81,43 @@ const closing = (text: string, open: number): number => {
       depth -= 1
       if (depth === 0) return at
     }
+    at += 1
   }
   return text.length
+}
+
+// The code without a body in braces at its end, and without the semicolon after one.
+const bodiless = (code: string): string => {
+  const brace = code.indexOf('{')
+  if (brace < 0 || !/\}\s*;?$/.test(code)) return code
+  return code.slice(0, brace).trimEnd()
+}
+
+// A constructor's signature without its initializer list: what follows the closing parenthesis and a lone colon.
+const uninitialized = (code: string): string => {
+  const colon = code.search(/\)\s*:(?!:)/)
+  return colon < 0 ? code : `${code.slice(0, colon)})`
+}
+
+// A field as `type name`, `type name = value` or `type name{value}`: the name is the last word before the value.
+const field = (code: string): { type: string; name: string; value?: string } | undefined => {
+  const whole = code.endsWith(';') ? code.slice(0, -1) : undefined
+  if (whole === undefined) return undefined
+  const equals = whole.indexOf('=')
+  const brace = whole.indexOf('{')
+  let head = whole
+  let value: string | undefined
+  if (equals >= 0 && (brace < 0 || equals < brace)) {
+    head = whole.slice(0, equals)
+    value = whole.slice(equals + 1).trimStart()
+  } else if (brace >= 0 && whole.endsWith('}')) {
+    head = whole.slice(0, brace)
+    value = whole.slice(brace + 1, -1)
+  }
+  head = head.trimEnd()
+  const space = head.search(/\s\w+$/)
+  if (space < 0) return undefined
+  return { type: head.slice(0, space), name: head.slice(space + 1), value }
 }
 
 type Statement = { code: string; doc: string }
@@ -129,23 +166,15 @@ const membersOf = (body: string, kind: 'struct' | 'class') => {
     if (one.code === 'public:') visible = true
     if (one.code === 'private:' || one.code === 'protected:') visible = false
     if (!visible || one.code.includes('operator') || /^(using|static|friend|template)\b/.test(one.code)) continue
-    if (/^[\w:<>, ]*\(|\w\s*\(/.test(one.code.replace(/\{[^]*\}\s*;?$/, '')) && !/^[^(]*=/.test(one.code)) {
-      const signature = one.code
-        .replace(/\s*\{[^]*\}\s*;?$/, '')
-        .replace(/;$/, '')
-        .replace(/^\[\[nodiscard\]\]\s*/, '')
-        .replace(/\)\s*:\s*(?!:)[^]*$/, ')')
+    const stripped = bodiless(one.code)
+    if ((/^[\w:<>, ]*\(/.test(stripped) || /\w\s*\(/.test(stripped)) && !/^[^(]*=/.test(one.code)) {
+      const signature = uninitialized(stripped.replace(/;$/, '').replace(/^\[\[nodiscard\]\]\s*/, ''))
       methods.push({ signature: squeeze(signature), doc: one.doc })
       continue
     }
-    const match = /^(.+?)\s+(\w+)\s*(\{.*\}|=\s*.+)?;$/.exec(one.code)
-    if (!match) continue
-    fields.push({
-      type: match[1],
-      name: match[2],
-      value: match[3] ? match[3].replace(/^=\s*/, '').replace(/^\{(.*)\}$/, '$1') : undefined,
-      doc: one.doc,
-    })
+    const parsed = field(one.code)
+    if (!parsed) continue
+    fields.push({ ...parsed, doc: one.doc })
   }
   return { fields, methods }
 }
@@ -159,7 +188,7 @@ for (const path of walk(source).filter((p) => p.endsWith('.hpp'))) {
 
 const headers: Header[] = walk(include)
   .filter((path) => path.endsWith('.hpp'))
-  .sort()
+  .sort((one, other) => (one < other ? -1 : one > other ? 1 : 0))
   .map((path) => {
     const text = readFileSync(path, 'utf8')
     const rel = relative(include, path)
@@ -189,13 +218,17 @@ const headers: Header[] = walk(include)
       name: one[1],
       doc: docBefore(text, one.index ?? 0),
       values: statements(one[2].replace(/,\s*$/gm, ';'))
-        .map((value) => ({ name: value.code.replace(/;$/, '').replace(/\s*=.*$/, ''), doc: value.doc }))
+        .map((value) => {
+          const code = value.code.replace(/;$/, '')
+          const equals = code.indexOf('=')
+          return { name: (equals < 0 ? code : code.slice(0, equals)).trimEnd(), doc: value.doc }
+        })
         .filter((value) => /^\w+$/.test(value.name)),
     }))
-    const aliases = [...text.matchAll(/^[ \t]*using (\w+)\s*=\s*([^;]+);/gm)]
+    const aliases = [...text.matchAll(/^[ \t]*using (\w+) =([^;]+);/gm)]
       .filter((one) => outside(one.index ?? 0))
       .map((one) => ({ name: one[1], target: squeeze(one[2]), doc: docBefore(text, (one.index ?? 0) + one[0].indexOf('using')) }))
-    const constants = [...text.matchAll(/^[ \t]*inline constexpr ([\w:<>, ]+?) (\w+)\s*(?:=\s*([^;]+)|\{([^;]*)\});/gm)]
+    const constants = [...text.matchAll(/^[ \t]*inline constexpr ([^=;{\n]+) (\w+)(?: = ([^;]+)|\{([^;]*)\});/gm)]
       .filter((one) => outside(one.index ?? 0))
       .map((one) => ({
         type: squeeze(one[1]),
@@ -203,8 +236,8 @@ const headers: Header[] = walk(include)
         value: squeeze(one[3] ?? one[4] ?? ''),
         doc: docBefore(text, (one.index ?? 0) + one[0].indexOf('inline')),
       }))
-    const declared = /^[ \t]*(?:\[\[nodiscard\]\]\s*)?DXFIO_API\s+(auto|void)\s+(\w+)\(([^;]*?)\)\s*(->\s*[^;{]+)?;/gm
-    const templated = /^(template\s*<[^>]*>\s*(?:requires[^\n]*\n)?)\s*\[\[nodiscard\]\]\s*auto\s+(\w+)\(([^)]*)\)\s*(->\s*[^{;]+)\{/gm
+    const declared = /^[ \t]*(?:\[\[nodiscard\]\] )?DXFIO_API (auto|void) (\w+)\(([^;]*)\)(\s*->[^;{]+)?;/gm
+    const templated = /^(template <[^>]*>\n(?:[ \t]*requires[^\n]*\n)?)[ \t]*\[\[nodiscard\]\] auto (\w+)\(([^)]*)\)(\s*->[^{;]+)\{/gm
     const functions = [
       ...[...text.matchAll(declared)].map((one) => ({ one, head: '' })),
       ...[...text.matchAll(templated)].map((one) => ({ one, head: squeeze(one[1]) + ' ' })),

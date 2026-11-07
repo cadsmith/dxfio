@@ -13,7 +13,7 @@ const hosted = (): Plugin => ({
   configurePreviewServer(server) {
     const out = path.resolve(server.config.root, server.config.build.outDir)
     server.middlewares.use((request, response, next) => {
-      const address = decodeURIComponent(new URL(request.url ?? '/', 'http://host').pathname)
+      const address = decodeURIComponent(new URL(request.url ?? '/', 'https://host').pathname)
       const file = path.join(out, address.slice(server.config.base.length - 1))
       if (existsSync(address.endsWith('/') ? path.join(file, 'index.html') : file)) return next()
       response.statusCode = 404
