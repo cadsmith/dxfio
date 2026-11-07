@@ -30,17 +30,28 @@ const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;
 
 let groups = 0
 
-// Each fenced block of the body: the whole of it, its language and its meta, found fence by fence.
+// Where the next fence opens at or after the index: three backticks at the start of a line with a language word
+// right after them, as ```cpp; none for backticks inside prose.
+const opening = (body: string, from: number): number => {
+  let at = body.indexOf('```', from)
+  while (at >= 0) {
+    if ((at === 0 || body[at - 1] === '\n') && /^\w/.test(body.slice(at + 3, at + 4))) return at
+    at = body.indexOf('```', at + 3)
+  }
+  return -1
+}
+
+// Each fenced block of the body: the whole of it, its language and the rest of its opening line as the meta.
 const fenced = (body: string): [string, string, string][] => {
   const out: [string, string, string][] = []
-  let at = body.indexOf('```')
+  let at = opening(body, 0)
   while (at >= 0) {
     const line = body.indexOf('\n', at)
     const end = line < 0 ? -1 : body.indexOf('```', line + 1)
     if (end < 0) break
-    const [lang, ...meta] = body.slice(at + 3, line).split(' ')
-    out.push([body.slice(at, end + 3), lang, meta.length ? ` ${meta.join(' ')}` : ''])
-    at = body.indexOf('```', end + 3)
+    const info = /^(\w+)([^\n]*)/.exec(body.slice(at + 3, line))
+    if (info) out.push([body.slice(at, end + 3), info[1], info[2]])
+    at = opening(body, end + 3)
   }
   return out
 }
