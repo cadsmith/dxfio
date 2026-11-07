@@ -30,11 +30,12 @@ const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;
 
 let groups = 0
 
-// Whether the backticks at the index open a line, indented by up to the three spaces CommonMark allows.
-const leading = (body: string, at: number): boolean => {
+// Where the line opens that the backticks at the index stand on, indented by up to the three spaces CommonMark
+// allows; nothing when they stand elsewhere in a line.
+const lined = (body: string, at: number): number | undefined => {
   let start = at
   while (start > 0 && at - start < 3 && body[start - 1] === ' ') start -= 1
-  return start === 0 || body[start - 1] === '\n'
+  return start === 0 || body[start - 1] === '\n' ? start : undefined
 }
 
 // Where the next fence opens at or after the index: three backticks opening a line with a language word right
@@ -42,13 +43,14 @@ const leading = (body: string, at: number): boolean => {
 const opening = (body: string, from: number): number => {
   let at = body.indexOf('```', from)
   while (at >= 0) {
-    if (leading(body, at) && /^\w/.test(body.slice(at + 3, at + 4))) return at
+    if (lined(body, at) !== undefined && /^\w/.test(body.slice(at + 3, at + 4))) return at
     at = body.indexOf('```', at + 3)
   }
   return -1
 }
 
-// Each fenced block of the body: the whole of it, its language and the rest of its opening line as the meta.
+// Each fenced block of the body, from its opening line's start so that an indented fence keeps its indentation
+// for the renderer to take off: the whole of it, its language and the rest of its opening line as the meta.
 const fenced = (body: string): [string, string, string][] => {
   const out: [string, string, string][] = []
   let at = opening(body, 0)
@@ -57,7 +59,7 @@ const fenced = (body: string): [string, string, string][] => {
     const end = line < 0 ? -1 : body.indexOf('```', line + 1)
     if (end < 0) break
     const info = /^(\w+)([^\n]*)/.exec(body.slice(at + 3, line))
-    if (info) out.push([body.slice(at, end + 3), info[1], info[2]])
+    if (info) out.push([body.slice(lined(body, at) ?? at, end + 3), info[1], info[2]])
     at = opening(body, end + 3)
   }
   return out
