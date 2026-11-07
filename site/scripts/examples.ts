@@ -18,6 +18,8 @@ const site = join(import.meta.dirname, '..')
 const root = join(site, '..')
 const library = join(root, 'build', 'release', 'lib', 'libdxfio.a')
 const compiler = process.env.CXX ?? 'c++'
+// The interpreter for AutoCAD's audit, from the fixed places it stands in rather than wherever PATH leads.
+const python = ['/usr/bin/python3', '/usr/local/bin/python3', '/opt/homebrew/bin/python3'].find((one) => existsSync(one))
 const sample = join(root, 'tests', 'fixtures', 'acad', 'entities-r2018.dxf')
 const flags = ['-std=c++23', '-Wall', '-Wextra', '-Werror', `-I${join(root, 'include')}`]
 
@@ -28,6 +30,10 @@ if (!existsSync(library)) {
 
 const args = process.argv.slice(2)
 const acad = args.includes('--acad')
+if (acad && !python) {
+  console.log('no python3 in /usr/bin, /usr/local/bin or /opt/homebrew/bin: AutoCAD cannot audit')
+  process.exit(1)
+}
 const wanted = args.filter((one) => !one.startsWith('--'))
 const content = join(root, 'docs')
 const pages = ['guide', 'tutorials']
@@ -138,7 +144,7 @@ for (const slug of pages) {
   let autocad = ''
   if (acad) {
     const refused = written.filter((name) => {
-      const audit = spawnSync('python3', [join(root, 'tools', 'acad', 'verify.py'), join(place, name)], { encoding: 'utf8', timeout: 120000 })
+      const audit = spawnSync(python ?? '', [join(root, 'tools', 'acad', 'verify.py'), join(place, name)], { encoding: 'utf8', timeout: 120000 })
       if (audit.status !== 0) console.log(`✗ ${slug}: AutoCAD's audit fails ${name}\n${audit.stdout}${audit.stderr}`)
       return audit.status !== 0
     })

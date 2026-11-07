@@ -19,5 +19,3 @@ Each family is a `std::variant` of the kinds dxfio types, ending with `Unknown`:
 ## Kinds with a type {#kinds}
 
 Every entity and object below has a type of its own, and so do the records of every table. Their fields are in the [reference](/reference/).
-
-<!-- kinds -->

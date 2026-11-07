@@ -8,16 +8,16 @@ Every release from R10 to R2018 reads and writes, ASCII or binary. A document sa
 
 | Release | `$ACADVER` | Text |
 | :--- | :--- | :--- |
-| `Version::R10`<span class="cell-note">AutoCAD 1988</span> | `AC1006` | <span class="pill pill-gold">Code page</span> |
-| `Version::R12`<span class="cell-note">AutoCAD 1992</span> | `AC1009` | <span class="pill pill-gold">Code page</span> |
-| `Version::R13`<span class="cell-note">AutoCAD 1994</span> | `AC1012` | <span class="pill pill-gold">Code page</span> |
-| `Version::R14`<span class="cell-note">AutoCAD 1997</span> | `AC1014` | <span class="pill pill-gold">Code page</span> |
-| `Version::R2000`<span class="cell-note">AutoCAD 1999</span> | `AC1015` | <span class="pill pill-gold">Code page</span> |
-| `Version::R2004`<span class="cell-note">AutoCAD 2003</span> | `AC1018` | <span class="pill pill-gold">Code page</span> |
-| `Version::R2007`<span class="cell-note">AutoCAD 2006</span> | `AC1021` | <span class="pill pill-blue">UTF-8</span> |
-| `Version::R2010`<span class="cell-note">AutoCAD 2009</span> | `AC1024` | <span class="pill pill-blue">UTF-8</span> |
-| `Version::R2013`<span class="cell-note">AutoCAD 2012</span> | `AC1027` | <span class="pill pill-blue">UTF-8</span> |
-| `Version::R2018`<span class="cell-note">AutoCAD 2017</span> | `AC1032` | <span class="pill pill-blue">UTF-8</span> |
+| `Version::R10`[AutoCAD 1988]{.cell-note} | `AC1006` | [Code page]{.pill .pill-gold} |
+| `Version::R12`[AutoCAD 1992]{.cell-note} | `AC1009` | [Code page]{.pill .pill-gold} |
+| `Version::R13`[AutoCAD 1994]{.cell-note} | `AC1012` | [Code page]{.pill .pill-gold} |
+| `Version::R14`[AutoCAD 1997]{.cell-note} | `AC1014` | [Code page]{.pill .pill-gold} |
+| `Version::R2000`[AutoCAD 1999]{.cell-note} | `AC1015` | [Code page]{.pill .pill-gold} |
+| `Version::R2004`[AutoCAD 2003]{.cell-note} | `AC1018` | [Code page]{.pill .pill-gold} |
+| `Version::R2007`[AutoCAD 2006]{.cell-note} | `AC1021` | [UTF-8]{.pill .pill-blue} |
+| `Version::R2010`[AutoCAD 2009]{.cell-note} | `AC1024` | [UTF-8]{.pill .pill-blue} |
+| `Version::R2013`[AutoCAD 2012]{.cell-note} | `AC1027` | [UTF-8]{.pill .pill-blue} |
+| `Version::R2018`[AutoCAD 2017]{.cell-note} | `AC1032` | [UTF-8]{.pill .pill-blue} |
 
 ## Saving to an older one {#older}
 

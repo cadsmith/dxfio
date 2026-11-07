@@ -1,11 +1,45 @@
 """Writes a drawing of a given size for dxfio_bench: a fixture with a realistic mix of entities spliced into
-its ENTITIES section, each with a handle of its own, and $HANDSEED moved past them.
+its ENTITIES section, each with a handle of its own, and $HANDSEED moved past them. The fixture is read from
+the repository and the drawing written under the working directory.
 
     python3 tools/bench/generate.py tests/fixtures/acad/entities-r2018.dxf 100 big.dxf
 """
 
-import random
+import hashlib
+import os
 import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+
+def within(base, given):
+    """The real path of what was given, which must lie under the base."""
+    path = os.path.realpath(given)
+    if path != base and not path.startswith(base + os.sep):
+        raise SystemExit(f"{given} is not under {base}")
+    return path
+
+
+class Rolls:
+    """Numbers drawn from BLAKE2 over a counter: the same drawing every time, and no part of random."""
+
+    def __init__(self, seed):
+        self.seed = seed
+        self.count = 0
+
+    def fraction(self):
+        self.count += 1
+        digest = hashlib.blake2b(self.count.to_bytes(8, "little"), digest_size=8, key=self.seed).digest()
+        return int.from_bytes(digest, "little") / 2**64
+
+    def uniform(self, low, high):
+        return low + (high - low) * self.fraction()
+
+    def randint(self, low, high):
+        return low + int(self.fraction() * (high - low + 1))
+
+    def choice(self, items):
+        return items[int(self.fraction() * len(items))]
 
 KINDS = ("LINE", "LWPOLYLINE", "CIRCLE", "ARC", "TEXT", "POINT", "MTEXT")
 OWNER = b"1F"
@@ -59,7 +93,9 @@ def section(lines, name):
 def main():
     if len(sys.argv) != 4:
         raise SystemExit(__doc__)
-    source, megabytes, target = sys.argv[1], float(sys.argv[2]), sys.argv[3]
+    source = within(ROOT, sys.argv[1])
+    megabytes = float(sys.argv[2])
+    target = within(os.getcwd(), sys.argv[3])
     with open(source, "rb") as file:
         bytes_ = file.read()
     newline = b"\r\n" if b"\r\n" in bytes_[:200] else b"\n"
@@ -68,7 +104,7 @@ def main():
     end = begin
     while not (lines[end].strip() == b"0" and lines[end + 1] == b"ENDSEC"):
         end += 1
-    rng = random.Random(7)
+    rng = Rolls(b"dxfio bench")
     wanted = int(megabytes * 1024 * 1024)
     kept = lines[:begin] + lines[end:]
     out, size, handle = [], sum(len(line) + len(newline) for line in kept), FIRST_HANDLE

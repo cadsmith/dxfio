@@ -98,6 +98,19 @@ def audit_dxf(dxf_path: Path) -> tuple[bool, str, int, int, int]:
             os.remove(scr_path)
 
 
+PLACES = (ROOT, Path(tempfile.gettempdir()).resolve())
+
+
+def placed(given: str) -> Path:
+    """The real path of what was given, which must lie in the repository or the temporary directory, where
+    the examples the site checks are written."""
+    path = Path(given).resolve()
+    for place in PLACES:
+        if path == place or place in path.parents:
+            return path
+    raise SystemExit(f"{given} is neither in the repository nor in {PLACES[1]}")
+
+
 def main() -> int:
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <dxf-file-or-dir>...")
@@ -105,10 +118,10 @@ def main() -> int:
 
     targets: list[Path] = []
     for arg in sys.argv[1:]:
-        p = Path(arg)
+        p = placed(arg)
         if p.is_dir():
             targets.extend(sorted(p.glob("**/*.dxf")))
-        elif p.is_file():
+        elif p.is_file() and p.suffix.lower() == ".dxf":
             targets.append(p)
 
     if not targets:
