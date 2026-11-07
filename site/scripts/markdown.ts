@@ -1,12 +1,17 @@
 import { fromHighlighter } from '@shikijs/markdown-it/core'
 import MarkdownIt from 'markdown-it'
+import attrs from 'markdown-it-attrs'
+import spans from 'markdown-it-bracketed-spans'
 import alerts from 'markdown-it-github-alerts'
 import type { Plugin } from 'vite'
 import { figure, highlighter, labelOf, themes } from './highlight.ts'
 
 type Part = { id: string; title: string; html: string }
 
-const md = MarkdownIt({ html: true, typographer: true })
+// No HTML from the pages themselves: a class on a run of text is written as [text]{.class}.
+const md = MarkdownIt({ html: false, typographer: true })
+// The spans plugin is CommonJS, so its default import is the plugin itself under Node and a namespace to TypeScript.
+md.use(spans as unknown as Parameters<typeof md.use>[0]).use(attrs)
 md.use(alerts)
 md.use(fromHighlighter(highlighter, { themes, defaultColor: false, transformers: [figure] }))
 md.renderer.rules.table_open = () => '<div class="table-scroll"><table>\n'
@@ -80,13 +85,15 @@ const group = (body: string): string => {
   return `<div class="code-group" id="${id}"><div class="code-tabs" role="tablist">${tabs}</div>${blocks}</div>`
 }
 
+// A code group is rendered apart and stands in for a paragraph of its own, blank lines around it so that the prose
+// after it never joins it, until the page is rendered.
 const render = (source: string): string => {
   const held: string[] = []
   const marked = source.replace(/^::: code-group\n([^]*?)\n:::\s*$/gm, (_, body: string) => {
     held.push(group(body))
-    return `<!--group ${held.length - 1}-->`
+    return `\n\n%%group ${held.length - 1}%%\n\n`
   })
-  return md.render(marked).replace(/<!--group (\d+)-->/g, (_, index: string) => held[Number(index)])
+  return md.render(marked).replace(/<p>%%group (\d+)%%<\/p>\n/g, (_, index: string) => held[Number(index)])
 }
 
 export const page = (source: string) => {

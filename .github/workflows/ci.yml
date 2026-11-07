@@ -216,12 +216,12 @@ jobs:
         run: |
           cmake --build --preset release --target dxfio_bench
           python3 tools/bench/generate.py \
-            tests/fixtures/acad/entities-r2018.dxf 10 "$RUNNER_TEMP/bench.dxf"
+            tests/fixtures/acad/entities-r2018.dxf 10 build/bench.dxf
           {
             echo '## Benchmark'
             echo '```'
-            build/release/bin/dxfio_bench "$RUNNER_TEMP/bench.dxf" 5
-            build/release/bin/dxfio_bench "$RUNNER_TEMP/bench.dxf" 5 1
+            build/release/bin/dxfio_bench build/bench.dxf 5
+            build/release/bin/dxfio_bench build/bench.dxf 5 1
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

@@ -11,6 +11,7 @@ pair is none.
 """
 
 import codecs
+import os
 import sys
 
 SINGLE = ["874"] + [str(n) for n in range(1250, 1259)]
@@ -52,6 +53,17 @@ def table(values):
     return ",\n    ".join(rows)
 
 
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+
+def within(base, given):
+    """The real path of what was given, which must lie under the base: the header is the repository's."""
+    path = os.path.realpath(given)
+    if path != base and not path.startswith(base + os.sep):
+        raise SystemExit(f"{given} is not under {base}")
+    return path
+
+
 def main(argv):
     if len(argv) != 2:
         print(__doc__)
@@ -86,7 +98,7 @@ def main(argv):
         lines.append(f"     {pairs_name}}},")
     lines += ["}};", "", "} // namespace DxfIO::Generated", "",
               "#endif /* DXFIO_ENCODING_PAGES_HPP */", ""]
-    with open(argv[1], "w", encoding="ascii") as out:
+    with open(within(ROOT, argv[1]), "w", encoding="ascii") as out:
         out.write("\n".join(lines))
     return 0
 

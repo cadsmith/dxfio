@@ -2,6 +2,8 @@
 
     python3 tools/tidy/touched.py build/tidy/compile_commands.json [base]
 
+The compile commands come from a build directory under the repository.
+
 With a base ref, the changed files are those of `git diff` from the merge base to HEAD: a changed source is
 printed, and so is every source whose preprocessed dependencies, from the compiler's -MM, hold a changed
 header. A change to the tidy configuration, a CMake file or this tool prints every source, as no base does.
@@ -73,9 +75,12 @@ def dependencies(entry, root):
 def main():
     if len(sys.argv) not in (2, 3):
         raise SystemExit(__doc__)
-    with open(sys.argv[1], encoding="utf-8") as file:
-        commands = json.load(file)
     root = pathlib.Path(__file__).resolve().parents[2]
+    commands_path = os.path.realpath(sys.argv[1])
+    if not commands_path.startswith(str(root) + os.sep):
+        raise SystemExit(f"{sys.argv[1]} is not a build under the repository")
+    with open(commands_path, encoding="utf-8") as file:
+        commands = json.load(file)
     library = sources(commands, root)
     touched = changed(root, sys.argv[2]) if len(sys.argv) == 3 else None
     if touched is None or whole(touched):

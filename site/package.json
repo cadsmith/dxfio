@@ -24,6 +24,8 @@
     "gsap": "^3.15.0",
     "lucide-react": "^1.67.0",
     "markdown-it": "^15.0.3",
+    "markdown-it-attrs": "^5.0.1",
+    "markdown-it-bracketed-spans": "^1.0.3",
     "markdown-it-github-alerts": "^1.0.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
