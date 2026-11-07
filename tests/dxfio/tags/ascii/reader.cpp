@@ -140,6 +140,18 @@ TEST_CASE("ascii: a blank that completes a caret escape ending a group 0 value i
                   });
 }
 
+TEST_CASE("ascii: a code line keeps its meaning with blanks after the digits, and refuses what is no code")
+{
+  const std::vector<Tag> tags = Read("70 \n1\n\t 0\t\nEOF\n");
+  REQUIRE(tags.size() == 2);
+  CHECK(tags.at(0).Code == 70);
+  CHECK(tags.at(1).Code == 0);
+  CHECK(Refused("1072\nx\n") == Failure{1, "group code expected, found \"1072\""});
+  CHECK(Refused("+70\n1\n") == Failure{1, "group code expected, found \"+70\""});
+  CHECK(Refused("-1\n1\n") == Failure{1, "group code expected, found \"-1\""});
+  CHECK(Refused("7 0\n1\n") == Failure{1, "group code expected, found \"7 0\""});
+}
+
 TEST_CASE("ascii: a group of a code DXF does not define is kept and told")
 {
   std::vector<Issue> issues;
