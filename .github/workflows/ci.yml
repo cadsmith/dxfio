@@ -46,6 +46,8 @@ jobs:
               - include/**
               - source/**
               - tests/**
+              - tools/tidy/**
+              - cmake/**
               - vendor/**
 
   check:
@@ -385,11 +387,13 @@ jobs:
     timeout-minutes: 30
     env:
       CXX: /usr/lib/llvm-23/bin/clang++
-      CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
+      # The whole history, so a pull request can be diffed from its merge
+      # base with main.
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       # The same major as the Homebrew LLVM used locally: .clang-tidy names
       # checks that older releases do not have.
@@ -397,20 +401,30 @@ jobs:
         with:
           packages: clang-23 clang-tidy-23
 
-      - uses: ./.github/actions/ccache
-
-      - uses: hendrikmuhs/ccache-action@v1.2.24
-        with:
-          key: tidy
-          install: no
-          max-size: 300M
-          save: ${{ github.event_name == 'push' }}
-
+      # Configure alone: clang-tidy reads the compile commands and parses
+      # each source itself, so nothing is compiled or linked here.
       - name: Configure
         run: cmake --preset tidy -DDXFIO_CLANG_TIDY=/usr/lib/llvm-23/bin/clang-tidy
 
-      - name: Build
-        run: cmake --build --preset tidy
+      # A pull request checks the sources its change reaches, a changed
+      # source or one that includes a changed header; a push to main checks
+      # every source.
+      - name: Tidy
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            base="origin/$GITHUB_BASE_REF"
+          else
+            base=""
+          fi
+          python3 tools/tidy/touched.py build/tidy/compile_commands.json \
+            ${base:+"$base"} > "$RUNNER_TEMP/touched"
+          if [ ! -s "$RUNNER_TEMP/touched" ]; then
+            echo "the change reaches no source of the library"
+            exit 0
+          fi
+          echo "checking $(wc -l < "$RUNNER_TEMP/touched") sources"
+          xargs run-clang-tidy-23 -p build/tidy -j "$(nproc)" -quiet \
+            < "$RUNNER_TEMP/touched"
 
   # The one check to require: green when every job passed or was skipped
   # by the changes gate, whose skipped matrix jobs report no names of
