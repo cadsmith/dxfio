@@ -13,8 +13,8 @@
 
 namespace DxfIO::Fields
 {
-// What no field took. Read in no order, a repeat of a code the part asked for is left out and told: written
-// after the fields, a marker before them, it would be read in their place.
+// What no field took. Read in no order, a repeat of a code the part asked for, standing before the part or
+// in it, is left out and told: written after the fields, a marker before them, it would be read in their place.
 auto Walk::Rest() const -> std::vector<Group>
 {
   std::vector<Group> out;
