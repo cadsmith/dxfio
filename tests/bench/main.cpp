@@ -2,6 +2,7 @@
 // save, binary save and binary load, the best of several runs each, with the peak memory of the process.
 #include "dxfio/dxfio.hpp"
 
+#include <algorithm>
 #include <charconv>
 #include <chrono>
 #include <cstddef>
@@ -15,6 +16,8 @@
 
 #if defined(_WIN32)
 // clang-format off
+#  define NOMINMAX
+#  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
 #  include <psapi.h>
 // clang-format on
