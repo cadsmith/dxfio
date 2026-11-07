@@ -17,8 +17,8 @@ struct Sheet
 
   Sheet(const Sheet &) = delete;
   Sheet(Sheet &&) = delete;
-  auto operator=(const Sheet &) -> auto;
-  auto operator=(Sheet &&) -> auto;
+  auto operator=(const Sheet &) -> Sheet & = delete;
+  auto operator=(Sheet &&) -> Sheet & = delete;
   ~Sheet() = default;
 
   std::string Out;
