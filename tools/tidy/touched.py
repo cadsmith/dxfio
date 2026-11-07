@@ -76,7 +76,8 @@ def main():
     library = sources(commands, root)
     touched = changed(root, sys.argv[2]) if len(sys.argv) == 3 else None
     if touched is None or whole(touched):
-        print("\n".join(sorted(library)))
+        if library:
+            print("\n".join(sorted(library)))
         return
     reached = {path for path in library if path in touched}
     rest = [path for path in library if path not in reached]
@@ -84,7 +85,8 @@ def main():
         for path, deps in zip(rest, pool.map(lambda p: dependencies(library[p], root), rest)):
             if deps & touched:
                 reached.add(path)
-    print("\n".join(sorted(reached)))
+    if reached:
+        print("\n".join(sorted(reached)))
 
 
 if __name__ == "__main__":
