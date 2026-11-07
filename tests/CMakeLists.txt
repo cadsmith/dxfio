@@ -23,6 +23,7 @@ target_include_directories(dxfio_tests
 )
 
 add_subdirectory(api)
+add_subdirectory(bench)
 add_subdirectory(dxfio)
 
 get_target_property(units dxfio_tests SOURCES)
