@@ -8,10 +8,12 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <format>
 #include <iterator>
+#include <memory>
 #include <string_view>
 #include <utility>
 #include <variant>
@@ -25,6 +27,10 @@ constexpr std::size_t Most = 127;
 constexpr int Escape = 255;
 
 constexpr std::array<int, 8> Widths{6, 6, 9, 18, 6, 6, 6, 6};
+
+constexpr std::size_t Columns = 3;
+
+constexpr std::size_t Room = 32;
 
 constexpr std::string_view Digits = "0123456789ABCDEF";
 
@@ -123,7 +129,7 @@ void Writer::Spell(int code, const Content &value)
           [this, code](const Chunk &bytes) -> void
           { Pieces(bytes.Bytes, [this, code](std::string_view part) -> void { Pair(code, Hex(part)); }); },
           [this, code](double number) -> void { Pair(code, Real(number).value_or(std::string{})); },
-          [this, code](auto number) -> void { Pair(code, std::format("{:>{}}", std::int64_t{number}, Width(code))); },
+          [this, code](auto number) -> void { Padded(code, std::int64_t{number}); },
       },
       value);
 }
@@ -196,9 +202,32 @@ void Writer::Coded(int code)
   Little(*m_Out, static_cast<std::uint16_t>(code));
 }
 
+// An integer right-aligned in its type's column, as AutoCAD writes one.
+void Writer::Padded(int code, std::int64_t number)
+{
+  std::array<char, Room> text{};
+  text.fill(' ');
+  std::array<char, Room> digits{};
+  const std::to_chars_result written = std::to_chars(digits.data(), std::to_address(digits.end()), number);
+  const auto count = static_cast<std::size_t>(written.ptr - digits.data());
+  const auto width = static_cast<std::size_t>(Width(code));
+  const std::size_t padding = width > count ? width - count : 0;
+  std::ranges::copy(digits.data(), written.ptr, std::next(text.begin(), static_cast<std::ptrdiff_t>(padding)));
+  Pair(code, std::string_view{text.data(), padding + count});
+}
+
+// The code in its three columns, the value on the line after, each line ended as AutoCAD ends it.
 void Writer::Pair(int code, std::string_view text)
 {
-  std::format_to(std::back_inserter(*m_Out), "{:>3}\r\n", code);
+  std::array<char, Room> digits{};
+  const std::to_chars_result written = std::to_chars(digits.data(), std::to_address(digits.end()), code);
+  const auto count = static_cast<std::size_t>(written.ptr - digits.data());
+  if (count < Columns)
+  {
+    m_Out->append(Columns - count, ' ');
+  }
+  m_Out->append(digits.data(), written.ptr);
+  m_Out->append("\r\n");
   m_Out->append(text);
   m_Out->append("\r\n");
   m_Line += 2;

@@ -56,6 +56,12 @@ TEST_CASE("writer: tags laid out in AutoCAD's columns")
               "290\r\n     1\r\n  5\r\n2C20A\r\n  1\r\n\r\n");
 }
 
+TEST_CASE("writer: an integer as wide as its column takes no padding")
+{
+  CHECK(Written({Tag{.Code = 160, .Value = std::int64_t{100000000000000000}}}) == "160\r\n100000000000000000\r\n");
+  CHECK(Written({Tag{.Code = 70, .Value = std::int64_t{-32768}}}) == " 70\r\n-32768\r\n");
+}
+
 TEST_CASE("writer: a chunk goes out as hex, 127 bytes a tag")
 {
   const std::string bytes(130, '\xab');
