@@ -13,11 +13,13 @@
 
 namespace DxfIO::Fields
 {
-// What no field took. Read in no order, a repeat of a code the part asked for, standing before the part or
-// in it, is left out and told: written after the fields, a marker before them, it would be read in their place.
+// What no field took. A repeat of a code the part asked for, standing where it would be written straight
+// after the part's fields, is left out and told: under the marker written before them, it would be read in
+// their place.
 auto Walk::Rest() const -> std::vector<Group>
 {
   std::vector<Group> out;
+  const std::size_t uncovered = Uncovered();
   for (std::size_t index = 0; index < m_Body.size(); ++index)
   {
     const Tags::Tag &one = At(index);
@@ -25,7 +27,7 @@ auto Walk::Rest() const -> std::vector<Group>
     {
       continue;
     }
-    if (!m_Ordered && !m_Unfit.at(index) && m_Repeats.Trailing(index, one.Code))
+    if (index < uncovered && !m_Unfit.at(index) && m_Repeats.Trails(one.Code))
     {
       m_With.Tell(Issue{.Line = one.Line, .What = std::format("group {} given again, one kept", one.Code)});
       continue;
@@ -83,6 +85,26 @@ auto Walk::Dropped(std::size_t at, int code, Standing where) -> std::optional<st
   // loses the group, and is told.
   m_Refused = true;
   return std::format("group {} out of its place, dropped", code);
+}
+
+// How far the rest stands uncovered: up to the first marker no field took, which, written with the rest,
+// fences what follows it. Nothing is, read in order, where the rest keeps its place, or before R13, where
+// no marker is written and a field takes the first group of its code.
+auto Walk::Uncovered() const -> std::size_t
+{
+  if (m_Ordered || m_With.Release < Version::R13)
+  {
+    return 0;
+  }
+  for (std::size_t index = 0; index < m_Body.size(); ++index)
+  {
+    const int code = At(index).Code;
+    if (!m_Used.at(index) && (code == Tags::Codes::Marker || code == Tags::Codes::Embedded))
+    {
+      return index;
+    }
+  }
+  return m_Body.size();
 }
 
 auto Walk::Opening() const -> std::size_t

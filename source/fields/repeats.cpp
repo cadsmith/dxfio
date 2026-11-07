@@ -25,14 +25,10 @@ void Repeats::Asked(std::size_t begin, std::size_t end, int code)
   found->End = end;
 }
 
-auto Repeats::Ask::Covers(std::size_t at, int code) const -> bool
-{
-  return Code == code && Begin <= at && at < End;
-}
-
 auto Repeats::Repeated(std::size_t at, int code) const -> bool
 {
-  return std::ranges::any_of(m_Asked, [at, code](const Ask &one) -> bool { return one.Covers(at, code); });
+  return std::ranges::any_of(m_Asked, [at, code](const Ask &one) -> bool
+                             { return one.Code == code && one.Begin <= at && at < one.End; });
 }
 
 void Repeats::Mark()
@@ -43,13 +39,5 @@ void Repeats::Mark()
 auto Repeats::Trails(int code) const -> bool
 {
   return std::ranges::contains(std::span{m_Asked}.subspan(m_Last), code, &Ask::Code);
-}
-
-// Whether the group at an index repeats a code the part being read asked for, standing no later than the
-// fence it asked in: written after the part's fields, it would stand in that fence.
-auto Repeats::Trailing(std::size_t at, int code) const -> bool
-{
-  return std::ranges::any_of(std::span{m_Asked}.subspan(m_Last),
-                             [at, code](const Ask &one) -> bool { return one.Code == code && at < one.End; });
 }
 } // namespace DxfIO::Fields
