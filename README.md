@@ -84,9 +84,10 @@ ctest --preset debug
 
 `ctest` runs `dxfio_tests` once per test file, named `dxfio/<file>`, so
 `ctest --preset debug -j 8` spreads them and `-R dxfio/tags/` runs one area.
-`dxfio_bench`, built with the tests, times load and save on one drawing
-read into memory, and `tools/bench/generate.py` makes a drawing of a given
-size from a fixture; CI prints the figures of a 10 MB one in its summary.
+`dxfio_bench`, built on request with `--target dxfio_bench`, times load and
+save on one drawing read into memory, and `tools/bench/generate.py` makes a
+drawing of a given size from a fixture; CI prints the figures of a 10 MB one
+in its summary.
 
 ## Continuous integration
 

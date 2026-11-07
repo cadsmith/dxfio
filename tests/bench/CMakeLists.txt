@@ -1,4 +1,4 @@
-add_executable(dxfio_bench
+add_executable(dxfio_bench EXCLUDE_FROM_ALL
   main.cpp
 )
 
