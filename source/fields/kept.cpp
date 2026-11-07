@@ -13,15 +13,24 @@
 
 namespace DxfIO::Fields
 {
+// What no field took. Read in no order, a repeat of a code the part asked for is left out and told: written
+// after the fields, a marker before them, it would be read in their place.
 auto Walk::Rest() const -> std::vector<Group>
 {
   std::vector<Group> out;
   for (std::size_t index = 0; index < m_Body.size(); ++index)
   {
-    if (!m_Used.at(index))
+    const Tags::Tag &one = At(index);
+    if (m_Used.at(index))
     {
-      out.push_back(Owned(At(index), m_With.Text));
+      continue;
     }
+    if (!m_Ordered && !m_Unfit.at(index) && m_Repeats.Trailing(index, one.Code))
+    {
+      m_With.Tell(Issue{.Line = one.Line, .What = std::format("group {} given again, one kept", one.Code)});
+      continue;
+    }
+    out.push_back(Owned(one, m_With.Text));
   }
   return out;
 }
