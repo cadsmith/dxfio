@@ -12,6 +12,7 @@
 #include <iterator>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <utility>
 
 #if defined(_WIN32)
@@ -64,11 +65,12 @@ void Timed(std::string_view what, std::size_t bytes, int runs, StepT &&step)
               static_cast<double>(bytes) / best / Mega, Peak());
 }
 
+// The runs asked for, the default when the argument is no count or none.
 auto Count(std::string_view text) -> int
 {
-  int value = Runs;
-  std::from_chars(text.data(), text.data() + text.size(), value);
-  return value;
+  int value = 0;
+  const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
+  return error == std::errc{} && end == text.data() + text.size() && value > 0 ? value : Runs;
 }
 } // namespace
 

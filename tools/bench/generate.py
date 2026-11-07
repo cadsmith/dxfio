@@ -70,7 +70,8 @@ def main():
         end += 1
     rng = random.Random(7)
     wanted = int(megabytes * 1024 * 1024)
-    out, size, handle = [], 0, FIRST_HANDLE
+    kept = lines[:begin] + lines[end:]
+    out, size, handle = [], sum(len(line) + len(newline) for line in kept), FIRST_HANDLE
     counts = dict.fromkeys(KINDS, 0)
     while size < wanted:
         kind = rng.choice(KINDS)
@@ -81,11 +82,12 @@ def main():
         size += sum(len(group) + len(newline) for group in groups)
     head = lines[:begin]
     for at, line in enumerate(head):
-        if line == b"$HANDSEED":
+        if line == b"$HANDSEED" and at > 0 and head[at - 1].strip() == b"9":
             head[at + 2] = format(handle, "X").encode()
+            break
     with open(target, "wb") as file:
         file.write(newline.join(head + out + lines[end:]))
-    print(f"{target}: {sum(counts.values())} entities, {size / 1048576:.1f} MB of them", counts)
+    print(f"{target}: {sum(counts.values())} entities, {size / 1048576:.1f} MB", counts)
 
 
 if __name__ == "__main__":
