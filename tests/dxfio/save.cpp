@@ -13,6 +13,7 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <filesystem>
 #include <ios>
@@ -20,6 +21,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -40,6 +42,64 @@ auto Entries(const Document &drawing) -> std::size_t
   return out;
 }
 } // namespace
+
+namespace
+{
+// A thousand lines, one of them broken when asked, in a drawing of the release given.
+auto Lined(bool broken) -> Document
+{
+  Document drawing = Create(Version::R2018);
+  for (int at = 0; at < 1000; ++at)
+  {
+    Entities::Line line;
+    line.Start = Vector{static_cast<double>(at), 0.0, 0.0};
+    line.End = Vector{static_cast<double>(at), 1.0, 0.0};
+    if (broken && at == 700)
+    {
+      line.End.Y = std::numeric_limits<double>::quiet_NaN();
+    }
+    drawing.Entities.emplace_back(std::move(line));
+  }
+  return drawing;
+}
+} // namespace
+
+TEST_CASE("save: a drawing written on several threads is the bytes written on one, in either form")
+{
+  const Document drawing = Lined(false);
+  const auto alone = Save(drawing, Options{.Threads = 1});
+  REQUIRE(alone);
+  const auto packed = Save(drawing, Options{.Binary = true, .Threads = 1});
+  REQUIRE(packed);
+  CHECK(packed->Bytes != alone->Bytes);
+  for (const int threads : {0, 2, 8})
+  {
+    CAPTURE(threads);
+    const auto together = Save(drawing, Options{.Threads = threads});
+    REQUIRE(together);
+    CHECK(together->Bytes == alone->Bytes);
+    const auto binary = Save(drawing, Options{.Binary = true, .Threads = threads});
+    REQUIRE(binary);
+    CHECK(binary->Bytes == packed->Bytes);
+  }
+  const auto read = Load(alone->Bytes, Loading{.Threads = 8});
+  REQUIRE(read);
+  CHECK(read->Document.Entities.size() == 1000);
+}
+
+TEST_CASE("save: a failure in a later part names the line the one thread would")
+{
+  const Document drawing = Lined(true);
+  const auto alone = Save(drawing, Options{.Threads = 1});
+  REQUIRE_FALSE(alone);
+  CHECK(alone.error().Line > 1000);
+  const auto together = Save(drawing, Options{.Threads = 8});
+  REQUIRE_FALSE(together);
+  CHECK(together.error() == alone.error());
+  const auto binary = Save(drawing, Options{.Binary = true, .Threads = 8});
+  REQUIRE_FALSE(binary);
+  CHECK(binary.error() == Save(drawing, Options{.Binary = true, .Threads = 1}).error());
+}
 
 TEST_CASE("save: up, an unknown object with no handle leaves every dictionary whole")
 {

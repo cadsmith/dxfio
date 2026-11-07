@@ -2068,9 +2068,14 @@ struct DXFIO_API Loaded
   DxfIO::Document Document{};
   std::vector<Issue> Issues{};
 };
-[[nodiscard]] DXFIO_API auto Load(std::string_view bytes) -> std::expected<Loaded, Failure>;
-[[nodiscard]] DXFIO_API auto Load(std::istream &from) -> std::expected<Loaded, Failure>;
-[[nodiscard]] DXFIO_API auto LoadFile(const std::filesystem::path &file) -> std::expected<Loaded, Failure>;
+struct DXFIO_API Loading
+{
+  int Threads{0};
+};
+[[nodiscard]] DXFIO_API auto Load(std::string_view bytes, const Loading &with = {}) -> std::expected<Loaded, Failure>;
+[[nodiscard]] DXFIO_API auto Load(std::istream &from, const Loading &with = {}) -> std::expected<Loaded, Failure>;
+[[nodiscard]] DXFIO_API auto LoadFile(const std::filesystem::path &file, const Loading &with = {})
+    -> std::expected<Loaded, Failure>;
 }
 == dxfio/matrix.hpp
 #include "dxfio/api.hpp"
@@ -2745,6 +2750,7 @@ struct DXFIO_API Options
   Version Release{Version::R2018};
   std::string Codepage{};
   bool Binary{};
+  int Threads{0};
 };
 struct DXFIO_API Saved
 {

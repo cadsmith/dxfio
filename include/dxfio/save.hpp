@@ -25,6 +25,9 @@ struct DXFIO_API Options
   std::string Codepage{};
   /// Writes binary DXF instead of ASCII.
   bool Binary{};
+  /// The threads the entities and objects are written on: 0 for as many as the machine has, 1 for the calling
+  /// thread alone. The bytes come out the same whatever the count.
+  int Threads{0};
 };
 
 /// A drawing written as DXF, with what the writer had to note about it.

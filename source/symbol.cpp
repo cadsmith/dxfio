@@ -27,18 +27,22 @@ struct Pool
 
 constexpr std::size_t Remembered = 4;
 
-auto Shared() -> Pool &
+// The pool in shards, each with a lock of its own, so threads reading a drawing's records together seldom
+// wait on one another; a text's shard follows its hash.
+constexpr std::size_t Shards = 16;
+
+auto Shared(std::string_view text) -> Pool &
 {
-  static Pool all;
-  return all;
+  static std::array<Pool, Shards> all;
+  return all.at(Hashing{}(text) % Shards);
 }
 
 auto Pooled(std::string_view text) -> const std::string *
 {
-  Pool &all = Shared();
-  const std::scoped_lock guard{all.Lock};
-  const auto found = all.Texts.find(text);
-  return found == all.Texts.end() ? &*all.Texts.emplace(text).first : &*found;
+  Pool &shard = Shared(text);
+  const std::scoped_lock guard{shard.Lock};
+  const auto found = shard.Texts.find(text);
+  return found == shard.Texts.end() ? &*shard.Texts.emplace(text).first : &*found;
 }
 
 auto Interned(std::string_view text) -> const std::string *

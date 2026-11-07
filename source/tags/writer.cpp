@@ -121,6 +121,12 @@ auto Writer::Put(const Tag &one) -> std::expected<void, Failure>
   return {};
 }
 
+void Writer::Append(std::string_view bytes, std::size_t lines)
+{
+  m_Out->append(bytes);
+  m_Line += lines;
+}
+
 void Writer::Spell(int code, const Content &value)
 {
   std::visit(
