@@ -1,9 +1,7 @@
 #include "tags/codes.hpp"
 
-#include "seek.hpp"
-
-#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <utility>
 
 namespace DxfIO::Tags::Codes
@@ -31,7 +29,21 @@ constexpr std::array Ranges{
     Range{.First = 440, .Last = 459, .Is = Type::Int32},    Range{.First = 1071, .Last = 1071, .Is = Type::Int32},
     Range{.First = 160, .Last = 169, .Is = Type::Int64},    Range{.First = 290, .Last = 299, .Is = Type::Boolean},
 };
-} // namespace
+
+// Each code's type, one byte a code, so a lookup is one load rather than a walk of the ranges.
+constexpr auto Types = [] -> std::array<Type, Last + 1>
+{
+  std::array<Type, Last + 1> out{};
+  out.fill(Type::Text);
+  for (const Range &range : Ranges)
+  {
+    for (int code = range.First; code <= range.Last; ++code)
+    {
+      out.at(static_cast<std::size_t>(code)) = range.Is;
+    }
+  }
+  return out;
+}();
 
 // The codes the DXF reference defines, as the ranges of its table of group code value types.
 constexpr std::array<std::pair<int, int>, 27> Given{{
@@ -40,16 +52,32 @@ constexpr std::array<std::pair<int, int>, 27> Given{{
     {450, 459}, {460, 469}, {470, 479}, {480, 481}, {999, 999}, {1000, 1009}, {1010, 1059}, {1060, 1070}, {1071, 1071},
 }};
 
+constexpr auto Defineds = [] -> std::array<bool, Last + 1>
+{
+  std::array<bool, Last + 1> out{};
+  for (const auto &[first, last] : Given)
+  {
+    for (int code = first; code <= last; ++code)
+    {
+      out.at(static_cast<std::size_t>(code)) = true;
+    }
+  }
+  return out;
+}();
+
+auto Within(int code) -> bool
+{
+  return code >= 0 && code <= Last;
+}
+} // namespace
+
 auto Defined(int code) -> bool
 {
-  return std::ranges::any_of(Given, [code](const std::pair<int, int> &range) -> bool
-                             { return code >= range.first && code <= range.second; });
+  return Within(code) && Defineds.at(static_cast<std::size_t>(code));
 }
 
 auto Of(int code) -> Type
 {
-  const auto *found =
-      SeekIf(Ranges, [code](const Range &one) -> bool { return code >= one.First && code <= one.Last; });
-  return found == nullptr ? Type::Text : found->Is;
+  return Within(code) ? Types.at(static_cast<std::size_t>(code)) : Type::Text;
 }
 } // namespace DxfIO::Tags::Codes
