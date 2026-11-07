@@ -84,4 +84,8 @@ ctest --preset memory
 
 The libc++ for `memory` comes from LLVM's own sources, built as
 [ci.yml](../.github/workflows/ci.yml) builds it: the `runtimes` directory
-of the `llvmorg-23.1.5` tag with `LLVM_USE_SANITIZER=MemoryWithOrigins`.
+of the `llvmorg-23.1.5` tag, `libcxx` and `libcxxabi` only, with
+`LLVM_USE_SANITIZER=MemoryWithOrigins` and `LIBCXXABI_USE_LLVM_UNWINDER=OFF`,
+so that exceptions unwind through the system's libgcc_s. A libunwind built
+with MSan cannot unwind one, it recurses until the stack ends, and the
+unwinder's own memory is not what MSan checks.
