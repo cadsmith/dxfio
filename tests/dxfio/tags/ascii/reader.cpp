@@ -121,6 +121,25 @@ TEST_CASE("ascii: blanks around a group 0 value are trimmed and told, other valu
   CHECK(Told("  0\nSECTION\n").empty());
 }
 
+TEST_CASE("ascii: a blank that completes a caret escape ending a group 0 value is kept")
+{
+  std::vector<Issue> issues;
+  const std::vector<Tag> tags = Read("  0\nA^ \n  0\n^ ^ \n  0\nB^  \n  0\n^^ \n  0\n^\n  0\nC^\n  0\nD^\t\n", &issues);
+  REQUIRE(tags.size() == 7);
+  CHECK(tags.at(0).Value == Content{std::string_view{"A^ "}});
+  CHECK(tags.at(1).Value == Content{std::string_view{"^ ^ "}});
+  CHECK(tags.at(2).Value == Content{std::string_view{"B^ "}});
+  CHECK(tags.at(3).Value == Content{std::string_view{"^^"}});
+  CHECK(tags.at(4).Value == Content{std::string_view{"^"}});
+  CHECK(tags.at(5).Value == Content{std::string_view{"C^"}});
+  CHECK(tags.at(6).Value == Content{std::string_view{"D^"}});
+  CHECK(issues == std::vector{
+                      Issue{.Line = 6, .What = "group 0 holds \"B^  \" with blanks, trimmed"},
+                      Issue{.Line = 8, .What = "group 0 holds \"^^ \" with blanks, trimmed"},
+                      Issue{.Line = 14, .What = "group 0 holds \"D^\t\" with blanks, trimmed"},
+                  });
+}
+
 TEST_CASE("ascii: a group of a code DXF does not define is kept and told")
 {
   std::vector<Issue> issues;
