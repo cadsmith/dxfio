@@ -219,6 +219,72 @@ TEST_CASE("walk: the rest leaves out a repeat of a code the part's fields took, 
   CHECK(issues.front().What == "group 40 given again, one kept");
 }
 
+TEST_CASE("walk: the rest leaves out a repeat before the part of a code its fields took, told")
+{
+  const auto all = Tags::All("  8\nwalls\n  2\nearly\n100\nAcDbBlockReference\n  2\nname\n  3\nnote\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Issues = &issues}};
+  CHECK(in.Take(8) != nullptr);
+  REQUIRE(in.Subclass("AcDbBlockReference"));
+  const Tags::Tag *name = in.Take(2);
+  REQUIRE(name != nullptr);
+  CHECK(std::get<std::string_view>(name->Value) == "name");
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 1);
+  CHECK(rest.front().Code == 3);
+  REQUIRE(issues.size() == 1);
+  CHECK(issues.front().Line == 3);
+  CHECK(issues.front().What == "group 2 given again, one kept");
+}
+
+TEST_CASE("walk: the rest keeps a repeat before the part under a marker no field took")
+{
+  const auto all = Tags::All("  8\nwalls\n100\nAcDbTable\n  2\nearly\n100\nAcDbBlockReference\n  2\nname\n  3\nnote\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Issues = &issues}};
+  CHECK(in.Take(8) != nullptr);
+  REQUIRE(in.Subclass("AcDbBlockReference"));
+  CHECK(in.Take(2) != nullptr);
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 3);
+  CHECK(rest.at(0).Code == 100);
+  CHECK(rest.at(1).Code == 2);
+  CHECK(rest.at(2).Code == 3);
+  CHECK(issues.empty());
+}
+
+TEST_CASE("walk: the rest keeps a repeat before the part under an embedded object's marker")
+{
+  const auto all = Tags::All("  8\nwalls\n101\nEmbedded Object\n  2\nearly\n100\nAcDbBlockReference\n  2\nname\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Issues = &issues}};
+  CHECK(in.Take(8) != nullptr);
+  REQUIRE(in.Subclass("AcDbBlockReference"));
+  CHECK(in.Take(2) != nullptr);
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 2);
+  CHECK(rest.at(0).Code == 101);
+  CHECK(rest.at(1).Code == 2);
+  CHECK(issues.empty());
+}
+
+TEST_CASE("walk: before R13 the rest keeps a repeat of a code a field took")
+{
+  const auto all = Tags::All("  8\nwalls\n 40\n1.0\n 40\n9.0\n  3\nnote\n");
+  REQUIRE(all);
+  std::vector<Issue> issues;
+  Walk in{*all, Reading{.Release = Version::R12, .Issues = &issues}};
+  CHECK(in.Take(8) != nullptr);
+  CHECK(Real(in.Take(40)) == 1.0);
+  const std::vector<Group> rest = in.Rest();
+  REQUIRE(rest.size() == 2);
+  CHECK(rest.front().Code == 40);
+  CHECK(issues.empty());
+}
+
 TEST_CASE("walk: the rest keeps a repeat of a code an earlier part took")
 {
   const auto all = Tags::All("  8\nwalls\n100\nAcDbLine\n 40\n1.0\n  8\nagain\n  3\nnote\n");

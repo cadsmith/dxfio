@@ -97,6 +97,7 @@ private:
   [[nodiscard]] auto Closing(std::size_t from) const -> std::size_t;
   auto Through(std::size_t from, std::string_view marker) -> std::size_t;
   [[nodiscard]] auto Opening() const -> std::size_t;
+  [[nodiscard]] auto Uncovered() const -> std::size_t;
 
   std::span<const Tags::Tag> m_Body;
   Reading m_With;
