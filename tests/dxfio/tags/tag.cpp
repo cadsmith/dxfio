@@ -9,7 +9,7 @@ namespace DxfIO::Tags
 {
 TEST_CASE("tag: two tags are equal by their code and value, not their line")
 {
-  CHECK(Tag{.Code = 40, .Value = 1.5, .Line = 7} == Tag{.Code = 40, .Value = 1.5, .Line = 9});
+  CHECK(Tag{.Code = 40, .Line = 7, .Value = 1.5} == Tag{.Code = 40, .Line = 9, .Value = 1.5});
   CHECK_FALSE(Tag{.Code = 40, .Value = 1.5} == Tag{.Code = 41, .Value = 1.5});
   CHECK_FALSE(Tag{.Code = 70, .Value = std::int64_t{1}} == Tag{.Code = 70, .Value = true});
 }

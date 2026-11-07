@@ -19,11 +19,14 @@ struct DXFIO_API Chunk
 
 using Content = std::variant<std::string_view, std::int64_t, double, bool, Chunk>;
 
+// A group as read: its code, the line it stands on in an ASCII file, 0 in a binary one, and its value, a view
+// into the file's bytes for text. The line fits 32 bits: a file of more lines, eight gigabytes at the least,
+// is never held whole in memory as a drawing is.
 struct DXFIO_API Tag
 {
   int Code{};
+  std::uint32_t Line{};
   Content Value;
-  std::size_t Line{};
 
   auto operator==(const Tag &other) const -> bool;
 };
