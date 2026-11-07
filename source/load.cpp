@@ -5,6 +5,7 @@
 #include "entities/io.hpp"
 #include "fields/owned.hpp"
 #include "file/file.hpp"
+#include "file/mapping.hpp"
 #include "file/sections/header.hpp"
 #include "file/sections/nests.hpp"
 #include "file/sections/records.hpp"
@@ -29,6 +30,7 @@
 #include <ios>
 #include <istream>
 #include <iterator>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -267,27 +269,19 @@ auto Load(std::istream &from) -> std::expected<Loaded, Failure>
   return Load(bytes);
 }
 
+// A plain file is read as the system maps it, its bytes taken from disk as they lie and never copied; one the
+// system will not map, or that is no plain file, is read as a stream to its end.
 auto LoadFile(const std::filesystem::path &file) -> std::expected<Loaded, Failure>
 {
+  if (const std::optional<File::Mapping> mapped = File::Mapping::Of(file))
+  {
+    return Load(mapped->View());
+  }
   std::ifstream from{file, std::ios::binary};
   if (!from)
   {
     return std::unexpected{Failure{.Line = 0, .What = std::format("{} cannot be read", file.string())}};
   }
-  std::error_code unsized;
-  const std::uintmax_t size = std::filesystem::file_size(file, unsized);
-  if (unsized)
-  {
-    return Load(from);
-  }
-  std::string bytes;
-  bytes.resize_and_overwrite(static_cast<std::size_t>(size),
-                             [&from](char *into, std::size_t room) -> std::size_t
-                             {
-                               from.read(into, static_cast<std::streamsize>(room));
-                               return static_cast<std::size_t>(from.gcount());
-                             });
-  bytes.append(std::istreambuf_iterator<char>{from}, std::istreambuf_iterator<char>{});
-  return Load(bytes);
+  return Load(from);
 }
 } // namespace DxfIO
