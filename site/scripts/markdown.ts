@@ -30,12 +30,19 @@ const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;
 
 let groups = 0
 
-// Where the next fence opens at or after the index: three backticks at the start of a line with a language word
-// right after them, as ```cpp; none for backticks inside prose.
+// Whether the backticks at the index open a line, indented by up to the three spaces CommonMark allows.
+const leading = (body: string, at: number): boolean => {
+  let start = at
+  while (start > 0 && at - start < 3 && body[start - 1] === ' ') start -= 1
+  return start === 0 || body[start - 1] === '\n'
+}
+
+// Where the next fence opens at or after the index: three backticks opening a line with a language word right
+// after them, as ```cpp; none for backticks inside prose.
 const opening = (body: string, from: number): number => {
   let at = body.indexOf('```', from)
   while (at >= 0) {
-    if ((at === 0 || body[at - 1] === '\n') && /^\w/.test(body.slice(at + 3, at + 4))) return at
+    if (leading(body, at) && /^\w/.test(body.slice(at + 3, at + 4))) return at
     at = body.indexOf('```', at + 3)
   }
   return -1
