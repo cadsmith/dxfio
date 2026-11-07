@@ -2,6 +2,7 @@
 
 #include "../blanks.hpp"
 #include "../whole.hpp"
+#include "encoding/carets.hpp"
 #include "tags/codes.hpp"
 #include "tags/glimpse.hpp"
 #include "tags/values.hpp"
@@ -19,6 +20,25 @@ namespace DxfIO::Tags::Ascii
 namespace
 {
 constexpr std::string_view Mark = "\xef\xbb\xbf";
+
+constexpr char Hat = '^';
+
+constexpr char Blank = ' ';
+
+// Whether the text ends on a caret that opens an escape, as "^ " writes a caret: the blank after it is its
+// second half, not padding.
+auto Escaping(std::string_view text) -> bool
+{
+  while (!text.empty())
+  {
+    text.remove_prefix(Encoding::Caret(text) ? 2 : 1);
+    if (text.size() == 1)
+    {
+      return text.front() == Hat;
+    }
+  }
+  return false;
+}
 
 auto Ending(std::string_view rest) -> std::size_t
 {
@@ -98,7 +118,15 @@ auto Reader::Line() -> std::string_view
 
 auto Reader::Bare(std::string_view text, std::size_t line) -> std::string_view
 {
-  const std::string_view word = Trimmed(text);
+  std::string_view word = Trimmed(text);
+  if (Escaping(word))
+  {
+    const std::size_t end = static_cast<std::size_t>(word.data() - text.data()) + word.size();
+    if (end < text.size() && text.at(end) == Blank)
+    {
+      word = text.substr(end - word.size(), word.size() + 1);
+    }
+  }
   if (word.size() != text.size())
   {
     Tell(Issue{.Line = line, .What = std::format("group 0 holds \"{}\" with blanks, trimmed", Glimpse(text))});
