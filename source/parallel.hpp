@@ -21,7 +21,8 @@ struct DXFIO_API Range
 // The threads to work with: the count asked for, or the machine's when none or less is asked, one at least.
 [[nodiscard]] DXFIO_API auto Threads(int asked) -> int;
 
-// How many parts to cut work for that many threads into: a few each, so that the uneven ones even out.
+// How many parts to cut work for that many threads into: one for one thread, which then takes the work
+// whole and in order; a few each otherwise, so that the uneven ones even out.
 [[nodiscard]] DXFIO_API auto Parts(int threads) -> std::size_t;
 
 // Count items cut into at most that many parts of near equal size, none shorter than least but the last;

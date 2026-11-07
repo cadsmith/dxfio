@@ -55,7 +55,8 @@ auto Threads(int asked) -> int
 
 auto Parts(int threads) -> std::size_t
 {
-  return static_cast<std::size_t>(Threads(threads)) * Each;
+  const auto count = static_cast<std::size_t>(Threads(threads));
+  return count == 1 ? 1 : count * Each;
 }
 
 auto Parted(std::size_t count, std::size_t parts, std::size_t least) -> std::vector<Range>
