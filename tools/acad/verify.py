@@ -103,7 +103,8 @@ PLACES = (ROOT, Path(tempfile.gettempdir()).resolve())
 
 def placed(given: str) -> Path:
     """The real path of what was given, which must lie in the repository or the temporary directory, where
-    the examples the site checks are written."""
+    the examples the site checks are written; a file found in a directory is checked the same, so that a
+    link in it leads nowhere else."""
     path = Path(given).resolve()
     for place in PLACES:
         if path == place or place in path.parents:
@@ -120,7 +121,7 @@ def main() -> int:
     for arg in sys.argv[1:]:
         p = placed(arg)
         if p.is_dir():
-            targets.extend(sorted(p.glob("**/*.dxf")))
+            targets.extend(placed(str(found)) for found in sorted(p.glob("**/*.dxf")) if found.is_file())
         elif p.is_file() and p.suffix.lower() == ".dxf":
             targets.append(p)
 
