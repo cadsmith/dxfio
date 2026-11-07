@@ -39,6 +39,7 @@ sanitizers' strictest runtime options.
 | `dxfio_headers` | - | Object | Each public header compiled on its own, twice |
 | `dxfio_api` | - | Custom, test | Takes the public interface's snapshot; the test compares it |
 | `dxfio_fuzz_dxf`, `dxfio_fuzz_tags`, `dxfio_fuzz_escapes` | - | Executable | libFuzzer targets |
+| `dxfio_bench` | - | Executable, on request | Times load and save on one drawing, from memory, best of several runs |
 | `coverage` | - | Custom | Runs the tests and gates lines, functions, regions and branches at 100% |
 
 ## Install
@@ -56,6 +57,11 @@ cmake --build --preset debug
 ctest --preset debug
 ctest --preset debug -j 8 -R dxfio/tags/
 ./build/debug/bin/dxfio_tests -tc="hatch*"
+
+cmake --preset release
+cmake --build --preset release --target dxfio_bench
+python3 tools/bench/generate.py tests/fixtures/acad/entities-r2018.dxf 100 big.dxf
+./build/release/bin/dxfio_bench big.dxf
 
 cmake --preset coverage
 cmake --build --preset coverage --target coverage

@@ -206,6 +206,22 @@ jobs:
         if: matrix.target != 'coverage'
         run: ctest --preset ${{ matrix.preset }} --parallel 4
 
+      # The figures of one job, on a drawing the generator makes, in the
+      # job's summary: a change to the library is measured, not claimed.
+      # The bench is built here alone, on request, not by every job.
+      - name: Benchmark
+        if: matrix.package
+        run: |
+          cmake --build --preset release --target dxfio_bench
+          python3 tools/bench/generate.py \
+            tests/fixtures/acad/entities-r2018.dxf 10 "$RUNNER_TEMP/bench.dxf"
+          {
+            echo '## Benchmark'
+            echo '```'
+            build/release/bin/dxfio_bench "$RUNNER_TEMP/bench.dxf" 5
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # The installed package, used the way a consumer would.
       - name: Install and consume
         if: matrix.package
