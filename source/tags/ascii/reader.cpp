@@ -1,7 +1,6 @@
 #include "tags/ascii/reader.hpp"
 
 #include "../blanks.hpp"
-#include "../whole.hpp"
 #include "encoding/carets.hpp"
 #include "tags/codes.hpp"
 #include "tags/glimpse.hpp"
@@ -10,6 +9,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <format>
 #include <optional>
 #include <string>
@@ -50,16 +50,73 @@ auto Ending(std::string_view rest) -> std::size_t
   return rest.empty() ? 0 : 1;
 }
 
-auto Group(std::string_view head) -> std::optional<int>
+constexpr std::string_view Blanks = " \t";
+
+// A code line, blanks then digits then blanks, 0 to 1071, read with no trimming and no parse; nothing for any
+// other shape, which is refused.
+auto Coded(std::string_view line) -> std::optional<int>
 {
-  const std::optional<int> code = Whole(head);
-  if (!code || *code < 0 || *code > Codes::Last)
+  std::size_t at = 0;
+  while (at < line.size() && Blanks.contains(line[at]))
+  {
+    ++at;
+  }
+  int code = 0;
+  std::size_t digits = 0;
+  for (; at < line.size() && line[at] >= '0' && line[at] <= '9'; ++at, ++digits)
+  {
+    code = (code * 10) + (line[at] - '0');
+    if (code > Codes::Last)
+    {
+      return std::nullopt;
+    }
+  }
+  if (digits == 0)
   {
     return std::nullopt;
   }
-  return code;
+  while (at < line.size() && Blanks.contains(line[at]))
+  {
+    ++at;
+  }
+  return at == line.size() ? std::optional{code} : std::nullopt;
 }
 
+constexpr std::uint64_t Ones = 0x0101010101010101ULL;
+
+constexpr std::uint64_t Highs = 0x8080808080808080ULL;
+
+constexpr std::uint64_t Feeds = 0x0A0A0A0A0A0A0A0AULL;
+
+constexpr std::uint64_t Returns = 0x0D0D0D0D0D0D0D0DULL;
+
+// Whether any byte of the word is zero.
+auto Zeroed(std::uint64_t word) -> bool
+{
+  return ((word - Ones) & ~word & Highs) != 0;
+}
+
+// Where the line ends: the first carriage return or line feed, or the end of the text. Eight bytes are
+// looked at together, the byte found among them after.
+auto Break(std::string_view rest) -> std::size_t
+{
+  std::size_t at = 0;
+  while (rest.size() - at >= sizeof(std::uint64_t))
+  {
+    std::uint64_t word = 0;
+    std::memcpy(&word, &rest[at], sizeof word);
+    if (Zeroed(word ^ Feeds) || Zeroed(word ^ Returns))
+    {
+      break;
+    }
+    at += sizeof word;
+  }
+  while (at < rest.size() && rest[at] != '\n' && rest[at] != '\r')
+  {
+    ++at;
+  }
+  return at;
+}
 } // namespace
 
 Reader::Reader(std::string_view text, std::vector<Issue> *issues)
@@ -75,14 +132,15 @@ auto Reader::Done() const -> bool
 auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
 {
   const std::uint32_t at = m_Line + 1;
-  const std::string_view head = Trimmed(Line());
-  if (head.empty())
-  {
-    return std::unexpected{Failure{.Line = at, .What = "blank line where a group code is expected"}};
-  }
-  const std::optional<int> code = Group(head);
+  const std::string_view line = Line();
+  const std::optional<int> code = Coded(line);
   if (!code)
   {
+    const std::string_view head = Trimmed(line);
+    if (head.empty())
+    {
+      return std::unexpected{Failure{.Line = at, .What = "blank line where a group code is expected"}};
+    }
     return std::unexpected{
         Failure{.Line = at, .What = std::format("group code expected, found \"{}\"", Glimpse(head))}};
   }
@@ -111,7 +169,7 @@ auto Reader::Next() -> std::expected<std::optional<Tag>, Failure>
 auto Reader::Line() -> std::string_view
 {
   const std::string_view rest = m_Text.substr(m_At);
-  const std::size_t end = std::min(rest.find_first_of("\r\n"), rest.size());
+  const std::size_t end = Break(rest);
   m_At += end + Ending(rest.substr(end));
   ++m_Line;
   return rest.substr(0, end);

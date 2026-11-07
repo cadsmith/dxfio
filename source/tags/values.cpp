@@ -22,8 +22,16 @@ namespace
 {
 constexpr double Beyond = 9223372036854775808.0;
 
+constexpr std::string_view Edges = " \t+";
+
+// The number without the blanks around it and a leading plus, which most never have: those go through as
+// they are.
 auto Bare(std::string_view text) -> std::string_view
 {
+  if (!text.empty() && !Edges.contains(text.front()) && !Edges.contains(text.back()))
+  {
+    return text;
+  }
   const std::string_view word = Trimmed(text);
   if (!word.starts_with('+'))
   {
