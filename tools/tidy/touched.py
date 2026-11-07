@@ -11,6 +11,7 @@ import concurrent.futures
 import json
 import os
 import pathlib
+import re
 import shlex
 import subprocess
 import sys
@@ -19,6 +20,8 @@ EVERYTHING = (".clang-tidy", "CMakePresets.json", ".github/workflows/ci.yml")
 
 
 def changed(root, base):
+    if not re.fullmatch(r"[A-Za-z0-9_./-]+", base) or base.startswith("-"):
+        raise SystemExit(f"not a ref: {base}")
     merge_base = subprocess.run(["git", "merge-base", base, "HEAD"], cwd=root, check=True,
                                 capture_output=True, text=True).stdout.strip()
     diff = subprocess.run(["git", "diff", "--name-only", merge_base, "HEAD"], cwd=root, check=True,

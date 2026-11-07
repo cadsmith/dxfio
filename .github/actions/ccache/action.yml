@@ -21,7 +21,7 @@ runs:
             exit 1
             ;;
         esac
-        curl -sSL -o "$RUNNER_TEMP/$asset" \
+        curl -fsSL --proto '=https' --tlsv1.2 -o "$RUNNER_TEMP/$asset" \
           "https://github.com/ccache/ccache/releases/download/v$version/$asset"
         echo "$sum  $RUNNER_TEMP/$asset" | shasum -a 256 -c -
         tar -xf "$RUNNER_TEMP/$asset" -C "$RUNNER_TEMP"

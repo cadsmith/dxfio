@@ -12,9 +12,9 @@ runs:
     - shell: bash
       run: |
         codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
-        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key \
+        curl -fsS --proto '=https' --tlsv1.2 https://apt.llvm.org/llvm-snapshot.gpg.key \
           | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
-        echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename-23 main" \
+        echo "deb https://apt.llvm.org/$codename/ llvm-toolchain-$codename-23 main" \
           | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
         sudo apt-get update -q
         sudo apt-get install -y -q --no-install-recommends ${{ inputs.packages }}
