@@ -7,7 +7,7 @@
     "api": "node scripts/api.ts",
     "dev": "npm run api && vite",
     "build": "npm run api && tsc -b && vite build && vite build --ssr src/server.tsx --outDir dist-ssr && node scripts/prerender.ts",
-    "lint": "oxlint",
+    "lint": "oxlint --type-aware",
     "preview": "vite preview",
     "examples": "node scripts/examples.ts"
   },
@@ -41,6 +41,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "oxlint": "^1.89.0",
+    "oxlint-tsgolint": "^7.0.2006",
     "typescript": "~7.0.2",
     "vite": "^8.3.5"
   }

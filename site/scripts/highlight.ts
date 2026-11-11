@@ -49,7 +49,7 @@ export const highlighter = await createHighlighter({
 })
 
 const channels = (hex: string) => {
-  const full = hex.length <= 5 ? `#${[...hex.slice(1)].map((digit) => digit + digit).join('')}` : hex
+  const full = hex.length <= 5 ? `#${hex.slice(1).replace(/./g, (digit) => digit + digit)}` : hex
   return [1, 3, 5, 7].map((at, index) => (index < 3 || full.length > 7 ? Number.parseInt(full.slice(at, at + 2), 16) : 255))
 }
 

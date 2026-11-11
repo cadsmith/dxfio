@@ -12,7 +12,8 @@
       {
         "allowConstantExport": true
       }
-    ]
+    ],
+    "typescript/no-confusing-void-expression": "error"
   },
   "overrides": [
     {

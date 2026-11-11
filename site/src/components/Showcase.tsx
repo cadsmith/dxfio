@@ -32,7 +32,7 @@ export function Showcase({ html }: { html: string }) {
       <ol className="steps" role="tablist" aria-label="Steps of the example">
         {steps.map((one, index) => (
           <li key={one.title} role="presentation">
-            <button type="button" role="tab" aria-selected={active === index} onClick={() => setActive(index)}>
+            <button type="button" role="tab" aria-selected={active === index} onClick={() => { setActive(index) }}>
               <span className="step-index">{String(index + 1).padStart(2, '0')}</span>
               <span className="step-text">
                 <strong>{one.title}</strong>

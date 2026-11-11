@@ -63,7 +63,7 @@ export function Stage() {
           .set('.select rect', { opacity: 0 })
           .set('.cursor', { x: 26, y: 26, opacity: 0 })
           .set('.prompt', { text: { value: '' } })
-          .call(() => setRecord([]))
+          .call(() => { setRecord([]) })
           .from('.grid line', { opacity: 0, duration: 0.8, stagger: { each: 0.008, from: 'center' } })
           .to('.cursor', { opacity: 1, duration: 0.3 }, '-=0.3')
         type('LINE')
@@ -80,7 +80,7 @@ export function Stage() {
         timeline
           .to('.stem', { opacity: 1, duration: 0.25 })
           .set('.band-line', { opacity: 0 })
-          .call(() => setRecord(steps[0].record))
+          .call(() => { setRecord(steps[0].record) })
         type('CIRCLE', '+=0.35')
         type(steps[1].prompts[0], '+=0.15')
         timeline.to('.cursor', { x: 14.75, y: 14.5, duration: 0.8 }, '<')
@@ -97,20 +97,20 @@ export function Stage() {
         timeline
           .to('.bowl', { opacity: 1, duration: 0.25 })
           .set('.band-radius, .band-circle', { opacity: 0 })
-          .call(() => setRecord(steps[1].record))
+          .call(() => { setRecord(steps[1].record) })
         type('POINT', '+=0.35')
         type(steps[2].prompts[0], '+=0.15')
         timeline.to('.cursor', { x: 5, y: 3.5, duration: 0.8 }, '<')
         click()
         timeline
           .fromTo('.dot', { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2.6)' })
-          .call(() => setRecord(steps[2].record))
+          .call(() => { setRecord(steps[2].record) })
           .to('.cursor', { opacity: 0, duration: 0.4 }, '+=0.3')
           .to('.select rect', { opacity: 1, duration: 0.2, stagger: 0.04 }, '<')
           .to('.select rect', { opacity: 0, duration: 0.5 }, '+=0.9')
         type('', '<')
       })
-      return () => media.revert()
+      return () => { media.revert() }
     },
     { scope, dependencies: [run], revertOnUpdate: true },
   )
@@ -173,7 +173,7 @@ export function Stage() {
           )}
         </p>
       </div>
-      <button type="button" className="stage-replay" onClick={() => setRun((one) => one + 1)} aria-label="Draw the mark again">
+      <button type="button" className="stage-replay" onClick={() => { setRun((one) => one + 1) }} aria-label="Draw the mark again">
         <RotateCcwIcon />
       </button>
     </div>

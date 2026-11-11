@@ -20,7 +20,7 @@ const useActive = (headings: Heading[]) => {
     }
     update()
     window.addEventListener('scroll', update, { passive: true })
-    return () => window.removeEventListener('scroll', update)
+    return () => { window.removeEventListener('scroll', update) }
   }, [headings])
   return active
 }
@@ -41,7 +41,7 @@ export function Layout({ sidebar, outline, children }: Props) {
             <SheetHeader>
               <SheetTitle>dxfio</SheetTitle>
             </SheetHeader>
-            <div className="docs-sheet-body">{sidebar(() => setOpen(false))}</div>
+            <div className="docs-sheet-body">{sidebar(() => { setOpen(false) })}</div>
           </SheetContent>
         </Sheet>
       </div>
