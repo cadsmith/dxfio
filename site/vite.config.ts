@@ -17,6 +17,8 @@ const hosted = (): Plugin => ({
       const file = path.join(out, address.slice(server.config.base.length - 1))
       // An encoded slash outlives the URL's own folding of `..`, so the joined path is held to out.
       const inside = file === out || file.startsWith(out + path.sep)
+      // A static host probes paths it is given; the check above is what keeps them to out.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       if (inside && existsSync(address.endsWith('/') ? path.join(file, 'index.html') : file)) {
         next()
         return
