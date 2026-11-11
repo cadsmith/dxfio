@@ -1,5 +1,6 @@
 #include "classes.hpp"
 
+#include "entities/io.hpp"
 #include "objects/io.hpp"
 #include "seek.hpp"
 
@@ -8,6 +9,9 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <variant>
+#include <vector>
 
 namespace DxfIO::Empty
 {
@@ -118,6 +122,32 @@ constexpr int Proxy = 90;
 constexpr int Instances = 91;
 constexpr int Proxied = 280;
 constexpr int Entity = 281;
+
+// A kind the drawing holds, and how many of it.
+struct Counted
+{
+  std::string_view Name;
+  std::int64_t Count{};
+};
+
+void Count(std::vector<Counted> &all, std::string_view name)
+{
+  const auto found = std::ranges::find(all, name, &Counted::Name);
+  if (found == all.end())
+  {
+    all.push_back(Counted{.Name = name, .Count = 1});
+    return;
+  }
+  ++found->Count;
+}
+
+// Whether a CLASS record declares the kind of that name in its group 1.
+auto Declares(const Raw &one, std::string_view name) -> bool
+{
+  const auto named = std::ranges::find(one.Groups, Named, &Group::Code);
+  const auto *held = named == one.Groups.end() ? nullptr : std::get_if<std::string>(&named->Value);
+  return held != nullptr && *held == name;
+}
 } // namespace
 
 auto Declared(const Class &one, Version release, std::int64_t count) -> Raw
@@ -154,6 +184,40 @@ auto Classes(Version release, std::span<const Object> all) -> std::vector<Raw>
     if (count > 0 && Known(one.Name, release) != nullptr)
     {
       out.push_back(Declared(one, release, static_cast<std::int64_t>(count)));
+    }
+  }
+  return out;
+}
+
+auto Undeclared(const Document &drawing, Version release) -> std::vector<Raw>
+{
+  std::vector<Counted> kinds;
+  for (const DxfIO::Entity &one : drawing.Entities)
+  {
+    Count(kinds, Entities::Named(one));
+  }
+  for (const Blocks::Block &block : drawing.Blocks)
+  {
+    for (const DxfIO::Entity &one : block.Entities)
+    {
+      Count(kinds, Entities::Named(one));
+    }
+  }
+  for (const Object &one : drawing.Objects)
+  {
+    Count(kinds, Objects::Type(one));
+  }
+  std::vector<Raw> out;
+  for (const Counted &kind : kinds)
+  {
+    const Class *known = Known(kind.Name, release);
+    const auto declares = [&kind](const Raw &one) -> bool
+    {
+      return Declares(one, kind.Name);
+    };
+    if (known != nullptr && std::ranges::none_of(drawing.Classes, declares))
+    {
+      out.push_back(Declared(*known, release, kind.Count));
     }
   }
   return out;

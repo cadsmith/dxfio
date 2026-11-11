@@ -1,6 +1,7 @@
 #include "down/down.hpp"
 
 #include "drawn.hpp"
+#include "empty/classes.hpp"
 #include "entities/io.hpp"
 #include "header/io.hpp"
 #include "masked.hpp"
@@ -15,6 +16,7 @@
 #include <array>
 #include <concepts>
 #include <format>
+#include <iterator>
 #include <ranges>
 #include <set>
 #include <string>
@@ -766,9 +768,9 @@ void Elder(Document &from, std::set<Handle> &gone)
     one.Layout = {};
   }
 }
-} // namespace
 
-auto Narrowed(Document from, Version release, std::vector<Issue> *issues) -> Document
+// The drawing as the release holds it, before the CLASS records it needs.
+auto Converted(Document from, Version release, std::vector<Issue> *issues) -> Document
 {
   if (release >= Version::R2000)
   {
@@ -821,5 +823,20 @@ auto Narrowed(Document from, Version release, std::vector<Issue> *issues) -> Doc
   }
   Seeded(from, handles.Next());
   return from;
+}
+} // namespace
+
+// A release declares in CLASS records kinds another did not, LAYOUT and ACDBPLACEHOLDER up to R2000: a drawing
+// given a release not its own gets the records that release needs for what it still holds. One kept at its own
+// release is written as it came.
+auto Narrowed(Document from, Version release, std::vector<Issue> *issues) -> Document
+{
+  const Version own = Header::Declared(from.Header);
+  Document out = Converted(std::move(from), release, issues);
+  if (release >= Version::R13 && release != own)
+  {
+    std::ranges::move(Empty::Undeclared(out, release), std::back_inserter(out.Classes));
+  }
+  return out;
 }
 } // namespace DxfIO::Down
