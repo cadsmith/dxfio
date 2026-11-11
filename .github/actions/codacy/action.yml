@@ -1,0 +1,35 @@
+name: Codacy coverage
+description: Sends an LCOV report to Codacy for a commit, with the reporter at a pinned release
+
+inputs:
+  report:
+    description: The LCOV report to send
+    required: true
+  commit:
+    description: The commit Codacy files the report under
+    required: true
+  token:
+    description: The project's API token; empty sends nothing, as on a fork
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        CODACY_PROJECT_TOKEN: ${{ inputs.token }}
+        REPORT: ${{ inputs.report }}
+        COMMIT: ${{ inputs.commit }}
+      run: |
+        if [ -z "$CODACY_PROJECT_TOKEN" ]; then
+          echo "::notice::no CODACY_PROJECT_TOKEN, so no coverage goes to Codacy"
+          exit 0
+        fi
+        version=14.1.3
+        digest=15c5f052207d27b8501ab5d5910c68c206ea70b0157ee1725132780530580875
+        reporter="$RUNNER_TEMP/codacy-coverage-reporter"
+        curl -fsSL --proto '=https' --tlsv1.2 -o "$reporter" \
+          "https://github.com/codacy/codacy-coverage-reporter/releases/download/$version/codacy-coverage-reporter-linux"
+        echo "$digest  $reporter" | sha256sum -c --quiet
+        chmod +x "$reporter"
+        "$reporter" report --force-coverage-parser lcov -r "$REPORT" --commit-uuid "$COMMIT"

@@ -162,9 +162,11 @@ jobs:
       CXX: ${{ matrix.cxx }}
       CMAKE_CXX_COMPILER_LAUNCHER: ${{ matrix.launcher }}
     steps:
+      # Coverage takes the merge's parents too, to compare it with the head.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: ${{ matrix.target == 'coverage' && 2 || 1 }}
 
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         if: runner.os == 'Windows'
@@ -252,6 +254,39 @@ jobs:
           file: coverage.lcov
           format: lcov
           fail-on-error: false
+
+      # main's report, kept for the pull requests that build no code, and
+      # kept first, so a Codacy outage does not lose it.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: matrix.target == 'coverage' && github.event_name == 'push'
+        with:
+          name: coverage
+          path: coverage.lcov
+          retention-days: 90
+
+      # Codacy files a pull request's report under its head. The report is
+      # the merge's, whose lines are the head's only while main has not
+      # changed the library since the branch left it.
+      - name: Match the head
+        id: head
+        if: matrix.target == 'coverage'
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" != pull_request ] || git diff --quiet HEAD^2 HEAD -- include source; then
+            echo "same=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::main changed the library since this branch left it: update it from main for Codacy's coverage"
+          fi
+
+      # Codacy's coverage checks need a report for a pull request's head and
+      # for its base on main.
+      - uses: ./.github/actions/codacy
+        if: matrix.target == 'coverage' && steps.head.outputs.same == 'true'
+        with:
+          report: coverage.lcov
+          commit: ${{ github.event.pull_request.head.sha || github.sha }}
+          token: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
   memory:
     name: memory
@@ -430,12 +465,64 @@ jobs:
           xargs run-clang-tidy-23 -p build/tidy -j "$(nproc)" -quiet \
             < "$RUNNER_TEMP/touched"
 
+  # A pull request that builds no code covers what its base on main covers:
+  # main's report goes to Codacy again, under the head, so Codacy's coverage
+  # checks report on docs and the site too, without a build.
+  codacy:
+    name: codacy
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.code != 'true'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - id: token
+        env:
+          TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: echo "set=${{ env.TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.token.outputs.set == 'true'
+        with:
+          persist-credentials: false
+
+      - name: Fetch main's report
+        if: steps.token.outputs.set == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          base=$(gh api "repos/$GITHUB_REPOSITORY/compare/$BASE...$HEAD" -q .merge_base_commit.sha)
+          run=$(gh run list -R "$GITHUB_REPOSITORY" --workflow ci.yml --event push \
+            --commit "$base" -L 1 --json databaseId -q '.[0].databaseId')
+          # A base from before main kept its report, or past the report's 90
+          # days, has none: bring the branch up to date with main, whose CI
+          # keeps one, and this job finds it.
+          if [ -z "$run" ]; then
+            echo "::error::main's CI has not run on $base: update this branch from main"
+            exit 1
+          fi
+          gh run download "$run" -R "$GITHUB_REPOSITORY" -n coverage -D "$RUNNER_TEMP/coverage" || {
+            echo "::error::main's run $run on $base kept no coverage: update this branch from main, or rerun once that run has finished"
+            exit 1
+          }
+
+      - uses: ./.github/actions/codacy
+        if: steps.token.outputs.set == 'true'
+        with:
+          report: ${{ runner.temp }}/coverage/coverage.lcov
+          commit: ${{ github.event.pull_request.head.sha }}
+          token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+
   # The one check to require: green when every job passed or was skipped
   # by the changes gate, whose skipped matrix jobs report no names of
   # their own.
   ok:
     name: ok
-    needs: [changes, check, build, memory, fuzz, tidy]
+    needs: [changes, check, build, memory, fuzz, tidy, codacy]
     if: always()
     runs-on: ubuntu-26.04
     timeout-minutes: 5
