@@ -15,7 +15,9 @@ const hosted = (): Plugin => ({
     server.middlewares.use((request, response, next) => {
       const address = decodeURIComponent(new URL(request.url ?? '/', 'https://host').pathname)
       const file = path.join(out, address.slice(server.config.base.length - 1))
-      if (existsSync(address.endsWith('/') ? path.join(file, 'index.html') : file)) {
+      // An encoded slash outlives the URL's own folding of `..`, so the joined path is held to out.
+      const inside = file === out || file.startsWith(out + path.sep)
+      if (inside && existsSync(address.endsWith('/') ? path.join(file, 'index.html') : file)) {
         next()
         return
       }
