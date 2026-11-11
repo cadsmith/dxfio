@@ -1,8 +1,10 @@
-# Read a drawing
+---
+title: Read a drawing
+---
 
 Load a DXF file, tell which release wrote it, and see what its tables and entities hold.
 
-## Load {#load}
+## Load [#load]
 
 `LoadFile` reads a file, ASCII or binary, of any release from R10 to R2018. It fails only when the bytes are not DXF; anything it stepped over, mended or kept as it came is listed in `Issues` with its line. plan.dxf, which AutoCAD 2026 wrote, loads with none.
 
@@ -22,7 +24,7 @@ for (const DxfIO::Issue &issue : loaded->Issues)
 const DxfIO::Document &drawing = loaded->Document;
 ```
 
-## The release {#release}
+## The release [#release]
 
 `Header` holds the header variables in the order the file gave them, each a name and the groups of its value. A group's `Value` is a variant of the type its code calls for: `$ACADVER` has one group 1, the release's code as text. `Release` turns the code into a `Version`, and `Name` gives its short name.
 
@@ -41,11 +43,11 @@ for (const DxfIO::Header::Variable &variable : drawing.Header)
 }
 ```
 
-```text [Output]
+```text title="Output"
 AC1032, R2018
 ```
 
-## Tables {#tables}
+## Tables [#tables]
 
 Each table is a member of the document: its `Head`, and its `Records` in the order the file gave them. A layer's `Color` is an AutoCAD Color Index and its `Linetype` the name of a linetype; [Layers](/tutorials/layers/) has the rest.
 
@@ -56,12 +58,12 @@ for (const DxfIO::Tables::Layer &layer : drawing.Layer.Records)
 }
 ```
 
-```text [Output]
+```text title="Output"
 layer 0: color 7, Continuous
 layer walls: color 3, Continuous
 ```
 
-## Entities {#entities}
+## Entities [#entities]
 
 `Entities` holds the entities of model space and of the active paper space layout, in the order they are drawn; a block's are in its entry of `Blocks`. Each is a `std::variant` of the kinds dxfio types, ending with `Unknown` for the rest, and `TypeOf` gives its DXF name, an `Unknown`'s included.
 
@@ -77,7 +79,7 @@ for (const auto &[kind, count] : kinds)
 }
 ```
 
-```text [Output]
+```text title="Output"
 3 3DFACE
 4 ARC
 3 CIRCLE
@@ -91,7 +93,7 @@ for (const auto &[kind, count] : kinds)
 1 XLINE
 ```
 
-## Model and paper space {#spaces}
+## Model and paper space [#spaces]
 
 Every kind but `Unknown` has a `Record`: the layer, linetype, color and the rest every entity carries, and `Paper`, true for an entity of paper space. [Find and change entities](/tutorials/editing/) reaches into the fields of each kind.
 
@@ -112,6 +114,6 @@ for (const DxfIO::Entity &entity : drawing.Entities)
 std::println("{} of {} in paper space", paper, drawing.Entities.size());
 ```
 
-```text [Output]
+```text title="Output"
 2 of 29 in paper space
 ```

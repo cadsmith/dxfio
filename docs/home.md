@@ -1,27 +1,23 @@
-# Home
+---
+title: Home
+---
 
-## Install {#install}
+## Install [#install]
 
-::: code-group
-
-```cmake [CMake]
+```cmake tab="CMake"
 add_subdirectory(dxfio)
 target_link_libraries(app PRIVATE dxfio::dxfio)
 ```
 
-```cpp [C++]
+```cpp tab="C++"
 #include "dxfio/dxfio.hpp"
 
 auto loaded = DxfIO::LoadFile("plan.dxf");
 ```
 
-:::
+## Example [#example]
 
-## Example {#example}
-
-::: code-group
-
-```cpp [Load and edit]
+```cpp tab="Load and edit"
 #include "dxfio/dxfio.hpp"
 
 auto loaded = DxfIO::LoadFile("plan.dxf");
@@ -42,7 +38,7 @@ line.End = DxfIO::Vector{.X = 100, .Y = 50, .Z = 0};
 DxfIO::Edit::Add(drawing, line);
 ```
 
-```cpp [Save to R12]
+```cpp tab="Save to R12"
 const auto older = DxfIO::SaveFile(drawing, "plan-r12.dxf", {.Release = DxfIO::Version::R12});
 for (const DxfIO::Issue &issue : older.value_or(std::vector<DxfIO::Issue>{}))
 {
@@ -50,9 +46,7 @@ for (const DxfIO::Issue &issue : older.value_or(std::vector<DxfIO::Issue>{}))
 }
 ```
 
-```cpp [Audit]
+```cpp tab="Audit"
 const DxfIO::Audit::Report report = DxfIO::Audit::Check(drawing);
 std::println("{} errors, {} warnings", report.Errors(), report.Warnings());
 ```
-
-:::

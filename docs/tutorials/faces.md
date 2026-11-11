@@ -1,8 +1,10 @@
-# 3D faces
+---
+title: 3D faces
+---
 
 Six 3DFACE entities closing a box in model space of a new drawing, the top one with its edges hidden.
 
-## Corners {#corners}
+## Corners [#corners]
 
 A 3DFACE is a triangle or a quadrilateral with its corners anywhere in space. `Corners` holds four, in world coordinates, groups 10 to 13 in that order; a triangle repeats its third as its fourth.
 
@@ -20,7 +22,7 @@ floor.Corners = bottom;
 DxfIO::Edit::Add(drawing, floor);
 ```
 
-## The sides {#sides}
+## The sides [#sides]
 
 Unlike a SOLID, a 3DFACE has no normal and no thickness: its corners alone place it, so a side stands upright by their heights.
 
@@ -39,7 +41,7 @@ for (std::size_t at = 0; at < bottom.size(); ++at)
 }
 ```
 
-## Hidden edges {#edges}
+## Hidden edges [#edges]
 
 `Flags` hides edges, one bit each: 1 the first, 2 the second, 4 the third, 8 the fourth. The top hides all four; each is also the top edge of a side, which still shows it.
 
@@ -50,7 +52,7 @@ lid.Flags = 1 | 2 | 4 | 8;
 DxfIO::Edit::Add(drawing, lid);
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "faces.dxf");

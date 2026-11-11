@@ -1,8 +1,10 @@
-# Extended data
+---
+title: Extended data
+---
 
 Extended data carries an application's own values on an entity: register the application, attach the values to a line, then read them back from the saved file.
 
-## Register the application {#register}
+## Register the application [#register]
 
 Each set of extended data names the application it belongs to, and the APPID table registers that name. `Edit::Add` adds the record, and fails when the table holds that name already.
 
@@ -14,7 +16,7 @@ application.Record.Name = "WALLPLAN";
 DxfIO::Edit::Add(drawing, application);
 ```
 
-## Attach the values {#attach}
+## Attach the values [#attach]
 
 An entity's `Record.Base.Extended` holds one `Xdata` for each application: its name, then its groups in order. Give each value the type dxfio reads its code back as: `std::string` for 1000, `double` for 1040, `std::int64_t` for 1070.
 
@@ -33,7 +35,7 @@ wall.Record.Base.Extended.push_back(DxfIO::Xdata{
 const auto handle = DxfIO::Edit::Add(drawing, wall);
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "xdata.dxf");
@@ -44,7 +46,7 @@ if (!saved)
 }
 ```
 
-## Read it back {#read}
+## Read it back [#read]
 
 `FindEntity` finds the line by the handle `Edit::Add` returned, and `BaseOf` gives the extended data of any entity. Other applications' data may sit beside yours, kept as it was read; `Edit::Same` matches the name as AutoCAD does, without case.
 
@@ -68,6 +70,6 @@ for (const DxfIO::Xdata &data : DxfIO::BaseOf(*found).Extended)
 }
 ```
 
-```text [Output]
+```text title="Output"
 LINE W-12: 0.2 thick, rated 60 minutes
 ```

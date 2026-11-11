@@ -1,8 +1,10 @@
-# Blocks and attributes
+---
+title: Blocks and attributes
+---
 
 A block defined once with its own entities and attribute definitions, then placed twice, once scaled and turned, by inserts that give its attributes their values.
 
-## A block {#block}
+## A block [#block]
 
 `Edit::AddBlock` makes an empty block, with its block record where the drawing has block records. Entities added under the block's name go into it, in the block's own coordinates: an insert puts the block's base point, `Begin.Origin`, at its own position.
 
@@ -20,7 +22,7 @@ stem.End = {.X = 0, .Y = 12, .Z = 0};
 DxfIO::Edit::Add(drawing, stem, "Valve");
 ```
 
-## Attribute definitions {#attdef}
+## Attribute definitions [#attdef]
 
 An ATTDEF names an attribute by its `Tag`, with the `Prompt` shown when the block is inserted and a default value in `Lettering->Value`: an ATTDEF keeps its `Lettering` on the heap, reached with `->`. `Horizontal` 1 and `Vertical` 2 center the number on `Alignment`, the base point here, and `Flags` 1 makes the size invisible.
 
@@ -44,7 +46,7 @@ size.Flags = 1;
 DxfIO::Edit::Add(drawing, size, "Valve");
 ```
 
-## The block's flags {#flags}
+## The block's flags [#flags]
 
 Bit 2 of `Begin.Flags` says the block has attribute definitions that are not constant. `AddBlock` leaves the flags at 0, so set it once the block has its ATTDEFs.
 
@@ -55,7 +57,7 @@ if (DxfIO::Blocks::Block *valve = DxfIO::Edit::FindBlock(drawing, "Valve"))
 }
 ```
 
-## Inserts {#inserts}
+## Inserts [#inserts]
 
 An INSERT names its block and puts it at `Position`, scaled along each axis by `Scale` and turned by `Rotation`, in degrees.
 
@@ -71,7 +73,7 @@ second.Scale = {.X = 2, .Y = 2, .Z = 2};
 second.Rotation = 30;
 ```
 
-## Attribute values {#attribs}
+## Attribute values [#attribs]
 
 An insert gives each attribute its value in an ATTRIB of the same tag and flags. The insert does not move an ATTRIB: it is drawn where its own `Lettering` says, so give it the definition's text as the insert places it. For these two definitions, both at the base point, that is the insert's position, with the height scaled and the rotation turned.
 
@@ -96,7 +98,7 @@ const auto attribute = [](const DxfIO::Entities::Attdef &definition, const DxfIO
 };
 ```
 
-## The SEQEND {#seqend}
+## The SEQEND [#seqend]
 
 The ATTRIBs follow their INSERT in the file, up to a SEQEND. `Edit::Add` sets the insert's `Follows`, group 66, which says they are there, gives it its SEQEND, and gives the ATTRIBs and the SEQEND handles of their own.
 
@@ -108,7 +110,7 @@ second.Attributes.Children = {attribute(number, second, "V-13"), attribute(size,
 DxfIO::Edit::Add(drawing, second);
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "blocks.dxf");

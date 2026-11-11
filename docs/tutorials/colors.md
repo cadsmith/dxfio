@@ -1,8 +1,10 @@
-# Color and lineweight
+---
+title: Color and lineweight
+---
 
 The color, lineweight and visibility every entity carries in its `Record`, set on the lines of a new drawing.
 
-## What an entity starts with {#defaults}
+## What an entity starts with [#defaults]
 
 A new entity takes its color and lineweight from its layer, 0 unless it names another: [Layers](/tutorials/layers/) sets them there.
 
@@ -15,11 +17,11 @@ std::println("layer {}, color {}, lineweight {}", plain.Record.Layer, plain.Reco
 DxfIO::Edit::Add(drawing, plain);
 ```
 
-```text [Output]
+```text title="Output"
 layer 0, color 256, lineweight -1
 ```
 
-## Color {#color}
+## Color [#color]
 
 `Color` is an AutoCAD Color Index from 1 to 255, or `Colors::Bylayer` (256) to take the layer's color, or `Colors::Byblock` (0) to take the color of the block insert the entity is drawn in. `Colors::White`, 7, is drawn white on a dark background and black on a light one.
 
@@ -31,7 +33,7 @@ indexed.Record.Color = 1;
 DxfIO::Edit::Add(drawing, indexed);
 ```
 
-## True color {#rgb}
+## True color [#rgb]
 
 `Rgb` adds a true color as 0xRRGGBB, written from R2004 on. A release before R2004 keeps only `Color`, so give it an index near the true color as well.
 
@@ -44,7 +46,7 @@ orange.Record.Rgb = 0xFF8000;
 DxfIO::Edit::Add(drawing, orange);
 ```
 
-## Lineweight {#lineweight}
+## Lineweight [#lineweight]
 
 `Lineweight` is in hundredths of a millimeter, so 50 is 0.50 mm, and is written from R2000 on. `Lineweights::Bylayer` (-1) takes the layer's, `Lineweights::Byblock` (-2) the block insert's, and `Lineweights::Standard` (-3) the drawing's default, which `$LWDEFAULT` gives.
 
@@ -56,7 +58,7 @@ heavy.Record.Lineweight = 50;
 DxfIO::Edit::Add(drawing, heavy);
 ```
 
-## Visibility {#hidden}
+## Visibility [#hidden]
 
 `Hidden` makes the entity invisible; it stays in the drawing. `Transparency`, from R2004, is empty while the entity takes its layer's.
 
@@ -68,7 +70,7 @@ invisible.Record.Hidden = true;
 DxfIO::Edit::Add(drawing, invisible);
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "colors.dxf");

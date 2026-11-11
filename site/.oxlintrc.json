@@ -1,28 +1,21 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": [
-    "react",
     "typescript",
-    "oxc"
+    "react",
+    "oxc",
+    "import",
+    "nextjs"
   ],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": [
-      "warn",
-      {
-        "allowConstantExport": true
-      }
-    ],
-    "typescript/no-confusing-void-expression": "error"
+    "typescript/no-confusing-void-expression": "error",
+    "typescript/no-unnecessary-condition": "error"
   },
-  "overrides": [
-    {
-      "files": [
-        "src/components/ui/**"
-      ],
-      "rules": {
-        "react/only-export-components": "off"
-      }
-    }
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    ".source/"
   ]
 }

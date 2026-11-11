@@ -1,31 +1,29 @@
-# Getting started
+---
+title: Getting started
+---
 
 dxfio is a C++23 library that reads and writes AutoCAD DXF files: every release from R10 to R2018, ASCII and binary, read whole and saved back to the same release or to any other.
 
-## Add it to a project {#add}
+## Add it to a project [#add]
 
 dxfio is a static library that needs nothing but the standard library; the tests and doctest are built only when dxfio is the top level project.
 
-::: code-group
-
-```cmake [CMakeLists.txt]
+```cmake tab="CMakeLists.txt"
 add_subdirectory(dxfio)
 target_link_libraries(app PRIVATE dxfio::dxfio)
 ```
 
-```sh [Build and test]
+```sh tab="Build and test"
 cmake --preset debug
 cmake --build --preset debug
 ctest --preset debug
 ```
 
-:::
-
-## A first program {#first}
+## A first program [#first]
 
 `dxfio/dxfio.hpp` brings in the whole interface, under the namespace `DxfIO`. This program makes a drawing with one line, saves it, and reads it back. Nothing throws: a load or a save that fails returns its `Failure`, with what went wrong and, for a load, on which line.
 
-```cpp [main.cpp]
+```cpp title="main.cpp"
 #include "dxfio/dxfio.hpp"
 
 #include <print>
@@ -56,7 +54,7 @@ auto main() -> int
 }
 ```
 
-```text [Output]
+```text title="Output"
 1 entity, 0 issues
 ```
 

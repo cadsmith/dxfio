@@ -1,8 +1,10 @@
-# Audit and repair
+---
+title: Audit and repair
+---
 
 A drawing broken on purpose, what `Audit::Check` finds in it, and what `Audit::Repair` fixes before it is saved. A drawing made with `Create` and `Edit::Add` passes the check as it is; the audit is for drawings other programs wrote, and for mistakes like these.
 
-## Break a drawing {#break}
+## Break a drawing [#break]
 
 `Edit::Add` gives an entity a new handle only when it has none, and adds it whatever layer, linetype or block it names. That is enough to break a new drawing four ways: a circle takes the handle of a line, a line names a layer and a linetype the drawing lacks, and an insert places a block that is not there.
 
@@ -31,7 +33,7 @@ door.Position = {.X = 100, .Y = 100, .Z = 0};
 DxfIO::Edit::Add(drawing, door);
 ```
 
-## Check {#check}
+## Check [#check]
 
 `Audit::Check` leaves the drawing as it is and lists its findings in the order the checks ran: handles, required records, references, meshes, SEQENDs. An error is a finding AutoCAD would refuse or recover the drawing for; with warnings alone, it opens the drawing as it is. `Clean` is false while an error is left unfixed.
 
@@ -50,7 +52,7 @@ std::println("Check:");
 listed(DxfIO::Audit::Check(drawing));
 ```
 
-```text [Output]
+```text title="Output"
 Check:
   error   handle 3D of a CIRCLE used twice
   error   layer Walls missing
@@ -59,7 +61,7 @@ Check:
   clean: false
 ```
 
-## Repair {#repair}
+## Repair [#repair]
 
 `Audit::Repair` runs the same checks and fixes what they find, in place. The circle, the second to hold the handle, takes a new one; the layer is made; the linetype falls back to ByLayer; the insert of the missing block is left out. `$HANDSEED` then moves past the handles in use, without a finding.
 
@@ -76,7 +78,7 @@ for (const DxfIO::Entity &one : drawing.Entities)
 }
 ```
 
-```text [Output]
+```text title="Output"
 Repair:
   error   handle 3D of a CIRCLE used twice, fixed
   error   layer Walls missing, fixed
@@ -88,7 +90,7 @@ Repair:
   LINE 3E
 ```
 
-## Save {#save}
+## Save [#save]
 
 The repaired drawing is the one saved, and a second check finds nothing in it.
 
@@ -103,6 +105,6 @@ if (!saved)
 }
 ```
 
-```text [Output]
+```text title="Output"
 Check again: 0 findings
 ```

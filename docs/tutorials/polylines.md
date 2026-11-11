@@ -1,8 +1,10 @@
-# Polylines
+---
+title: Polylines
+---
 
 Lightweight polylines with widths, arcs and a closed outline, and a 3D polyline whose vertices follow it in the file.
 
-## A lightweight polyline {#lwpolyline}
+## A lightweight polyline [#lwpolyline]
 
 An LWPOLYLINE holds its vertices itself, in its own coordinate system. Only the X and Y of a vertex are written, groups 10 and 20; `Elevation` places all of them along the normal.
 
@@ -18,7 +20,7 @@ path.Vertices = {
 DxfIO::Edit::Add(drawing, path);
 ```
 
-## Widths {#widths}
+## Widths [#widths]
 
 `Width` is a width every segment shares. When they differ, empty it and give each vertex its `Widths`: the segment from that vertex starts at `Start` and ends at `End`.
 
@@ -33,7 +35,7 @@ arrow.Vertices = {
 DxfIO::Edit::Add(drawing, arrow);
 ```
 
-## Arcs and a closed outline {#arcs}
+## Arcs and a closed outline [#arcs]
 
 A vertex's `Bulge` makes the segment from it an arc: the tangent of a quarter of the arc's angle, so 1 is a half circle and 0 a straight segment. `Flags` 1 closes the polyline with a segment from the last vertex back to the first, which takes the last vertex's bulge and widths.
 
@@ -49,7 +51,7 @@ slot.Vertices = {
 DxfIO::Edit::Add(drawing, slot);
 ```
 
-## A 3D polyline {#polyline}
+## A 3D polyline [#polyline]
 
 A POLYLINE keeps its vertices as VERTEX entities that follow it in the file. `Flags` 8 makes it a 3D polyline: its vertices are in world coordinates, and each takes flag 32.
 
@@ -72,7 +74,7 @@ for (const DxfIO::Vector &at : route)
 }
 ```
 
-## The SEQEND {#seqend}
+## The SEQEND [#seqend]
 
 The vertices end with a SEQEND. `Edit::Add` gives the polyline its SEQEND, and gives the vertices and the SEQEND handles of their own.
 
@@ -80,7 +82,7 @@ The vertices end with a SEQEND. `Edit::Add` gives the polyline its SEQEND, and g
 DxfIO::Edit::Add(drawing, pipe);
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "polylines.dxf");
