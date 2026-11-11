@@ -428,6 +428,30 @@ TEST_CASE("down: an R2018 drawing AutoCAD wrote saves to R12 and reads back")
   CHECK_FALSE(issues.empty());
 }
 
+TEST_CASE("down: a release not the drawing's own gets the CLASS records it needs, LAYOUT up to R2000")
+{
+  const auto read = Load(Bytes("entities-r2018.dxf"));
+  REQUIRE(read);
+  CHECK(Narrowed(read->Document, Version::R2018, nullptr) == read->Document);
+  const Document narrowed = Narrowed(read->Document, Version::R2000, nullptr);
+  const auto declares = [&narrowed](std::string_view name) -> bool
+  {
+    return std::ranges::any_of(
+        narrowed.Classes, [name](const Raw &one) -> bool
+        { return !one.Groups.empty() && one.Groups.front() == Group{.Code = 1, .Value = std::string{name}}; });
+  };
+  CHECK(declares("LAYOUT"));
+  CHECK(declares("ACDBPLACEHOLDER"));
+  const auto saved = Tests::Written(read->Document, Options{.Release = Version::R2000});
+  REQUIRE(saved);
+  const auto again = Load(*saved);
+  REQUIRE(again);
+  for (const Audit::Finding &one : Audit::Check(again->Document).Findings)
+  {
+    CHECK_FALSE(one.What.starts_with("no CLASS for"));
+  }
+}
+
 TEST_CASE("down: a drawing already of R12 is written as it stands")
 {
   const std::string text = Bytes("empty-r12.dxf");
