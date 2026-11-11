@@ -162,9 +162,13 @@ jobs:
       CXX: ${{ matrix.cxx }}
       CMAKE_CXX_COMPILER_LAUNCHER: ${{ matrix.launcher }}
     steps:
+      # A pull request is built as its merge, except for coverage: Codacy
+      # files that report under the head, so it is measured on the head's
+      # own lines.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ matrix.target == 'coverage' && github.event.pull_request.head.sha || '' }}
 
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         if: runner.os == 'Windows'
@@ -253,23 +257,23 @@ jobs:
           format: lcov
           fail-on-error: false
 
-      # Codacy's coverage checks need a report for a pull request's head and
-      # for its base on main. A pull request is built as its merge, so the
-      # report is filed under the head it was asked for.
-      - uses: ./.github/actions/codacy
-        if: matrix.target == 'coverage'
-        with:
-          report: coverage.lcov
-          commit: ${{ github.event.pull_request.head.sha || github.sha }}
-          token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-
-      # main's report, kept for the pull requests that build no code.
+      # main's report, kept for the pull requests that build no code, and
+      # kept first, so a Codacy outage does not lose it.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: matrix.target == 'coverage' && github.event_name == 'push'
         with:
           name: coverage
           path: coverage.lcov
           retention-days: 90
+
+      # Codacy's coverage checks need a report for a pull request's head and
+      # for its base on main.
+      - uses: ./.github/actions/codacy
+        if: matrix.target == 'coverage'
+        with:
+          report: coverage.lcov
+          commit: ${{ github.event.pull_request.head.sha || github.sha }}
+          token: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
   memory:
     name: memory
@@ -481,12 +485,15 @@ jobs:
           base=$(gh api "repos/$GITHUB_REPOSITORY/compare/$BASE...$HEAD" -q .merge_base_commit.sha)
           run=$(gh run list -R "$GITHUB_REPOSITORY" --workflow ci.yml --event push \
             --commit "$base" -L 1 --json databaseId -q '.[0].databaseId')
+          # A base from before main kept its report, or past the report's 90
+          # days, has none: bring the branch up to date with main, whose CI
+          # keeps one, and this job finds it.
           if [ -z "$run" ]; then
-            echo "::error::main's CI has not run on $base, so it has no report to send again"
+            echo "::error::main's CI has not run on $base: update this branch from main"
             exit 1
           fi
           gh run download "$run" -R "$GITHUB_REPOSITORY" -n coverage -D "$RUNNER_TEMP/coverage" || {
-            echo "::error::run $run kept no coverage; rerun this job once it has finished"
+            echo "::error::main's run $run on $base kept no coverage: update this branch from main, or rerun once that run has finished"
             exit 1
           }
 
