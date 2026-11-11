@@ -31,7 +31,7 @@ export type Header = {
 
 // A group its pattern always fills, which the types cannot see; a pattern that stops filling it fails the build.
 const filled = (match: RegExpMatchArray, index: number): string => {
-  const value = match[index]
+  const value = match.at(index)
   if (value === undefined) throw new Error(`no group ${index} in ${JSON.stringify(match[0])}`)
   return value
 }
