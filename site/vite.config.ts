@@ -15,7 +15,14 @@ const hosted = (): Plugin => ({
     server.middlewares.use((request, response, next) => {
       const address = decodeURIComponent(new URL(request.url ?? '/', 'https://host').pathname)
       const file = path.join(out, address.slice(server.config.base.length - 1))
-      if (existsSync(address.endsWith('/') ? path.join(file, 'index.html') : file)) return next()
+      // An encoded slash outlives the URL's own folding of `..`, so the joined path is held to out.
+      const inside = file === out || file.startsWith(out + path.sep)
+      // A static host probes paths it is given; the check above is what keeps them to out.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      if (inside && existsSync(address.endsWith('/') ? path.join(file, 'index.html') : file)) {
+        next()
+        return
+      }
       response.statusCode = 404
       response.setHeader('content-type', 'text/html')
       response.end(readFileSync(path.join(out, '404.html')))

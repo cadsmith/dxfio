@@ -82,7 +82,7 @@ export default function Search({ open, onOpenChange }: Props) {
   const list = (heading: string, entries: Entry[]) => (
     <CommandGroup heading={heading}>
       {entries.map((one) => (
-        <CommandItem key={one.value} value={one.value} keywords={[one.label, ...one.keywords]} onSelect={() => go(one.href)}>
+        <CommandItem key={one.value} value={one.value} keywords={[one.label, ...one.keywords]} onSelect={() => { go(one.href) }}>
           <span className="search-label">{one.label}</span>
           <span className="search-detail">{one.detail}</span>
         </CommandItem>

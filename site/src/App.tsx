@@ -33,10 +33,10 @@ const useMac = () => useSyncExternalStore(still, () => /Mac|iPhone|iPad/.test(na
 const useScrolled = () => {
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
-    const update = () => setScrolled(window.scrollY > 4)
+    const update = () => { setScrolled(window.scrollY > 4) }
     update()
     window.addEventListener('scroll', update, { passive: true })
-    return () => window.removeEventListener('scroll', update)
+    return () => { window.removeEventListener('scroll', update) }
   }, [])
   return scrolled
 }
@@ -54,7 +54,7 @@ const stored = (): Theme | null => {
 const watch = (changed: () => void) => {
   const observer = new MutationObserver(changed)
   observer.observe(document.documentElement, { attributeFilter: ['class'] })
-  return () => observer.disconnect()
+  return () => { observer.disconnect() }
 }
 
 const shown = (): Theme => (document.documentElement.classList.contains('dark') ? 'dark' : 'light')
@@ -67,7 +67,7 @@ const useTheme = () => {
       if (!stored()) document.documentElement.classList.toggle('dark', media.matches)
     }
     media.addEventListener('change', changed)
-    return () => media.removeEventListener('change', changed)
+    return () => { media.removeEventListener('change', changed) }
   }, [])
   const flip = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
@@ -116,7 +116,7 @@ const useCode = () => {
       if (tab) pick(tab)
     }
     document.addEventListener('click', click)
-    return () => document.removeEventListener('click', click)
+    return () => { document.removeEventListener('click', click) }
   }, [])
 }
 
@@ -136,7 +136,7 @@ const useSearch = () => {
       }
     }
     document.addEventListener('keydown', key)
-    return () => document.removeEventListener('keydown', key)
+    return () => { document.removeEventListener('keydown', key) }
   }, [])
   return { open, loaded, show }
 }
@@ -178,7 +178,7 @@ export function App({ at }: { at: string[] }) {
             ))}
           </nav>
           <div className="bar-end">
-            <Button variant="secondary" className="search-trigger" onClick={() => search.show(true)} aria-label="Search docs">
+            <Button variant="secondary" className="search-trigger" onClick={() => { search.show(true) }} aria-label="Search docs">
               <SearchIcon data-icon="inline-start" />
               <span className="search-word">Search docs</span>
               <KbdGroup className="search-keys hidden sm:inline-flex">
@@ -203,7 +203,7 @@ export function App({ at }: { at: string[] }) {
                 </SheetHeader>
                 <nav className="bar-sheet-nav" aria-label="Sections">
                   {pages.map((one) => (
-                    <a key={one.id} href={one.href} aria-current={page === one.id ? 'page' : undefined} onClick={() => setMenu(false)}>
+                    <a key={one.id} href={one.href} aria-current={page === one.id ? 'page' : undefined} onClick={() => { setMenu(false) }}>
                       {one.label}
                     </a>
                   ))}

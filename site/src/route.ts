@@ -51,7 +51,7 @@ export const useRoute = (at: string[]) => {
   const [pending, start] = useTransition()
   useEffect(() => {
     // A transition: the page shown stays until the next one has loaded its code and text.
-    const changed = () => start(() => setRoute(parse(window.location.pathname)))
+    const changed = () => { start(() => { setRoute(parse(window.location.pathname)) }) }
     window.addEventListener('popstate', changed)
     document.addEventListener('click', followed)
     return () => {

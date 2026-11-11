@@ -39,7 +39,7 @@ function Kinds() {
           placeholder="Filter, such as MTEXT"
           aria-label="Filter the kinds"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => { setQuery(event.target.value) }}
         />
       </div>
       {families.map((family) => (

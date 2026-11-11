@@ -198,7 +198,7 @@ export default function Reference({ route }: { route: string[] }) {
         type="search"
         placeholder="circle, LWPOLYLINE, Add…"
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={(event) => { setQuery(event.target.value) }}
       />
       {shown.length === 0 && <p className="faint">No header holds that name. Try a DXF name such as CIRCLE.</p>}
     </div>

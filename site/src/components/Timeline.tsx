@@ -43,7 +43,7 @@ export function Timeline() {
         })
         timeline.from('.era', { opacity: 0, y: 6, duration: 0.45, stagger: 0.06, ease: 'power3.out' }, 0.3 + points.length * 0.12)
       })
-      return () => media.revert()
+      return () => { media.revert() }
     },
     { scope },
   )
