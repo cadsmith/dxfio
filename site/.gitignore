@@ -1,9 +1,10 @@
 node_modules
-dist
-dist-ssr
-*.local
+.next
+out
+.source
+next-env.d.ts
+*.tsbuildinfo
+.vercel
 
 # generated from ../include by scripts/api.ts
-src/headers.json
-src/kinds.json
-src/version.json
+generated/

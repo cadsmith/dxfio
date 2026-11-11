@@ -1,0 +1,31 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/generated/glass.css';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* dxfio's gold as the accent: a darker gold that reads on white, the brand's own on dark. */
+:root {
+  --color-fd-primary: #8a5f0c;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-ring: #8a5f0c;
+}
+
+.dark {
+  --color-fd-primary: #f2b53a;
+  --color-fd-primary-foreground: #1a1c21;
+  --color-fd-ring: #f2b53a;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

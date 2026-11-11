@@ -48,7 +48,7 @@ const pages = ['guide', 'tutorials']
 // The home page's install tab repeats the example's first line; only the example runs.
 const source = (page: string) => {
   const text = readFileSync(join(content, `${page}.md`), 'utf8')
-  return page === 'home' ? text.slice(text.indexOf('{#example}')) : text
+  return page === 'home' ? text.slice(text.indexOf('[#example]')) : text
 }
 
 const work = mkdtempSync(join(tmpdir(), 'dxfio-examples-'))
@@ -111,7 +111,7 @@ let failures = 0
 for (const slug of pages) {
   const text = source(slug)
   const code = [...text.matchAll(/```cpp[^\n]*\n([^]*?)```/g)].map((one) => one[1]).join('\n')
-  const expected = [...text.matchAll(/```text \[Output\]\n([^]*?)```/g)].map((one) => one[1]).join('')
+  const expected = [...text.matchAll(/```text title="Output"\n([^]*?)```/g)].map((one) => one[1]).join('')
   const place = join(work, slug)
   mkdirSync(place, { recursive: true })
   copyFileSync(sample, join(place, 'plan.dxf'))

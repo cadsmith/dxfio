@@ -1,8 +1,10 @@
-# Paper space
+---
+title: Paper space
+---
 
 Entities drawn on a layout's sheet rather than in the model: in paper space of a new drawing, then in the second layout of a drawing AutoCAD saved.
 
-## Paper space {#paper}
+## Paper space [#paper]
 
 `Create` makes one paper space layout, Layout1, whose sheet is the `*Paper_Space` block and whose limits run from 0,0 to 12,9. `Space::Paper` adds an entity to it: the entity goes to the ENTITIES section with its `Paper` flag set, owned by the `*Paper_Space` block record.
 
@@ -26,7 +28,7 @@ title.Lettering.Value = "Ground floor";
 DxfIO::Edit::Add(drawing, title, DxfIO::Edit::Space::Paper);
 ```
 
-## Another layout {#layout}
+## Another layout [#layout]
 
 A drawing's other layouts each draw their sheet in a block of their own, and a LAYOUT object names its block's record in `Block`. `plan.dxf` here is a drawing AutoCAD saved with two layouts; the loop finds the block of Layout2.
 
@@ -58,11 +60,11 @@ for (const DxfIO::Object &one : sheets.Objects)
 std::println("Layout2 is drawn in {}", sheet);
 ```
 
-```text [Output]
+```text title="Output"
 Layout2 is drawn in *Paper_Space0
 ```
 
-## Add to its block {#block}
+## Add to its block [#block]
 
 `Edit::Add` with the block's name puts the entity in that block, owned by its block record. The block's BLOCK record carries the paper space flag, so the entity takes it too.
 
@@ -79,7 +81,7 @@ if (!added)
 }
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "paper.dxf");

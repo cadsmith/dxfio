@@ -1,8 +1,10 @@
-# Text
+---
+title: Text
+---
 
 Single-line TEXT, justified and in a text style added to the STYLE table, and MTEXT that wraps to a width and carries formatting codes.
 
-## A text style {#style}
+## A text style [#style]
 
 A STYLE record names the font and proportions text is drawn with: `Width` is the width of the letters over their height and `Oblique` their slant, in degrees. A `Height` of 0, the default, lets each text give its own.
 
@@ -17,7 +19,7 @@ narrow.Oblique = 15;
 DxfIO::Edit::Add(drawing, narrow);
 ```
 
-## A line of text {#text}
+## A line of text [#text]
 
 A TEXT is one line in one style, `Standard` unless it names another. Left on its baseline, the default, it starts at `Lettering.Position`; `Height` is the height of its letters in drawing units.
 
@@ -29,7 +31,7 @@ title.Lettering.Value = "Pump room";
 DxfIO::Edit::Add(drawing, title);
 ```
 
-## Justification {#justification}
+## Justification [#justification]
 
 `Lettering.Horizontal` takes 0 left, 1 center, 2 right or 4 middle, and the text's own `Vertical` 0 baseline, 1 bottom, 2 middle or 3 top. Each of these but left on the baseline holds the text to `Lettering.Alignment`. `Position` is then where the drawn text starts, which depends on the font and which dxfio does not work out, so these texts give it the alignment point too.
 
@@ -63,7 +65,7 @@ for (const Justification &one : justifications)
 }
 ```
 
-## In a style {#styled}
+## In a style [#styled]
 
 `Lettering.Style` names the style. `Width` and `Oblique` are the text's own, groups 41 and 51, and this one takes the style's.
 
@@ -78,7 +80,7 @@ styled.Lettering.Oblique = narrow.Oblique;
 DxfIO::Edit::Add(drawing, styled);
 ```
 
-## Multiline text {#mtext}
+## Multiline text [#mtext]
 
 An MTEXT wraps its text in a frame `Width` wide, its `Attachment` point, top left by default, at `Position`. Its fields are in `Paragraph`, kept on the heap and reached with `->`. A value of any length goes in `Value` whole: dxfio writes it in pieces of 250 characters.
 
@@ -91,7 +93,7 @@ note.Paragraph->Value = R"(Pump P-1 feeds {\C1;tank 3} through valve V-12, open 
 DxfIO::Edit::Add(drawing, note);
 ```
 
-## Formatting codes {#codes}
+## Formatting codes [#codes]
 
 The codes are in the text itself. Saved to R12, which has no MTEXT, the note becomes plain TEXT, a new one only where the note breaks its own line and not where its width wraps it. What is left shows what is code: `\P` ends a line, and a code with a value, such as `\C1;`, runs to its semicolon.
 
@@ -112,12 +114,12 @@ if (older)
 }
 ```
 
-```text [Output]
+```text title="Output"
 Pump P-1 feeds tank 3 through valve V-12, open in service
 Drain before winter
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "text.dxf");

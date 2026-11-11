@@ -1,8 +1,10 @@
-# Splines
+---
+title: Splines
+---
 
 Two SPLINE entities in model space of a new drawing: one given by its control points and knots, one by the points it passes through.
 
-## By control points {#poles}
+## By control points [#poles]
 
 `Poles` are the control points the curve is drawn toward, in world coordinates, and `Degree` its degree. A curve of degree 3 on six control points takes 6 + 3 + 1 = 10 knots; the first and last repeated four times make it start on the first control point and end on the last. Flag 8 says the curve lies in a plane, and `Normal` gives that plane.
 
@@ -21,7 +23,7 @@ controlled.Curve->Poles = {
 DxfIO::Edit::Add(drawing, controlled);
 ```
 
-## Through fit points {#fits}
+## Through fit points [#fits]
 
 `Fits` lists the points the curve passes through, and `Fitted` how far from them it may pass. Flags 1064 copy what AutoCAD writes on such a spline in its own files: 8 for planar, with bits 32 and 1024 beside it. dxfio writes the lists as they are and works out no knots or control points from the fit points, so this spline is saved with none.
 
@@ -40,7 +42,7 @@ fitted.Curve->Fits = {
 DxfIO::Edit::Add(drawing, fitted);
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "splines.dxf");

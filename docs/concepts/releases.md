@@ -1,25 +1,27 @@
-# Releases
+---
+title: Releases
+---
 
 The ten releases dxfio reads and writes, and what happens to a drawing saved to an older one.
 
-## Every release {#releases}
+## Every release [#releases]
 
 Every release from R10 to R2018 reads and writes, ASCII or binary. A document saves to any of them; what the release cannot hold is converted, as AutoCAD converts it, or left out, and `Saved::Issues` names each entity changed so.
 
-| Release | `$ACADVER` | Text |
-| :--- | :--- | :--- |
-| `Version::R10`[AutoCAD 1988]{.cell-note} | `AC1006` | [Code page]{.pill .pill-gold} |
-| `Version::R12`[AutoCAD 1992]{.cell-note} | `AC1009` | [Code page]{.pill .pill-gold} |
-| `Version::R13`[AutoCAD 1994]{.cell-note} | `AC1012` | [Code page]{.pill .pill-gold} |
-| `Version::R14`[AutoCAD 1997]{.cell-note} | `AC1014` | [Code page]{.pill .pill-gold} |
-| `Version::R2000`[AutoCAD 1999]{.cell-note} | `AC1015` | [Code page]{.pill .pill-gold} |
-| `Version::R2004`[AutoCAD 2003]{.cell-note} | `AC1018` | [Code page]{.pill .pill-gold} |
-| `Version::R2007`[AutoCAD 2006]{.cell-note} | `AC1021` | [UTF-8]{.pill .pill-blue} |
-| `Version::R2010`[AutoCAD 2009]{.cell-note} | `AC1024` | [UTF-8]{.pill .pill-blue} |
-| `Version::R2013`[AutoCAD 2012]{.cell-note} | `AC1027` | [UTF-8]{.pill .pill-blue} |
-| `Version::R2018`[AutoCAD 2017]{.cell-note} | `AC1032` | [UTF-8]{.pill .pill-blue} |
+| Release | AutoCAD | `$ACADVER` | Text |
+| :--- | :--- | :--- | :--- |
+| `Version::R10` | AutoCAD 1988 | `AC1006` | Code page |
+| `Version::R12` | AutoCAD 1992 | `AC1009` | Code page |
+| `Version::R13` | AutoCAD 1994 | `AC1012` | Code page |
+| `Version::R14` | AutoCAD 1997 | `AC1014` | Code page |
+| `Version::R2000` | AutoCAD 1999 | `AC1015` | Code page |
+| `Version::R2004` | AutoCAD 2003 | `AC1018` | Code page |
+| `Version::R2007` | AutoCAD 2006 | `AC1021` | UTF-8 |
+| `Version::R2010` | AutoCAD 2009 | `AC1024` | UTF-8 |
+| `Version::R2013` | AutoCAD 2012 | `AC1027` | UTF-8 |
+| `Version::R2018` | AutoCAD 2017 | `AC1032` | UTF-8 |
 
-## Saving to an older one {#older}
+## Saving to an older one [#older]
 
 **Kinds a release lacks** are left out, and told: no HATCH, IMAGE or WIPEOUT before R14, no 3DSOLID before R13. A lightweight polyline becomes a POLYLINE before R14, with no issue.
 
@@ -34,6 +36,6 @@ Every release from R10 to R2018 reads and writes, ASCII or binary. A document sa
 
 **Data tables** are ACDBDATATABLE in R2000 and DATATABLE after it.
 
-## Text and code pages {#text}
+## Text and code pages [#text]
 
 From R2007 text is UTF-8. Before it, text is in the code page `$DWGCODEPAGE` names: ANSI 874 and 1250 to 1258, and the East Asian 932, 936, 949, 950 and 1361. A character the page lacks is written as a `\U+` escape, and a file whose page is not carried keeps its text as bytes, so it saves back the same.

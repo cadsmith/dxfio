@@ -1,26 +1,25 @@
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { paint } from './highlight.ts'
 
-type Field = { type: string; name: string; value?: string; doc: string }
-type Method = { signature: string; doc: string; html?: string }
-type Struct = {
+export type Field = { type: string; name: string; value?: string; doc: string }
+export type Method = { signature: string; doc: string }
+export type Struct = {
   kind: 'struct' | 'class'
   name: string
   template?: string
-  templateHtml?: string
   doc: string
   fields: Field[]
   methods: Method[]
 }
-type Value = { name: string; doc: string }
-type Enum = { name: string; doc: string; values: Value[] }
-type Alias = { name: string; target: string; doc: string; html?: string }
-type Constant = { type: string; name: string; value: string; doc: string }
-type Fn = { name: string; signature: string; doc: string; html?: string }
-type Header = {
+export type Value = { name: string; doc: string }
+export type Enum = { name: string; doc: string; values: Value[] }
+export type Alias = { name: string; target: string; doc: string }
+export type Constant = { type: string; name: string; value: string; doc: string }
+export type Fn = { name: string; signature: string; doc: string }
+export type Kind = { type: string; dxf: string; family: 'entity' | 'object' | 'table'; header: string }
+
+export type Header = {
   path: string
-  include?: string
   namespace: string
   group: string
   structs: Struct[]
@@ -346,16 +345,6 @@ const headers: Header[] = walk(include)
     return { path: rel, namespace, group, structs, enums, aliases, constants, functions }
   })
 
-for (const one of headers) {
-  one.include = paint(`#include "dxfio/${one.path}"`)
-  for (const fn of one.functions) fn.html = paint(fn.signature)
-  for (const alias of one.aliases) alias.html = paint(`using ${alias.name} = ${alias.target};`)
-  for (const item of one.structs) {
-    if (item.template) item.templateHtml = paint(item.template)
-    for (const method of item.methods) method.html = paint(method.signature)
-  }
-}
-
 const kinds = [...names.entries()]
   .map(([type, dxf]) => ({
     type,
@@ -368,11 +357,11 @@ const homes = (type: string) => {
   const name = type.split('::').pop() ?? type
   return headers.find((one) => one.structs.some((item) => item.name === name) || one.aliases.some((item) => item.name === name))?.path
 }
-writeFileSync(join(import.meta.dirname, '..', 'src', 'headers.json'), JSON.stringify(headers))
+writeFileSync(join(import.meta.dirname, '..', 'generated', 'headers.json'), JSON.stringify(headers))
 const version = /project\(dxfio VERSION ([\d.]+)/.exec(readFileSync(join(root, 'CMakeLists.txt'), 'utf8'))?.[1] ?? ''
-writeFileSync(join(import.meta.dirname, '..', 'src', 'version.json'), JSON.stringify({ version }))
+writeFileSync(join(import.meta.dirname, '..', 'generated', 'version.json'), JSON.stringify({ version }))
 writeFileSync(
-  join(import.meta.dirname, '..', 'src', 'kinds.json'),
+  join(import.meta.dirname, '..', 'generated', 'kinds.json'),
   JSON.stringify(kinds.map((one) => ({ ...one, header: homes(one.type) ?? 'dxfio.hpp' })), null, 1),
 )
 const declarations = headers.flatMap((one) => [

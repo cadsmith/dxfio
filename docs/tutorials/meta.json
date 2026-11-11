@@ -1,0 +1,26 @@
+{
+  "title": "Tutorials",
+  "pages": [
+    "---Drawings---",
+    "reading",
+    "editing",
+    "saving",
+    "audit",
+    "---Header and tables---",
+    "units",
+    "layers",
+    "linetypes",
+    "---Entities---",
+    "colors",
+    "lines",
+    "polylines",
+    "splines",
+    "text",
+    "hatch",
+    "faces",
+    "xdata",
+    "---Blocks and layouts---",
+    "blocks",
+    "paper"
+  ]
+}

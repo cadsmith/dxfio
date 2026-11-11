@@ -1,8 +1,10 @@
-# Find and change entities
+---
+title: Find and change entities
+---
 
 Find entities by kind, layer and handle, change and delete some, and save the drawing.
 
-## Load {#load}
+## Load [#load]
 
 The drawing is plan.dxf, the one [Read a drawing](/tutorials/reading/) walks through, loaded as a value this time so it can change.
 
@@ -17,11 +19,11 @@ DxfIO::Document &drawing = loaded->Document;
 std::println("{} entities, {} issues", drawing.Entities.size(), loaded->Issues.size());
 ```
 
-```text [Output]
+```text title="Output"
 29 entities, 0 issues
 ```
 
-## By kind {#kind}
+## By kind [#kind]
 
 `std::get_if` gives a pointer to the entity when the variant holds that kind, and null otherwise. `Record.Paper` tells an entity of paper space from one of model space. `Hex` writes a handle as DXF does.
 
@@ -40,14 +42,14 @@ for (DxfIO::Entity &one : drawing.Entities)
 }
 ```
 
-```text [Output]
+```text title="Output"
 LINE 2CE moved to (10, 0) - (110, 50)
 LINE 2CF moved to (10, 0) - (20, 10)
 LINE 2DA moved to (50, 0) - (50, 10)
 LINE 2DB moved to (10, 20) - (40, 40)
 ```
 
-## By layer {#layer}
+## By layer [#layer]
 
 Every kind dxfio types carries its layer and color in `Record`; an `Unknown` has none, and the `requires` test leaves it out. `Edit::Same` compares names as AutoCAD does, without case. `Colors::Bylayer` gives an entity its layer's color; the circle on walls also has a true color in `Rgb`, cleared with it.
 
@@ -74,11 +76,11 @@ for (DxfIO::Entity &one : drawing.Entities)
 }
 ```
 
-```text [Output]
+```text title="Output"
 CIRCLE 2D0 on walls: color 30, true color 0xFF8000
 ```
 
-## By handle {#handle}
+## By handle [#handle]
 
 A handle's `Value` is the number DXF writes in hex. `Edit::FindEntity` looks for it in the ENTITIES section and in every block, and returns a pointer into the document, or null. `std::get_if` gives null for a null pointer too, so one test covers both.
 
@@ -91,11 +93,11 @@ if (auto *circle = std::get_if<DxfIO::Entities::Circle>(found))
 }
 ```
 
-```text [Output]
+```text title="Output"
 CIRCLE 2D5 radius now 14
 ```
 
-## Delete {#delete}
+## Delete [#delete]
 
 `std::erase_if` takes out of the list every entity the test picks and returns how many. It changes nothing else: a GROUP that lists a deleted entity in its `Members` would still name it. Nothing in plan.dxf names its points.
 
@@ -105,11 +107,11 @@ const std::size_t deleted = std::erase_if(drawing.Entities, [](const DxfIO::Enti
 std::println("{} points deleted, {} entities left", deleted, drawing.Entities.size());
 ```
 
-```text [Output]
+```text title="Output"
 3 points deleted, 26 entities left
 ```
 
-## Save {#save}
+## Save [#save]
 
 ```cpp
 const auto saved = DxfIO::SaveFile(drawing, "editing.dxf");
