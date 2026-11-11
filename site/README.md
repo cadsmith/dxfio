@@ -41,7 +41,8 @@ SITE_URL=https://dxfio.dev/ npm run build
 ```
 
 Each page then names its full address as canonical, and `out/sitemap.xml`
-lists them all. Vercel needs no setting: with `SITE_URL` unset, the build
+lists them all. The site is served at a host's root: a `SITE_URL` with a
+path stops the build rather than linking every page wrong. Vercel needs no setting: with `SITE_URL` unset, the build
 takes the project's production address. Every page also has its Markdown at
 `/llms.mdx/<page>/content.md`, a card image at `/og/<page>/image.png`, and
 `/llms.txt` lists them for a language model.

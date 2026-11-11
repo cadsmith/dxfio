@@ -8,7 +8,7 @@
     "dev": "npm run api && next dev",
     "build": "npm run api && next build",
     "preview": "serve out",
-    "types": "next typegen && tsc --noEmit",
+    "types": "npm run api && next typegen && tsc --noEmit",
     "lint": "oxlint --type-aware",
     "examples": "node scripts/examples.ts"
   },
