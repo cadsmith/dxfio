@@ -3,7 +3,12 @@ import type { Element, ElementContent } from 'hast'
 
 export const themes = { light: 'ayu-light', dark: 'ayu-dark' } as const
 
-const labels: Record<string, string> = { cpp: 'C++', cmake: 'CMake', sh: 'Shell', shellscript: 'Shell' }
+const labels = new Map([
+  ['cpp', 'C++'],
+  ['cmake', 'CMake'],
+  ['sh', 'Shell'],
+  ['shellscript', 'Shell'],
+])
 
 const element = (tagName: string, properties: Element['properties'], children: ElementContent[]): Element => ({
   type: 'element',
@@ -23,7 +28,7 @@ const between = (meta: string, open: string, close: string): string | undefined 
 }
 
 export const labelOf = (lang: string, meta: string): string =>
-  between(meta, '[', ']') ?? between(meta, 'title="', '"') ?? labels[lang] ?? lang
+  between(meta, '[', ']') ?? between(meta, 'title="', '"') ?? labels.get(lang) ?? lang
 
 export const figure: ShikiTransformer = {
   name: 'dxfio-figure',
@@ -32,7 +37,7 @@ export const figure: ShikiTransformer = {
     const lang = String(this.options.lang)
     const title = /title="([^"]+)"/.exec(meta)?.[1]
     const children: ElementContent[] = [
-      element('span', { className: ['code-lang'] }, [text(labels[lang] ?? lang)]),
+      element('span', { className: ['code-lang'] }, [text(labels.get(lang) ?? lang)]),
       element('button', { type: 'button', className: ['code-copy'], dataCopy: '', ariaLabel: 'Copy the code' }, [
         text('Copy'),
       ]),
@@ -48,40 +53,50 @@ export const highlighter = await createHighlighter({
   langs: ['cpp', 'cmake', 'shellscript'],
 })
 
-const channels = (hex: string) => {
+type Rgb = readonly [number, number, number]
+
+// A #rgb, #rgba, #rrggbb or #rrggbbaa color as its channels and its opacity, out of 255.
+const rgba = (hex: string): { rgb: Rgb; alpha: number } => {
   const full = hex.length <= 5 ? `#${hex.slice(1).replace(/./g, (digit) => digit + digit)}` : hex
-  return [1, 3, 5, 7].map((at, index) => (index < 3 || full.length > 7 ? Number.parseInt(full.slice(at, at + 2), 16) : 255))
+  const at = (from: number) => Number.parseInt(full.slice(from, from + 2), 16)
+  return { rgb: [at(1), at(3), at(5)], alpha: full.length > 7 ? at(7) : 255 }
 }
+
+const each = ([red, green, blue]: Rgb, change: (channel: number, under: number) => number, under: Rgb = [0, 0, 0]): Rgb => [
+  change(red, under[0]),
+  change(green, under[1]),
+  change(blue, under[2]),
+]
 
 const linear = (channel: number) => {
   const value = channel / 255
   return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
 }
 
-const luminance = (rgb: number[]) => 0.2126 * linear(rgb[0]) + 0.7152 * linear(rgb[1]) + 0.0722 * linear(rgb[2])
+const luminance = ([red, green, blue]: Rgb) => 0.2126 * linear(red) + 0.7152 * linear(green) + 0.0722 * linear(blue)
 
-const contrast = (one: number[], other: number[]) => {
-  const [light, dark] = [luminance(one), luminance(other)].sort((a, b) => b - a)
-  return (light + 0.05) / (dark + 0.05)
+const contrast = (one: Rgb, other: Rgb) => {
+  const [first, second] = [luminance(one), luminance(other)]
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05)
 }
 
-const hex = (rgb: number[]) => `#${rgb.map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('')}`
+const hex = (rgb: Rgb) => `#${rgb.map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('')}`
 
 // A token color that reads below 4.5:1 on its theme's background is taken toward black,
 // or toward white on a dark theme, until it reads; the others stay Ayu's own.
 const legible = (name: string): Record<string, string> => {
   const theme = highlighter.getTheme(name)
-  const back = channels(theme.bg)
+  const back = rgba(theme.bg).rgb
   const toward = luminance(back) > 0.5 ? 0 : 255
-  const colors = [theme.fg, ...theme.settings.map((one) => one.settings?.foreground)].filter(
+  const colors = [theme.fg, ...theme.settings.map((one) => one.settings.foreground)].filter(
     (color): color is string => typeof color === 'string' && color.startsWith('#'),
   )
   return Object.fromEntries(
     colors.flatMap((color) => {
-      const [red, green, blue, alpha] = channels(color)
-      let shown = [red, green, blue].map((channel, index) => channel * (alpha / 255) + back[index] * (1 - alpha / 255))
+      const { rgb, alpha } = rgba(color)
+      let shown = each(rgb, (channel, under) => channel * (alpha / 255) + under * (1 - alpha / 255), back)
       if (contrast(shown, back) >= 4.5) return []
-      while (contrast(shown, back) < 4.5) shown = shown.map((channel) => channel + (toward - channel) * 0.04)
+      while (contrast(shown, back) < 4.5) shown = each(shown, (channel) => channel + (toward - channel) * 0.04)
       return [[color.toLowerCase(), hex(shown)]]
     }),
   )

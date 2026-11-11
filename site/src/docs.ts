@@ -13,12 +13,15 @@ const texts = import.meta.glob<{ default: Page }>('../../docs/{guide,tutorials,c
 
 const path = (section: string, slug: string) => `../../docs/${section}/${slug}.md`
 
-export const groups = sections.map((group) => ({ ...group, slugs: group.slugs.filter((slug) => outlines[path(group.id, slug)]) }))
+export const groups = sections.map((group) => ({ ...group, slugs: group.slugs.filter((slug) => path(group.id, slug) in outlines) }))
 
 export type Entry = { section: string; slug: string; page: Outline }
 
 export const entries: Entry[] = groups.flatMap((group) =>
-  group.slugs.map((slug) => ({ section: group.id, slug, page: outlines[path(group.id, slug)].default })),
+  group.slugs.flatMap((slug) => {
+    const outline = outlines[path(group.id, slug)]
+    return outline ? [{ section: group.id, slug, page: outline.default }] : []
+  }),
 )
 
 // A section alone opens its first page.
@@ -31,7 +34,9 @@ const fetched = new Map<Entry, Promise<Page>>()
 export const text = (entry: Entry): Promise<Page> => {
   const known = fetched.get(entry)
   if (known) return known
-  const loading = texts[path(entry.section, entry.slug)]().then((module) => module.default)
+  const load = texts[path(entry.section, entry.slug)]
+  if (!load) return Promise.reject(new Error(`no page at ${entry.section}/${entry.slug}`))
+  const loading = load().then((module) => module.default)
   fetched.set(entry, loading)
   return loading
 }

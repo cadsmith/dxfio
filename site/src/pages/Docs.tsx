@@ -91,7 +91,8 @@ const docsSidebar = (section: string, slug: string) => (close: () => void) => (
 )
 
 export default function Docs({ route }: { route: string[] }) {
-  const entry = route.length <= 2 ? find(route[0], route[1]) : undefined
+  const [section, slug] = route
+  const entry = section !== undefined && route.length <= 2 ? find(section, slug) : undefined
   useTitle(entry ? docHead(entry).title : missing.title)
   useEffect(reach, [entry])
   if (!entry) return <Missing />

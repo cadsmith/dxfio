@@ -30,6 +30,13 @@ type Header = {
   functions: Fn[]
 }
 
+// A group its pattern always fills, which the types cannot see; a pattern that stops filling it fails the build.
+const filled = (match: RegExpMatchArray, index: number): string => {
+  const value = match[index]
+  if (value === undefined) throw new Error(`no group ${index} in ${JSON.stringify(match[0])}`)
+  return value
+}
+
 const root = join(import.meta.dirname, '..', '..')
 const include = join(root, 'include', 'dxfio')
 const source = join(root, 'source')
@@ -84,6 +91,64 @@ const closing = (text: string, open: number): number => {
     at += 1
   }
   return text.length
+}
+
+// Where a struct's body opens after its name: right away, or past its bases; none for a declaration alone.
+const bodyAfter = (text: string, from: number): number => {
+  const space = /\s*/y
+  space.lastIndex = from
+  space.exec(text)
+  let at = space.lastIndex
+  if (text.charAt(at) === ':') {
+    const bases = /[^{;]*/y
+    bases.lastIndex = at + 1
+    bases.exec(text)
+    at = bases.lastIndex
+  }
+  return text.charAt(at) === '{' ? at : -1
+}
+
+// Where the `template <...>` a declaration follows begins, with only space between them; none without one.
+const templateBefore = (text: string, at: number): number | undefined => {
+  let end = at
+  while (end > 0 && /\s/.test(text.charAt(end - 1))) end -= 1
+  if (text.charAt(end - 1) !== '>') return undefined
+  const open = text.lastIndexOf('<', end - 1)
+  if (open < 0 || text.slice(open + 1, end - 1).includes('>')) return undefined
+  let start = open
+  while (start > 0 && /\s/.test(text.charAt(start - 1))) start -= 1
+  return text.slice(start - 'template'.length, start) === 'template' ? start - 'template'.length : undefined
+}
+
+// The `template <...>` line, with a requires line after it, that ends right where a line starts; none without one.
+const templateAbove = (text: string, line: number): { at: number; head: string } | undefined => {
+  let at = text.lastIndexOf('\n', line - 2) + 1
+  if (/^[ \t]*requires/.test(text.slice(at, line))) at = text.lastIndexOf('\n', at - 2) + 1
+  const first = text.slice(at, text.indexOf('\n', at))
+  return at < line && /^template <[^>\n]*>$/.test(first) ? { at, head: text.slice(at, line) } : undefined
+}
+
+// The parenthesis that closes the one open at the index, with no semicolon before it; none without one.
+const matching = (text: string, open: number): number => {
+  let depth = 0
+  for (let at = open; at < text.length; at += 1) {
+    const char = text.charAt(at)
+    if (char === ';') return -1
+    if (char === '(') depth += 1
+    if (char === ')') {
+      depth -= 1
+      if (depth === 0) return at
+    }
+  }
+  return -1
+}
+
+// A trailing return type at the index, as ` -> RecordT *`, and where it ends; empty without one.
+const returnAt = (text: string, from: number): { returned: string; end: number } => {
+  const arrow = /\s*->[^;{]+/y
+  arrow.lastIndex = from
+  const found = arrow.exec(text)
+  return found ? { returned: found[0], end: arrow.lastIndex } : { returned: '', end: from }
 }
 
 // The code without a body in braces at its end, and without the semicolon after one.
@@ -182,7 +247,7 @@ const membersOf = (body: string, kind: 'struct' | 'class') => {
 const names = new Map<string, string>()
 for (const path of walk(source).filter((p) => p.endsWith('.hpp'))) {
   for (const match of readFileSync(path, 'utf8').matchAll(/Type<([\w:]+)>\s*=\s*"([^"]+)"/g)) {
-    names.set(match[1], match[2])
+    names.set(filled(match, 1), filled(match, 2))
   }
 }
 
@@ -192,32 +257,43 @@ const headers: Header[] = walk(include)
   .map((path) => {
     const text = readFileSync(path, 'utf8')
     const rel = relative(include, path)
-    const namespace = /namespace\s+(DxfIO(?:::\w+)*)\s*\{/.exec(text)?.[1] ?? 'DxfIO'
+    const namespace = /namespace\s+(DxfIO[\w:]*)\s*\{/.exec(text)?.[1] ?? 'DxfIO'
     const structs: Struct[] = []
     const spans: [number, number][] = []
-    const pattern = /(template\s*<[^>]*>\s*)?(?<!enum )\b(struct|class)\s+(?:DXFIO_API\s+)?(\w+)\s*(?::[^{;]*)?\{/g
-    for (const match of text.matchAll(pattern)) {
-      const at = match.index ?? 0
+    for (const match of text.matchAll(/(?<!enum )\b(struct|class)\s+(\w+)/g)) {
+      let name = filled(match, 2)
+      let after = match.index + match[0].length
+      if (name === 'DXFIO_API') {
+        const next = /\s+(\w+)/y
+        next.lastIndex = after
+        const real = next.exec(text)
+        if (!real) continue
+        name = filled(real, 1)
+        after = next.lastIndex
+      }
+      const open = bodyAfter(text, after)
+      if (open < 0) continue
+      const prefix = templateBefore(text, match.index)
+      const at = prefix ?? match.index
       const line = text.slice(text.lastIndexOf('\n', at) + 1, at)
       if (line.trim().startsWith('//')) continue
-      const open = at + match[0].length - 1
       const end = closing(text, open)
       spans.push([at, end])
-      if (['std', 'hash', 'formatter'].includes(match[3])) continue
-      const kind = match[2] as 'struct' | 'class'
+      if (['std', 'hash', 'formatter'].includes(name)) continue
+      const kind = filled(match, 1) as 'struct' | 'class'
       structs.push({
         kind,
-        name: match[3],
-        template: match[1] ? squeeze(match[1]) : undefined,
+        name,
+        template: prefix === undefined ? undefined : squeeze(text.slice(prefix, match.index)),
         doc: docBefore(text, at),
         ...membersOf(text.slice(open + 1, end), kind),
       })
     }
     const outside = (at: number) => !spans.some(([from, to]) => at > from && at < to)
     const enums = [...text.matchAll(/enum class (\w+)\s*:\s*[\w:]+\s*\{([^}]*)\}/g)].map((one) => ({
-      name: one[1],
-      doc: docBefore(text, one.index ?? 0),
-      values: statements(one[2].replace(/,\s*$/gm, ';'))
+      name: filled(one, 1),
+      doc: docBefore(text, one.index),
+      values: statements(filled(one, 2).replace(/,\s*$/gm, ';'))
         .map((value) => {
           const code = value.code.replace(/;$/, '')
           const equals = code.indexOf('=')
@@ -226,28 +302,45 @@ const headers: Header[] = walk(include)
         .filter((value) => /^\w+$/.test(value.name)),
     }))
     const aliases = [...text.matchAll(/^[ \t]*using (\w+) =([^;]+);/gm)]
-      .filter((one) => outside(one.index ?? 0))
-      .map((one) => ({ name: one[1], target: squeeze(one[2]), doc: docBefore(text, (one.index ?? 0) + one[0].indexOf('using')) }))
+      .filter((one) => outside(one.index))
+      .map((one) => ({ name: filled(one, 1), target: squeeze(filled(one, 2)), doc: docBefore(text, one.index + one[0].indexOf('using')) }))
     const constants = [...text.matchAll(/^[ \t]*inline constexpr ([^=;{\n]+) (\w+)(?: = ([^;]+)|\{([^;]*)\});/gm)]
-      .filter((one) => outside(one.index ?? 0))
+      .filter((one) => outside(one.index))
       .map((one) => ({
-        type: squeeze(one[1]),
-        name: one[2],
+        type: squeeze(filled(one, 1)),
+        name: filled(one, 2),
         value: squeeze(one[3] ?? one[4] ?? ''),
-        doc: docBefore(text, (one.index ?? 0) + one[0].indexOf('inline')),
+        doc: docBefore(text, one.index + one[0].indexOf('inline')),
       }))
-    const declared = /^[ \t]*(?:\[\[nodiscard\]\] )?DXFIO_API (auto|void) (\w+)\(([^;]*)\)(\s*->[^;{]+)?;/gm
-    const templated = /^(template <[^>]*>\n(?:[ \t]*requires[^\n]*\n)?)[ \t]*\[\[nodiscard\]\] auto (\w+)\(([^)]*)\)(\s*->[^{;]+)\{/gm
-    const functions = [
-      ...[...text.matchAll(declared)].map((one) => ({ one, head: '' })),
-      ...[...text.matchAll(templated)].map((one) => ({ one, head: squeeze(one[1]) + ' ' })),
-    ]
-      .filter(({ one }) => outside(one.index ?? 0))
-      .sort((a, b) => (a.one.index ?? 0) - (b.one.index ?? 0))
-      .map(({ one, head }) => ({
-        name: one[2],
-        signature: squeeze(`${head}${head ? 'auto' : one[1]} ${one[2]}(${one[3]})${one[4] ? ' ' + one[4] : ''}`),
-        doc: docBefore(text, (one.index ?? 0) + one[0].search(/\S/)),
+    // An exported function's declaration ends in a semicolon; a template's definition opens its body after a return type.
+    type Found = { at: number; start: number; head: string; kind: string; name: string; params: string; returned: string }
+    const found: Found[] = []
+    for (const one of text.matchAll(/^[ \t]*(?:\[\[nodiscard\]\] )?DXFIO_API (auto|void) (\w+)\(/gm)) {
+      const open = one.index + one[0].length - 1
+      const close = matching(text, open)
+      if (close < 0) continue
+      const { returned, end } = returnAt(text, close + 1)
+      if (text.charAt(end) !== ';') continue
+      const start = one.index + one[0].search(/\S/)
+      found.push({ at: one.index, start, head: '', kind: filled(one, 1), name: filled(one, 2), params: text.slice(open + 1, close), returned })
+    }
+    for (const one of text.matchAll(/^[ \t]*\[\[nodiscard\]\] auto (\w+)\(/gm)) {
+      const above = templateAbove(text, one.index)
+      if (!above) continue
+      const open = one.index + one[0].length - 1
+      const close = matching(text, open)
+      if (close < 0) continue
+      const { returned, end } = returnAt(text, close + 1)
+      if (!returned || text.charAt(end) !== '{') continue
+      found.push({ at: above.at, start: above.at, head: squeeze(above.head) + ' ', kind: 'auto', name: filled(one, 1), params: text.slice(open + 1, close), returned })
+    }
+    const functions = found
+      .filter((one) => outside(one.at))
+      .sort((a, b) => a.at - b.at)
+      .map((one) => ({
+        name: one.name,
+        signature: squeeze(`${one.head}${one.kind} ${one.name}(${one.params})${one.returned ? ' ' + one.returned : ''}`),
+        doc: docBefore(text, one.start),
       }))
     const group = groups.find(([, test]) => test(rel))?.[0] ?? 'Values'
     return { path: rel, namespace, group, structs, enums, aliases, constants, functions }

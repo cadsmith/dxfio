@@ -59,7 +59,7 @@ const tags = (head: Head): string[] => {
 // and the fonts the stylesheet names are fetched at once rather than after it.
 const sheet = /<link rel="stylesheet" crossorigin href="([^"]+)">/
 const linked = readFileSync(join(dist, 'index.html'), 'utf8')
-const stylesheet = join(dist, sheet.exec(linked)?.[1].slice(base.length) ?? '')
+const stylesheet = join(dist, sheet.exec(linked)?.[1]?.slice(base.length) ?? '')
 // The app's code takes over a page already painted from its HTML, so it loads after what paints it.
 const template = linked
   .replace(sheet, () => `<style>${readFileSync(stylesheet, 'utf8')}</style>`)
@@ -103,11 +103,11 @@ if (base === '/') {
 const home = pages.find((head) => head.path === base)
 const sections = Map.groupBy(
   pages.filter((head) => head !== home),
-  (head) => parse(head.path)[0],
+  (head) => parse(head.path)[0] ?? '',
 )
 const listed = [...sections].map(
   ([section, heads]) =>
-    `## ${section[0].toUpperCase()}${section.slice(1)}\n\n${heads
+    `## ${section.charAt(0).toUpperCase()}${section.slice(1)}\n\n${heads
       .map((head) => `- [${head.trail.at(-1)?.name}](${origin ? at(head.path) : head.path}): ${head.description}`)
       .join('\n')}\n`,
 )

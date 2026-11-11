@@ -2,9 +2,10 @@ import { useRef, useState } from 'react'
 import { RotateCcwIcon } from 'lucide-react'
 import { gsap, moving, useGSAP } from '../motion'
 
-type Step = { command: string; prompts: string[]; record: [string, string][] }
+type Row = readonly [string, string]
+type Step = { command: string; prompts: readonly string[]; record: readonly Row[] }
 
-const steps: Step[] = [
+const steps = [
   {
     command: 'LINE',
     prompts: ['Specify first point: 5,15', 'Specify next point: 5,4'],
@@ -20,9 +21,9 @@ const steps: Step[] = [
     prompts: ['Specify a point: 5,20.5'],
     record: [['0', 'POINT'], ['8', 'GRIP'], ['10', '5'], ['20', '20.5']],
   },
-]
+] as const satisfies readonly Step[]
 
-const summary: [string, string][] = [
+const summary: readonly Row[] = [
   ['0', 'LINE'],
   ['0', 'CIRCLE'],
   ['0', 'POINT'],
@@ -45,7 +46,7 @@ export function Stage() {
   const scope = useRef<HTMLDivElement>(null)
   const [run, setRun] = useState(0)
   // The finished record, as a prerendered page and a calm visitor see it; the intro clears it first.
-  const [record, setRecord] = useState<[string, string][]>(summary)
+  const [record, setRecord] = useState<readonly Row[]>(summary)
   useGSAP(
     () => {
       const media = gsap.matchMedia()

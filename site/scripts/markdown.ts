@@ -20,8 +20,9 @@ md.renderer.rules.table_close = () => '</table></div>\n'
 // A page links another as /tutorials/layers/, below wherever the site is served.
 let base = '/'
 md.renderer.rules.link_open = (tokens, index, options, _env, self) => {
-  const href = tokens[index].attrGet('href')
-  if (typeof href === 'string' && href.startsWith('/') && !href.startsWith('//')) tokens[index].attrSet('href', base + href.slice(1))
+  const token = tokens[index]
+  const href = token?.attrGet('href')
+  if (typeof href === 'string' && href.startsWith('/') && !href.startsWith('//')) token?.attrSet('href', base + href.slice(1))
   return self.renderToken(tokens, index, options)
 }
 
@@ -63,8 +64,8 @@ const fenced = (body: string): [string, string, string][] => {
     const line = body.indexOf('\n', at)
     const end = line < 0 ? -1 : body.indexOf('```', line + 1)
     if (end < 0) break
-    const info = /^(\w+)([^\n]*)/.exec(body.slice(at + 3, line))
-    if (info) out.push([body.slice(lined(body, at) ?? at, end + 3), info[1], info[2]])
+    const [, lang, meta] = /^(\w+)([^\n]*)/.exec(body.slice(at + 3, line)) ?? []
+    if (lang !== undefined && meta !== undefined) out.push([body.slice(lined(body, at) ?? at, end + 3), lang, meta])
     at = opening(body, end + 3)
   }
   return out
@@ -93,7 +94,7 @@ const render = (source: string): string => {
     held.push(group(body))
     return `\n\n%%group ${held.length - 1}%%\n\n`
   })
-  return md.render(marked).replace(/<p>%%group (\d+)%%<\/p>\n/g, (_, index: string) => held[Number(index)])
+  return md.render(marked).replace(/<p>%%group (\d+)%%<\/p>\n/g, (_, index: string) => held[Number(index)] ?? '')
 }
 
 export const page = (source: string) => {
@@ -129,7 +130,7 @@ export const markdown = (): Plugin => ({
   },
   // A page imported with ?outline keeps its sections' names and drops their text.
   transform(source, id) {
-    const [file, query] = id.split('?')
+    const [file = id, query] = id.split('?')
     if (!file.endsWith('.md')) return null
     const whole = page(source)
     const kept = query === 'outline' ? { ...whole, parts: whole.parts.map(({ id: part, title }) => ({ id: part, title })) } : whole
