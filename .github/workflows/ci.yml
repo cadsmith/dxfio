@@ -162,13 +162,11 @@ jobs:
       CXX: ${{ matrix.cxx }}
       CMAKE_CXX_COMPILER_LAUNCHER: ${{ matrix.launcher }}
     steps:
-      # A pull request is built as its merge, except for coverage: Codacy
-      # files that report under the head, so it is measured on the head's
-      # own lines.
+      # Coverage takes the merge's parents too, to compare it with the head.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ matrix.target == 'coverage' && github.event.pull_request.head.sha || '' }}
+          fetch-depth: ${{ matrix.target == 'coverage' && 2 || 1 }}
 
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         if: runner.os == 'Windows'
@@ -266,10 +264,25 @@ jobs:
           path: coverage.lcov
           retention-days: 90
 
+      # Codacy files a pull request's report under its head. The report is
+      # the merge's, whose lines are the head's only while main has not
+      # changed the library since the branch left it.
+      - name: Match the head
+        id: head
+        if: matrix.target == 'coverage'
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" != pull_request ] || git diff --quiet HEAD^2 HEAD -- include source; then
+            echo "same=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::main changed the library since this branch left it: update it from main for Codacy's coverage"
+          fi
+
       # Codacy's coverage checks need a report for a pull request's head and
       # for its base on main.
       - uses: ./.github/actions/codacy
-        if: matrix.target == 'coverage'
+        if: matrix.target == 'coverage' && steps.head.outputs.same == 'true'
         with:
           report: coverage.lcov
           commit: ${{ github.event.pull_request.head.sha || github.sha }}
