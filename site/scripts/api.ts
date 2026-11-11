@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 export type Field = { type: string; name: string; value?: string; doc: string }
@@ -357,11 +357,14 @@ const homes = (type: string) => {
   const name = type.split('::').pop() ?? type
   return headers.find((one) => one.structs.some((item) => item.name === name) || one.aliases.some((item) => item.name === name))?.path
 }
-writeFileSync(join(import.meta.dirname, '..', 'generated', 'headers.json'), JSON.stringify(headers))
+// generated/ is not kept in git, so a fresh checkout makes it here.
+const generated = join(import.meta.dirname, '..', 'generated')
+mkdirSync(generated, { recursive: true })
+writeFileSync(join(generated, 'headers.json'), JSON.stringify(headers))
 const version = /project\(dxfio VERSION ([\d.]+)/.exec(readFileSync(join(root, 'CMakeLists.txt'), 'utf8'))?.[1] ?? ''
-writeFileSync(join(import.meta.dirname, '..', 'generated', 'version.json'), JSON.stringify({ version }))
+writeFileSync(join(generated, 'version.json'), JSON.stringify({ version }))
 writeFileSync(
-  join(import.meta.dirname, '..', 'generated', 'kinds.json'),
+  join(generated, 'kinds.json'),
   JSON.stringify(kinds.map((one) => ({ ...one, header: homes(one.type) ?? 'dxfio.hpp' })), null, 1),
 )
 const declarations = headers.flatMap((one) => [
