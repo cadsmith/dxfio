@@ -4,6 +4,7 @@
 [![CodeQL](https://github.com/cadsmith/dxfio/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/cadsmith/dxfio/actions/workflows/codeql.yml)
 [![Fuzz](https://github.com/cadsmith/dxfio/actions/workflows/fuzz.yml/badge.svg)](https://github.com/cadsmith/dxfio/actions/workflows/fuzz.yml)
 [![Coverage](https://coveralls.io/repos/github/cadsmith/dxfio/badge.svg?branch=main)](https://coveralls.io/github/cadsmith/dxfio?branch=main)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8da3742c6d824e7fbd565dcb9216e041)](https://app.codacy.com/gh/cadsmith/dxfio/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)](docs/cpp.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-dxfio.dev-blue)](https://dxfio.dev)
