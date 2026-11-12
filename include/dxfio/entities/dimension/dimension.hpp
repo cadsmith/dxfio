@@ -173,11 +173,11 @@ struct DXFIO_API Jog
 {
   /// The block, the text and the plane, from the AcDbDimension subclass.
   Entities::Measure Measure{};
-  /// The point on the curve, in world coordinates. Groups 13, 23, 33.
+  /// The point on the curve, in world coordinates. Groups 15, 25, 35.
   Vector Chord{};
-  /// The center the dimension is drawn from, in place of the curve's own, in world coordinates. Groups 14, 24, 34.
+  /// The center the dimension is drawn from, in place of the curve's own, in world coordinates. Groups 13, 23, 33.
   Vector Center{};
-  /// The point of the jog, in world coordinates. Groups 15, 25, 35.
+  /// The point of the jog, in world coordinates. Groups 14, 24, 34.
   Vector Turn{};
   /// The angle of the jog. Group 40.
   double Angle{};
