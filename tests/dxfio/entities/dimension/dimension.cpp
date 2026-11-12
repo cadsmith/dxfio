@@ -9,6 +9,7 @@
 
 #include "dxfio/objects/mleader/style.hpp"
 
+#include <cmath>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -215,6 +216,25 @@ TEST_CASE("dimension: a jogged radius, a type of its own")
   const LargeRadialDimension one = Alikened<LargeRadialDimension>(Marked("3CD"));
   CHECK(one.Jog->Chord != Vector{});
   CHECK_FALSE(one.Picture.empty());
+}
+
+TEST_CASE("dimension: a jogged radius's points read from the groups AutoCAD writes them in")
+{
+  // In every release the arc of the measures fixture has radius 30 about group 10: group 15 lies on it, 13 is the
+  // center AutoCAD drew from instead, and 14 the jog between them.
+  for (const Version release : Releases)
+  {
+    CAPTURE(release);
+    const LargeRadialDimension one = Alikened<LargeRadialDimension>(Marked("3CD", release), release);
+    const Vector &center = one.Jog->Measure.Point;
+    CHECK(std::hypot(one.Jog->Chord.X - center.X, one.Jog->Chord.Y - center.Y) == doctest::Approx(30.0));
+    CHECK(one.Jog->Chord.X == doctest::Approx(411.1417202906233));
+    CHECK(one.Jog->Chord.Y == doctest::Approx(-27.85430072655778));
+    CHECK(one.Jog->Center.X == doctest::Approx(380.0));
+    CHECK(one.Jog->Center.Y == doctest::Approx(-60.0));
+    CHECK(one.Jog->Turn.X == doctest::Approx(393.375880569281));
+    CHECK(one.Jog->Turn.Y == doctest::Approx(-38.43970142320205));
+  }
 }
 
 TEST_CASE("dimension: named as DXF names each")

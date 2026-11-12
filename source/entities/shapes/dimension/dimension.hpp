@@ -75,9 +75,9 @@ inline constexpr auto Shapes<Entities::Jog> = std::tuple{
         .Fields = Shapes<Entities::Measure>,
     },
     Fields::Subclass{.Marker = "AcDbRadialDimensionLarge"},
-    Fields::Field{.Code = 13, .Member = &Entities::Jog::Chord},
-    Fields::Field{.Code = 14, .Member = &Entities::Jog::Center},
-    Fields::Field{.Code = 15, .Member = &Entities::Jog::Turn},
+    Fields::Field{.Code = 13, .Member = &Entities::Jog::Center},
+    Fields::Field{.Code = 14, .Member = &Entities::Jog::Turn},
+    Fields::Field{.Code = 15, .Member = &Entities::Jog::Chord},
     Fields::Field{.Code = 40, .Member = &Entities::Jog::Angle},
 };
 
