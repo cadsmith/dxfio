@@ -7,31 +7,31 @@
 
 namespace DxfIO::Empty
 {
-struct Spaces
-{
-  Handle Model{};
-  Handle Paper{};
-};
+  struct Spaces
+  {
+    Handle Model{};
+    Handle Paper{};
+  };
 
-struct Stock
-{
-  Handle Byblock{};
-  Handle Bylayer{};
-  Handle Global{};
-};
+  struct Stock
+  {
+    Handle Byblock{};
+    Handle Bylayer{};
+    Handle Global{};
+  };
 
-struct Roots
-{
-  Handle Dictionary{};
-  Spaces Records{};
-  Spaces Layouts{};
-  Stock Materials{};
-  Handle Normal{};
-  Handle Linetype{};
-  Handle Style{};
-};
+  struct Roots
+  {
+    Handle Dictionary{};
+    Spaces Records{};
+    Spaces Layouts{};
+    Stock  Materials{};
+    Handle Normal{};
+    Handle Linetype{};
+    Handle Style{};
+  };
 
-auto Taken(Seed &handles) -> Roots;
+  auto Taken(Seed &handles) -> Roots;
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_ROOTS_HPP */

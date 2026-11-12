@@ -9,34 +9,34 @@
 
 namespace DxfIO::Fields
 {
-struct Tracked
-{
-  Tracked() = default;
-
-  Tracked(const Tracked & /*other*/) : Copied(true) {}
-
-  Tracked(Tracked &&) noexcept = default;
-
-  auto operator=(const Tracked & /*other*/) -> Tracked &
+  struct Tracked
   {
-    Copied = true;
-    return *this;
-  }
+    Tracked() = default;
 
-  auto operator=(Tracked &&) noexcept -> Tracked & = default;
-  ~Tracked() = default;
+    Tracked(const Tracked & /*other*/) : Copied(true) {}
 
-  bool Copied{};
-};
+    Tracked(Tracked &&) noexcept = default;
 
-template <>
-struct Value<Tracked>
-{
-  static auto Read(Walk &in, int code) -> std::optional<Tracked>
+    auto operator=(const Tracked & /*other*/) -> Tracked &
+    {
+      Copied = true;
+      return *this;
+    }
+
+    auto operator=(Tracked &&) noexcept -> Tracked & = default;
+    ~Tracked()                                       = default;
+
+    bool Copied{};
+  };
+
+  template <>
+  struct Value<Tracked>
   {
-    return in.Take(code) == nullptr ? std::nullopt : std::optional<Tracked>{std::in_place};
-  }
-};
+    static auto Read(Walk &in, int code) -> std::optional<Tracked>
+    {
+      return in.Take(code) == nullptr ? std::nullopt : std::optional<Tracked>{std::in_place};
+    }
+  };
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_TESTS_DXF_FIELDS_TRACKED_HPP */

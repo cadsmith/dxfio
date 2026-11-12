@@ -16,20 +16,20 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Ellipse> = std::tuple{
-    Entities::Part<Entities::Ellipse>,
-    Fields::Subclass{.Marker = "AcDbEllipse"},
-    Fields::Field{.Code = 10, .Member = &Entities::Ellipse::Center},
-    Fields::Field{.Code = 11, .Member = &Entities::Ellipse::Axis},
-    Fields::Field{.Code = 210, .Member = &Entities::Ellipse::Extrusion},
-    Fields::Field{.Code = 40, .Member = &Entities::Ellipse::Ratio},
-    Fields::Field{.Code = 41, .Member = &Entities::Ellipse::Start},
-    Fields::Field{.Code = 42, .Member = &Entities::Ellipse::End},
-};
+  template <>
+  inline constexpr auto Shapes<Entities::Ellipse> = std::tuple{
+      Entities::Part<Entities::Ellipse>,
+      Fields::Subclass{.Marker = "AcDbEllipse"},
+      Fields::Field{.Code = 10, .Member = &Entities::Ellipse::Center},
+      Fields::Field{.Code = 11, .Member = &Entities::Ellipse::Axis},
+      Fields::Field{.Code = 210, .Member = &Entities::Ellipse::Extrusion},
+      Fields::Field{.Code = 40, .Member = &Entities::Ellipse::Ratio},
+      Fields::Field{.Code = 41, .Member = &Entities::Ellipse::Start},
+      Fields::Field{.Code = 42, .Member = &Entities::Ellipse::End},
+  };
 
-template <>
-inline constexpr std::string_view Type<Entities::Ellipse> = "ELLIPSE";
+  template <>
+  inline constexpr std::string_view Type<Entities::Ellipse> = "ELLIPSE";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_ELLIPSE_HPP */

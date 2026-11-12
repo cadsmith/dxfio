@@ -10,7 +10,8 @@
 
 namespace DxfIO::Down
 {
-[[nodiscard]] DXFIO_API auto Narrowed(Document from, Version release, std::vector<Issue> *issues) -> Document;
+  [[nodiscard]] DXFIO_API auto Narrowed(Document from, Version release, std::vector<Issue> *issues)
+      -> Document;
 } // namespace DxfIO::Down
 
 #endif /* DXFIO_DOWN_DOWN_HPP */

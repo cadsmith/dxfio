@@ -6,7 +6,7 @@
 
 namespace DxfIO
 {
-auto Broken(std::string_view bytes) -> std::string;
+  auto Broken(std::string_view bytes) -> std::string;
 } // namespace DxfIO
 
 #endif /* DXFIO_TESTS_FUZZ_ORACLE_HPP */

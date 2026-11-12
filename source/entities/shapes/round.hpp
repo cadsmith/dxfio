@@ -15,23 +15,23 @@
 
 namespace DxfIO::Entities
 {
-template <class KindT>
-inline constexpr auto Round = std::tuple{
-    Part<KindT>,
-    Fields::Subclass{.Marker = "AcDbCircle"},
-    Fields::Field<KindT, double, double>{
-        .Code = 39,
-        .Member = &KindT::Thickness,
-        .Fallback = 0.0,
-    },
-    Fields::Field<KindT, Vector>{.Code = 10, .Member = &KindT::Center},
-    Fields::Field<KindT, double>{.Code = 40, .Member = &KindT::Radius},
-    Fields::Field<KindT, Vector, Vector>{
-        .Code = 210,
-        .Member = &KindT::Extrusion,
-        .Fallback = Up,
-    },
-};
+  template <class KindT>
+  inline constexpr auto Round = std::tuple{
+      Part<KindT>,
+      Fields::Subclass{.Marker = "AcDbCircle"},
+      Fields::Field<KindT, double, double>{
+          .Code     = 39,
+          .Member   = &KindT::Thickness,
+          .Fallback = 0.0,
+      },
+      Fields::Field<KindT, Vector>{.Code = 10, .Member = &KindT::Center},
+      Fields::Field<KindT, double>{.Code = 40, .Member = &KindT::Radius},
+      Fields::Field<KindT, Vector, Vector>{
+          .Code     = 210,
+          .Member   = &KindT::Extrusion,
+          .Fallback = Up,
+      },
+  };
 } // namespace DxfIO::Entities
 
 #endif /* DXFIO_ENTITIES_SHAPES_ROUND_HPP */

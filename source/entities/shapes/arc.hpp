@@ -14,16 +14,17 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Arc> =
-    std::tuple_cat(Entities::Round<Entities::Arc>, std::tuple{
-                                                       Fields::Subclass{.Marker = "AcDbArc"},
-                                                       Fields::Field{.Code = 50, .Member = &Entities::Arc::Start},
-                                                       Fields::Field{.Code = 51, .Member = &Entities::Arc::End},
-                                                   });
+  template <>
+  inline constexpr auto Shapes<Entities::Arc> =
+      std::tuple_cat(Entities::Round<Entities::Arc>,
+                     std::tuple{
+                         Fields::Subclass{.Marker = "AcDbArc"},
+                         Fields::Field{.Code = 50, .Member = &Entities::Arc::Start},
+                         Fields::Field{.Code = 51, .Member = &Entities::Arc::End},
+                     });
 
-template <>
-inline constexpr std::string_view Type<Entities::Arc> = "ARC";
+  template <>
+  inline constexpr std::string_view Type<Entities::Arc> = "ARC";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_ARC_HPP */

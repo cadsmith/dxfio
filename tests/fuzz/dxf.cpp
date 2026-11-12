@@ -11,7 +11,7 @@ extern "C" auto LLVMFuzzerTestOneInput(const std::uint8_t *data, std::size_t siz
 {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const std::string_view bytes{reinterpret_cast<const char *>(data), size};
-  const std::string found = DxfIO::Broken(bytes);
+  const std::string      found = DxfIO::Broken(bytes);
   if (!found.empty())
   {
     (void)std::fputs(found.c_str(), stderr);

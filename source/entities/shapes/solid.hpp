@@ -10,11 +10,11 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Solid> = Entities::Filled<Entities::Solid>;
+  template <>
+  inline constexpr auto Shapes<Entities::Solid> = Entities::Filled<Entities::Solid>;
 
-template <>
-inline constexpr std::string_view Type<Entities::Solid> = "SOLID";
+  template <>
+  inline constexpr std::string_view Type<Entities::Solid> = "SOLID";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_SOLID_HPP */

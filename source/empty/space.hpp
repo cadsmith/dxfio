@@ -13,15 +13,16 @@
 
 namespace DxfIO::Empty
 {
-struct DXFIO_API Space
-{
-  Handle Record{};
-  bool Paper{};
-};
+  struct DXFIO_API Space
+  {
+    Handle Record{};
+    bool   Paper{};
+  };
 
-[[nodiscard]] DXFIO_API auto Layout(std::string name, Handle self, Handle record) -> Objects::Layout;
+  [[nodiscard]] DXFIO_API auto Layout(std::string name, Handle self, Handle record)
+      -> Objects::Layout;
 
-[[nodiscard]] DXFIO_API auto Block(std::string name, Space space, Seed &handles) -> Blocks::Block;
+  [[nodiscard]] DXFIO_API auto Block(std::string name, Space space, Seed &handles) -> Blocks::Block;
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_SPACE_HPP */

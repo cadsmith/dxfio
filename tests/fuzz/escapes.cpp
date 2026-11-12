@@ -9,16 +9,16 @@
 
 namespace
 {
-void Check(const DxfIO::Encoding::Scheme &with, std::string_view bytes)
-{
-  const std::string text = Decode(DxfIO::Encoding::Utf8(), bytes);
-  const std::string once = Decode(with, Encode(with, text));
-  const std::string written = Encode(with, once);
-  if (written.find_first_of("\r\n") != std::string::npos || Decode(with, written) != once)
+  void Check(const DxfIO::Encoding::Scheme &with, std::string_view bytes)
   {
-    std::abort();
+    const std::string text    = Decode(DxfIO::Encoding::Utf8(), bytes);
+    const std::string once    = Decode(with, Encode(with, text));
+    const std::string written = Encode(with, once);
+    if (written.find_first_of("\r\n") != std::string::npos || Decode(with, written) != once)
+    {
+      std::abort();
+    }
   }
-}
 } // namespace
 
 extern "C" auto LLVMFuzzerTestOneInput(const std::uint8_t *data, std::size_t size) -> int

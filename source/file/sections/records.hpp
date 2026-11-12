@@ -12,7 +12,7 @@
 
 namespace DxfIO::File::Sections
 {
-auto Records(std::span<const Tags::Tag> body) -> std::expected<std::vector<Record>, Failure>;
+  auto Records(std::span<const Tags::Tag> body) -> std::expected<std::vector<Record>, Failure>;
 } // namespace DxfIO::File::Sections
 
 #endif /* DXFIO_FILE_SECTIONS_RECORDS_HPP */

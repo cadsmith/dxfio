@@ -10,11 +10,11 @@
 
 namespace DxfIO::File
 {
-struct DXFIO_API Record
-{
-  std::string_view Name;
-  std::span<const Tags::Tag> Tags;
-};
+  struct DXFIO_API Record
+  {
+    std::string_view           Name;
+    std::span<const Tags::Tag> Tags;
+  };
 } // namespace DxfIO::File
 
 #endif /* DXFIO_FILE_RECORD_HPP */

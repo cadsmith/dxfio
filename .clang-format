@@ -1,11 +1,11 @@
 BasedOnStyle: LLVM
 Language: Cpp
 Standard: Latest
-ColumnLimit: 120
+ColumnLimit: 100
 IndentWidth: 2
 AccessModifierOffset: -2
 BreakBeforeBraces: Allman
-NamespaceIndentation: None
+NamespaceIndentation: All
 FixNamespaceComments: true
 IndentPPDirectives: AfterHash
 BreakTemplateDeclarations: Yes
@@ -22,10 +22,28 @@ QualifierAlignment: Left
 InsertBraces: true
 InsertNewlineAtEOF: true
 SeparateDefinitionBlocks: Always
-AlignConsecutiveAssignments: None
-AlignConsecutiveDeclarations: None
-AlignConsecutiveMacros: None
-AlignConsecutiveBitFields: None
+BreakBeforeBinaryOperators: NonAssignment
+BreakBinaryOperations: RespectPrecedence
+AlignOperands: AlignAfterOperator
+ReflowComments: IndentOnly
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+AlignConsecutiveBitFields:
+  Enabled: true
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+AlignArrayOfStructures: None
 AlignTrailingComments:
   Kind: Always
 IncludeBlocks: Regroup

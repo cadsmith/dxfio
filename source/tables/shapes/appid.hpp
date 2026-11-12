@@ -10,18 +10,18 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Tables::Appid> = std::tuple{
-    Tables::Opening,
-    Fields::Subclass{.Marker = "AcDbRegAppTableRecord"},
-    Fields::Part{
-        .Member = &Tables::Appid::Record,
-        .Fields = Shapes<Tables::Record>,
-    },
-};
+  template <>
+  inline constexpr auto Shapes<Tables::Appid> = std::tuple{
+      Tables::Opening,
+      Fields::Subclass{.Marker = "AcDbRegAppTableRecord"},
+      Fields::Part{
+          .Member = &Tables::Appid::Record,
+          .Fields = Shapes<Tables::Record>,
+      },
+  };
 
-template <>
-inline constexpr std::string_view Type<Tables::Appid> = "APPID";
+  template <>
+  inline constexpr std::string_view Type<Tables::Appid> = "APPID";
 } // namespace DxfIO
 
 #endif /* DXFIO_TABLES_SHAPES_APPID_HPP */

@@ -22,29 +22,29 @@
 
 namespace DxfIO::Objects
 {
-auto Read(std::span<const File::Record> all, const Fields::Reading &with) -> std::vector<Object>
-{
-  return Family::Read<Object>(all, with);
-}
+  auto Read(std::span<const File::Record> all, const Fields::Reading &with) -> std::vector<Object>
+  {
+    return Family::Read<Object>(all, with);
+  }
 
-auto Type(const Object &one) -> std::string_view
-{
-  return Family::Type(one);
-}
+  auto Type(const Object &one) -> std::string_view
+  {
+    return Family::Type(one);
+  }
 
-auto Based(const Object &one) -> const DxfIO::Base &
-{
-  return std::visit(
-      [](const auto &kind) -> const DxfIO::Base &
-      {
-        using DxfIO::Based;
-        return Based(kind);
-      },
-      one);
-}
+  auto Based(const Object &one) -> const DxfIO::Base &
+  {
+    return std::visit(
+        [](const auto &kind) -> const DxfIO::Base &
+        {
+          using DxfIO::Based;
+          return Based(kind);
+        },
+        one);
+  }
 
-auto Write(Fields::Writing &to, std::span<const Object> all) -> std::expected<void, Failure>
-{
-  return Family::Write<Object>(to, all);
-}
+  auto Write(Fields::Writing &to, std::span<const Object> all) -> std::expected<void, Failure>
+  {
+    return Family::Write<Object>(to, all);
+  }
 } // namespace DxfIO::Objects

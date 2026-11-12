@@ -8,7 +8,7 @@
 
 namespace DxfIO::Empty
 {
-void Tables(Document &drawing, const Roots &ids, Seed &handles);
+  void Tables(Document &drawing, const Roots &ids, Seed &handles);
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_TABLES_HPP */

@@ -11,24 +11,25 @@
 
 namespace DxfIO::Fields
 {
-struct DXFIO_API Skip
-{
-  int Code{};
-};
-
-template <class OwnerT>
-void Take(const Skip &shape, OwnerT & /*unused*/, Walk &in)
-{
-  while (in.Take(shape.Code) != nullptr)
+  struct DXFIO_API Skip
   {
-  }
-}
+    int Code{};
+  };
 
-template <class OwnerT>
-auto Put(const Skip & /*unused*/, const OwnerT & /*unused*/, Writing & /*unused*/) -> std::expected<void, Failure>
-{
-  return {};
-}
+  template <class OwnerT>
+  void Take(const Skip &shape, OwnerT & /*unused*/, Walk &in)
+  {
+    while (in.Take(shape.Code) != nullptr)
+    {
+    }
+  }
+
+  template <class OwnerT>
+  auto Put(const Skip & /*unused*/, const OwnerT & /*unused*/, Writing & /*unused*/)
+      -> std::expected<void, Failure>
+  {
+    return {};
+  }
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_FIELDS_SKIP_HPP */

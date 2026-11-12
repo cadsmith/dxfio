@@ -9,24 +9,25 @@
 
 namespace DxfIO
 {
-template <class StepT, class ElementT>
-concept Writes = std::invocable<StepT &, ElementT> &&
-                 std::same_as<std::invoke_result_t<StepT &, ElementT>, std::expected<void, Failure>>;
+  template <class StepT, class ElementT>
+  concept Writes =
+      std::invocable<StepT &, ElementT>
+      && std::same_as<std::invoke_result_t<StepT &, ElementT>, std::expected<void, Failure>>;
 
-template <std::ranges::input_range RangeT, class StepT>
-  requires Writes<StepT, std::ranges::range_reference_t<const RangeT>>
-auto Chained(const RangeT &all, StepT step) -> std::expected<void, Failure>
-{
-  for (const auto &one : all)
+  template <std::ranges::input_range RangeT, class StepT>
+    requires Writes<StepT, std::ranges::range_reference_t<const RangeT>>
+  auto Chained(const RangeT &all, StepT step) -> std::expected<void, Failure>
   {
-    std::expected<void, Failure> done = step(one);
-    if (!done)
+    for (const auto &one : all)
     {
-      return done;
+      std::expected<void, Failure> done = step(one);
+      if (!done)
+      {
+        return done;
+      }
     }
+    return {};
   }
-  return {};
-}
 } // namespace DxfIO
 
 #endif /* DXFIO_CHAINED_HPP */

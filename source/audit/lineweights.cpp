@@ -12,85 +12,94 @@
 
 namespace DxfIO::Audit
 {
-namespace
-{
-// The lineweights AutoCAD has: ByLayer, ByBlock and the default, then its widths in hundredths of a millimeter.
-constexpr std::array<int, 27> Known{-3, -2, -1, 0,  5,  9,  13,  15,  18,  20,  25,  30,  35, 40,
-                                    50, 53, 60, 70, 80, 90, 100, 106, 120, 140, 158, 200, 211};
-
-// The lineweight AutoCAD has nearest to one, the lighter of two as near.
-auto Nearest(int weight) -> int
-{
-  int out = Known.front();
-  for (const int one : Known)
+  namespace
   {
-    if (std::abs(one - weight) < std::abs(out - weight))
+    /**
+     *  The lineweights AutoCAD has: ByLayer, ByBlock and the default, then its widths in hundredths
+     *  of a millimeter.
+     */
+    constexpr std::array<int, 27> Known{-3, -2, -1,  0,   5,   9,   13,  15,  18,
+                                        20, 25, 30,  35,  40,  50,  53,  60,  70,
+                                        80, 90, 100, 106, 120, 140, 158, 200, 211};
+
+    /**
+     *  The lineweight AutoCAD has nearest to one, the lighter of two as near.
+     */
+    auto Nearest(int weight) -> int
     {
-      out = one;
-    }
-  }
-  return out;
-}
-
-template <class DocumentT>
-void Weighed(Auditor<DocumentT> &with, Part<DocumentT, int> &weight, Handle self)
-{
-  const int nearest = Nearest(weight);
-  if (nearest == weight)
-  {
-    return;
-  }
-  with.Note(Severity::Warning, std::format("lineweight {} is none AutoCAD has, {} taken", weight, nearest), self);
-  if constexpr (Auditor<DocumentT>::Fix)
-  {
-    weight = nearest;
-  }
-}
-
-} // namespace
-
-// AutoCAD has 24 lineweights and three names; one of any other value is a warning, and takes the nearest when the
-// checks fix, on a layer, an entity, or what an entity carries.
-template <class DocumentT>
-void Weighted(Auditor<DocumentT> &with)
-{
-  for (auto &layer : with.Drawing->Layer.Records)
-  {
-    Weighed(with, layer.Lineweight, layer.Record.Base.Self);
-  }
-  Lists(*with.Drawing,
-        [&with](auto &all) -> void
+      int out = Known.front();
+      for (const int one : Known)
+      {
+        if (std::abs(one - weight) < std::abs(out - weight))
         {
-          for (auto &one : all)
+          out = one;
+        }
+      }
+      return out;
+    }
+
+    template <class DocumentT>
+    void Weighed(Auditor<DocumentT> &with, Part<DocumentT, int> &weight, Handle self)
+    {
+      const int nearest = Nearest(weight);
+      if (nearest == weight)
+      {
+        return;
+      }
+      with.Note(Severity::Warning,
+                std::format("lineweight {} is none AutoCAD has, {} taken", weight, nearest), self);
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        weight = nearest;
+      }
+    }
+
+  } // namespace
+
+  /**
+   *  AutoCAD has 24 lineweights and three names; one of any other value is a warning, and takes the
+   *  nearest when the checks fix, on a layer, an entity, or what an entity carries.
+   */
+  template <class DocumentT>
+  void Weighted(Auditor<DocumentT> &with)
+  {
+    for (auto &layer : with.Drawing->Layer.Records)
+    {
+      Weighed(with, layer.Lineweight, layer.Record.Base.Self);
+    }
+    Lists(*with.Drawing,
+          [&with](auto &all) -> void
           {
-            std::visit(
-                [&with](auto &kind) -> void
-                {
-                  if constexpr (requires { kind.Record.Lineweight; })
+            for (auto &one : all)
+            {
+              std::visit(
+                  [&with](auto &kind) -> void
                   {
-                    Weighed(with, kind.Record.Lineweight, kind.Record.Base.Self);
-                  }
-                  if constexpr (requires { kind.Vertices.Children; })
-                  {
-                    for (auto &child : kind.Vertices.Children)
+                    if constexpr (requires { kind.Record.Lineweight; })
                     {
-                      Weighed(with, child.Record.Lineweight, child.Record.Base.Self);
+                      Weighed(with, kind.Record.Lineweight, kind.Record.Base.Self);
                     }
-                  }
-                  if constexpr (requires { kind.Attributes.Children; })
-                  {
-                    for (auto &child : kind.Attributes.Children)
+                    if constexpr (requires { kind.Vertices.Children; })
                     {
-                      Weighed(with, child.Record.Lineweight, child.Record.Base.Self);
+                      for (auto &child : kind.Vertices.Children)
+                      {
+                        Weighed(with, child.Record.Lineweight, child.Record.Base.Self);
+                      }
                     }
-                  }
-                },
-                one);
-          }
-        });
-}
+                    if constexpr (requires { kind.Attributes.Children; })
+                    {
+                      for (auto &child : kind.Attributes.Children)
+                      {
+                        Weighed(with, child.Record.Lineweight, child.Record.Base.Self);
+                      }
+                    }
+                  },
+                  one);
+            }
+          });
+  }
 
-template void Weighted(Auditor<Document> &with);
+  template void Weighted(Auditor<Document> &with);
 
-template void Weighted(Auditor<const Document> &with);
+  template void Weighted(Auditor<const Document> &with);
 } // namespace DxfIO::Audit

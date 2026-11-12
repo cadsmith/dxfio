@@ -16,8 +16,10 @@
 
 namespace DxfIO
 {
-[[nodiscard]] DXFIO_API auto Copied(std::span<const File::Record> all, const Fields::Reading &with) -> std::vector<Raw>;
-[[nodiscard]] DXFIO_API auto Put(Fields::Writing &to, std::span<const Raw> all) -> std::expected<void, Failure>;
+  [[nodiscard]] DXFIO_API auto Copied(std::span<const File::Record> all,
+                                      const Fields::Reading        &with) -> std::vector<Raw>;
+  [[nodiscard]] DXFIO_API auto Put(Fields::Writing &to, std::span<const Raw> all)
+      -> std::expected<void, Failure>;
 } // namespace DxfIO
 
 #endif /* DXFIO_RAW_IO_HPP */

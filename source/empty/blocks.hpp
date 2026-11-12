@@ -11,7 +11,7 @@
 
 namespace DxfIO::Empty
 {
-auto Blocks(const Roots &ids, Seed &handles) -> std::vector<Blocks::Block>;
+  auto Blocks(const Roots &ids, Seed &handles) -> std::vector<Blocks::Block>;
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_BLOCKS_HPP */

@@ -6,14 +6,18 @@
 
 namespace DxfIO::Tables
 {
-/// An APPID table record: an application registered to attach extended data, named after it.
-struct DXFIO_API Appid
-{
-  /// The name, flags and handles every table record carries.
-  Tables::Record Record{};
+  /**
+   *  An APPID table record: an application registered to attach extended data, named after it.
+   */
+  struct DXFIO_API Appid
+  {
+    /**
+     *  The name, flags and handles every table record carries.
+     */
+    Tables::Record Record{};
 
-  auto operator==(const Appid &) const -> bool = default;
-};
+    auto operator==(const Appid &) const -> bool = default;
+  };
 } // namespace DxfIO::Tables
 
 #endif /* DXFIO_TABLES_APPID_HPP */

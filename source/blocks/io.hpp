@@ -18,8 +18,10 @@
 
 namespace DxfIO::Blocks
 {
-[[nodiscard]] DXFIO_API auto Read(std::span<const File::Nest> all, const Fields::Reading &with) -> std::vector<Block>;
-[[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, std::span<const Block> all) -> std::expected<void, Failure>;
+  [[nodiscard]] DXFIO_API auto Read(std::span<const File::Nest> all, const Fields::Reading &with)
+      -> std::vector<Block>;
+  [[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, std::span<const Block> all)
+      -> std::expected<void, Failure>;
 } // namespace DxfIO::Blocks
 
 #endif /* DXFIO_BLOCKS_IO_HPP */

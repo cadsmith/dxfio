@@ -9,7 +9,7 @@
 
 namespace DxfIO::Empty
 {
-auto Scales(Seed &handles) -> std::vector<Objects::Scale>;
+  auto Scales(Seed &handles) -> std::vector<Objects::Scale>;
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_SCALES_HPP */

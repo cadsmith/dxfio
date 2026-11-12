@@ -13,107 +13,116 @@
 
 namespace DxfIO::Fields
 {
-// What no field took. A repeat of a code the part asked for, standing where it would be written straight
-// after the part's fields, is left out and told: under the marker written before them, it would be read in
-// their place.
-auto Walk::Rest() const -> std::vector<Group>
-{
-  std::vector<Group> out;
-  const std::size_t uncovered = Uncovered();
-  for (std::size_t index = 0; index < m_Body.size(); ++index)
+  /**
+   *  What no field took. A repeat of a code the part asked for, standing where it would be written
+   *  straight after the part's fields, is left out and told: under the marker written before them,
+   *  it would be read in their place.
+   */
+  auto Walk::Rest() const -> std::vector<Group>
   {
-    const Tags::Tag &one = At(index);
-    if (m_Used.at(index))
+    std::vector<Group> out;
+    const std::size_t  uncovered = Uncovered();
+    for (std::size_t index = 0; index < m_Body.size(); ++index)
     {
-      continue;
+      const Tags::Tag &one = At(index);
+      if (m_Used.at(index))
+      {
+        continue;
+      }
+      if (index < uncovered && !m_Unfit.at(index) && m_Repeats.Trails(one.Code))
+      {
+        m_With.Tell(Issue{.Line = one.Line,
+                          .What = std::format("group {} given again, one kept", one.Code)});
+        continue;
+      }
+      out.push_back(Owned(one, m_With.Text));
     }
-    if (index < uncovered && !m_Unfit.at(index) && m_Repeats.Trails(one.Code))
+    return out;
+  }
+
+  void Walk::Spend()
+  {
+    m_Used.assign(m_Body.size(), true);
+  }
+
+  auto Walk::Kept() -> std::vector<Group>
+  {
+    std::vector<Group> out;
+    bool               beyond = false;
+    const std::size_t  first  = Opening();
+    for (std::size_t index = 0; index < m_Body.size(); ++index)
     {
-      m_With.Tell(Issue{.Line = one.Line, .What = std::format("group {} given again, one kept", one.Code)});
-      continue;
+      const Tags::Tag &one = At(index);
+      if (m_Used.at(index))
+      {
+        continue;
+      }
+      if (std::optional<std::string> why =
+              Dropped(index, one.Code, Standing{.Beyond = beyond, .Early = index < first}))
+      {
+        m_With.Tell(Issue{.Line = one.Line, .What = std::move(*why)});
+        continue;
+      }
+      beyond = beyond
+            || (m_With.Release >= Version::R13
+                && (one.Code == Tags::Codes::Marker || one.Code == Tags::Codes::Embedded));
+      out.push_back(Owned(one, m_With.Text));
     }
-    out.push_back(Owned(one, m_With.Text));
+    return out;
   }
-  return out;
-}
 
-void Walk::Spend()
-{
-  m_Used.assign(m_Body.size(), true);
-}
-
-auto Walk::Kept() -> std::vector<Group>
-{
-  std::vector<Group> out;
-  bool beyond = false;
-  const std::size_t first = Opening();
-  for (std::size_t index = 0; index < m_Body.size(); ++index)
+  auto Walk::Dropped(std::size_t at, int code, Standing where) -> std::optional<std::string>
   {
-    const Tags::Tag &one = At(index);
-    if (m_Used.at(index))
+    if (!m_Unfit.at(at) && m_Repeats.Repeated(at, code))
     {
-      continue;
+      return std::format("group {} given again, one kept", code);
     }
-    if (std::optional<std::string> why = Dropped(index, one.Code, Standing{.Beyond = beyond, .Early = index < first}))
+    if (!where.Early && (where.Beyond || !m_Repeats.Trails(code)))
     {
-      m_With.Tell(Issue{.Line = one.Line, .What = std::move(*why)});
-      continue;
+      return std::nullopt;
     }
-    beyond = beyond ||
-             (m_With.Release >= Version::R13 && (one.Code == Tags::Codes::Marker || one.Code == Tags::Codes::Embedded));
-    out.push_back(Owned(one, m_With.Text));
-  }
-  return out;
-}
-
-auto Walk::Dropped(std::size_t at, int code, Standing where) -> std::optional<std::string>
-{
-  if (!m_Unfit.at(at) && m_Repeats.Repeated(at, code))
-  {
-    return std::format("group {} given again, one kept", code);
-  }
-  if (!where.Early && (where.Beyond || !m_Repeats.Trails(code)))
-  {
-    return std::nullopt;
-  }
-  if (m_Unfit.at(at))
-  {
-    return std::format("group {} holds no value its field takes", code);
-  }
-  // A group of a code the kind names, outside the part that names it: the record does not fit its layout.
-  // A kind read through Taking is then kept as Unknown, whole; one read through Taken keeps its fields and
-  // loses the group, and is told.
-  m_Refused = true;
-  return std::format("group {} out of its place, dropped", code);
-}
-
-// How far the rest stands uncovered: up to the first marker no field took, which, written with the rest,
-// fences what follows it. Nothing is, read in order, where the rest keeps its place, or before R13, where
-// no marker is written and a field takes the first group of its code.
-auto Walk::Uncovered() const -> std::size_t
-{
-  if (m_Ordered || m_With.Release < Version::R13)
-  {
-    return 0;
-  }
-  for (std::size_t index = 0; index < m_Body.size(); ++index)
-  {
-    const int code = At(index).Code;
-    if (!m_Used.at(index) && (code == Tags::Codes::Marker || code == Tags::Codes::Embedded))
+    if (m_Unfit.at(at))
     {
-      return index;
+      return std::format("group {} holds no value its field takes", code);
     }
+    /**
+     *  A group of a code the kind names, outside the part that names it: the record does not fit
+     *  its layout. A kind read through Taking is then kept as Unknown, whole; one read through
+     *  Taken keeps its fields and loses the group, and is told.
+     */
+    m_Refused = true;
+    return std::format("group {} out of its place, dropped", code);
   }
-  return m_Body.size();
-}
 
-auto Walk::Opening() const -> std::size_t
-{
-  if (m_With.Release < Version::R13)
+  /**
+   *  How far the rest stands uncovered: up to the first marker no field took, which, written with
+   *  the rest, fences what follows it. Nothing is, read in order, where the rest keeps its place,
+   *  or before R13, where no marker is written and a field takes the first group of its code.
+   */
+  auto Walk::Uncovered() const -> std::size_t
   {
-    return 0;
+    if (m_Ordered || m_With.Release < Version::R13)
+    {
+      return 0;
+    }
+    for (std::size_t index = 0; index < m_Body.size(); ++index)
+    {
+      const int code = At(index).Code;
+      if (!m_Used.at(index) && (code == Tags::Codes::Marker || code == Tags::Codes::Embedded))
+      {
+        return index;
+      }
+    }
+    return m_Body.size();
   }
-  const auto found = std::ranges::find(m_Body, Tags::Codes::Marker, &Tags::Tag::Code);
-  return found == m_Body.end() ? 0 : static_cast<std::size_t>(found - m_Body.begin());
-}
+
+  auto Walk::Opening() const -> std::size_t
+  {
+    if (m_With.Release < Version::R13)
+    {
+      return 0;
+    }
+    const auto found = std::ranges::find(m_Body, Tags::Codes::Marker, &Tags::Tag::Code);
+    return found == m_Body.end() ? 0 : static_cast<std::size_t>(found - m_Body.begin());
+  }
 } // namespace DxfIO::Fields

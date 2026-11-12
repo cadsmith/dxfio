@@ -9,7 +9,7 @@
 
 namespace DxfIO::Header::Rows
 {
-[[nodiscard]] DXFIO_API auto All() -> std::span<const Row>;
+  [[nodiscard]] DXFIO_API auto All() -> std::span<const Row>;
 } // namespace DxfIO::Header::Rows
 
 #endif /* DXFIO_HEADER_ROWS_HPP */

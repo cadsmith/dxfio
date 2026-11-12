@@ -13,14 +13,14 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Objects::WipeoutVariables> = std::tuple{
-    Fields::Subclass{.Marker = "AcDbWipeoutVariables"},
-    Fields::Field{.Code = 70, .Member = &Objects::WipeoutVariables::Frame},
-};
+  template <>
+  inline constexpr auto Shapes<Objects::WipeoutVariables> = std::tuple{
+      Fields::Subclass{.Marker = "AcDbWipeoutVariables"},
+      Fields::Field{.Code = 70, .Member = &Objects::WipeoutVariables::Frame},
+  };
 
-template <>
-inline constexpr std::string_view Type<Objects::WipeoutVariables> = "WIPEOUTVARIABLES";
+  template <>
+  inline constexpr std::string_view Type<Objects::WipeoutVariables> = "WIPEOUTVARIABLES";
 } // namespace DxfIO
 
 #endif /* DXFIO_OBJECTS_SHAPES_WIPEOUT_VARIABLES_HPP */

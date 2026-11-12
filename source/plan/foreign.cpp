@@ -10,41 +10,46 @@
 
 namespace DxfIO::Plan
 {
-namespace
-{
-auto Left(std::span<const Object> all) -> std::vector<Handle>
-{
-  std::vector<Handle> out;
-  for (const Object &one : all)
+  namespace
   {
-    const Handle self = Objects::Based(one).Self;
-    if (self && std::holds_alternative<Unknown>(one))
+    auto Left(std::span<const Object> all) -> std::vector<Handle>
     {
-      out.push_back(self);
+      std::vector<Handle> out;
+      for (const Object &one : all)
+      {
+        const Handle self = Objects::Based(one).Self;
+        if (self && std::holds_alternative<Unknown>(one))
+        {
+          out.push_back(self);
+        }
+      }
+      std::ranges::sort(out);
+      return out;
     }
-  }
-  std::ranges::sort(out);
-  return out;
-}
 
-void Prune(Objects::Dictionary &one, const std::vector<Handle> &gone)
-{
-  std::erase_if(one.Entries, [&gone](const Objects::Entry &held) -> bool
-                { return std::ranges::binary_search(gone, held.Soft) || std::ranges::binary_search(gone, held.Hard); });
-}
-} // namespace
+    void Prune(Objects::Dictionary &one, const std::vector<Handle> &gone)
+    {
+      std::erase_if(one.Entries,
+                    [&gone](const Objects::Entry &held) -> bool
+                    {
+                      return std::ranges::binary_search(gone, held.Soft)
+                          || std::ranges::binary_search(gone, held.Hard);
+                    });
+    }
+  } // namespace
 
-auto Foreign(std::vector<Object> all) -> std::vector<Object>
-{
-  const std::vector<Handle> gone = Left(all);
-  std::erase_if(all, [](const Object &one) -> bool { return std::holds_alternative<Unknown>(one); });
-  for (Object &one : all)
+  auto Foreign(std::vector<Object> all) -> std::vector<Object>
   {
-    if (auto *table = std::get_if<Objects::Dictionary>(&one))
+    const std::vector<Handle> gone = Left(all);
+    std::erase_if(all,
+                  [](const Object &one) -> bool { return std::holds_alternative<Unknown>(one); });
+    for (Object &one : all)
     {
-      Prune(*table, gone);
+      if (auto *table = std::get_if<Objects::Dictionary>(&one))
+      {
+        Prune(*table, gone);
+      }
     }
+    return all;
   }
-  return all;
-}
 } // namespace DxfIO::Plan

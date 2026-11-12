@@ -12,16 +12,16 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Objects::PlotSettings> = std::tuple{
-    Fields::Part{
-        .Member = &Objects::PlotSettings::Plot,
-        .Fields = Shapes<Objects::Plot>,
-    },
-};
+  template <>
+  inline constexpr auto Shapes<Objects::PlotSettings> = std::tuple{
+      Fields::Part{
+          .Member = &Objects::PlotSettings::Plot,
+          .Fields = Shapes<Objects::Plot>,
+      },
+  };
 
-template <>
-inline constexpr std::string_view Type<Objects::PlotSettings> = "PLOTSETTINGS";
+  template <>
+  inline constexpr std::string_view Type<Objects::PlotSettings> = "PLOTSETTINGS";
 } // namespace DxfIO
 
 #endif /* DXFIO_OBJECTS_SHAPES_SETTINGS_HPP */

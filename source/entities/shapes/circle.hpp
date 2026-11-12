@@ -10,11 +10,11 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Circle> = Entities::Round<Entities::Circle>;
+  template <>
+  inline constexpr auto Shapes<Entities::Circle> = Entities::Round<Entities::Circle>;
 
-template <>
-inline constexpr std::string_view Type<Entities::Circle> = "CIRCLE";
+  template <>
+  inline constexpr std::string_view Type<Entities::Circle> = "CIRCLE";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_CIRCLE_HPP */

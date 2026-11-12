@@ -4,11 +4,12 @@ list(SORT headers)
 set(listing "")
 foreach(header IN LISTS headers)
   file(READ ${API_ROOT}/${header} text)
-  string(REGEX REPLACE "[ \t]*//[^\n]*" "" text "${text}")
   string(REGEX REPLACE "#(ifndef|define) DXFIO_[A-Z0-9_]+_HPP\n" ""
     text "${text}")
   string(REGEX REPLACE "#endif /\\* DXFIO_[A-Z0-9_]+_HPP \\*/\n" ""
     text "${text}")
+  string(REGEX REPLACE "[ \t]*/\\*([^*]|\\*+[^*/])*\\*+/" "" text "${text}")
+  string(REGEX REPLACE "[ \t]*//[^\n]*" "" text "${text}")
   string(REGEX REPLACE "\n[ \t\n]*\n" "\n" text "\n${text}")
   string(APPEND listing "== ${header}${text}")
 endforeach()

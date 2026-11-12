@@ -16,32 +16,33 @@
 
 namespace DxfIO::Fields
 {
-template <class OwnerT, class ElementT>
-struct Many
-{
-  int Code{};
-  std::vector<ElementT> OwnerT::*Member{};
-};
+  template <class OwnerT, class ElementT>
+  struct Many
+  {
+    int                   Code{};
+    std::vector<ElementT> OwnerT::*Member{};
+  };
 
-template <class OwnerT, class ElementT>
-void Take(const Many<OwnerT, ElementT> &shape, OwnerT &owner, Walk &in)
-{
-  Elements(in, shape.Code,
-           [&] -> auto
-           {
-             if (std::optional<ElementT> one = Value<ElementT>::Read(in, shape.Code))
+  template <class OwnerT, class ElementT>
+  void Take(const Many<OwnerT, ElementT> &shape, OwnerT &owner, Walk &in)
+  {
+    Elements(in, shape.Code,
+             [&] -> auto
              {
-               (owner.*shape.Member).push_back(std::move(*one));
-             }
-           });
-}
+               if (std::optional<ElementT> one = Value<ElementT>::Read(in, shape.Code))
+               {
+                 (owner.*shape.Member).push_back(std::move(*one));
+               }
+             });
+  }
 
-template <class OwnerT, class ElementT>
-auto Put(const Many<OwnerT, ElementT> &shape, const OwnerT &owner, Writing &to) -> std::expected<void, Failure>
-{
-  return Chained(owner.*shape.Member,
-                 [&](const ElementT &one) -> auto { return Value<ElementT>::Write(to, shape.Code, one); });
-}
+  template <class OwnerT, class ElementT>
+  auto Put(const Many<OwnerT, ElementT> &shape, const OwnerT &owner, Writing &to)
+      -> std::expected<void, Failure>
+  {
+    return Chained(owner.*shape.Member, [&](const ElementT &one) -> auto
+                   { return Value<ElementT>::Write(to, shape.Code, one); });
+  }
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_FIELDS_MANY_HPP */

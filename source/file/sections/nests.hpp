@@ -12,9 +12,9 @@
 
 namespace DxfIO::File::Sections
 {
-auto Tables(std::span<const Tags::Tag> body) -> std::expected<std::vector<Nest>, Failure>;
+  auto Tables(std::span<const Tags::Tag> body) -> std::expected<std::vector<Nest>, Failure>;
 
-auto Blocks(std::span<const Tags::Tag> body) -> std::expected<std::vector<Nest>, Failure>;
+  auto Blocks(std::span<const Tags::Tag> body) -> std::expected<std::vector<Nest>, Failure>;
 } // namespace DxfIO::File::Sections
 
 #endif /* DXFIO_FILE_SECTIONS_NESTS_HPP */

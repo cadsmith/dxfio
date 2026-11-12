@@ -14,16 +14,16 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Ray> = std::tuple{
-    Entities::Part<Entities::Ray>,
-    Fields::Subclass{.Marker = "AcDbRay"},
-    Fields::Field{.Code = 10, .Member = &Entities::Ray::Start},
-    Fields::Field{.Code = 11, .Member = &Entities::Ray::Direction},
-};
+  template <>
+  inline constexpr auto Shapes<Entities::Ray> = std::tuple{
+      Entities::Part<Entities::Ray>,
+      Fields::Subclass{.Marker = "AcDbRay"},
+      Fields::Field{.Code = 10, .Member = &Entities::Ray::Start},
+      Fields::Field{.Code = 11, .Member = &Entities::Ray::Direction},
+  };
 
-template <>
-inline constexpr std::string_view Type<Entities::Ray> = "RAY";
+  template <>
+  inline constexpr std::string_view Type<Entities::Ray> = "RAY";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_RAY_HPP */

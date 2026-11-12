@@ -15,16 +15,16 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Face3d> = std::tuple{
-    Entities::Part<Entities::Face3d>,
-    Fields::Subclass{.Marker = "AcDbFace"},
-    Fields::Field{.Code = 10, .Member = &Entities::Face3d::Corners},
-    Fields::Field{.Code = 70, .Member = &Entities::Face3d::Flags, .Fallback = 0},
-};
+  template <>
+  inline constexpr auto Shapes<Entities::Face3d> = std::tuple{
+      Entities::Part<Entities::Face3d>,
+      Fields::Subclass{.Marker = "AcDbFace"},
+      Fields::Field{.Code = 10, .Member = &Entities::Face3d::Corners},
+      Fields::Field{.Code = 70, .Member = &Entities::Face3d::Flags, .Fallback = 0},
+  };
 
-template <>
-inline constexpr std::string_view Type<Entities::Face3d> = "3DFACE";
+  template <>
+  inline constexpr std::string_view Type<Entities::Face3d> = "3DFACE";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_FACE_HPP */
