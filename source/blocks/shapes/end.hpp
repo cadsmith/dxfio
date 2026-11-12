@@ -12,14 +12,14 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Blocks::End> = std::tuple{
-    Entities::Part<Blocks::End>,
-    Fields::Subclass{.Marker = "AcDbBlockEnd"},
-};
+  template <>
+  inline constexpr auto Shapes<Blocks::End> = std::tuple{
+      Entities::Part<Blocks::End>,
+      Fields::Subclass{.Marker = "AcDbBlockEnd"},
+  };
 
-template <>
-inline constexpr std::string_view Type<Blocks::End> = "ENDBLK";
+  template <>
+  inline constexpr std::string_view Type<Blocks::End> = "ENDBLK";
 } // namespace DxfIO
 
 #endif /* DXFIO_BLOCKS_SHAPES_END_HPP */

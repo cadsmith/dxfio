@@ -9,7 +9,7 @@
 
 namespace DxfIO::Header
 {
-[[nodiscard]] DXFIO_API auto Created(Version release = Version::R2018) -> std::vector<Variable>;
+  [[nodiscard]] DXFIO_API auto Created(Version release = Version::R2018) -> std::vector<Variable>;
 } // namespace DxfIO::Header
 
 #endif /* DXFIO_HEADER_CREATED_HPP */

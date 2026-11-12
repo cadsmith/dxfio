@@ -12,26 +12,28 @@
 
 namespace DxfIO::Fields
 {
-struct DXFIO_API Sequence
-{
-  std::string_view Marker;
-};
+  struct DXFIO_API Sequence
+  {
+    std::string_view Marker;
+  };
 
-DXFIO_API void Open(const Sequence &shape, Walk &in);
+  DXFIO_API void Open(const Sequence &shape, Walk &in);
 
-[[nodiscard]] DXFIO_API auto Mark(const Sequence &shape, const Writing &to) -> std::expected<void, Failure>;
+  [[nodiscard]] DXFIO_API auto Mark(const Sequence &shape, const Writing &to)
+      -> std::expected<void, Failure>;
 
-template <class OwnerT>
-void Take(const Sequence &shape, OwnerT & /*unused*/, Walk &in)
-{
-  Open(shape, in);
-}
+  template <class OwnerT>
+  void Take(const Sequence &shape, OwnerT & /*unused*/, Walk &in)
+  {
+    Open(shape, in);
+  }
 
-template <class OwnerT>
-auto Put(const Sequence &shape, const OwnerT & /*unused*/, Writing &to) -> std::expected<void, Failure>
-{
-  return Mark(shape, to);
-}
+  template <class OwnerT>
+  auto Put(const Sequence &shape, const OwnerT & /*unused*/, Writing &to)
+      -> std::expected<void, Failure>
+  {
+    return Mark(shape, to);
+  }
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_FIELDS_SEQUENCE_HPP */

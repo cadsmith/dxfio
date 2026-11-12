@@ -29,23 +29,33 @@
 
 namespace DxfIO
 {
-/// An object of the OBJECTS section: one of the kinds DXF defines, or an Unknown kept as it came.
-using Object =
-    std::variant<Objects::Dictionary, Objects::DictionaryWithDefault, Objects::Group, Objects::ImageDef,
-                 Objects::ImageDefReactor, Objects::RasterVariables, Objects::Layout, Objects::Material,
-                 Objects::MLeaderStyle, Objects::MLineStyle, Objects::Placeholder, Objects::Scale,
-                 Objects::SortEntsTable, Objects::TableStyle, Objects::DictionaryVar, Objects::XRecord,
-                 Objects::PlotSettings, Objects::WipeoutVariables, Objects::PdfDefinition, Objects::DwfDefinition,
-                 Objects::DgnDefinition, Objects::VisualStyle, Objects::DataTable, Objects::AcDbDataTable, Unknown>;
+  /**
+   *  An object of the OBJECTS section: one of the kinds DXF defines, or an Unknown kept as it came.
+   */
+  using Object =
+      std::variant<Objects::Dictionary, Objects::DictionaryWithDefault, Objects::Group,
+                   Objects::ImageDef, Objects::ImageDefReactor, Objects::RasterVariables,
+                   Objects::Layout, Objects::Material, Objects::MLeaderStyle, Objects::MLineStyle,
+                   Objects::Placeholder, Objects::Scale, Objects::SortEntsTable,
+                   Objects::TableStyle, Objects::DictionaryVar, Objects::XRecord,
+                   Objects::PlotSettings, Objects::WipeoutVariables, Objects::PdfDefinition,
+                   Objects::DwfDefinition, Objects::DgnDefinition, Objects::VisualStyle,
+                   Objects::DataTable, Objects::AcDbDataTable, Unknown>;
 
-/// The DXF name of an object, such as "DICTIONARY", or the name an unknown object came in with.
-[[nodiscard]] DXFIO_API auto TypeOf(const Object &one) -> std::string_view;
+  /**
+   *  The DXF name of an object, such as "DICTIONARY", or the name an unknown object came in with.
+   */
+  [[nodiscard]] DXFIO_API auto TypeOf(const Object &one) -> std::string_view;
 
-/// The handle, owner, reactors and extended data every object carries.
-[[nodiscard]] DXFIO_API auto BaseOf(const Object &one) -> const Base &;
+  /**
+   *  The handle, owner, reactors and extended data every object carries.
+   */
+  [[nodiscard]] DXFIO_API auto BaseOf(const Object &one) -> const Base &;
 
-/// The handle, owner, reactors and extended data every object carries.
-[[nodiscard]] DXFIO_API auto BaseOf(Object &one) -> Base &;
+  /**
+   *  The handle, owner, reactors and extended data every object carries.
+   */
+  [[nodiscard]] DXFIO_API auto BaseOf(Object &one) -> Base &;
 } // namespace DxfIO
 
 #endif /* DXFIO_OBJECT_HPP */

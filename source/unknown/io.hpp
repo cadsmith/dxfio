@@ -18,8 +18,10 @@
 
 namespace DxfIO
 {
-[[nodiscard]] DXFIO_API auto Kept(const File::Record &one, const Fields::Reading &with) -> Unknown;
-[[nodiscard]] DXFIO_API auto Put(Fields::Writing &to, const Unknown &one) -> std::expected<void, Failure>;
+  [[nodiscard]] DXFIO_API auto Kept(const File::Record &one, const Fields::Reading &with)
+      -> Unknown;
+  [[nodiscard]] DXFIO_API auto Put(Fields::Writing &to, const Unknown &one)
+      -> std::expected<void, Failure>;
 } // namespace DxfIO
 
 #endif /* DXFIO_UNKNOWN_IO_HPP */

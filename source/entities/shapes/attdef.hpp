@@ -16,19 +16,19 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Attdef> = std::tuple_cat(
-    std::tuple{
-        Entities::Part<Entities::Attdef>,
-        Entities::Lettered<Entities::Attdef>,
-        Fields::Subclass{.Marker = "AcDbAttributeDefinition"},
-        Entities::Revised<Entities::Attdef>,
-        Fields::Field{.Code = 3, .Member = &Entities::Attdef::Prompt},
-    },
-    Entities::Labeled<Entities::Attdef>);
+  template <>
+  inline constexpr auto Shapes<Entities::Attdef> = std::tuple_cat(
+      std::tuple{
+          Entities::Part<Entities::Attdef>,
+          Entities::Lettered<Entities::Attdef>,
+          Fields::Subclass{.Marker = "AcDbAttributeDefinition"},
+          Entities::Revised<Entities::Attdef>,
+          Fields::Field{.Code = 3, .Member = &Entities::Attdef::Prompt},
+      },
+      Entities::Labeled<Entities::Attdef>);
 
-template <>
-inline constexpr std::string_view Type<Entities::Attdef> = "ATTDEF";
+  template <>
+  inline constexpr std::string_view Type<Entities::Attdef> = "ATTDEF";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_ATTDEF_HPP */

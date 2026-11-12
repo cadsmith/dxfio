@@ -10,11 +10,11 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Entities::Trace> = Entities::Filled<Entities::Trace>;
+  template <>
+  inline constexpr auto Shapes<Entities::Trace> = Entities::Filled<Entities::Trace>;
 
-template <>
-inline constexpr std::string_view Type<Entities::Trace> = "TRACE";
+  template <>
+  inline constexpr std::string_view Type<Entities::Trace> = "TRACE";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_TRACE_HPP */

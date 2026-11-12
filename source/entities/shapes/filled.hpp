@@ -16,22 +16,22 @@
 
 namespace DxfIO::Entities
 {
-template <class KindT>
-inline constexpr auto Filled = std::tuple{
-    Part<KindT>,
-    Fields::Subclass{.Marker = "AcDbTrace"},
-    Fields::Field<KindT, Corners>{.Code = 10, .Member = &KindT::Corners},
-    Fields::Field<KindT, double, double>{
-        .Code = 39,
-        .Member = &KindT::Thickness,
-        .Fallback = 0.0,
-    },
-    Fields::Field<KindT, Vector, Vector>{
-        .Code = 210,
-        .Member = &KindT::Extrusion,
-        .Fallback = Up,
-    },
-};
+  template <class KindT>
+  inline constexpr auto Filled = std::tuple{
+      Part<KindT>,
+      Fields::Subclass{.Marker = "AcDbTrace"},
+      Fields::Field<KindT, Corners>{.Code = 10, .Member = &KindT::Corners},
+      Fields::Field<KindT, double, double>{
+          .Code     = 39,
+          .Member   = &KindT::Thickness,
+          .Fallback = 0.0,
+      },
+      Fields::Field<KindT, Vector, Vector>{
+          .Code     = 210,
+          .Member   = &KindT::Extrusion,
+          .Fallback = Up,
+      },
+  };
 } // namespace DxfIO::Entities
 
 #endif /* DXFIO_ENTITIES_SHAPES_FILLED_HPP */

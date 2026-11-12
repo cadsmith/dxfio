@@ -9,16 +9,16 @@
 
 namespace DxfIO
 {
-auto Create(Version release) -> Document
-{
-  Seed handles;
-  if (release >= Version::R13)
+  auto Create(Version release) -> Document
   {
-    return Empty::Whole(release, handles);
+    Seed handles;
+    if (release >= Version::R13)
+    {
+      return Empty::Whole(release, handles);
+    }
+    Document out = Down::Narrowed(Empty::Whole(Version::R2000, handles), release, nullptr);
+    out.Header   = Header::Created(release);
+    WriteSeed(out, Past(out));
+    return out;
   }
-  Document out = Down::Narrowed(Empty::Whole(Version::R2000, handles), release, nullptr);
-  out.Header = Header::Created(release);
-  WriteSeed(out, Past(out));
-  return out;
-}
 } // namespace DxfIO

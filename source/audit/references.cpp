@@ -15,243 +15,258 @@
 
 namespace DxfIO::Audit
 {
-namespace
-{
-constexpr std::string_view Bylayer = "ByLayer";
-
-constexpr std::string_view Byblock = "ByBlock";
-
-constexpr std::string_view Standard = "Standard";
-
-// The names the references are looked up in, gathered once for the whole check, and the audit they report to.
-template <class DocumentT>
-struct Known
-{
-  Auditor<DocumentT> *With{};
-  Names Layers;
-  Names Linetypes;
-  Names Styles;
-  Names Dimstyles;
-  Names Blocks;
-};
-
-// What a missing name is called: the name, or none.
-auto Absent(std::string_view kind, std::string_view name) -> std::string
-{
-  return name.empty() ? std::format("{} with no name", kind) : std::format("{} {} missing", kind, name);
-}
-
-// An entity on a layer with no name goes to layer 0: a layer cannot be made for a name AutoCAD refuses.
-template <class DocumentT>
-void Grounded(Known<DocumentT> &known, Part<DocumentT, Entities::Record> &one)
-{
-  known.With->Note(Severity::Error, "layer with no name, 0 taken", one.Base.Self);
-  if constexpr (Auditor<DocumentT>::Fix)
+  namespace
   {
-    one.Layer = Symbol{"0"};
-  }
-}
+    constexpr std::string_view Bylayer = "ByLayer";
 
-template <class DocumentT>
-void Layered(Known<DocumentT> &known, Part<DocumentT, Entities::Record> &one)
-{
-  if (one.Layer.View().empty())
-  {
-    Grounded(known, one);
-    return;
-  }
-  if (known.Layers.contains(one.Layer.View()))
-  {
-    return;
-  }
-  Auditor<DocumentT> &with = *known.With;
-  with.Note(Severity::Error, std::format("layer {} missing", one.Layer.View()), one.Base.Self);
-  if constexpr (Auditor<DocumentT>::Fix)
-  {
-    Tables::Table<Tables::Layer> &layers = with.Drawing->Layer;
-    Tables::Layer made = *std::ranges::min_element(layers.Records, {}, [](const Tables::Layer &layer) -> bool
-                                                   { return layer.Record.Name != "0"; });
-    made.Record.Base = {};
-    made.Record.Base.Owner = layers.Head.Base.Self;
-    if (layers.Head.Base.Self)
+    constexpr std::string_view Byblock = "ByBlock";
+
+    constexpr std::string_view Standard = "Standard";
+
+    /**
+     *  The names the references are looked up in, gathered once for the whole check, and the audit
+     *  they report to.
+     */
+    template <class DocumentT>
+    struct Known
     {
-      made.Record.Base.Self = with.Take();
+      Auditor<DocumentT> *With{};
+      Names               Layers;
+      Names               Linetypes;
+      Names               Styles;
+      Names               Dimstyles;
+      Names               Blocks;
+    };
+
+    /**
+     *  What a missing name is called: the name, or none.
+     */
+    auto Absent(std::string_view kind, std::string_view name) -> std::string
+    {
+      return name.empty() ? std::format("{} with no name", kind)
+                          : std::format("{} {} missing", kind, name);
     }
-    made.Record.Name = one.Layer.Str();
-    known.Layers.emplace(made.Record.Name);
-    layers.Records.push_back(std::move(made));
-  }
-}
 
-template <class DocumentT, class RecordT>
-void Lined(Known<DocumentT> &known, RecordT &one)
-{
-  const std::string_view name = one.Linetype.View();
-  if (DxfIO::Ascii::Same(name, Bylayer) || DxfIO::Ascii::Same(name, Byblock) || known.Linetypes.contains(name))
-  {
-    return;
-  }
-  known.With->Note(Severity::Warning, Absent("linetype", name), one.Base.Self);
-  if constexpr (Auditor<DocumentT>::Fix)
-  {
-    one.Linetype = Symbol{Bylayer};
-  }
-}
+    /**
+     *  An entity on a layer with no name goes to layer 0: a layer cannot be made for a name AutoCAD
+     *  refuses.
+     */
+    template <class DocumentT>
+    void Grounded(Known<DocumentT> &known, Part<DocumentT, Entities::Record> &one)
+    {
+      known.With->Note(Severity::Error, "layer with no name, 0 taken", one.Base.Self);
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        one.Layer = Symbol{"0"};
+      }
+    }
 
-template <class DocumentT, class SymbolT>
-void Styled(Known<DocumentT> &known, SymbolT &style, Handle self)
-{
-  if (known.Styles.contains(style.View()))
-  {
-    return;
-  }
-  known.With->Note(Severity::Warning, Absent("text style", style.View()), self);
-  if constexpr (Auditor<DocumentT>::Fix)
-  {
-    style = Symbol{Standard};
-  }
-}
-
-template <class DocumentT, class SymbolT>
-void Dimstyled(Known<DocumentT> &known, SymbolT &style, Handle self)
-{
-  if (known.Dimstyles.contains(style.View()))
-  {
-    return;
-  }
-  known.With->Note(Severity::Warning, Absent("dimension style", style.View()), self);
-  if constexpr (Auditor<DocumentT>::Fix)
-  {
-    style = Symbol{Standard};
-  }
-}
-
-template <class DocumentT, class RecordT>
-void Recorded(Known<DocumentT> &known, RecordT &one)
-{
-  Layered(known, one);
-  Lined(known, one);
-}
-
-template <class DocumentT>
-auto Orphan(Known<DocumentT> &known, const Entity &one) -> bool
-{
-  const auto *insert = std::get_if<Entities::Insert>(&one);
-  if (insert == nullptr || known.Blocks.contains(insert->Block.View()))
-  {
-    return false;
-  }
-  known.With->Note(Severity::Error, std::format("{}, its insert left out", Absent("block", insert->Block.View())),
-                   insert->Record.Base.Self);
-  return true;
-}
-
-template <class DocumentT, class KindT>
-void Looked(Known<DocumentT> &known, KindT &kind);
-
-template <class DocumentT, class ChainT>
-void Carried(Known<DocumentT> &known, ChainT &chain)
-{
-  for (auto &child : chain.Children)
-  {
-    Looked(known, child);
-  }
-  if (chain.Closing)
-  {
-    Looked(known, **chain.Closing);
-  }
-}
-
-template <class DocumentT, class KindT>
-void Looked(Known<DocumentT> &known, KindT &kind)
-{
-  if constexpr (requires { kind.Record; })
-  {
-    Recorded(known, kind.Record);
-  }
-  if constexpr (requires { kind.Lettering.Style; })
-  {
-    Styled(known, kind.Lettering.Style, kind.Record.Base.Self);
-  }
-  if constexpr (requires { kind.Paragraph->Style; })
-  {
-    Styled(known, kind.Paragraph->Style, kind.Record.Base.Self);
-  }
-  if constexpr (requires { kind.Lettering->Style; })
-  {
-    Styled(known, kind.Lettering->Style, kind.Record.Base.Self);
-  }
-  if constexpr (requires { kind.Figure->Measure.Style; })
-  {
-    Dimstyled(known, kind.Figure->Measure.Style, kind.Record.Base.Self);
-  }
-  if constexpr (requires { kind.Bend->Measure.Style; })
-  {
-    Dimstyled(known, kind.Bend->Measure.Style, kind.Record.Base.Self);
-  }
-  if constexpr (requires { kind.Jog->Measure.Style; })
-  {
-    Dimstyled(known, kind.Jog->Measure.Style, kind.Record.Base.Self);
-  }
-  if constexpr (requires { kind.Lead->Style; })
-  {
-    Dimstyled(known, kind.Lead->Style, kind.Record.Base.Self);
-  }
-  if constexpr (std::is_same_v<std::remove_cvref_t<KindT>, Entities::Tolerance>)
-  {
-    Dimstyled(known, kind.Style, kind.Record.Base.Self);
-  }
-  if constexpr (requires { kind.Vertices.Children; })
-  {
-    Carried(known, kind.Vertices);
-  }
-  if constexpr (requires { kind.Attributes.Children; })
-  {
-    Carried(known, kind.Attributes);
-  }
-}
-
-template <class DocumentT, class EntityT>
-void Checked(Known<DocumentT> &known, EntityT &one)
-{
-  std::visit([&known](auto &kind) -> void { Looked(known, kind); }, one);
-}
-} // namespace
-
-template <class DocumentT>
-void Referred(Auditor<DocumentT> &with)
-{
-  const DocumentT &drawing = *with.Drawing;
-  Known<DocumentT> known{
-      .With = &with,
-      .Layers = Named(drawing.Layer),
-      .Linetypes = Named(drawing.Ltype),
-      .Styles = Named(drawing.Style),
-      .Dimstyles = Named(drawing.Dimstyle),
-      .Blocks = Defined(drawing.Blocks),
-  };
-  Lists(*with.Drawing,
-        [&known](auto &all) -> void
+    template <class DocumentT>
+    void Layered(Known<DocumentT> &known, Part<DocumentT, Entities::Record> &one)
+    {
+      if (one.Layer.View().empty())
+      {
+        Grounded(known, one);
+        return;
+      }
+      if (known.Layers.contains(one.Layer.View()))
+      {
+        return;
+      }
+      Auditor<DocumentT> &with = *known.With;
+      with.Note(Severity::Error, std::format("layer {} missing", one.Layer.View()), one.Base.Self);
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        Tables::Table<Tables::Layer> &layers = with.Drawing->Layer;
+        Tables::Layer                 made =
+            *std::ranges::min_element(layers.Records, {}, [](const Tables::Layer &layer) -> bool
+                                      { return layer.Record.Name != "0"; });
+        made.Record.Base       = {};
+        made.Record.Base.Owner = layers.Head.Base.Self;
+        if (layers.Head.Base.Self)
         {
-          for (auto &one : all)
+          made.Record.Base.Self = with.Take();
+        }
+        made.Record.Name = one.Layer.Str();
+        known.Layers.emplace(made.Record.Name);
+        layers.Records.push_back(std::move(made));
+      }
+    }
+
+    template <class DocumentT, class RecordT>
+    void Lined(Known<DocumentT> &known, RecordT &one)
+    {
+      const std::string_view name = one.Linetype.View();
+      if (DxfIO::Ascii::Same(name, Bylayer)
+          || DxfIO::Ascii::Same(name, Byblock)
+          || known.Linetypes.contains(name))
+      {
+        return;
+      }
+      known.With->Note(Severity::Warning, Absent("linetype", name), one.Base.Self);
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        one.Linetype = Symbol{Bylayer};
+      }
+    }
+
+    template <class DocumentT, class SymbolT>
+    void Styled(Known<DocumentT> &known, SymbolT &style, Handle self)
+    {
+      if (known.Styles.contains(style.View()))
+      {
+        return;
+      }
+      known.With->Note(Severity::Warning, Absent("text style", style.View()), self);
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        style = Symbol{Standard};
+      }
+    }
+
+    template <class DocumentT, class SymbolT>
+    void Dimstyled(Known<DocumentT> &known, SymbolT &style, Handle self)
+    {
+      if (known.Dimstyles.contains(style.View()))
+      {
+        return;
+      }
+      known.With->Note(Severity::Warning, Absent("dimension style", style.View()), self);
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        style = Symbol{Standard};
+      }
+    }
+
+    template <class DocumentT, class RecordT>
+    void Recorded(Known<DocumentT> &known, RecordT &one)
+    {
+      Layered(known, one);
+      Lined(known, one);
+    }
+
+    template <class DocumentT>
+    auto Orphan(Known<DocumentT> &known, const Entity &one) -> bool
+    {
+      const auto *insert = std::get_if<Entities::Insert>(&one);
+      if (insert == nullptr || known.Blocks.contains(insert->Block.View()))
+      {
+        return false;
+      }
+      known.With->Note(
+          Severity::Error,
+          std::format("{}, its insert left out", Absent("block", insert->Block.View())),
+          insert->Record.Base.Self);
+      return true;
+    }
+
+    template <class DocumentT, class KindT>
+    void Looked(Known<DocumentT> &known, KindT &kind);
+
+    template <class DocumentT, class ChainT>
+    void Carried(Known<DocumentT> &known, ChainT &chain)
+    {
+      for (auto &child : chain.Children)
+      {
+        Looked(known, child);
+      }
+      if (chain.Closing)
+      {
+        Looked(known, **chain.Closing);
+      }
+    }
+
+    template <class DocumentT, class KindT>
+    void Looked(Known<DocumentT> &known, KindT &kind)
+    {
+      if constexpr (requires { kind.Record; })
+      {
+        Recorded(known, kind.Record);
+      }
+      if constexpr (requires { kind.Lettering.Style; })
+      {
+        Styled(known, kind.Lettering.Style, kind.Record.Base.Self);
+      }
+      if constexpr (requires { kind.Paragraph->Style; })
+      {
+        Styled(known, kind.Paragraph->Style, kind.Record.Base.Self);
+      }
+      if constexpr (requires { kind.Lettering->Style; })
+      {
+        Styled(known, kind.Lettering->Style, kind.Record.Base.Self);
+      }
+      if constexpr (requires { kind.Figure->Measure.Style; })
+      {
+        Dimstyled(known, kind.Figure->Measure.Style, kind.Record.Base.Self);
+      }
+      if constexpr (requires { kind.Bend->Measure.Style; })
+      {
+        Dimstyled(known, kind.Bend->Measure.Style, kind.Record.Base.Self);
+      }
+      if constexpr (requires { kind.Jog->Measure.Style; })
+      {
+        Dimstyled(known, kind.Jog->Measure.Style, kind.Record.Base.Self);
+      }
+      if constexpr (requires { kind.Lead->Style; })
+      {
+        Dimstyled(known, kind.Lead->Style, kind.Record.Base.Self);
+      }
+      if constexpr (std::is_same_v<std::remove_cvref_t<KindT>, Entities::Tolerance>)
+      {
+        Dimstyled(known, kind.Style, kind.Record.Base.Self);
+      }
+      if constexpr (requires { kind.Vertices.Children; })
+      {
+        Carried(known, kind.Vertices);
+      }
+      if constexpr (requires { kind.Attributes.Children; })
+      {
+        Carried(known, kind.Attributes);
+      }
+    }
+
+    template <class DocumentT, class EntityT>
+    void Checked(Known<DocumentT> &known, EntityT &one)
+    {
+      std::visit([&known](auto &kind) -> void { Looked(known, kind); }, one);
+    }
+  } // namespace
+
+  template <class DocumentT>
+  void Referred(Auditor<DocumentT> &with)
+  {
+    const DocumentT &drawing = *with.Drawing;
+    Known<DocumentT> known{
+        .With      = &with,
+        .Layers    = Named(drawing.Layer),
+        .Linetypes = Named(drawing.Ltype),
+        .Styles    = Named(drawing.Style),
+        .Dimstyles = Named(drawing.Dimstyle),
+        .Blocks    = Defined(drawing.Blocks),
+    };
+    Lists(*with.Drawing,
+          [&known](auto &all) -> void
           {
-            Checked(known, one);
-          }
-          if constexpr (Auditor<DocumentT>::Fix)
-          {
-            std::erase_if(all, [&known](const Entity &one) -> bool { return Orphan(known, one); });
-          }
-          else
-          {
-            for (const Entity &one : all)
+            for (auto &one : all)
             {
-              Orphan(known, one);
+              Checked(known, one);
             }
-          }
-        });
-}
+            if constexpr (Auditor<DocumentT>::Fix)
+            {
+              std::erase_if(all,
+                            [&known](const Entity &one) -> bool { return Orphan(known, one); });
+            }
+            else
+            {
+              for (const Entity &one : all)
+              {
+                Orphan(known, one);
+              }
+            }
+          });
+  }
 
-template void Referred(Auditor<Document> &with);
+  template void Referred(Auditor<Document> &with);
 
-template void Referred(Auditor<const Document> &with);
+  template void Referred(Auditor<const Document> &with);
 } // namespace DxfIO::Audit

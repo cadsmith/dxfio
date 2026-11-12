@@ -9,15 +9,15 @@
 
 namespace DxfIO::Encoding
 {
-struct DXFIO_API Step
-{
-  char32_t Point{};
-  std::size_t Length{};
-};
+  struct DXFIO_API Step
+  {
+    char32_t    Point{};
+    std::size_t Length{};
+  };
 
-[[nodiscard]] DXFIO_API auto First(std::string_view text) -> Step;
+  [[nodiscard]] DXFIO_API auto First(std::string_view text) -> Step;
 
-DXFIO_API void Put(std::string &out, char32_t point);
+  DXFIO_API void Put(std::string &out, char32_t point);
 } // namespace DxfIO::Encoding
 
 #endif /* DXFIO_ENCODING_POINTS_HPP */

@@ -12,7 +12,7 @@
 
 namespace DxfIO::File::Sections
 {
-auto Header(std::span<const Tags::Tag> body) -> std::expected<std::vector<Variable>, Failure>;
+  auto Header(std::span<const Tags::Tag> body) -> std::expected<std::vector<Variable>, Failure>;
 } // namespace DxfIO::File::Sections
 
 #endif /* DXFIO_FILE_SECTIONS_HEADER_HPP */

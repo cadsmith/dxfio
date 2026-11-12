@@ -9,16 +9,16 @@
 
 namespace DxfIO
 {
-namespace
-{
-constexpr Handle Last{.Value = std::numeric_limits<std::uint64_t>::max()};
-} // namespace
+  namespace
+  {
+    constexpr Handle Last{.Value = std::numeric_limits<std::uint64_t>::max()};
+  } // namespace
 
-auto Past(const Document &from) -> Handle
-{
-  Handle held{};
-  Held(from, [&held](Handle one) -> void { held = std::max(held, one); });
-  const Handle out = std::max(Handle{.Value = held.Value + 1}, ReadSeed(from));
-  return held == Last || out == Last ? Handle{} : out;
-}
+  auto Past(const Document &from) -> Handle
+  {
+    Handle held{};
+    Held(from, [&held](Handle one) -> void { held = std::max(held, one); });
+    const Handle out = std::max(Handle{.Value = held.Value + 1}, ReadSeed(from));
+    return held == Last || out == Last ? Handle{} : out;
+  }
 } // namespace DxfIO

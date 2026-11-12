@@ -8,23 +8,23 @@
 
 namespace DxfIO::Fields
 {
-struct Sheet
-{
-  explicit Sheet(Version release = Version::R2018, Encoding::Scheme text = Encoding::Utf8())
-      : To{.To = &Writer, .Release = release, .Text = text, .From = release}
+  struct Sheet
   {
-  }
+    explicit Sheet(Version release = Version::R2018, Encoding::Scheme text = Encoding::Utf8())
+        : To{.To = &Writer, .Release = release, .Text = text, .From = release}
+    {
+    }
 
-  Sheet(const Sheet &) = delete;
-  Sheet(Sheet &&) = delete;
-  auto operator=(const Sheet &) -> Sheet & = delete;
-  auto operator=(Sheet &&) -> Sheet & = delete;
-  ~Sheet() = default;
+    Sheet(const Sheet &)                     = delete;
+    Sheet(Sheet &&)                          = delete;
+    auto operator=(const Sheet &) -> Sheet & = delete;
+    auto operator=(Sheet &&) -> Sheet &      = delete;
+    ~Sheet()                                 = default;
 
-  std::string Out;
-  Tags::Writer Writer{Out};
-  Writing To;
-};
+    std::string  Out;
+    Tags::Writer Writer{Out};
+    Writing      To;
+  };
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_TESTS_DXF_FIELDS_FIXTURE_HPP */

@@ -14,9 +14,9 @@
 
 namespace DxfIO::Tables
 {
-auto Headed(const File::Record &one, const Fields::Reading &with) -> Tables::Head;
+  auto Headed(const File::Record &one, const Fields::Reading &with) -> Tables::Head;
 
-auto Headed(Fields::Writing &to, const Tables::Head &one) -> std::expected<void, Failure>;
+  auto Headed(Fields::Writing &to, const Tables::Head &one) -> std::expected<void, Failure>;
 } // namespace DxfIO::Tables
 
 #endif /* DXFIO_TABLES_HEADING_HPP */

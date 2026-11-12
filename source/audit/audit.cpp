@@ -11,68 +11,69 @@
 
 namespace DxfIO::Audit
 {
-namespace
-{
-constexpr Handle Last{.Value = std::numeric_limits<std::uint64_t>::max()};
-
-auto Unfixed(const Finding &one) -> bool
-{
-  return one.Level == Severity::Error && !one.Fixed;
-}
-
-template <class DocumentT>
-auto Run(DocumentT &drawing) -> Report
-{
-  Auditor<DocumentT> with{.Drawing = &drawing, .Handles = Seed{}};
-  if constexpr (Auditor<DocumentT>::Fix)
+  namespace
   {
-    with.Handles = Seed{Past(drawing)};
-  }
-  Seeded(with);
-  Handled(with);
-  Unnamed(with);
-  Tabled(with);
-  Applied(with);
-  Referred(with);
-  Weighted(with);
-  Meshed(with);
-  Curved(with);
-  Led(with);
-  Sequenced(with);
-  Attributed(with);
-  Grouped(with);
-  Classed(with);
-  if constexpr (Auditor<DocumentT>::Fix)
+    constexpr Handle Last{.Value = std::numeric_limits<std::uint64_t>::max()};
+
+    auto Unfixed(const Finding &one) -> bool
+    {
+      return one.Level == Severity::Error && !one.Fixed;
+    }
+
+    template <class DocumentT>
+    auto Run(DocumentT &drawing) -> Report
+    {
+      Auditor<DocumentT> with{.Drawing = &drawing, .Handles = Seed{}};
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        with.Handles = Seed{Past(drawing)};
+      }
+      Seeded(with);
+      Handled(with);
+      Unnamed(with);
+      Tabled(with);
+      Applied(with);
+      Referred(with);
+      Weighted(with);
+      Meshed(with);
+      Curved(with);
+      Led(with);
+      Sequenced(with);
+      Attributed(with);
+      Grouped(with);
+      Classed(with);
+      if constexpr (Auditor<DocumentT>::Fix)
+      {
+        const Handle past = Past(drawing);
+        WriteSeed(drawing, past ? past : Last);
+      }
+      return std::move(with.Out);
+    }
+  } // namespace
+
+  auto Report::Clean() const -> bool
   {
-    const Handle past = Past(drawing);
-    WriteSeed(drawing, past ? past : Last);
+    return std::ranges::none_of(Findings, Unfixed);
   }
-  return std::move(with.Out);
-}
-} // namespace
 
-auto Report::Clean() const -> bool
-{
-  return std::ranges::none_of(Findings, Unfixed);
-}
+  auto Report::Errors() const -> std::size_t
+  {
+    return static_cast<std::size_t>(std::ranges::count(Findings, Severity::Error, &Finding::Level));
+  }
 
-auto Report::Errors() const -> std::size_t
-{
-  return static_cast<std::size_t>(std::ranges::count(Findings, Severity::Error, &Finding::Level));
-}
+  auto Report::Warnings() const -> std::size_t
+  {
+    return static_cast<std::size_t>(
+        std::ranges::count(Findings, Severity::Warning, &Finding::Level));
+  }
 
-auto Report::Warnings() const -> std::size_t
-{
-  return static_cast<std::size_t>(std::ranges::count(Findings, Severity::Warning, &Finding::Level));
-}
+  auto Check(const Document &drawing) -> Report
+  {
+    return Run(drawing);
+  }
 
-auto Check(const Document &drawing) -> Report
-{
-  return Run(drawing);
-}
-
-auto Repair(Document &drawing) -> Report
-{
-  return Run(drawing);
-}
+  auto Repair(Document &drawing) -> Report
+  {
+    return Run(drawing);
+  }
 } // namespace DxfIO::Audit

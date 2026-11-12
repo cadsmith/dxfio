@@ -16,28 +16,36 @@
 
 namespace DxfIO::Tags::Ascii
 {
-class DXFIO_API Reader
-{
-public:
-  // Reads the text as tags; a group whose value does not parse is left out and told to issues, when given.
-  Reader(std::string_view text, std::vector<Issue> *issues);
+  class DXFIO_API Reader
+  {
+  public:
+    /**
+     *  Reads the text as tags; a group whose value does not parse is left out and told to issues,
+     *  when given.
+     */
+    Reader(std::string_view text, std::vector<Issue> *issues);
 
-  [[nodiscard]] auto Done() const -> bool;
+    [[nodiscard]] auto Done() const -> bool;
 
-  // The next tag, none for a group left out, or the failure that stops the file.
-  auto Next() -> std::expected<std::optional<Tag>, Failure>;
+    /**
+     *  The next tag, none for a group left out, or the failure that stops the file.
+     */
+    auto Next() -> std::expected<std::optional<Tag>, Failure>;
 
-private:
-  auto Line() -> std::string_view;
-  // A group 0 value without the blanks around it, which AutoCAD's viewer reads past; told when there were any.
-  auto Bare(std::string_view text, std::size_t line) -> std::string_view;
-  void Tell(Issue issue);
+  private:
+    auto Line() -> std::string_view;
+    /**
+     *  A group 0 value without the blanks around it, which AutoCAD's viewer reads past; told when
+     *  there were any.
+     */
+    auto Bare(std::string_view text, std::size_t line) -> std::string_view;
+    void Tell(Issue issue);
 
-  std::string_view m_Text;
-  std::vector<Issue> *m_Issues;
-  std::size_t m_At{};
-  std::uint32_t m_Line{};
-};
+    std::string_view    m_Text;
+    std::vector<Issue> *m_Issues;
+    std::size_t         m_At{};
+    std::uint32_t       m_Line{};
+  };
 } // namespace DxfIO::Tags::Ascii
 
 #endif /* DXFIO_TAGS_ASCII_READER_HPP */

@@ -66,8 +66,12 @@ jobs:
         with:
           packages: clang-format-23
 
+      # clang-format lays out the code, and the formatter turns every comment
+      # into a block and aligns what clang-format cannot; both are checked.
       - name: Format
-        run: git ls-files '*.hpp' '*.cpp' | xargs clang-format-23 --dry-run --Werror
+        env:
+          CLANG_FORMAT: clang-format-23
+        run: python3 -I tools/format/style.py --check
 
       - name: CMake guidelines
         run: |

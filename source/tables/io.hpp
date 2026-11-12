@@ -15,8 +15,10 @@
 
 namespace DxfIO::Tables
 {
-DXFIO_API void Read(std::span<const File::Nest> all, Document &drawing, const Fields::Reading &with);
-[[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, const Document &drawing) -> std::expected<void, Failure>;
+  DXFIO_API void               Read(std::span<const File::Nest> all, Document &drawing,
+                                    const Fields::Reading &with);
+  [[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, const Document &drawing)
+      -> std::expected<void, Failure>;
 } // namespace DxfIO::Tables
 
 #endif /* DXFIO_TABLES_IO_HPP */

@@ -16,17 +16,18 @@
 
 namespace DxfIO
 {
-inline constexpr int Reactor = 330;
+  inline constexpr int Reactor = 330;
 
-inline constexpr std::string_view Reactors = "ACAD_REACTORS";
+  inline constexpr std::string_view Reactors = "ACAD_REACTORS";
 
-inline constexpr std::string_view Extension = "ACAD_XDICTIONARY";
+  inline constexpr std::string_view Extension = "ACAD_XDICTIONARY";
 
-auto Opens(const Tags::Tag &one) -> bool;
+  auto Opens(const Tags::Tag &one) -> bool;
 
-auto Braced(std::span<const Tags::Tag> body, Base &into, const Fields::Reading &with) -> std::size_t;
+  auto Braced(std::span<const Tags::Tag> body, Base &into, const Fields::Reading &with)
+      -> std::size_t;
 
-auto Braces(Fields::Writing &to, const Base &from) -> std::expected<void, Failure>;
+  auto Braces(Fields::Writing &to, const Base &from) -> std::expected<void, Failure>;
 } // namespace DxfIO
 
 #endif /* DXFIO_BRACES_HPP */

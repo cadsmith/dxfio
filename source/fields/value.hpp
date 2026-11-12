@@ -3,8 +3,8 @@
 
 namespace DxfIO::Fields
 {
-template <class ValueT>
-struct Value;
+  template <class ValueT>
+  struct Value;
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_FIELDS_VALUE_HPP */

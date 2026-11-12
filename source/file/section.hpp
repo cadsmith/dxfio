@@ -12,24 +12,24 @@
 
 namespace DxfIO::File
 {
-struct DXFIO_API Variable
-{
-  std::string_view Name;
-  std::span<const Tags::Tag> Values;
-};
+  struct DXFIO_API Variable
+  {
+    std::string_view           Name;
+    std::span<const Tags::Tag> Values;
+  };
 
-struct DXFIO_API Nest
-{
-  Record Head;
-  std::vector<Record> Records;
-  Record End;
-};
+  struct DXFIO_API Nest
+  {
+    Record              Head;
+    std::vector<Record> Records;
+    Record              End;
+  };
 
-struct DXFIO_API Section
-{
-  std::string_view Name;
-  std::span<const Tags::Tag> Body;
-};
+  struct DXFIO_API Section
+  {
+    std::string_view           Name;
+    std::span<const Tags::Tag> Body;
+  };
 } // namespace DxfIO::File
 
 #endif /* DXFIO_FILE_SECTION_HPP */

@@ -6,7 +6,7 @@
 
 namespace DxfIO::Tags
 {
-auto Whole(std::string_view word) -> std::optional<int>;
+  auto Whole(std::string_view word) -> std::optional<int>;
 } // namespace DxfIO::Tags
 
 #endif /* DXFIO_TAGS_WHOLE_HPP */

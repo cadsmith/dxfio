@@ -7,7 +7,7 @@
 
 namespace DxfIO
 {
-[[nodiscard]] DXFIO_API auto Past(const Document &from) -> Handle;
+  [[nodiscard]] DXFIO_API auto Past(const Document &from) -> Handle;
 } // namespace DxfIO
 
 #endif /* DXFIO_PAST_HPP */

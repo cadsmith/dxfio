@@ -13,12 +13,12 @@
 
 namespace DxfIO::Fields
 {
-template <>
-struct Value<Matrix>
-{
-  static auto Read(Walk &in, int code) -> std::optional<Matrix>;
-  static auto Write(Writing &to, int code, const Matrix &held) -> std::expected<void, Failure>;
-};
+  template <>
+  struct Value<Matrix>
+  {
+    static auto Read(Walk &in, int code) -> std::optional<Matrix>;
+    static auto Write(Writing &to, int code, const Matrix &held) -> std::expected<void, Failure>;
+  };
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_FIELDS_MATRICES_HPP */

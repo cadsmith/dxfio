@@ -15,18 +15,19 @@
 
 namespace DxfIO
 {
-inline constexpr int Handled = 5;
+  inline constexpr int Handled = 5;
 
-struct DXFIO_API Heading
-{
-  Base *Into{};
-  int Code{Handled};
-};
+  struct DXFIO_API Heading
+  {
+    Base *Into{};
+    int   Code{Handled};
+  };
 
-[[nodiscard]] DXFIO_API auto Head(std::span<const Tags::Tag> body, const Heading &to, const Fields::Reading &with)
-    -> std::vector<Tags::Tag>;
+  [[nodiscard]] DXFIO_API auto Head(std::span<const Tags::Tag> body, const Heading &to,
+                                    const Fields::Reading &with) -> std::vector<Tags::Tag>;
 
-[[nodiscard]] DXFIO_API auto Head(Fields::Writing &to, const Base &from, int code) -> std::expected<void, Failure>;
+  [[nodiscard]] DXFIO_API auto Head(Fields::Writing &to, const Base &from, int code)
+      -> std::expected<void, Failure>;
 } // namespace DxfIO
 
 #endif /* DXFIO_HEAD_HPP */

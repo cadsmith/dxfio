@@ -13,14 +13,14 @@
 
 namespace DxfIO::Fields
 {
-inline constexpr int Axis = 10;
+  inline constexpr int Axis = 10;
 
-template <>
-struct Value<Vector>
-{
-  static auto Read(Walk &in, int code) -> std::optional<Vector>;
-  static auto Write(Writing &to, int code, const Vector &held) -> std::expected<void, Failure>;
-};
+  template <>
+  struct Value<Vector>
+  {
+    static auto Read(Walk &in, int code) -> std::optional<Vector>;
+    static auto Write(Writing &to, int code, const Vector &held) -> std::expected<void, Failure>;
+  };
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_FIELDS_POINTS_HPP */

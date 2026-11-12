@@ -15,11 +15,12 @@
 
 namespace DxfIO
 {
-[[nodiscard]] DXFIO_API auto Trailing(std::span<const Tags::Tag> body) -> std::size_t;
+  [[nodiscard]] DXFIO_API auto Trailing(std::span<const Tags::Tag> body) -> std::size_t;
 
-DXFIO_API void Tail(std::span<const Tags::Tag> groups, Base &into, const Fields::Reading &with);
+  DXFIO_API void Tail(std::span<const Tags::Tag> groups, Base &into, const Fields::Reading &with);
 
-[[nodiscard]] DXFIO_API auto Tail(Fields::Writing &to, const Base &from) -> std::expected<void, Failure>;
+  [[nodiscard]] DXFIO_API auto Tail(Fields::Writing &to, const Base &from)
+      -> std::expected<void, Failure>;
 } // namespace DxfIO
 
 #endif /* DXFIO_TAIL_HPP */

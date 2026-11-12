@@ -8,7 +8,7 @@
 
 namespace DxfIO::Tags
 {
-[[nodiscard]] DXFIO_API auto Real(double value) -> std::optional<std::string>;
+  [[nodiscard]] DXFIO_API auto Real(double value) -> std::optional<std::string>;
 } // namespace DxfIO::Tags
 
 #endif /* DXFIO_TAGS_REAL_HPP */

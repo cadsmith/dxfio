@@ -13,12 +13,12 @@
 
 namespace DxfIO::Fields
 {
-template <>
-struct Value<Widths>
-{
-  static auto Read(Walk &in, int code) -> std::optional<Widths>;
-  static auto Write(Writing &to, int code, const Widths &held) -> std::expected<void, Failure>;
-};
+  template <>
+  struct Value<Widths>
+  {
+    static auto Read(Walk &in, int code) -> std::optional<Widths>;
+    static auto Write(Writing &to, int code, const Widths &held) -> std::expected<void, Failure>;
+  };
 } // namespace DxfIO::Fields
 
 #endif /* DXFIO_FIELDS_WIDTHS_HPP */

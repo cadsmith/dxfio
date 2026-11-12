@@ -10,11 +10,11 @@
 
 namespace DxfIO
 {
-template <>
-inline constexpr auto Shapes<Objects::Placeholder> = std::tuple{};
+  template <>
+  inline constexpr auto Shapes<Objects::Placeholder> = std::tuple{};
 
-template <>
-inline constexpr std::string_view Type<Objects::Placeholder> = "ACDBPLACEHOLDER";
+  template <>
+  inline constexpr std::string_view Type<Objects::Placeholder> = "ACDBPLACEHOLDER";
 } // namespace DxfIO
 
 #endif /* DXFIO_OBJECTS_SHAPES_PLACEHOLDER_HPP */

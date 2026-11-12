@@ -7,18 +7,18 @@
 
 namespace DxfIO
 {
-auto TypeOf(const Entity &one) -> std::string_view
-{
-  return Entities::Named(one);
-}
+  auto TypeOf(const Entity &one) -> std::string_view
+  {
+    return Entities::Named(one);
+  }
 
-auto BaseOf(const Entity &one) -> const Base &
-{
-  return Entities::Based(one);
-}
+  auto BaseOf(const Entity &one) -> const Base &
+  {
+    return Entities::Based(one);
+  }
 
-auto BaseOf(Entity &one) -> Base &
-{
-  return std::visit([](auto &kind) -> Base & { return DxfIO::Based(kind); }, one);
-}
+  auto BaseOf(Entity &one) -> Base &
+  {
+    return std::visit([](auto &kind) -> Base & { return DxfIO::Based(kind); }, one);
+  }
 } // namespace DxfIO

@@ -10,7 +10,7 @@
 
 namespace DxfIO::Empty
 {
-auto Layouts(const Roots &ids, Handle viewport) -> std::vector<Objects::Layout>;
+  auto Layouts(const Roots &ids, Handle viewport) -> std::vector<Objects::Layout>;
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_LAYOUTS_HPP */

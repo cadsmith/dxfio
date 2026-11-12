@@ -10,20 +10,20 @@
 
 namespace DxfIO::Entities
 {
-inline auto Drawn(std::string_view self, Version release = Version::R2018, std::string_view stem = "entities")
-    -> std::string
-{
-  std::string text;
-  for (const char one : Acad(Fixture(stem, release)))
+  inline auto Drawn(std::string_view self, Version release = Version::R2018,
+                    std::string_view stem = "entities") -> std::string
   {
-    if (one == '\n' && !text.ends_with('\r'))
+    std::string text;
+    for (const char one : Acad(Fixture(stem, release)))
     {
-      text.push_back('\r');
+      if (one == '\n' && !text.ends_with('\r'))
+      {
+        text.push_back('\r');
+      }
+      text.push_back(one);
     }
-    text.push_back(one);
+    return Autocad(text, self);
   }
-  return Autocad(text, self);
-}
 } // namespace DxfIO::Entities
 
 #endif /* DXFIO_TESTS_DXF_ENTITIES_DRAWN_HPP */
