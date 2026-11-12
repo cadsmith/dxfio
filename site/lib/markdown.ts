@@ -4,13 +4,14 @@ import kinds from '../generated/kinds.json' with { type: 'json' }
 import type { Kind } from '../scripts/api.ts'
 import { reference } from './reference'
 
-// GitHub's alerts, as `> [!NOTE]`, become the site's callouts, so a page reads the same on GitHub.
-const alerts: Record<string, 'info' | 'warn' | 'error'> = {
-  NOTE: 'info',
-  TIP: 'info',
-  IMPORTANT: 'warn',
-  WARNING: 'warn',
-  CAUTION: 'error',
+// GitHub's alerts, as `> [!NOTE]`, become the site's callouts, titled as GitHub titles them, so a page reads the same
+// on GitHub.
+const alerts: Record<string, { type: 'info' | 'warn' | 'error'; title: string }> = {
+  NOTE: { type: 'info', title: 'Note' },
+  TIP: { type: 'info', title: 'Tip' },
+  IMPORTANT: { type: 'warn', title: 'Important' },
+  WARNING: { type: 'warn', title: 'Warning' },
+  CAUTION: { type: 'error', title: 'Caution' },
 }
 
 export function remarkAlerts() {
@@ -20,14 +21,17 @@ export function remarkAlerts() {
       const [first, ...rest] = node.children
       const lead = first?.type === 'paragraph' ? first.children[0] : undefined
       const marker = lead?.type === 'text' ? /^\[!(\w+)\]\n?/.exec(lead.value) : null
-      const type = marker ? alerts[marker[1] ?? ''] : undefined
-      if (!first || first.type !== 'paragraph' || lead?.type !== 'text' || !marker || !type) return node
+      const alert = marker ? alerts[marker[1] ?? ''] : undefined
+      if (!first || first.type !== 'paragraph' || lead?.type !== 'text' || !marker || !alert) return node
       const text = lead.value.slice(marker[0].length)
       const body = text ? [{ ...lead, value: text }, ...first.children.slice(1)] : first.children.slice(1)
       const callout: MdxJsxFlowElement = {
         type: 'mdxJsxFlowElement',
         name: 'Callout',
-        attributes: [{ type: 'mdxJsxAttribute', name: 'type', value: type }],
+        attributes: [
+          { type: 'mdxJsxAttribute', name: 'type', value: alert.type },
+          { type: 'mdxJsxAttribute', name: 'title', value: alert.title },
+        ],
         children: [...(body.length > 0 ? [{ ...first, children: body }] : []), ...rest] as BlockContent[],
       }
       return callout
