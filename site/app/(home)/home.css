@@ -30,13 +30,18 @@
   .frame::after {
     content: '';
     position: absolute;
-    left: -100vw;
-    right: -100vw;
+    left: -1px;
+    right: -1px;
     height: 1px;
     background: var(--color-fd-border);
   }
   .frame::before {
     top: 0;
+  }
+  /* The hero's top rule is the line under the nav, so it runs the page's full width. */
+  .hero::before {
+    left: -100vw;
+    right: -100vw;
   }
   .frame::after {
     bottom: 0;
@@ -54,6 +59,11 @@
     top: -6px;
     left: -6px;
   }
+  /* The hero's top pluses centre on its top rule, just under the nav, which would cover a stroke any higher. */
+  .hero > .tick-tl,
+  .hero > .tick-tr {
+    top: -5px;
+  }
   .tick-tr {
     top: -6px;
     right: -6px;
@@ -69,7 +79,6 @@
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    margin-top: 40px;
   }
   .hero-text {
     display: flex;
@@ -586,6 +595,12 @@
   }
 }
 
+/* On the home page the frame's top rule is the line under the nav, as on fumadocs.dev: the nav draws none of its
+   own, which would cover the top pluses' strokes. */
+header:has(~ .home) nav {
+  border-bottom-width: 0;
+}
+
 .dark .home {
   --brand-text: #f2b53a;
   --brand-soft: rgb(242 181 58 / 0.14);
@@ -612,6 +627,13 @@
     transform: translateY(16px);
   }
 }
+/* Registered so the shine's angle animates; an unregistered custom property only jumps from one value to the next. */
+@property --shine {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 @keyframes shine {
   to {
     --shine: 360deg;

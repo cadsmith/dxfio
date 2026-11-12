@@ -25,6 +25,12 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* Code blocks, in the docs, the reference and on the home page: larger, with room between the lines. */
+figure.shiki pre {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
