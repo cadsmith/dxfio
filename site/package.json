@@ -37,7 +37,7 @@
     "oxlint": "^1.92.0",
     "oxlint-tsgolint": "^7.0.2006",
     "postcss": "^8.5.32",
-    "serve": "^14.2.7",
+    "serve": "^14.2.8",
     "tailwindcss": "^4.3.5",
     "typescript": "~7.0.2"
   }
