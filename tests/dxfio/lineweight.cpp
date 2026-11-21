@@ -2,8 +2,11 @@
 
 #include "dxfio/entities/polyline.hpp"
 #include "dxfio/flags.hpp"
+#include "dxfio/library.hpp"
 
 #include <doctest/doctest.h>
+
+#include <format>
 
 namespace DxfIO
 {
@@ -26,4 +29,11 @@ namespace DxfIO
     CHECK_FALSE(Has(flags, Entities::PolylineFlags::PolyfaceMesh));
   }
 
+  TEST_CASE("library: the version string is the three numbers, as the project declares them")
+  {
+    CHECK(
+        LibraryVersion
+        == std::format("{}.{}.{}", DXFIO_VERSION_MAJOR, DXFIO_VERSION_MINOR, DXFIO_VERSION_PATCH));
+    CHECK(LibraryVersion == DXFIO_VERSION_STRING);
+  }
 } // namespace DxfIO

@@ -15,6 +15,7 @@ set(DXFIO_HEADERS
   dxfio/edit/add.hpp
   dxfio/edit/find.hpp
   dxfio/edit/handles.hpp
+  dxfio/edit/index.hpp
   dxfio/edit/space.hpp
   dxfio/entities/arc.hpp
   dxfio/entities/attdef.hpp
@@ -64,6 +65,8 @@ set(DXFIO_HEADERS
   dxfio/entity.hpp
   dxfio/failure.hpp
   dxfio/flags.hpp
+  dxfio/geometry/coordinates.hpp
+  dxfio/geometry/transform.hpp
   dxfio/handle.hpp
   dxfio/header/header.hpp
   dxfio/issue.hpp
@@ -117,11 +120,14 @@ set(DXFIO_HEADERS
   dxfio/xdata.hpp
 )
 
+configure_file(${PROJECT_SOURCE_DIR}/cmake/library.hpp.in
+  ${PROJECT_BINARY_DIR}/include/dxfio/library.hpp @ONLY)
+
 target_sources(dxfio
   PUBLIC
     FILE_SET HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-    FILES ${DXFIO_HEADERS}
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include
+    FILES ${DXFIO_HEADERS} ${PROJECT_BINARY_DIR}/include/dxfio/library.hpp
 )
 
 file(GLOB_RECURSE found RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}

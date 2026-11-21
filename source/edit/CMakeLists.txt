@@ -3,5 +3,6 @@ target_sources(dxfio
     add.cpp
     find.cpp
     handles.cpp
+    index.cpp
     seeding.cpp
 )
