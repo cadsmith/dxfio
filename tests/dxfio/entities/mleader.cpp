@@ -75,7 +75,7 @@ namespace DxfIO::Entities
     CHECK(note.HasMText);
     CHECK(note.Text           == "note");
     CHECK(note.TextLocation.X == 240);
-    CHECK(note.TextColor      == Inherited);
+    CHECK(note.TextColor      == DxfIO::Colors::PackedByLayer);
     CHECK_FALSE(note.HasBlock);
     CHECK(note.PlaneOrigin      == Vector{.X = 220});
     REQUIRE(note.Leaders.size() == 1);

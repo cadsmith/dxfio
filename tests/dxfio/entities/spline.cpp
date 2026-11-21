@@ -41,8 +41,8 @@ namespace DxfIO::Entities
     CHECK(one.Curve->Normal           == Up);
     CHECK(one.Curve->Flags            == 8);
     CHECK(one.Curve->Degree           == 3);
-    CHECK(one.Curve->KnotTolerance    == Knotting);
-    CHECK(one.Curve->ControlTolerance == Framing);
+    CHECK(one.Curve->KnotTolerance    == 1e-9);
+    CHECK(one.Curve->ControlTolerance == 1e-10);
     CHECK_FALSE(one.Curve->FitTolerance);
     CHECK_FALSE(one.Curve->StartTangent);
     CHECK(one.Curve->Knots.size()           == 8);
@@ -56,7 +56,7 @@ namespace DxfIO::Entities
   {
     const Spline one = Alikened(Marked("2CD"));
     CHECK(one.Curve->Flags        == 1064);
-    CHECK(one.Curve->FitTolerance == Framing);
+    CHECK(one.Curve->FitTolerance == 1e-10);
     CHECK(one.Curve->Knots.size() == 10);
     CHECK(one.Curve->ControlPoints.size() == 6);
     REQUIRE(one.Curve->FitPoints.size()   == 4);
@@ -156,8 +156,8 @@ namespace DxfIO::Entities
   TEST_CASE("spline: tolerances a record leaves out are AutoCAD's")
   {
     const Spline one = DxfIO::Read<Spline>(Held(" 71\r\n     3\r\n"));
-    CHECK(one.Curve->KnotTolerance    == Knotting);
-    CHECK(one.Curve->ControlTolerance == Framing);
+    CHECK(one.Curve->KnotTolerance    == 1e-9);
+    CHECK(one.Curve->ControlTolerance == 1e-10);
   }
 
   TEST_CASE("spline: what AutoCAD takes and ignores kept, after the fields")

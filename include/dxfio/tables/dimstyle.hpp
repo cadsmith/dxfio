@@ -10,36 +10,6 @@
 namespace DxfIO::Tables
 {
   /**
-   *  The arrow size, text height and extension of a new dimension style.
-   */
-  inline constexpr double Size = 0.18;
-
-  /**
-   *  The offset of extension lines from their origin in a new dimension style.
-   */
-  inline constexpr double Offset = 0.0625;
-
-  /**
-   *  The spacing of baseline dimensions in a new dimension style.
-   */
-  inline constexpr double Increment = 0.38;
-
-  /**
-   *  The center mark size and text gap of a new dimension style.
-   */
-  inline constexpr double Mark = 0.09;
-
-  /**
-   *  Millimeters to the inch: the alternate unit factor of a new dimension style.
-   */
-  inline constexpr double Inch = 25.4;
-
-  /**
-   *  The jog angle of radius dimensions, in degrees, in a new dimension style.
-   */
-  inline constexpr double Jog = 45;
-
-  /**
    *  The arrow blocks a dimension style names by their block names, as releases up to R14 write
    *  them.
    */
@@ -90,19 +60,19 @@ namespace DxfIO::Tables
     /**
      *  DIMASZ: the size of arrowheads. Group 41.
      */
-    double Dimasz{Size};
+    double Dimasz{0.18};
     /**
      *  DIMEXO: how far extension lines start from the points they measure. Group 42.
      */
-    double Dimexo{Offset};
+    double Dimexo{0.0625};
     /**
      *  DIMDLI: the spacing between the dimension lines of baseline dimensions. Group 43.
      */
-    double Dimdli{Increment};
+    double Dimdli{0.38};
     /**
      *  DIMEXE: how far extension lines run past the dimension line. Group 44.
      */
-    double Dimexe{Size};
+    double Dimexe{0.18};
     /**
      *  DIMRND: the value distances are rounded to; 0 for none. Group 45.
      */
@@ -127,7 +97,7 @@ namespace DxfIO::Tables
      *  DIMJOGANG: the angle of the jog in jogged radius dimensions, in degrees. Group 50, from
      *  R2007.
      */
-    double Dimjogang{Jog};
+    double Dimjogang{45};
     /**
      *  DIMTFILL: the text background: 0 none, 1 the drawing's background, 2 DIMTFILLCLR. Group 69,
      *  from R2007.
@@ -183,11 +153,11 @@ namespace DxfIO::Tables
     /**
      *  DIMTXT: the text height. Group 140.
      */
-    double Dimtxt{Size};
+    double Dimtxt{0.18};
     /**
      *  DIMCEN: the size of center marks; negative to draw center lines, 0 for none. Group 141.
      */
-    double Dimcen{Mark};
+    double Dimcen{0.09};
     /**
      *  DIMTSZ: the size of ticks drawn in place of arrowheads; 0 for arrowheads. Group 142.
      */
@@ -195,7 +165,7 @@ namespace DxfIO::Tables
     /**
      *  DIMALTF: the factor alternate units are measured by. Group 143.
      */
-    double Dimaltf{Inch};
+    double Dimaltf{25.4};
     /**
      *  DIMLFAC: the factor linear measurements are scaled by. Group 144.
      */
@@ -212,7 +182,7 @@ namespace DxfIO::Tables
      *  DIMGAP: the gap around text where it breaks the dimension line; negative to box the text.
      *  Group 147.
      */
-    double Dimgap{Mark};
+    double Dimgap{0.09};
     /**
      *  DIMALTRND: the value alternate measurements are rounded to. Group 148, from R2000.
      */

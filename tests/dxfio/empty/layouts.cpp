@@ -14,7 +14,7 @@ namespace DxfIO::Empty
     CHECK(sheet.Base.Self    == Handle{.Value = 0x30});
     CHECK(sheet.Block        == Handle{.Value = 0x31});
     CHECK(sheet.Plot->Device == "none_device");
-    CHECK(sheet.Limmax       == Objects::Limits);
+    CHECK(sheet.Limmax       == DxfIO::Vector{.X = 12, .Y = 9, .Z = 0});
     CHECK(sheet.Order        == 0);
     CHECK_FALSE(sheet.Base.Owner);
   }

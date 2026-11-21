@@ -264,6 +264,6 @@ namespace DxfIO::Entities
   TEST_CASE("viewport: its grid's major lines hide no table's spacing")
   {
     using namespace DxfIO::Tables;
-    CHECK(VPort{}.Snap.X == Snapunit);
+    CHECK(VPort{}.Snap.X == 10);
   }
 } // namespace DxfIO::Entities

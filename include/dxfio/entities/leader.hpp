@@ -15,12 +15,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The annotation type of a leader made without an annotation, which group 73 takes when it is
-   *  left out.
-   */
-  inline constexpr int Unannotated = 3;
-
-  /**
    *  The AcDbLeader subclass of a LEADER: its vertices, its arrowhead and the annotation it points
    *  from.
    */
@@ -42,7 +36,7 @@ namespace DxfIO::Entities
      *  What the leader was made with: 0 an MTEXT, 1 a TOLERANCE, 2 a block reference, 3 no
      *  annotation. Group 73.
      */
-    int Annotation{Unannotated};
+    int Annotation{3};
     /**
      *  1 when the hookline runs along the horizontal direction, 0 when it runs against it. Group
      *  74.

@@ -63,7 +63,7 @@ namespace DxfIO::Objects::MLeaderStyles
     CHECK(taken.Description == "Standard");
     CHECK(*taken.Leader     == Leader{.Linetype = Handle{.Value = 0x14}});
     CHECK(taken.Text->Style == Handle{.Value = 0x11});
-    CHECK(taken.Text->BottomAttachment == Centered);
+    CHECK(taken.Text->BottomAttachment == 9);
     CHECK(*taken.Block == Block{});
     CHECK_FALSE(taken.Annotative);
     CHECK(Written(taken) == text);

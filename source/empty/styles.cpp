@@ -89,9 +89,9 @@ namespace DxfIO::Empty
     out.Base.Self   = handles.Take();
     out.Description = "Standard";
     out.Cells       = {
-        Cell(Objects::TableStyles::Height, Centered),
+        Cell(4.5, Centered),
         Cell(Title, Middle),
-        Cell(Objects::TableStyles::Height, Middle),
+        Cell(4.5, Middle),
     };
     return out;
   }

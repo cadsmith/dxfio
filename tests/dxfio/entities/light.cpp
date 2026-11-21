@@ -35,7 +35,7 @@ namespace DxfIO::Entities
     CHECK(point.Lamp->Target   == Vector{.X = 260, .Y = 0, .Z = -5});
     CHECK(point.Lamp->Lit);
     CHECK(point.Lamp->Color == 7);
-    CHECK(point.Lamp->Rgb   == Lamplight);
+    CHECK(point.Lamp->Rgb   == 0xFFFFFF);
     CHECK_FALSE(point.Lamp->Glyph);
     CHECK(point.Lamp->Intensity == 1);
     CHECK_FALSE(point.Lamp->Limited);
@@ -67,7 +67,7 @@ namespace DxfIO::Entities
   TEST_CASE("light: r2000 packs its color in one group, written back the same")
   {
     const Light old = Alikened("31D", Version::R2000);
-    CHECK(old.Lamp->Rgb == Lamplight);
+    CHECK(old.Lamp->Rgb == 0xFFFFFF);
     CHECK(Written(old, Version::R2000).find("-1023410177") != std::string::npos);
     Light red{};
     red.Lamp->Rgb = 0xFF0000;
@@ -80,7 +80,7 @@ namespace DxfIO::Entities
     const std::size_t from = text.find(" 90\r\n", text.find("  1\r\n"));
     REQUIRE(from != std::string::npos);
     text.erase(from, text.find("291\r\n", from) - from);
-    CHECK(DxfIO::Read<Light>(text, Version::R2000).Lamp->Rgb == Lamplight);
+    CHECK(DxfIO::Read<Light>(text, Version::R2000).Lamp->Rgb == 0xFFFFFF);
   }
 
   TEST_CASE("light: alike only with what it holds alike")

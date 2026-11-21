@@ -30,7 +30,7 @@ namespace DxfIO::Entities
     CHECK(one.Frame->Description == "Paintbrush Picture");
     CHECK(one.Frame->Upper       == Vector{.X = 4, .Y = 5});
     CHECK(one.Frame->Lower       == Vector{.X = 6, .Y = 1});
-    CHECK(one.Frame->Kind        == Embedded);
+    CHECK(one.Frame->Kind        == 2);
     CHECK(one.Frame->Space       == 0);
     CHECK(one.Frame->Data        == std::string{"\xDE\xAD\xBE\xEF"});
   }

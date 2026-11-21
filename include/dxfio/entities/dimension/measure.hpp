@@ -11,17 +11,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The attachment point a new dimension's text takes: 5, middle center, as an MTEXT's group 71
-   *  names it.
-   */
-  inline constexpr int MiddleCenter = 5;
-
-  /**
-   *  The measurement of a dimension not yet measured.
-   */
-  inline constexpr double Unmeasured = -1;
-
-  /**
    *  The AcDbDimension subclass every kind of dimension shares: its block, its text and the plane
    *  it is drawn in.
    */
@@ -64,7 +53,7 @@ namespace DxfIO::Entities
      *  The attachment point of the text, as an MTEXT's: 1 top left to 9 bottom right. Group 71,
      *  from R2000.
      */
-    int Attachment{MiddleCenter};
+    int Attachment{5};
     /**
      *  The line spacing style of the text: 1 at least, 2 exactly. Group 72, from R2000.
      */
@@ -76,7 +65,7 @@ namespace DxfIO::Entities
     /**
      *  The measurement, as AutoCAD last computed it. Group 42, from R2000.
      */
-    double Measured{Unmeasured};
+    double Measured{-1};
     /**
      *  Unnamed in the DXF reference. Group 73, from R2007.
      */

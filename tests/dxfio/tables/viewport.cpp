@@ -75,7 +75,7 @@ namespace DxfIO::Tables
     const VPort                taken = Read<VPort>(text);
     CHECK(taken.Record.Name == "*Active");
     CHECK(taken.Lower       == Vector{.X = 0.5, .Y = 0, .Z = 0});
-    CHECK(taken.Zoom        == Viewres);
+    CHECK(taken.Zoom        == 1000);
     CHECK(taken.Axes.X.Y    == 0.5);
     CHECK(taken.Rgb         == 3355443);
     REQUIRE(taken.Record.Base.Extended.size() == 1);

@@ -37,9 +37,9 @@ namespace DxfIO::Empty
                               .Style        = "",
                               .Standard     = 0,
                               .Factor       = 0.1148885871608098,
-                              .Shading      = 0,
-                              .Resolution   = Objects::Normal,
-                              .Dots         = Objects::Dpi,
+                              .Shading      =   0,
+                              .Resolution   =   2,
+                              .Dots         = 300,
                               .Image        = Vector{}};
       return out;
     }

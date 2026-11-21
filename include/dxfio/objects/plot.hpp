@@ -9,32 +9,6 @@
 namespace DxfIO::Objects
 {
   /**
-   *  The plot flags of a new layout: 16 standard scale, 32 plot styles, 128 lineweights, 512
-   *  viewports first.
-   */
-  inline constexpr int Plotted = 688;
-
-  /**
-   *  The plot type that plots the layout itself, its own sheet: what a new layout plots.
-   */
-  inline constexpr int PlotLayout = 5;
-
-  /**
-   *  A standard scale: 1:1.
-   */
-  inline constexpr int Actual = 16;
-
-  /**
-   *  A shade plot resolution: normal.
-   */
-  inline constexpr int Normal = 2;
-
-  /**
-   *  The shade plot resolution of a new layout, in dots per inch.
-   */
-  inline constexpr int Dpi = 300;
-
-  /**
    *  What a layout or a page setup plots and how: the AcDbPlotSettings part both carry.
    */
   struct DXFIO_API Plot
@@ -104,7 +78,7 @@ namespace DxfIO::Objects
      *  plot styles, 64 lineweights scaled, 128 lineweights, 512 viewports first, 1024 model space.
      *  Group 70.
      */
-    int Flags{Plotted};
+    int Flags{688};
     /**
      *  The units of the paper: 0 inches, 1 millimeters, 2 pixels. Group 72.
      */
@@ -118,7 +92,7 @@ namespace DxfIO::Objects
      *  What is plotted: 0 the last screen, 1 the extents, 2 the limits, 3 View, 4 the window from
      *  Lower to Upper, 5 the layout. Group 74.
      */
-    int Type{PlotLayout};
+    int Type{5};
     /**
      *  The plot style table, such as "acad.ctb". Group 7.
      */
@@ -126,7 +100,7 @@ namespace DxfIO::Objects
     /**
      *  The standard scale: 0 scaled to fit, 16 1:1, others for the scales AutoCAD lists. Group 75.
      */
-    int Standard{Actual};
+    int Standard{16};
     /**
      *  The standard scale as a number. Group 147.
      */
@@ -140,11 +114,11 @@ namespace DxfIO::Objects
      *  The resolution of shaded plots: 0 draft, 1 preview, 2 normal, 3 presentation, 4 maximum, 5
      *  custom. Group 77, from R2004.
      */
-    int Resolution{Normal};
+    int Resolution{2};
     /**
      *  The dots per inch of shaded plots when Resolution is custom. Group 78, from R2004.
      */
-    int Dots{Dpi};
+    int Dots{300};
     /**
      *  The origin of the paper image. Groups 148, 149.
      */

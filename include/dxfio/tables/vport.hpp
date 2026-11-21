@@ -13,31 +13,6 @@
 namespace DxfIO::Tables
 {
   /**
-   *  The snap spacing of a new viewport, as $SNAPUNIT.
-   */
-  inline constexpr double Snapunit = 10;
-
-  /**
-   *  The grid spacing of a new viewport, as $GRIDUNIT.
-   */
-  inline constexpr double Gridunit = 10;
-
-  /**
-   *  The circle zoom percent of a new viewport, as $VIEWRES.
-   */
-  inline constexpr int Viewres = 1000;
-
-  /**
-   *  The grid lines between major ones in a new viewport.
-   */
-  inline constexpr int Gridmajor = 5;
-
-  /**
-   *  The color of a new viewport's ambient light: color index 250, a dark gray.
-   */
-  inline constexpr int Ambience = 250;
-
-  /**
    *  A VPORT table record: a tiled viewport of model space. The tiled viewports on screen together
    *  share the name "*Active".
    */
@@ -66,11 +41,11 @@ namespace DxfIO::Tables
     /**
      *  The snap spacing along X and Y. Groups 14, 24.
      */
-    Vector Snap{.X = Snapunit, .Y = Snapunit, .Z = 0};
+    Vector Snap{.X = 10, .Y = 10, .Z = 0};
     /**
      *  The grid spacing along X and Y. Groups 15, 25.
      */
-    Vector Grid{.X = Gridunit, .Y = Gridunit, .Z = 0};
+    Vector Grid{.X = 10, .Y = 10, .Z = 0};
     /**
      *  The direction the view looks from, toward the target, in world coordinates. Groups 16, 26,
      *  36.
@@ -91,7 +66,7 @@ namespace DxfIO::Tables
     /**
      *  The lens length, in millimeters, of a perspective view. Group 42.
      */
-    double LensLength{Lens};
+    double LensLength{50};
     /**
      *  The front clipping plane, as an offset from the target. Group 43.
      */
@@ -116,7 +91,7 @@ namespace DxfIO::Tables
     /**
      *  The circle zoom percent, as $VIEWRES: how smooth arcs and circles are drawn. Group 72.
      */
-    int Zoom{Viewres};
+    int Zoom{1000};
     /**
      *  Whether fast zoom is on. Group 73.
      */
@@ -166,7 +141,7 @@ namespace DxfIO::Tables
     /**
      *  The grid lines between major ones, as $GRIDMAJOR. Group 61, from R2007.
      */
-    int GridMajor{Gridmajor};
+    int GridMajor{5};
     /**
      *  Whether the default lighting is on. Group 292, from R2007.
      */
@@ -186,7 +161,7 @@ namespace DxfIO::Tables
     /**
      *  The AutoCAD Color Index of the ambient light. Group 63, from R2007.
      */
-    int Ambient{Ambience};
+    int Ambient{250};
     /**
      *  The ambient light as a true color 0xRRGGBB, when it has one. Group 421, from R2007.
      */

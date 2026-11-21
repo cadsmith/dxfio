@@ -13,18 +13,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The display flags of a new image or wipeout, as AutoCAD writes them: shown, shown when not
-   *  aligned with the screen, and clipped.
-   */
-  inline constexpr int Displayed = 7;
-
-  /**
-   *  The brightness and the contrast of a new image or wipeout: 50, halfway, as AutoCAD writes
-   *  them.
-   */
-  inline constexpr int Halfway = 50;
-
-  /**
    *  A vertex of the clipping boundary of an image or a wipeout.
    */
   struct DXFIO_API Pixel
@@ -74,7 +62,7 @@ namespace DxfIO::Entities
      *  1 shown, 2 shown when not aligned with the screen, 4 clipped, 8 transparent; 7 for a new
      *  one, as AutoCAD writes it. Group 70.
      */
-    int Flags{Displayed};
+    int Flags{7};
     /**
      *  Whether the clipping boundary is on. Group 280.
      */
@@ -82,11 +70,11 @@ namespace DxfIO::Entities
     /**
      *  The brightness, 0 to 100. Group 281.
      */
-    int Brightness{Halfway};
+    int Brightness{50};
     /**
      *  The contrast, 0 to 100. Group 282.
      */
-    int Contrast{Halfway};
+    int Contrast{50};
     /**
      *  The fade, 0 to 100. Group 283.
      */

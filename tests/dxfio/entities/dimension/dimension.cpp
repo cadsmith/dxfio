@@ -155,14 +155,14 @@ namespace DxfIO::Entities
   TEST_CASE("dimension: what a file leaves out, as AutoCAD takes it")
   {
     const Dimension one{};
-    CHECK(one.Figure->Measure.Attachment == MiddleCenter);
-    CHECK(one.Figure->Measure.Measured   == Unmeasured);
+    CHECK(one.Figure->Measure.Attachment == 5);
+    CHECK(one.Figure->Measure.Measured   == -1);
   }
 
   TEST_CASE("dimension: its text's attachment hides no multileader's")
   {
     using namespace DxfIO::Objects::MLeaderStyles;
-    CHECK(Objects::MLeaderStyles::Text{}.TopAttachment == Centered);
+    CHECK(Objects::MLeaderStyles::Text{}.TopAttachment == 9);
   }
 
   TEST_CASE("dimension: its block and style symbols, as a layer is")

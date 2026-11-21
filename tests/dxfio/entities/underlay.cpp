@@ -32,8 +32,8 @@ namespace DxfIO::Entities
     CHECK(one.Overlaid->Scale      == Vector{.X = 1, .Y = 1, .Z = 1});
     CHECK(one.Overlaid->Rotation   == 0);
     CHECK(one.Overlaid->Extrusion  == Up);
-    CHECK(one.Overlaid->Flags      == Visible);
-    CHECK(one.Overlaid->Contrast   == Whole);
+    CHECK(one.Overlaid->Flags      == 2);
+    CHECK(one.Overlaid->Contrast   == 100);
     CHECK(one.Overlaid->Fade       == 0);
     CHECK(one.Overlaid->Clip.empty());
   }

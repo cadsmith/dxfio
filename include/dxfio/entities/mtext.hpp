@@ -79,11 +79,6 @@ namespace DxfIO::Entities
   };
 
   /**
-   *  The drawing direction that takes the text style's own.
-   */
-  inline constexpr int Styled = 5;
-
-  /**
    *  The AcDbMText subclass of an MTEXT: its text with its formatting codes, its frame and its
    *  background.
    */
@@ -114,7 +109,7 @@ namespace DxfIO::Entities
      *  The drawing direction: 1 left to right, 3 top to bottom, 5 as the text style has it. Group
      *  72.
      */
-    int Flow{Styled};
+    int Flow{5};
     /**
      *  What the text says, with its formatting codes. Group 3 for each 250 characters but the last,
      *  then group 1.

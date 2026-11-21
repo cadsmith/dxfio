@@ -12,16 +12,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The knot tolerance a new spline takes.
-   */
-  inline constexpr double Knotting = 1e-9;
-
-  /**
-   *  The control point tolerance a new spline takes.
-   */
-  inline constexpr double Framing = 1e-10;
-
-  /**
    *  The AcDbSpline subclass a SPLINE and a HELIX share: a NURBS curve, by its knots and control
    *  points or by the points it fits.
    */
@@ -43,11 +33,11 @@ namespace DxfIO::Entities
     /**
      *  The knot tolerance. Group 42.
      */
-    double KnotTolerance{Knotting};
+    double KnotTolerance{1e-9};
     /**
      *  The control point tolerance. Group 43.
      */
-    double ControlTolerance{Framing};
+    double ControlTolerance{1e-10};
     /**
      *  The fit tolerance, when the spline is given by fit points. Group 44.
      */

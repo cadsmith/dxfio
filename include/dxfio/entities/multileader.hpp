@@ -3,6 +3,7 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/matrix.hpp"
@@ -11,14 +12,6 @@
 #include <optional>
 #include <string>
 #include <vector>
-
-namespace DxfIO::Entities
-{
-  /**
-   *  ByLayer, as a packed color: the color method 0xC0 in the top byte and nothing below it.
-   */
-  inline constexpr int Inherited = -1073741824;
-} // namespace DxfIO::Entities
 
 namespace DxfIO::Entities::MultiLeaders
 {
@@ -246,7 +239,7 @@ namespace DxfIO::Entities::MultiLeaders
     /**
      *  The color of the text, as a packed color. Group 90.
      */
-    int TextColor{Inherited};
+    int TextColor{Colors::PackedByLayer};
     /**
      *  The attachment point of the text, as an MTEXT's group 71 gives it. Group 171.
      */
@@ -258,7 +251,7 @@ namespace DxfIO::Entities::MultiLeaders
     /**
      *  The color of the background, as a packed color. Group 91.
      */
-    int BackgroundColor{Inherited};
+    int BackgroundColor{Colors::PackedByLayer};
     /**
      *  How far the background reaches past the text, as a factor of the letter height. Group 141.
      */
@@ -331,7 +324,7 @@ namespace DxfIO::Entities::MultiLeaders
     /**
      *  The color of the block, as a packed color. Group 93.
      */
-    int BlockColor{Inherited};
+    int BlockColor{Colors::PackedByLayer};
     /**
      *  The block's transformation matrix, its 16 cells each a group 47.
      */
@@ -439,7 +432,7 @@ namespace DxfIO::Entities::MultiLeaders
     /**
      *  The color of the leader lines, as a packed color. Group 91.
      */
-    int LineColor{Inherited};
+    int LineColor{Colors::PackedByLayer};
     /**
      *  The linetype of the leader lines. Group 341.
      */
@@ -496,7 +489,7 @@ namespace DxfIO::Entities::MultiLeaders
     /**
      *  The color of the text, as a packed color. Group 92.
      */
-    int TextColor{Inherited};
+    int TextColor{Colors::PackedByLayer};
     /**
      *  Whether the text has a frame. Group 292.
      */
@@ -508,7 +501,7 @@ namespace DxfIO::Entities::MultiLeaders
     /**
      *  The color of the block, as a packed color. Group 93.
      */
-    int BlockColor{Inherited};
+    int BlockColor{Colors::PackedByLayer};
     /**
      *  The scale of the block along each axis. Groups 10, 20, 30.
      */

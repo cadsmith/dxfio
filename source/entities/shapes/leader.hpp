@@ -32,7 +32,7 @@ namespace DxfIO
       Fields::Field{
           .Code     = 73,
           .Member   = &Entities::Lead::Annotation,
-          .Fallback = Entities::Unannotated,
+          .Fallback = 3,
       },
       Fields::Field{
           .Code     = 74,

@@ -10,11 +10,6 @@
 namespace DxfIO::Tables
 {
   /**
-   *  The lens length, in millimeters, of a new view or viewport.
-   */
-  inline constexpr double Lens = 50;
-
-  /**
    *  A VIEW table record: a named view of the drawing, with the camera it is seen through.
    */
   struct DXFIO_API View
@@ -47,7 +42,7 @@ namespace DxfIO::Tables
     /**
      *  The lens length, in millimeters, of a perspective view. Group 42.
      */
-    double LensLength{Lens};
+    double LensLength{50};
     /**
      *  The front clipping plane, as an offset from the target. Group 43.
      */

@@ -15,28 +15,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The circle zoom percent a new viewport takes, which sets how smoothly it draws circles and
-   *  arcs.
-   */
-  inline constexpr int Roundness = 100;
-
-  /**
-   *  The status bits of a new viewport: only 32768, which AutoCAD always sets.
-   */
-  inline constexpr int Unflagged = 32768;
-
-  /**
-   *  How often a new viewport draws a major grid line, as $GRIDMAJOR and a VPORT's
-   *  Tables::Gridmajor: every fifth line.
-   */
-  inline constexpr int Gridmajor = 5;
-
-  /**
-   *  The ambient light color of a new viewport, as an AutoCAD Color Index: a dark gray.
-   */
-  inline constexpr int Ambience = 250;
-
-  /**
    *  The AcDbViewport subclass of a VIEWPORT: the window on the paper and the view of model space
    *  it shows.
    */
@@ -115,7 +93,7 @@ namespace DxfIO::Entities
     /**
      *  The circle zoom percent. Group 72, from R2000.
      */
-    int Zoom{Roundness};
+    int Zoom{100};
     /**
      *  The layers frozen in this viewport alone. Group 341 before R2004, 331 from it.
      */
@@ -125,7 +103,7 @@ namespace DxfIO::Entities
      *  locked, 65536 clipped by an entity, 131072 off, among others; 32768 always set. Group 90,
      *  from R2000.
      */
-    int Flags{Unflagged};
+    int Flags{32768};
     /**
      *  The entity that clips the viewport when it is not rectangular. Group 340, from R2000.
      */
@@ -159,7 +137,7 @@ namespace DxfIO::Entities
     /**
      *  How often a major grid line is drawn, in grid lines. Group 61, from R2007.
      */
-    int GridMajor{Gridmajor};
+    int GridMajor{5};
     /**
      *  The background drawn behind the view. Group 332, from R2007.
      */
@@ -191,7 +169,7 @@ namespace DxfIO::Entities
     /**
      *  The ambient light color, as an AutoCAD Color Index. Group 63, from R2007.
      */
-    int Ambient{Ambience};
+    int Ambient{250};
     /**
      *  The ambient light's true color, as 0xRRGGBB. Group 421, from R2007.
      */

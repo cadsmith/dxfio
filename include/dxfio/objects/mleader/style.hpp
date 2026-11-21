@@ -4,6 +4,7 @@
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/lineweights.hpp"
 #include "dxfio/vector.hpp"
@@ -12,37 +13,6 @@
 
 namespace DxfIO::Objects::MLeaderStyles
 {
-  /**
-   *  ByBlock as a packed color, AutoCAD's color in one integer: the color method 0xC1 in the top
-   *  byte and nothing below it. Not Colors::ByBlock, the index 0 of group 62.
-   */
-  inline constexpr int PackedByBlock = -1056964608;
-
-  /**
-   *  The landing gap of a new multileader style.
-   */
-  inline constexpr double Margin = 2;
-
-  /**
-   *  The dogleg length of a new multileader style.
-   */
-  inline constexpr double Reach = 8;
-
-  /**
-   *  The arrow size and text height of a new multileader style.
-   */
-  inline constexpr double Size = 4;
-
-  /**
-   *  The break gap of a new multileader style.
-   */
-  inline constexpr double Breaking = 3.75;
-
-  /**
-   *  A text attachment above or below: centered on the text.
-   */
-  inline constexpr int Centered = 9;
-
   /**
    *  How the leader lines of a multileader style are drawn.
    */
@@ -71,7 +41,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The color of the lines, packed into one integer as AutoCAD does. Group 91.
      */
-    int Color{PackedByBlock};
+    int Color{Colors::PackedByBlock};
     /**
      *  The linetype of the lines. Group 340.
      */
@@ -88,7 +58,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The gap between the landing and the content. Group 42.
      */
-    double LandingGap{Margin};
+    double LandingGap{2};
     /**
      *  Whether the leader ends in a horizontal dogleg. Group 291.
      */
@@ -96,7 +66,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The length of the dogleg. Group 43.
      */
-    double DoglegLength{Reach};
+    double DoglegLength{8};
     /**
      *  The block record of the arrowhead; none for the closed filled arrow. Group 341.
      */
@@ -104,7 +74,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The size of the arrowhead. Group 44.
      */
-    double ArrowheadSize{MLeaderStyles::Size};
+    double ArrowheadSize{4};
 
     auto operator==(const Leader &) const -> bool = default;
   };
@@ -143,11 +113,11 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The color of the text, packed into one integer as AutoCAD does. Group 93.
      */
-    int Color{PackedByBlock};
+    int Color{Colors::PackedByBlock};
     /**
      *  The height of the text. Group 45.
      */
-    double Height{Size};
+    double Height{4};
     /**
      *  Whether the text is framed. Group 292.
      */
@@ -159,7 +129,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The space between the text and its alignment. Group 46.
      */
-    double AlignSpace{Size};
+    double AlignSpace{4};
     /**
      *  Which way leaders meet the text: 0 from the sides, 1 from above or below. Group 271, from
      *  R2010.
@@ -168,11 +138,11 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  Where a leader from below meets the text. Group 272, from R2010.
      */
-    int BottomAttachment{Centered};
+    int BottomAttachment{9};
     /**
      *  Where a leader from above meets the text. Group 273, from R2010.
      */
-    int TopAttachment{Centered};
+    int TopAttachment{9};
 
     auto operator==(const Text &) const -> bool = default;
   };
@@ -189,7 +159,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The color of the block, packed into one integer as AutoCAD does. Group 94.
      */
-    int Color{PackedByBlock};
+    int Color{Colors::PackedByBlock};
     /**
      *  The scale of the block along X, Y and Z. Groups 47, 49, 140.
      */
@@ -271,7 +241,7 @@ namespace DxfIO::Objects
     /**
      *  The gap left where a leader is broken. Group 143.
      */
-    double BreakGapSize{MLeaderStyles::Breaking};
+    double BreakGapSize{3.75};
     /**
      *  Unnamed in the DXF reference; 0 as AutoCAD writes it. Group 298, from R2013.
      */

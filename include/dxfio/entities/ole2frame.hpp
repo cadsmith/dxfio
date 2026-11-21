@@ -11,11 +11,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The object type of an embedded OLE object, as against a linked or a static one.
-   */
-  inline constexpr int Embedded = 2;
-
-  /**
    *  The AcDbOle2Frame subclass of an OLE2FRAME: the corners of the frame and the bytes of the OLE
    *  object.
    */
@@ -40,7 +35,7 @@ namespace DxfIO::Entities
     /**
      *  1 linked, 2 embedded, 3 static. Group 71.
      */
-    int Kind{Embedded};
+    int Kind{2};
     /**
      *  0 in model space, 1 in paper space. Group 72.
      */

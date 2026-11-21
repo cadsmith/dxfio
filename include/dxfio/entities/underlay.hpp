@@ -14,16 +14,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The display flags of a new underlay: on, unclipped, in color.
-   */
-  inline constexpr int Visible = 2;
-
-  /**
-   *  The full contrast a new underlay takes.
-   */
-  inline constexpr int Whole = 100;
-
-  /**
    *  A vertex of an underlay's clipping boundary.
    */
   struct DXFIO_API Bound
@@ -65,11 +55,11 @@ namespace DxfIO::Entities
     /**
      *  1 clipped, 2 on, 4 monochrome, 8 adjusted for the background. Group 280.
      */
-    int Flags{Visible};
+    int Flags{2};
     /**
      *  The contrast, 20 to 100. Group 281.
      */
-    int Contrast{Whole};
+    int Contrast{100};
     /**
      *  The fade, 0 to 80. Group 282.
      */

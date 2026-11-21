@@ -11,12 +11,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The true color a new light takes: white, as 0xRRGGBB. Not a color index: Colors::White is
-   *  that.
-   */
-  inline constexpr int Lamplight = 0xFFFFFF;
-
-  /**
    *  The AcDbLight subclass of a LIGHT: its kind, color and place, and how it falls off and casts
    *  shadows.
    */
@@ -46,7 +40,7 @@ namespace DxfIO::Entities
      *  The true color of the light, as 0xRRGGBB. Group 421 from R2004; up to R2000, packed in a
      *  group 90.
      */
-    int Rgb{Lamplight};
+    int Rgb{0xFFFFFF};
     /**
      *  Whether the light's glyph is plotted. Group 291.
      */

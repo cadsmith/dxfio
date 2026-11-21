@@ -50,7 +50,7 @@ namespace DxfIO::Entities
     const Leader one = Alikened(Marked("2D0"));
     CHECK(one.Lead->Arrow      == 1);
     CHECK(one.Lead->Path       == 0);
-    CHECK(one.Lead->Annotation == Unannotated);
+    CHECK(one.Lead->Annotation == 3);
     CHECK(one.Lead->Direction  == 1);
     CHECK_FALSE(one.Lead->Height);
     CHECK(one.Lead->Note == Handle{});

@@ -175,7 +175,7 @@ namespace DxfIO::Objects
     Plot fresh{};
     fresh.Device = "Default Windows System Printer.pc3";
     CHECK(*taken.Plot  == fresh);
-    CHECK(taken.Limmax == Limits);
+    CHECK(taken.Limmax == DxfIO::Vector{.X = 12, .Y = 9, .Z = 0});
     CHECK(taken.Axes   == Tables::Axes{});
     CHECK_FALSE(taken.Viewport);
     CHECK(Written(taken, Version::R2000) == text);

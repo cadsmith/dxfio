@@ -14,11 +14,6 @@
 namespace DxfIO::Tables
 {
   /**
-   *  The color of a new layer: white, index 7.
-   */
-  inline constexpr int White = Colors::White;
-
-  /**
    *  A LAYER table record: how the entities on a layer are drawn. Its flags are 1 frozen, 2 frozen
    *  in new viewports and 4 locked.
    */
@@ -31,7 +26,7 @@ namespace DxfIO::Tables
     /**
      *  The AutoCAD Color Index of the layer, 1 to 255; negative when the layer is off. Group 62.
      */
-    int Color{White};
+    int Color{Colors::White};
     /**
      *  The name of the layer's linetype. Group 6.
      */

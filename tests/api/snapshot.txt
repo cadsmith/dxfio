@@ -217,6 +217,8 @@ namespace DxfIO::Colors
   inline constexpr int White = 7;
   inline constexpr int ByBlock = 0;
   inline constexpr int ByLayer = 256;
+  inline constexpr int PackedByLayer = -1073741824;
+  inline constexpr int PackedByBlock = -1056964608;
 }
 == dxfio/corners.hpp
 #include "dxfio/vector.hpp"
@@ -572,8 +574,6 @@ namespace DxfIO::Entities
 #include <string>
 namespace DxfIO::Entities
 {
-  inline constexpr int MiddleCenter = 5;
-  inline constexpr double Unmeasured = -1;
   struct DXFIO_API Measure
   {
     int Version{};
@@ -583,10 +583,10 @@ namespace DxfIO::Entities
     std::optional<Vector> CloneInsertion{};
     int Flags{};
     std::string Text{};
-    int Attachment{MiddleCenter};
+    int Attachment{5};
     std::optional<int> LineSpacingStyle{};
     std::optional<double> LineSpacingFactor{};
-    double Measured{Unmeasured};
+    double Measured{-1};
     int Unknown1{};
     int FlipFirst{};
     int FlipSecond{};
@@ -857,13 +857,12 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Unannotated = 3;
   struct DXFIO_API Lead
   {
     Symbol Style{};
     int Arrow{1};
     int Path{};
-    int Annotation{Unannotated};
+    int Annotation{3};
     int Direction{1};
     int Hook{};
     std::optional<double> Height{};
@@ -917,7 +916,6 @@ namespace DxfIO::Entities
 #include <string>
 namespace DxfIO::Entities
 {
-  inline constexpr int Lamplight = 0xFFFFFF;
   struct DXFIO_API Lamp
   {
     int Version{1};
@@ -925,7 +923,7 @@ namespace DxfIO::Entities
     int Kind{2};
     bool Lit{true};
     int Color{7};
-    int Rgb{Lamplight};
+    int Rgb{0xFFFFFF};
     bool Glyph{};
     double Intensity{1};
     Vector Position{};
@@ -1171,7 +1169,6 @@ namespace DxfIO::Entities
     std::vector<double> Heights{};
     auto operator==(const Columns &) const -> bool = default;
   };
-  inline constexpr int Styled = 5;
   struct DXFIO_API Paragraph
   {
     Vector Position{};
@@ -1179,7 +1176,7 @@ namespace DxfIO::Entities
     double Width{};
     double Defined{};
     int Attachment{1};
-    int Flow{Styled};
+    int Flow{5};
     std::string Value{};
     Symbol Style{"Standard"};
     Vector Extrusion{Up};
@@ -1206,6 +1203,7 @@ namespace DxfIO::Entities
 == dxfio/entities/multileader.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/matrix.hpp"
@@ -1213,10 +1211,6 @@ namespace DxfIO::Entities
 #include <optional>
 #include <string>
 #include <vector>
-namespace DxfIO::Entities
-{
-  inline constexpr int Inherited = -1073741824;
-}
 namespace DxfIO::Entities::MultiLeaders
 {
   struct DXFIO_API LineBreak
@@ -1281,10 +1275,10 @@ namespace DxfIO::Entities::MultiLeaders
     double BoundaryHeight{};
     double LineSpacingFactor{1};
     int LineSpacingStyle{1};
-    int TextColor{Inherited};
+    int TextColor{Colors::PackedByLayer};
     int TextAttachment{1};
     int FlowDirection{5};
-    int BackgroundColor{Inherited};
+    int BackgroundColor{Colors::PackedByLayer};
     double BackgroundScale{};
     int BackgroundTransparency{};
     bool BackgroundFill{};
@@ -1302,7 +1296,7 @@ namespace DxfIO::Entities::MultiLeaders
     Vector BlockPosition{};
     Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
     double BlockRotation{};
-    int BlockColor{Inherited};
+    int BlockColor{Colors::PackedByLayer};
     Matrix BlockTransform{};
     Vector PlaneOrigin{};
     Vector PlaneXAxis{.X = 1};
@@ -1334,7 +1328,7 @@ namespace DxfIO::Entities::MultiLeaders
     Handle Style{};
     int Overrides{};
     int LeaderType{1};
-    int LineColor{Inherited};
+    int LineColor{Colors::PackedByLayer};
     Handle Linetype{};
     int Lineweight{-2};
     bool EnableLanding{true};
@@ -1348,10 +1342,10 @@ namespace DxfIO::Entities::MultiLeaders
     int TextRightAttachment{1};
     int TextAngleType{1};
     int TextAlignment{};
-    int TextColor{Inherited};
+    int TextColor{Colors::PackedByLayer};
     bool TextFrame{};
     Handle BlockContent{};
-    int BlockColor{Inherited};
+    int BlockColor{Colors::PackedByLayer};
     Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
     double BlockRotation{};
     int BlockConnection{};
@@ -1387,14 +1381,13 @@ namespace DxfIO::Entities
 #include <string>
 namespace DxfIO::Entities
 {
-  inline constexpr int Embedded = 2;
   struct DXFIO_API Frame
   {
     int Version{2};
     std::string Description{};
     Vector Upper{};
     Vector Lower{};
-    int Kind{Embedded};
+    int Kind{2};
     int Space{};
     std::string Data{};
     auto operator==(const Frame &) const -> bool = default;
@@ -1470,8 +1463,6 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Displayed = 7;
-  inline constexpr int Halfway = 50;
   struct DXFIO_API Pixel
   {
     Vector Position{};
@@ -1485,10 +1476,10 @@ namespace DxfIO::Entities
     Vector VVector{};
     Vector Size{};
     Handle Definition{};
-    int Flags{Displayed};
+    int Flags{7};
     int Clipped{};
-    int Brightness{Halfway};
-    int Contrast{Halfway};
+    int Brightness{50};
+    int Contrast{50};
     int Fade{};
     bool Outside{};
     Handle Reactor{};
@@ -1662,15 +1653,13 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr double Knotting = 1e-9;
-  inline constexpr double Framing = 1e-10;
   struct DXFIO_API Curve
   {
     std::optional<Vector> Normal{};
     int Flags{};
     int Degree{3};
-    double KnotTolerance{Knotting};
-    double ControlTolerance{Framing};
+    double KnotTolerance{1e-9};
+    double ControlTolerance{1e-10};
     std::optional<double> FitTolerance{};
     std::optional<Vector> StartTangent{};
     std::optional<Vector> EndTangent{};
@@ -1771,8 +1760,6 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Visible = 2;
-  inline constexpr int Whole = 100;
   struct DXFIO_API Bound
   {
     Vector Position{};
@@ -1785,8 +1772,8 @@ namespace DxfIO::Entities
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
     double Rotation{};
     Vector Extrusion{Up};
-    int Flags{Visible};
-    int Contrast{Whole};
+    int Flags{2};
+    int Contrast{100};
     int Fade{};
     std::vector<Bound> Clip{};
     auto operator==(const Overlaid &) const -> bool = default;
@@ -1839,10 +1826,6 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Roundness = 100;
-  inline constexpr int Unflagged = 32768;
-  inline constexpr int Gridmajor = 5;
-  inline constexpr int Ambience = 250;
   struct DXFIO_API Port
   {
     Vector Center{};
@@ -1862,9 +1845,9 @@ namespace DxfIO::Entities
     double ViewHeight{-1};
     double SnapAngle{};
     double Twist{};
-    int Zoom{Roundness};
+    int Zoom{100};
     std::vector<Handle> Frozen{};
-    int Flags{Unflagged};
+    int Flags{32768};
     Handle Clip{};
     std::string Sheet{};
     int Render{};
@@ -1872,7 +1855,7 @@ namespace DxfIO::Entities
     int UcsIconAtOrigin{};
     Tables::Axes Axes{};
     int ShadePlotMode{};
-    int GridMajor{Gridmajor};
+    int GridMajor{5};
     Handle Background{};
     Handle ShadePlotObject{};
     Handle VisualStyle{};
@@ -1880,7 +1863,7 @@ namespace DxfIO::Entities
     int DefaultLightingType{1};
     double Brightness{};
     double Contrast{};
-    int Ambient{Ambience};
+    int Ambient{250};
     std::optional<int> Rgb{};
     std::string Book{};
     Handle Sun{};
@@ -2282,7 +2265,6 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects
 {
-  inline constexpr Vector Limits{.X = 12, .Y = 9, .Z = 0};
   struct DXFIO_API Layout
   {
     DxfIO::Base Base{};
@@ -2291,7 +2273,7 @@ namespace DxfIO::Objects
     int Flags{1};
     int Order{};
     Vector Limmin{};
-    Vector Limmax{Limits};
+    Vector Limmax{.X = 12, .Y = 9, .Z = 0};
     Vector Insbase{};
     Vector Extmin{};
     Vector Extmax{};
@@ -2310,28 +2292,21 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects
 {
-  inline constexpr int Black = -1040187392;
-  inline constexpr int Scene = 0;
-  inline constexpr int Bitmap = 1;
-  inline constexpr int Box = 2;
-  inline constexpr int Tiled = 1;
-  inline constexpr int Manual = 1;
-  inline constexpr double Glossy = 0.5;
   struct DXFIO_API Shade
   {
     int Method{};
     double Factor{1};
-    int Color{Black};
+    int Color{-1040187392};
     auto operator==(const Shade &) const -> bool = default;
   };
   struct DXFIO_API Map
   {
     double Blend{1};
-    int Source{Bitmap};
+    int Source{1};
     std::string File{};
-    int Projection{Box};
-    int Tiling{Tiled};
-    int Automatic{Manual};
+    int Projection{2};
+    int Tiling{1};
+    int Automatic{1};
     DxfIO::Matrix Transform{};
     auto operator==(const Map &) const -> bool = default;
   };
@@ -2344,11 +2319,11 @@ namespace DxfIO::Objects
     Map Bump{};
     Map Refraction{
         .Blend      = 1,
-        .Source     = Scene,
+        .Source     = 0,
         .File       = {},
-        .Projection = Box,
-        .Tiling     = Tiled,
-        .Automatic  = Manual,
+        .Projection = 2,
+        .Tiling     = 1,
+        .Automatic  = 1,
         .Transform  = Identity,
     };
     auto operator==(const Maps &) const -> bool = default;
@@ -2360,7 +2335,7 @@ namespace DxfIO::Objects
     std::string Description{};
     Shade Ambient{};
     Shade Diffuse{};
-    double Gloss{Glossy};
+    double Gloss{0.5};
     Shade Specular{};
     double Opacity{1};
     double Refraction{1};
@@ -2378,18 +2353,13 @@ namespace DxfIO::Objects
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/lineweights.hpp"
 #include "dxfio/vector.hpp"
 #include <string>
 namespace DxfIO::Objects::MLeaderStyles
 {
-  inline constexpr int PackedByBlock = -1056964608;
-  inline constexpr double Margin = 2;
-  inline constexpr double Reach = 8;
-  inline constexpr double Size = 4;
-  inline constexpr double Breaking = 3.75;
-  inline constexpr int Centered = 9;
   struct DXFIO_API Leader
   {
     int DrawOrder{};
@@ -2397,15 +2367,15 @@ namespace DxfIO::Objects::MLeaderStyles
     double FirstSegmentAngle{};
     double SecondSegmentAngle{};
     int LeaderType{1};
-    int Color{PackedByBlock};
+    int Color{Colors::PackedByBlock};
     Handle Linetype{};
     int Lineweight{Lineweights::ByBlock};
     bool EnableLanding{true};
-    double LandingGap{Margin};
+    double LandingGap{2};
     bool EnableDogleg{true};
-    double DoglegLength{Reach};
+    double DoglegLength{8};
     Handle Arrowhead{};
-    double ArrowheadSize{MLeaderStyles::Size};
+    double ArrowheadSize{4};
     auto operator==(const Leader &) const -> bool = default;
   };
   struct DXFIO_API Text
@@ -2416,20 +2386,20 @@ namespace DxfIO::Objects::MLeaderStyles
     int RightAttachment{1};
     int AngleType{1};
     int Alignment{};
-    int Color{PackedByBlock};
-    double Height{Size};
+    int Color{Colors::PackedByBlock};
+    double Height{4};
     bool Frame{};
     bool AlwaysLeft{};
-    double AlignSpace{Size};
+    double AlignSpace{4};
     int AttachmentDirection{};
-    int BottomAttachment{Centered};
-    int TopAttachment{Centered};
+    int BottomAttachment{9};
+    int TopAttachment{9};
     auto operator==(const Text &) const -> bool = default;
   };
   struct DXFIO_API Block
   {
     Handle Content{};
-    int Color{PackedByBlock};
+    int Color{Colors::PackedByBlock};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
     bool EnableScale{true};
     double Rotation{};
@@ -2453,7 +2423,7 @@ namespace DxfIO::Objects
     double Scale{1};
     bool OverwriteProperty{};
     bool Annotative{};
-    double BreakGapSize{MLeaderStyles::Breaking};
+    double BreakGapSize{3.75};
     int Unknown1{};
     auto operator==(const MLeaderStyle &) const -> bool = default;
   };
@@ -2466,7 +2436,6 @@ namespace DxfIO::Objects
 #include <vector>
 namespace DxfIO::Objects::MLineStyles
 {
-  inline constexpr double Square = 90;
   struct DXFIO_API Element
   {
     double Offset{};
@@ -2484,8 +2453,8 @@ namespace DxfIO::Objects
     int Flags{};
     std::string Description{};
     int Fill{Colors::ByLayer};
-    double Start{MLineStyles::Square};
-    double End{MLineStyles::Square};
+    double Start{90};
+    double End{90};
     std::vector<MLineStyles::Element> Elements{};
     auto operator==(const MLineStyle &) const -> bool = default;
   };
@@ -2507,11 +2476,6 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects
 {
-  inline constexpr int Plotted = 688;
-  inline constexpr int PlotLayout = 5;
-  inline constexpr int Actual = 16;
-  inline constexpr int Normal = 2;
-  inline constexpr int Dpi = 300;
   struct DXFIO_API Plot
   {
     std::string Name{};
@@ -2529,16 +2493,16 @@ namespace DxfIO::Objects
     Vector Upper{};
     double PaperUnits{1};
     double DrawingUnits{1};
-    int Flags{Plotted};
+    int Flags{688};
     int Units{};
     int Rotation{};
-    int Type{PlotLayout};
+    int Type{5};
     std::string Style{};
-    int Standard{Actual};
+    int Standard{16};
     double Factor{1};
     int Shading{};
-    int Resolution{Normal};
-    int Dots{Dpi};
+    int Resolution{2};
+    int Dots{300};
     Vector Image{};
     auto operator==(const Plot &) const -> bool = default;
   };
@@ -2608,9 +2572,6 @@ namespace DxfIO::Objects
 #include <vector>
 namespace DxfIO::Objects::TableStyles
 {
-  inline constexpr int General = 512;
-  inline constexpr double Height = 4.5;
-  inline constexpr double Margin = 1.5;
   struct DXFIO_API Border
   {
     int Lineweight{Lineweights::ByBlock};
@@ -2621,12 +2582,12 @@ namespace DxfIO::Objects::TableStyles
   struct DXFIO_API RowStyle
   {
     std::string Style{};
-    double Height{TableStyles::Height};
+    double Height{4.5};
     int Alignment{1};
     int Color{};
     int Fill{Colors::White};
     bool Filled{};
-    int Type{General};
+    int Type{512};
     int Unit{};
     std::string Format{};
     Border Top{};
@@ -2647,8 +2608,8 @@ namespace DxfIO::Objects
     std::string Description{};
     int Flow{};
     int Flags{};
-    double Horizontal{TableStyles::Margin};
-    double Vertical{TableStyles::Margin};
+    double Horizontal{1.5};
+    double Vertical{1.5};
     bool Untitled{};
     bool Headless{};
     std::vector<TableStyles::RowStyle> Cells{};
@@ -2878,12 +2839,6 @@ namespace DxfIO::Tables
 #include <string>
 namespace DxfIO::Tables
 {
-  inline constexpr double Size = 0.18;
-  inline constexpr double Offset = 0.0625;
-  inline constexpr double Increment = 0.38;
-  inline constexpr double Mark = 0.09;
-  inline constexpr double Inch = 25.4;
-  inline constexpr double Jog = 45;
   struct DXFIO_API Arrows
   {
     std::string Dimblk{};
@@ -2898,16 +2853,16 @@ namespace DxfIO::Tables
     std::string Dimpost{};
     std::string Dimapost{};
     double Dimscale{1};
-    double Dimasz{Size};
-    double Dimexo{Offset};
-    double Dimdli{Increment};
-    double Dimexe{Size};
+    double Dimasz{0.18};
+    double Dimexo{0.0625};
+    double Dimdli{0.38};
+    double Dimexe{0.18};
     double Dimrnd{};
     double Dimdle{};
     double Dimtp{};
     double Dimtm{};
     double Dimfxl{1};
-    double Dimjogang{Jog};
+    double Dimjogang{45};
     int Dimtfill{};
     int Dimtfillclr{};
     int Dimtol{};
@@ -2920,14 +2875,14 @@ namespace DxfIO::Tables
     int Dimzin{};
     int Dimazin{};
     int Dimarcsym{};
-    double Dimtxt{Size};
-    double Dimcen{Mark};
+    double Dimtxt{0.18};
+    double Dimcen{0.09};
     double Dimtsz{};
-    double Dimaltf{Inch};
+    double Dimaltf{25.4};
     double Dimlfac{1};
     double Dimtvp{};
     double Dimtfac{1};
-    double Dimgap{Mark};
+    double Dimgap{0.09};
     double Dimaltrnd{};
     int Dimalt{};
     int Dimaltd{2};
@@ -3012,11 +2967,10 @@ namespace DxfIO::Tables
 #include <string>
 namespace DxfIO::Tables
 {
-  inline constexpr int White = Colors::White;
   struct DXFIO_API Layer
   {
     Tables::Record Record{};
-    int Color{White};
+    int Color{Colors::White};
     Symbol Linetype{"Continuous"};
     bool Plot{true};
     int Lineweight{Lineweights::Standard};
@@ -3036,7 +2990,6 @@ namespace DxfIO::Tables
 #include <vector>
 namespace DxfIO::Tables
 {
-  inline constexpr int Aligned = 'A';
   struct DXFIO_API Dash
   {
     double Length{};
@@ -3054,7 +3007,7 @@ namespace DxfIO::Tables
   {
     Tables::Record Record{};
     std::string Description{};
-    int Alignment{Aligned};
+    int Alignment{'A'};
     double Length{};
     std::vector<Tables::Dash> Dashes{};
     auto operator==(const LType &) const -> bool = default;
@@ -3080,7 +3033,6 @@ namespace DxfIO::Tables
 #include <string>
 namespace DxfIO::Tables
 {
-  inline constexpr double Last = 2.5;
   struct DXFIO_API Style
   {
     Tables::Record Record{};
@@ -3088,7 +3040,7 @@ namespace DxfIO::Tables
     double Width{1};
     double Oblique{};
     int Generation{};
-    double LastHeight{Last};
+    double LastHeight{2.5};
     std::string Font{"txt"};
     std::string Bigfont{};
     auto operator==(const Style &) const -> bool = default;
@@ -3134,7 +3086,6 @@ namespace DxfIO::Tables
 #include "dxfio/vector.hpp"
 namespace DxfIO::Tables
 {
-  inline constexpr double Lens = 50;
   struct DXFIO_API View
   {
     Tables::Record Record{};
@@ -3143,7 +3094,7 @@ namespace DxfIO::Tables
     double ViewWidth{1};
     Vector Direction{.X = 0, .Y = 0, .Z = 1};
     Vector Target{};
-    double LensLength{Lens};
+    double LensLength{50};
     double Front{};
     double Back{};
     double Twist{};
@@ -3168,11 +3119,6 @@ namespace DxfIO::Tables
 #include <optional>
 namespace DxfIO::Tables
 {
-  inline constexpr double Snapunit = 10;
-  inline constexpr double Gridunit = 10;
-  inline constexpr int Viewres = 1000;
-  inline constexpr int Gridmajor = 5;
-  inline constexpr int Ambience = 250;
   struct DXFIO_API VPort
   {
     Tables::Record Record{};
@@ -3180,19 +3126,19 @@ namespace DxfIO::Tables
     Vector Upper{.X = 1, .Y = 1, .Z = 0};
     Vector ViewCenter{};
     Vector SnapBase{};
-    Vector Snap{.X = Snapunit, .Y = Snapunit, .Z = 0};
-    Vector Grid{.X = Gridunit, .Y = Gridunit, .Z = 0};
+    Vector Snap{.X = 10, .Y = 10, .Z = 0};
+    Vector Grid{.X = 10, .Y = 10, .Z = 0};
     Vector Direction{.X = 0, .Y = 0, .Z = 1};
     Vector Target{};
     double ViewHeight{1};
     double Aspect{1};
-    double LensLength{Lens};
+    double LensLength{50};
     double Front{};
     double Back{};
     double SnapAngle{};
     double Twist{};
     int Mode{};
-    int Zoom{Viewres};
+    int Zoom{1000};
     bool FastZoom{true};
     int UcsIcon{3};
     bool SnapOn{};
@@ -3204,12 +3150,12 @@ namespace DxfIO::Tables
     Tables::Axes Axes{};
     Handle VisualStyle{};
     int GridDisplay{3};
-    int GridMajor{Gridmajor};
+    int GridMajor{5};
     bool DefaultLighting{true};
     int DefaultLightingType{1};
     double Brightness{};
     double Contrast{};
-    int Ambient{Ambience};
+    int Ambient{250};
     std::optional<int> Rgb{};
     Handle Background{};
     Handle ShadePlotObject{};

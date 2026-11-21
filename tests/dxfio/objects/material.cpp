@@ -146,7 +146,7 @@ namespace DxfIO::Objects
     CHECK(taken.Maps->Specular.Tiling       == 2);
     CHECK(taken.Maps->Reflection.Projection == 3);
     CHECK(taken.Maps->Reflection.Automatic  == 2);
-    CHECK(taken.Maps->Refraction.Source     == Bitmap);
+    CHECK(taken.Maps->Refraction.Source     == 1);
     CHECK(taken.Base.Extra.empty());
     CHECK(Written(taken) == text);
   }
@@ -169,7 +169,7 @@ namespace DxfIO::Objects
                                        " 94\r\n        0\r\n";
     const Material             taken = Read<Material>(text);
     CHECK(taken.Channels == 0);
-    CHECK(taken.Maps->Diffuse.Projection == Box);
+    CHECK(taken.Maps->Diffuse.Projection == 2);
     CHECK(Written(taken) == text);
   }
 
@@ -205,10 +205,10 @@ namespace DxfIO::Objects
     CHECK(taken.Description     == "brown square tiles");
     CHECK(taken.Gloss           == 0.85);
     CHECK(taken.Specular.Method == 1);
-    CHECK(taken.Maps->Specular.Source   == Scene);
+    CHECK(taken.Maps->Specular.Source   == 0);
     CHECK(taken.Maps->Bump.Blend        == 0.55);
     CHECK(taken.Maps->Bump.File         == "tile.bump.png");
-    CHECK(taken.Maps->Refraction.Source == Scene);
+    CHECK(taken.Maps->Refraction.Source == 0);
     CHECK(taken.Base.Extra.empty());
     CHECK(Written(taken, Version::R2004) == text);
   }

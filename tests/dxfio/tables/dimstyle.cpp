@@ -90,9 +90,9 @@ namespace DxfIO::Tables
                                        " 70\r\n     0\r\n"
                                        "340\r\n11\r\n";
     const DimStyle             taken = Read<DimStyle>(text);
-    CHECK(taken.Dimasz    == Size);
+    CHECK(taken.Dimasz    == 0.18);
     CHECK(taken.Dimdsep   == '.');
-    CHECK(taken.Dimjogang == Jog);
+    CHECK(taken.Dimjogang == 45);
     CHECK(Written(taken)  == text);
   }
 

@@ -11,11 +11,6 @@
 namespace DxfIO::Objects::MLineStyles
 {
   /**
-   *  The start and end angle of a new multiline style, in degrees: square to the line.
-   */
-  inline constexpr double Square = 90;
-
-  /**
    *  One of the parallel lines a multiline style draws.
    */
   struct DXFIO_API Element
@@ -68,11 +63,11 @@ namespace DxfIO::Objects
     /**
      *  The angle of the start cap, in degrees. Group 51.
      */
-    double Start{MLineStyles::Square};
+    double Start{90};
     /**
      *  The angle of the end cap, in degrees. Group 52.
      */
-    double End{MLineStyles::Square};
+    double End{90};
     /**
      *  The lines, in order; their count is group 71.
      */
