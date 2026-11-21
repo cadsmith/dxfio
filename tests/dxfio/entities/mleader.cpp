@@ -26,74 +26,74 @@ namespace DxfIO::Entities
     auto Full() -> MultiLeader
     {
       MultiLeader out{};
-      out.Record.Base.Self = Handle{.Value = 0x2a};
-      Callout &all         = *out.Callout;
-      all.Style            = Handle{.Value = 0x12e};
-      all.Arrow            = Handle{.Value = 0x31};
-      all.Linetype         = Handle{.Value = 0x14};
-      all.Lettering        = Handle{.Value = 0x11};
-      all.Block            = Handle{.Value = 0x32};
-      all.Tips             = {Tip{.Index = 0, .Block = Handle{.Value = 0x33}},
-                              Tip{.Index = 1, .Block = Handle{.Value = 0x34}}};
-      all.Labels           = {
-          Label{.Definition = Handle{.Value = 0x35}, .Index = 3, .Width = 2.5, .Text = "TAG"}};
-      Note &note   = all.Context;
-      note.Texted  = true;
-      note.Text    = "two\\Plines";
-      note.Style   = Handle{.Value = 0x11};
-      note.Heights = {1.5, 2.5};
-      note.Blocked = true;
-      note.Block   = Handle{.Value = 0x36};
-      note.Frame.Cells.fill(1.0);
-      Stem stem{};
-      stem.Points     = {Vector{.X = 1}, Vector{.X = 2}};
-      stem.Gaps       = {Gap{.Index = 1, .Start = Vector{.Y = 1}},
-                         Gap{.Index = 2, .End = Vector{.Y = 2}}};
-      stem.Index      = 4;
-      stem.Color      = 7;
-      stem.Kind       = 2;
-      stem.Linetype   = Handle{.Value = 0x37};
-      stem.Lineweight = -1;
-      stem.Arrow      = 0.5;
-      stem.Head       = Handle{.Value = 0x38};
-      stem.Overrides  = 3;
-      Branch branch{};
-      branch.Spans  = {Span{.Start = Vector{.X = 3}, .End = Vector{.X = 4}}};
-      branch.Stems  = {stem, Stem{.Points = {Vector{.Z = 1}}}};
-      note.Branches = {branch, Branch{}};
+      out.Record.Base.Self       = Handle{.Value = 0x2a};
+      MultiLeaders::MLeader &all = *out.MLeader;
+      all.Style                  = Handle{.Value = 0x12e};
+      all.Arrowhead              = Handle{.Value = 0x31};
+      all.Linetype               = Handle{.Value = 0x14};
+      all.TextStyle              = Handle{.Value = 0x11};
+      all.BlockContent           = Handle{.Value = 0x32};
+      all.Arrowheads      = {MultiLeaders::Arrowhead{.Index = 0, .Block = Handle{.Value = 0x33}},
+                             MultiLeaders::Arrowhead{.Index = 1, .Block = Handle{.Value = 0x34}}};
+      all.BlockAttributes = {MultiLeaders::BlockAttribute{
+          .Definition = Handle{.Value = 0x35}, .Index = 3, .Width = 2.5, .Text = "TAG"}};
+      MultiLeaders::ContextData &note = all.Context;
+      note.HasMText                   = true;
+      note.Text                       = "two\\Plines";
+      note.TextStyle                  = Handle{.Value = 0x11};
+      note.ColumnHeights              = {1.5, 2.5};
+      note.HasBlock                   = true;
+      note.BlockContent               = Handle{.Value = 0x36};
+      note.BlockTransform.Cells.fill(1.0);
+      MultiLeaders::LeaderLine stem{};
+      stem.Vertices      = {Vector{.X = 1}, Vector{.X = 2}};
+      stem.Breaks        = {MultiLeaders::LineBreak{.Index = 1, .Start = Vector{.Y = 1}},
+                            MultiLeaders::LineBreak{.Index = 2, .End = Vector{.Y = 2}}};
+      stem.Index         = 4;
+      stem.Color         = 7;
+      stem.LeaderType    = 2;
+      stem.Linetype      = Handle{.Value = 0x37};
+      stem.Lineweight    = -1;
+      stem.ArrowheadSize = 0.5;
+      stem.Arrowhead     = Handle{.Value = 0x38};
+      stem.Overrides     = 3;
+      MultiLeaders::LeaderRoot branch{};
+      branch.Breaks = {MultiLeaders::DoglegBreak{.Start = Vector{.X = 3}, .End = Vector{.X = 4}}};
+      branch.Lines  = {stem, MultiLeaders::LeaderLine{.Vertices = {Vector{.Z = 1}}}};
+      note.Leaders  = {branch, MultiLeaders::LeaderRoot{}};
       return out;
     }
   } // namespace
 
   TEST_CASE("mleader: AutoCAD's note, its text and its one leader")
   {
-    const MultiLeader one  = Alikened();
-    const Callout    &all  = *one.Callout;
-    const Note       &note = all.Context;
-    CHECK(all.Version == 2);
-    CHECK(note.Scale  == 1);
-    CHECK(note.Texted);
-    CHECK(note.Text       == "note");
-    CHECK(note.Location.X == 240);
-    CHECK(note.Color      == Inherited);
-    CHECK_FALSE(note.Blocked);
-    CHECK(note.Origin            == Vector{.X = 220});
-    REQUIRE(note.Branches.size() == 1);
-    const Branch &branch = note.Branches.front();
-    CHECK(branch.Last           == Vector{.X = 230, .Y = 10});
-    CHECK(branch.Length         == 8);
-    REQUIRE(branch.Stems.size() == 1);
-    CHECK(branch.Stems.front().Points == std::vector{Vector{.X = 220}});
-    CHECK_FALSE(branch.Stems.front().Color);
-    CHECK(all.Style     == Handle{.Value = 0x12e});
-    CHECK(all.Overrides == 279552);
-    CHECK(all.Size      == 4);
-    CHECK(all.Content   == 2);
-    CHECK(all.Lettering == Handle{.Value = 0x11});
-    CHECK(all.Sized     == Vector{.X = 1, .Y = 1, .Z = 1});
-    CHECK(all.Tips.empty());
-    CHECK(all.Labels.empty());
-    CHECK_FALSE(all.Extended);
+    const MultiLeader                one  = Alikened();
+    const MultiLeaders::MLeader     &all  = *one.MLeader;
+    const MultiLeaders::ContextData &note = all.Context;
+    CHECK(all.Version       == 2);
+    CHECK(note.ContentScale == 1);
+    CHECK(note.HasMText);
+    CHECK(note.Text           == "note");
+    CHECK(note.TextLocation.X == 240);
+    CHECK(note.TextColor      == Inherited);
+    CHECK_FALSE(note.HasBlock);
+    CHECK(note.PlaneOrigin      == Vector{.X = 220});
+    REQUIRE(note.Leaders.size() == 1);
+    const MultiLeaders::LeaderRoot &branch = note.Leaders.front();
+    CHECK(branch.LastPoint      == Vector{.X = 230, .Y = 10});
+    CHECK(branch.DoglegLength   == 8);
+    REQUIRE(branch.Lines.size() == 1);
+    CHECK(branch.Lines.front().Vertices == std::vector{Vector{.X = 220}});
+    CHECK_FALSE(branch.Lines.front().Color);
+    CHECK(all.Style         == Handle{.Value = 0x12e});
+    CHECK(all.Overrides     == 279552);
+    CHECK(all.ArrowheadSize == 4);
+    CHECK(all.ContentType   == 2);
+    CHECK(all.TextStyle     == Handle{.Value = 0x11});
+    CHECK(all.BlockScale    == Vector{.X = 1, .Y = 1, .Z = 1});
+    CHECK(all.Arrowheads.empty());
+    CHECK(all.BlockAttributes.empty());
+    CHECK_FALSE(all.ExtendToText);
     CHECK_FALSE(one.Picture.empty());
   }
 
@@ -102,7 +102,7 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened(release).Callout->Context.Text == "note");
+      CHECK(Alikened(release).MLeader->Context.Text == "note");
     }
   }
 
@@ -115,38 +115,38 @@ namespace DxfIO::Entities
       const std::string text  = Written(full, release);
       const MultiLeader again = DxfIO::Read<MultiLeader>(text, release);
       CHECK(again.Record.Base.Extra.empty());
-      CHECK(Written(again, release)         == text);
-      CHECK(again.Callout->Tips             == full.Callout->Tips);
-      CHECK(again.Callout->Labels           == full.Callout->Labels);
-      CHECK(again.Callout->Context.Branches == full.Callout->Context.Branches);
-      CHECK(again.Callout->Context.Frame    == full.Callout->Context.Frame);
+      CHECK(Written(again, release)        == text);
+      CHECK(again.MLeader->Arrowheads      == full.MLeader->Arrowheads);
+      CHECK(again.MLeader->BlockAttributes == full.MLeader->BlockAttributes);
+      CHECK(again.MLeader->Context.Leaders == full.MLeader->Context.Leaders);
+      CHECK(again.MLeader->Context.BlockTransform == full.MLeader->Context.BlockTransform);
     }
   }
 
   TEST_CASE("mleader: no text and no block, neither's groups written")
   {
     MultiLeader one{};
-    one.Callout->Context.Text = "dropped";
+    one.MLeader->Context.Text = "dropped";
     const std::string text    = Written(one);
     CHECK(text.find("dropped") == std::string::npos);
     CHECK(text.find("341\r\n") != std::string::npos);
-    CHECK(DxfIO::Read<MultiLeader>(text).Callout->Context.Text.empty());
+    CHECK(DxfIO::Read<MultiLeader>(text).MLeader->Context.Text.empty());
   }
 
   TEST_CASE("mleader: a block's transform a matrix, its 16 cells written")
   {
-    CHECK(std::is_same_v<decltype(Note::Frame), Matrix>);
+    CHECK(std::is_same_v<decltype(MultiLeaders::ContextData::BlockTransform), Matrix>);
     MultiLeader one{};
-    one.Callout->Context.Blocked = true;
-    const std::string text       = Written(one);
-    std::size_t       cells      = 0;
+    one.MLeader->Context.HasBlock = true;
+    const std::string text        = Written(one);
+    std::size_t       cells       = 0;
     for (std::size_t at = text.find(" 47\r\n"); at != std::string::npos;
          at             = text.find(" 47\r\n", at + 1))
     {
       ++cells;
     }
     CHECK(cells == 16);
-    CHECK(DxfIO::Read<MultiLeader>(text).Callout->Context.Frame == Identity);
+    CHECK(DxfIO::Read<MultiLeader>(text).MLeader->Context.BlockTransform == Identity);
   }
 
   TEST_CASE("mleader: an arrow and a block named only when there are")
@@ -206,17 +206,17 @@ namespace DxfIO::Entities
   TEST_CASE("mleader: alike only with what it holds alike")
   {
     CHECK(Full() == Full());
-    MultiLeader other                                                        = Full();
-    other.Callout->Context.Branches.front().Stems.front().Gaps.front().Index = 9;
+    MultiLeader other                                                         = Full();
+    other.MLeader->Context.Leaders.front().Lines.front().Breaks.front().Index = 9;
     CHECK(other != Full());
     other                                                       = Full();
-    other.Callout->Context.Branches.front().Spans.front().End.X = 9;
+    other.MLeader->Context.Leaders.front().Breaks.front().End.X = 9;
     CHECK(other != Full());
-    other                             = Full();
-    other.Callout->Tips.front().Index = 9;
+    other                                   = Full();
+    other.MLeader->Arrowheads.front().Index = 9;
     CHECK(other != Full());
-    other                              = Full();
-    other.Callout->Labels.front().Text = "other";
+    other                                       = Full();
+    other.MLeader->BlockAttributes.front().Text = "other";
     CHECK(other != Full());
   }
 

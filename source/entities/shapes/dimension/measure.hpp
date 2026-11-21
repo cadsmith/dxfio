@@ -25,8 +25,8 @@ namespace DxfIO
   {
     inline constexpr std::tuple Settings{
         Fields::Field{.Code = 71, .Member = &Measure::Attachment},
-        Fields::Field{.Code = 72, .Member = &Measure::Spacing},
-        Fields::Field{.Code = 41, .Member = &Measure::Factor},
+        Fields::Field{.Code = 72, .Member = &Measure::LineSpacingStyle},
+        Fields::Field{.Code = 41, .Member = &Measure::LineSpacingFactor},
         Fields::Field{.Code = 42, .Member = &Measure::Measured},
     };
 

@@ -68,11 +68,11 @@ namespace DxfIO::Entities
     /**
      *  The line spacing style of the text: 1 at least, 2 exactly. Group 72, from R2000.
      */
-    std::optional<int> Spacing{};
+    std::optional<int> LineSpacingStyle{};
     /**
      *  The line spacing of the text, as a factor of the default. Group 41, from R2000.
      */
-    std::optional<double> Factor{};
+    std::optional<double> LineSpacingFactor{};
     /**
      *  The measurement, as AutoCAD last computed it. Group 42, from R2000.
      */

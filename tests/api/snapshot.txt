@@ -583,8 +583,8 @@ namespace DxfIO::Entities
     int Flags{};
     std::string Text{};
     int Attachment{MiddleCenter};
-    std::optional<int> Spacing{};
-    std::optional<double> Factor{};
+    std::optional<int> LineSpacingStyle{};
+    std::optional<double> LineSpacingFactor{};
     double Measured{Unmeasured};
     int Above{};
     int First{};
@@ -1184,8 +1184,8 @@ namespace DxfIO::Entities
     Vector Extrusion{Up};
     std::optional<Vector> Direction{};
     std::optional<double> Rotation{};
-    int Spacing{1};
-    double Factor{1};
+    int LineSpacingStyle{1};
+    double LineSpacingFactor{1};
     int Fill{};
     std::optional<int> Color{};
     std::optional<int> Rgb{};
@@ -1215,160 +1215,166 @@ namespace DxfIO::Entities
 namespace DxfIO::Entities
 {
   inline constexpr int Inherited = -1073741824;
-  struct DXFIO_API Gap
+}
+namespace DxfIO::Entities::MultiLeaders
+{
+  struct DXFIO_API LineBreak
   {
     int Index{};
     Vector Start{};
     Vector End{};
-    auto operator==(const Gap &) const -> bool = default;
+    auto operator==(const LineBreak &) const -> bool = default;
   };
-  struct DXFIO_API Stem
+  struct DXFIO_API LeaderLine
   {
-    std::vector<Vector> Points{};
-    std::vector<Gap> Gaps{};
+    std::vector<Vector> Vertices{};
+    std::vector<LineBreak> Breaks{};
     int Index{};
     std::optional<int> Color{};
-    std::optional<int> Kind{};
+    std::optional<int> LeaderType{};
     Handle Linetype{};
     std::optional<int> Lineweight{};
-    std::optional<double> Arrow{};
-    Handle Head{};
+    std::optional<double> ArrowheadSize{};
+    Handle Arrowhead{};
     std::optional<int> Overrides{};
-    auto operator==(const Stem &) const -> bool = default;
+    auto operator==(const LeaderLine &) const -> bool = default;
   };
-  struct DXFIO_API Span
+  struct DXFIO_API DoglegBreak
   {
     Vector Start{};
     Vector End{};
-    auto operator==(const Span &) const -> bool = default;
+    auto operator==(const DoglegBreak &) const -> bool = default;
   };
-  struct DXFIO_API Branch
+  struct DXFIO_API LeaderRoot
   {
-    bool Lasting{true};
-    bool Bent{true};
-    Vector Last{};
-    Vector Dogleg{.X = 1};
-    std::vector<Span> Spans{};
+    bool HasLastPoint{true};
+    bool HasDoglegVector{true};
+    Vector LastPoint{};
+    Vector DoglegVector{.X = 1};
+    std::vector<DoglegBreak> Breaks{};
     int Index{};
-    double Length{};
-    std::vector<Stem> Stems{};
-    int Attachment{};
-    auto operator==(const Branch &) const -> bool = default;
+    double DoglegLength{};
+    std::vector<LeaderLine> Lines{};
+    int AttachmentDirection{};
+    auto operator==(const LeaderRoot &) const -> bool = default;
   };
-  struct DXFIO_API Note
+  struct DXFIO_API ContextData
   {
-    double Scale{1};
-    Vector Base{};
-    double Height{};
-    double Arrow{};
-    double Landing{};
-    int Left{1};
-    int Right{1};
-    int Align{};
-    int Attach{};
-    bool Texted{};
+    double ContentScale{1};
+    Vector ContentBasePoint{};
+    double TextHeight{};
+    double ArrowheadSize{};
+    double LandingGap{};
+    int TextLeftAttachment{1};
+    int TextRightAttachment{1};
+    int TextAlignment{};
+    int AttachmentType{};
+    bool HasMText{};
     std::string Text{};
-    Vector Normal{Up};
-    Handle Style{};
-    Vector Location{};
-    Vector Direction{.X = 1};
-    double Rotation{};
-    double Width{};
-    double Tall{};
-    double Spacing{1};
-    int Spaced{1};
-    int Color{Inherited};
-    int Attachment{1};
-    int Flow{5};
-    int Background{Inherited};
-    double Margin{};
-    int Transparency{};
-    bool Backed{};
-    bool Filled{};
-    int Columns{};
-    bool Grows{};
-    double Column{};
-    double Gutter{};
-    bool Reversed{};
-    std::vector<double> Heights{};
-    bool Breaks{};
-    bool Blocked{};
-    Handle Block{};
-    Vector Facing{Up};
-    Vector Placed{};
-    Vector Sized{.X = 1, .Y = 1, .Z = 1};
-    double Turned{};
-    int Tint{Inherited};
-    Matrix Frame{};
-    Vector Origin{};
-    Vector Across{.X = 1};
-    Vector Along{.Y = 1};
-    bool Flipped{};
-    std::vector<Branch> Branches{};
-    int Bottom{9};
-    int Top{9};
-    auto operator==(const Note &) const -> bool = default;
+    Vector TextNormal{Up};
+    Handle TextStyle{};
+    Vector TextLocation{};
+    Vector TextDirection{.X = 1};
+    double TextRotation{};
+    double BoundaryWidth{};
+    double BoundaryHeight{};
+    double LineSpacingFactor{1};
+    int LineSpacingStyle{1};
+    int TextColor{Inherited};
+    int TextAttachment{1};
+    int FlowDirection{5};
+    int BackgroundColor{Inherited};
+    double BackgroundScale{};
+    int BackgroundTransparency{};
+    bool BackgroundFill{};
+    bool BackgroundMask{};
+    int ColumnType{};
+    bool AutoHeight{};
+    double ColumnWidth{};
+    double ColumnGutter{};
+    bool ColumnFlowReversed{};
+    std::vector<double> ColumnHeights{};
+    bool WordBreak{};
+    bool HasBlock{};
+    Handle BlockContent{};
+    Vector BlockNormal{Up};
+    Vector BlockPosition{};
+    Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
+    double BlockRotation{};
+    int BlockColor{Inherited};
+    Matrix BlockTransform{};
+    Vector PlaneOrigin{};
+    Vector PlaneXAxis{.X = 1};
+    Vector PlaneYAxis{.Y = 1};
+    bool PlaneNormalReversed{};
+    std::vector<LeaderRoot> Leaders{};
+    int TextBottomAttachment{9};
+    int TextTopAttachment{9};
+    auto operator==(const ContextData &) const -> bool = default;
   };
-  struct DXFIO_API Tip
+  struct DXFIO_API Arrowhead
   {
     int Index{};
     Handle Block{};
-    auto operator==(const Tip &) const -> bool = default;
+    auto operator==(const Arrowhead &) const -> bool = default;
   };
-  struct DXFIO_API Label
+  struct DXFIO_API BlockAttribute
   {
     Handle Definition{};
     int Index{};
     double Width{};
     std::string Text{};
-    auto operator==(const Label &) const -> bool = default;
+    auto operator==(const BlockAttribute &) const -> bool = default;
   };
-  struct DXFIO_API Callout
+  struct DXFIO_API MLeader
   {
     int Version{2};
-    Note Context{};
+    ContextData Context{};
     Handle Style{};
     int Overrides{};
-    int Line{1};
-    int Color{Inherited};
+    int LeaderType{1};
+    int LineColor{Inherited};
     Handle Linetype{};
     int Lineweight{-2};
-    bool Landing{true};
-    bool Bent{true};
-    double Length{};
-    Handle Arrow{};
-    double Size{};
-    int Content{2};
-    Handle Lettering{};
-    int Left{1};
-    int Right{1};
-    int Angle{1};
-    int Align{};
-    int Tint{Inherited};
-    bool Framed{};
-    Handle Block{};
-    int Shade{Inherited};
-    Vector Sized{.X = 1, .Y = 1, .Z = 1};
-    double Turned{};
-    int Connection{};
+    bool EnableLanding{true};
+    bool EnableDogleg{true};
+    double DoglegLength{};
+    Handle Arrowhead{};
+    double ArrowheadSize{};
+    int ContentType{2};
+    Handle TextStyle{};
+    int TextLeftAttachment{1};
+    int TextRightAttachment{1};
+    int TextAngleType{1};
+    int TextAlignment{};
+    int TextColor{Inherited};
+    bool TextFrame{};
+    Handle BlockContent{};
+    int BlockColor{Inherited};
+    Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
+    double BlockRotation{};
+    int BlockConnection{};
     bool Annotative{};
-    std::vector<Tip> Tips{};
-    std::vector<Label> Labels{};
-    bool Negative{};
-    int Pinned{};
-    int Point{1};
-    double Factor{1};
-    int Attachment{};
-    int Bottom{9};
-    int Top{9};
-    bool Extended{};
-    auto operator==(const Callout &) const -> bool = default;
+    std::vector<MultiLeaders::Arrowhead> Arrowheads{};
+    std::vector<BlockAttribute> BlockAttributes{};
+    bool TextDirectionNegative{};
+    int IpeAlignment{};
+    int TextAttachmentPoint{1};
+    double OverallScale{1};
+    int TextAttachmentDirection{};
+    int TextBottomAttachment{9};
+    int TextTopAttachment{9};
+    bool ExtendToText{};
+    auto operator==(const MLeader &) const -> bool = default;
   };
+}
+namespace DxfIO::Entities
+{
   struct DXFIO_API MultiLeader
   {
     Entities::Record Record{};
     std::string Picture{};
-    Boxed<Entities::Callout> Callout{};
+    Boxed<MultiLeaders::MLeader> MLeader{};
     auto operator==(const MultiLeader &) const -> bool = default;
   };
 }
@@ -2385,48 +2391,48 @@ namespace DxfIO::Objects::MLeaderStyles
   inline constexpr int Centered = 9;
   struct DXFIO_API Leader
   {
-    int Order{};
-    int Points{2};
-    double First{};
-    double Second{};
-    int Type{1};
+    int DrawOrder{};
+    int MaxPoints{2};
+    double FirstSegmentAngle{};
+    double SecondSegmentAngle{};
+    int LeaderType{1};
     int Color{PackedByBlock};
     Handle Linetype{};
     int Lineweight{Lineweights::ByBlock};
-    bool Landing{true};
-    double Gap{Margin};
-    bool Dogleg{true};
-    double Length{Reach};
-    Handle Arrow{};
-    double Size{MLeaderStyles::Size};
+    bool EnableLanding{true};
+    double LandingGap{Margin};
+    bool EnableDogleg{true};
+    double DoglegLength{Reach};
+    Handle Arrowhead{};
+    double ArrowheadSize{MLeaderStyles::Size};
     auto operator==(const Leader &) const -> bool = default;
   };
   struct DXFIO_API Text
   {
-    std::string Content{};
+    std::string DefaultText{};
     Handle Style{};
-    int Left{1};
-    int Right{1};
-    int Angle{1};
+    int LeftAttachment{1};
+    int RightAttachment{1};
+    int AngleType{1};
     int Alignment{};
     int Color{PackedByBlock};
     double Height{Size};
     bool Frame{};
-    bool Flush{};
-    double Space{Size};
-    int Direction{};
-    int Bottom{Centered};
-    int Top{Centered};
+    bool AlwaysLeft{};
+    double AlignSpace{Size};
+    int AttachmentDirection{};
+    int BottomAttachment{Centered};
+    int TopAttachment{Centered};
     auto operator==(const Text &) const -> bool = default;
   };
   struct DXFIO_API Block
   {
-    Handle Record{};
+    Handle Content{};
     int Color{PackedByBlock};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
-    bool Scaled{true};
+    bool EnableScale{true};
     double Rotation{};
-    bool Rotated{true};
+    bool EnableRotation{true};
     int Connection{};
     auto operator==(const Block &) const -> bool = default;
   };
@@ -2437,16 +2443,16 @@ namespace DxfIO::Objects
   {
     DxfIO::Base Base{};
     int Revision{2};
-    int Content{2};
-    int Order{1};
+    int ContentType{2};
+    int DrawOrder{1};
     std::string Description{};
     Boxed<MLeaderStyles::Leader> Leader{};
     Boxed<MLeaderStyles::Text> Text{};
     Boxed<MLeaderStyles::Block> Block{};
     double Scale{1};
-    bool Overwrite{};
+    bool OverwriteProperty{};
     bool Annotative{};
-    double Breaks{MLeaderStyles::Breaking};
+    double BreakGapSize{MLeaderStyles::Breaking};
     int Spare{};
     auto operator==(const MLeaderStyle &) const -> bool = default;
   };

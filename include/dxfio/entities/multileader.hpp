@@ -18,11 +18,14 @@ namespace DxfIO::Entities
    *  ByLayer, as a packed color: the color method 0xC0 in the top byte and nothing below it.
    */
   inline constexpr int Inherited = -1073741824;
+} // namespace DxfIO::Entities
 
+namespace DxfIO::Entities::MultiLeaders
+{
   /**
    *  A break in a leader line, between two points of one of its segments.
    */
-  struct DXFIO_API Gap
+  struct DXFIO_API LineBreak
   {
     /**
      *  The segment the break is in. Group 90.
@@ -37,23 +40,23 @@ namespace DxfIO::Entities
      */
     Vector End{};
 
-    auto operator==(const Gap &) const -> bool = default;
+    auto operator==(const LineBreak &) const -> bool = default;
   };
 
   /**
    *  A leader line of a MULTILEADER: its vertices, its breaks and what it overrides of its
    *  MULTILEADER.
    */
-  struct DXFIO_API Stem
+  struct DXFIO_API LeaderLine
   {
     /**
      *  The vertices, in world coordinates. Groups 10, 20, 30.
      */
-    std::vector<Vector> Points{};
+    std::vector<Vector> Vertices{};
     /**
      *  The breaks in its segments, each opened by group 90.
      */
-    std::vector<Gap> Gaps{};
+    std::vector<LineBreak> Breaks{};
     /**
      *  The line's index in its leader. Group 91.
      */
@@ -65,7 +68,7 @@ namespace DxfIO::Entities
     /**
      *  The line type, when it has its own: 0 invisible, 1 straight, 2 spline. Group 170.
      */
-    std::optional<int> Kind{};
+    std::optional<int> LeaderType{};
     /**
      *  The linetype of the line, when it has its own. Group 340.
      */
@@ -77,23 +80,23 @@ namespace DxfIO::Entities
     /**
      *  The size of the arrowhead, when it has its own. Group 40.
      */
-    std::optional<double> Arrow{};
+    std::optional<double> ArrowheadSize{};
     /**
      *  The block that draws the arrowhead, when it has its own. Group 341.
      */
-    Handle Head{};
+    Handle Arrowhead{};
     /**
      *  Which properties the line has of its own, as bits. Group 94.
      */
     std::optional<int> Overrides{};
 
-    auto operator==(const Stem &) const -> bool = default;
+    auto operator==(const LeaderLine &) const -> bool = default;
   };
 
   /**
    *  A break in the dogleg of a leader.
    */
-  struct DXFIO_API Span
+  struct DXFIO_API DoglegBreak
   {
     /**
      *  Where the break starts, in world coordinates. Groups 12, 22, 32.
@@ -104,35 +107,35 @@ namespace DxfIO::Entities
      */
     Vector End{};
 
-    auto operator==(const Span &) const -> bool = default;
+    auto operator==(const DoglegBreak &) const -> bool = default;
   };
 
   /**
    *  A leader of a MULTILEADER: its landing, its dogleg and the leader lines that run from it.
    */
-  struct DXFIO_API Branch
+  struct DXFIO_API LeaderRoot
   {
     /**
      *  Whether the point the lines end at is set. Group 290.
      */
-    bool Lasting{true};
+    bool HasLastPoint{true};
     /**
      *  Whether the direction of the dogleg is set. Group 291.
      */
-    bool Bent{true};
+    bool HasDoglegVector{true};
     /**
      *  The point the leader lines end at, where the landing starts, in world coordinates. Groups
      *  10, 20, 30.
      */
-    Vector Last{};
+    Vector LastPoint{};
     /**
      *  The direction of the dogleg. Groups 11, 21, 31.
      */
-    Vector Dogleg{.X = 1};
+    Vector DoglegVector{.X = 1};
     /**
      *  The breaks in the dogleg, each opened by group 12.
      */
-    std::vector<Span> Spans{};
+    std::vector<DoglegBreak> Breaks{};
     /**
      *  The leader's index. Group 90.
      */
@@ -140,65 +143,66 @@ namespace DxfIO::Entities
     /**
      *  The length of the dogleg. Group 40.
      */
-    double Length{};
+    double DoglegLength{};
     /**
      *  The leader lines, each between group 304 LEADER_LINE{ and group 305.
      */
-    std::vector<Stem> Stems{};
+    std::vector<LeaderLine> Lines{};
     /**
      *  How the leader attaches to the content: 0 horizontally, 1 vertically. Group 271, from R2010.
      */
-    int Attachment{};
+    int AttachmentDirection{};
 
-    auto operator==(const Branch &) const -> bool = default;
+    auto operator==(const LeaderRoot &) const -> bool = default;
   };
 
   /**
    *  The context data of a MULTILEADER: where its content and leaders lie, and how its text or
    *  block is drawn.
    */
-  struct DXFIO_API Note
+  struct DXFIO_API ContextData
   {
     /**
      *  The overall scale of the content. Group 40.
      */
-    double Scale{1};
+    double ContentScale{1};
     /**
      *  The base point of the content, in world coordinates. Groups 10, 20, 30.
      */
-    Vector Base{};
+    Vector ContentBasePoint{};
     /**
      *  The height of the text. Group 41.
      */
-    double Height{};
+    double TextHeight{};
     /**
      *  The size of the arrowheads. Group 140.
      */
-    double Arrow{};
+    double ArrowheadSize{};
     /**
      *  The gap between the landing and the text. Group 145.
      */
-    double Landing{};
+    double LandingGap{};
     /**
      *  How text attaches to a leader on its left. Group 174.
      */
-    int Left{1};
+    int TextLeftAttachment{1};
     /**
      *  How text attaches to a leader on its right. Group 175.
      */
-    int Right{1};
+    int TextRightAttachment{1};
     /**
      *  How the text is aligned. Group 176.
      */
-    int Align{};
+    int TextAlignment{};
     /**
      *  How the content attaches, as AutoCAD records it. Group 177.
      */
-    int Attach{};
+    int AttachmentType{};
     /**
-     *  Whether the content is text, which the groups from Text to Breaks then describe. Group 290.
+     *  Whether the content is text, which the groups from Text to WordBreak then describe. Group
+     *  290.
      */
-    bool Texted{};
+    bool HasMText{};
     /**
      *  What the text says, with its MTEXT formatting codes. Group 304.
      */
@@ -206,168 +210,168 @@ namespace DxfIO::Entities
     /**
      *  The normal of the text's plane. Groups 11, 21, 31.
      */
-    Vector Normal{Up};
+    Vector TextNormal{Up};
     /**
      *  The text style. Group 340.
      */
-    Handle Style{};
+    Handle TextStyle{};
     /**
      *  Where the text lies, in world coordinates. Groups 12, 22, 32.
      */
-    Vector Location{};
+    Vector TextLocation{};
     /**
      *  The direction of the text. Groups 13, 23, 33.
      */
-    Vector Direction{.X = 1};
+    Vector TextDirection{.X = 1};
     /**
      *  The rotation of the text. Group 42.
      */
-    double Rotation{};
+    double TextRotation{};
     /**
      *  The width of the text's frame. Group 43.
      */
-    double Width{};
+    double BoundaryWidth{};
     /**
      *  The height of the text's frame. Group 44.
      */
-    double Tall{};
+    double BoundaryHeight{};
     /**
      *  The line spacing, as a factor of the default. Group 45.
      */
-    double Spacing{1};
+    double LineSpacingFactor{1};
     /**
      *  The line spacing style: 1 at least, 2 exactly. Group 170.
      */
-    int Spaced{1};
+    int LineSpacingStyle{1};
     /**
      *  The color of the text, as a packed color. Group 90.
      */
-    int Color{Inherited};
+    int TextColor{Inherited};
     /**
      *  The attachment point of the text, as an MTEXT's group 71 gives it. Group 171.
      */
-    int Attachment{1};
+    int TextAttachment{1};
     /**
      *  The drawing direction of the text, as an MTEXT's group 72 gives it. Group 172.
      */
-    int Flow{5};
+    int FlowDirection{5};
     /**
      *  The color of the background, as a packed color. Group 91.
      */
-    int Background{Inherited};
+    int BackgroundColor{Inherited};
     /**
      *  How far the background reaches past the text, as a factor of the letter height. Group 141.
      */
-    double Margin{};
+    double BackgroundScale{};
     /**
      *  The transparency of the background. Group 92.
      */
-    int Transparency{};
+    int BackgroundTransparency{};
     /**
      *  Whether the text has a background fill. Group 291.
      */
-    bool Backed{};
+    bool BackgroundFill{};
     /**
      *  Whether the background is filled with the drawing window's color. Group 292.
      */
-    bool Filled{};
+    bool BackgroundMask{};
     /**
      *  The columns: 0 none, 1 static, 2 dynamic. Group 173.
      */
-    int Columns{};
+    int ColumnType{};
     /**
      *  Whether the height of the text's frame follows the text. Group 293.
      */
-    bool Grows{};
+    bool AutoHeight{};
     /**
      *  The width of a column. Group 142.
      */
-    double Column{};
+    double ColumnWidth{};
     /**
      *  The gap between columns. Group 143.
      */
-    double Gutter{};
+    double ColumnGutter{};
     /**
      *  Whether the text flows through the columns in reverse. Group 294.
      */
-    bool Reversed{};
+    bool ColumnFlowReversed{};
     /**
      *  The height of each column. Group 144.
      */
-    std::vector<double> Heights{};
+    std::vector<double> ColumnHeights{};
     /**
      *  Whether words break at the edge of the frame. Group 295.
      */
-    bool Breaks{};
+    bool WordBreak{};
     /**
-     *  Whether the content is a block, which the groups from Block to Frame then describe. Group
-     *  296.
+     *  Whether the content is a block, which the groups from BlockContent to BlockTransform then
+     *  describe. Group 296.
      */
-    bool Blocked{};
+    bool HasBlock{};
     /**
      *  The block record of the content. Group 341.
      */
-    Handle Block{};
+    Handle BlockContent{};
     /**
      *  The normal of the block's plane. Groups 14, 24, 34.
      */
-    Vector Facing{Up};
+    Vector BlockNormal{Up};
     /**
      *  Where the block lies, in world coordinates. Groups 15, 25, 35.
      */
-    Vector Placed{};
+    Vector BlockPosition{};
     /**
      *  The scale of the block along each axis. Groups 16, 26, 36.
      */
-    Vector Sized{.X = 1, .Y = 1, .Z = 1};
+    Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
     /**
      *  The rotation of the block. Group 46.
      */
-    double Turned{};
+    double BlockRotation{};
     /**
      *  The color of the block, as a packed color. Group 93.
      */
-    int Tint{Inherited};
+    int BlockColor{Inherited};
     /**
      *  The block's transformation matrix, its 16 cells each a group 47.
      */
-    Matrix Frame{};
+    Matrix BlockTransform{};
     /**
      *  The origin of the MULTILEADER's plane, in world coordinates. Groups 110, 120, 130.
      */
-    Vector Origin{};
+    Vector PlaneOrigin{};
     /**
      *  The X axis of the MULTILEADER's plane. Groups 111, 121, 131.
      */
-    Vector Across{.X = 1};
+    Vector PlaneXAxis{.X = 1};
     /**
      *  The Y axis of the MULTILEADER's plane. Groups 112, 122, 132.
      */
-    Vector Along{.Y = 1};
+    Vector PlaneYAxis{.Y = 1};
     /**
      *  Whether the normal of the MULTILEADER's plane is reversed. Group 297.
      */
-    bool Flipped{};
+    bool PlaneNormalReversed{};
     /**
      *  The leaders, each between group 302 LEADER{ and group 303.
      */
-    std::vector<Branch> Branches{};
+    std::vector<LeaderRoot> Leaders{};
     /**
      *  How text attaches to a leader below it, 9 at its center. Group 272, from R2010.
      */
-    int Bottom{9};
+    int TextBottomAttachment{9};
     /**
      *  How text attaches to a leader above it, 9 at its center. Group 273, from R2010.
      */
-    int Top{9};
+    int TextTopAttachment{9};
 
-    auto operator==(const Note &) const -> bool = default;
+    auto operator==(const ContextData &) const -> bool = default;
   };
 
   /**
    *  An arrowhead of a MULTILEADER, by the index of the leader line it ends.
    */
-  struct DXFIO_API Tip
+  struct DXFIO_API Arrowhead
   {
     /**
      *  Which arrowhead of the MULTILEADER this is, by index. Group 94.
@@ -378,13 +382,13 @@ namespace DxfIO::Entities
      */
     Handle Block{};
 
-    auto operator==(const Tip &) const -> bool = default;
+    auto operator==(const Arrowhead &) const -> bool = default;
   };
 
   /**
    *  The value a MULTILEADER gives an attribute of its block.
    */
-  struct DXFIO_API Label
+  struct DXFIO_API BlockAttribute
   {
     /**
      *  The ATTDEF of the block the value is for. Group 330.
@@ -403,14 +407,14 @@ namespace DxfIO::Entities
      */
     std::string Text{};
 
-    auto operator==(const Label &) const -> bool = default;
+    auto operator==(const BlockAttribute &) const -> bool = default;
   };
 
   /**
    *  The AcDbMLeader subclass of a MULTILEADER: its context data, and what it overrides of its
    *  MLEADERSTYLE.
    */
-  struct DXFIO_API Callout
+  struct DXFIO_API MLeader
   {
     /**
      *  The version of the MULTILEADER's layout. Group 270, from R2010.
@@ -419,7 +423,7 @@ namespace DxfIO::Entities
     /**
      *  Where the content and the leaders lie, between group 300 CONTEXT_DATA{ and group 301.
      */
-    Note Context{};
+    ContextData Context{};
     /**
      *  The MLEADERSTYLE. Group 340.
      */
@@ -431,11 +435,11 @@ namespace DxfIO::Entities
     /**
      *  The leader line type: 0 invisible, 1 straight, 2 spline. Group 170.
      */
-    int Line{1};
+    int LeaderType{1};
     /**
      *  The color of the leader lines, as a packed color. Group 91.
      */
-    int Color{Inherited};
+    int LineColor{Inherited};
     /**
      *  The linetype of the leader lines. Group 341.
      */
@@ -447,77 +451,77 @@ namespace DxfIO::Entities
     /**
      *  Whether the leaders have a landing. Group 290.
      */
-    bool Landing{true};
+    bool EnableLanding{true};
     /**
      *  Whether the leaders have a dogleg. Group 291.
      */
-    bool Bent{true};
+    bool EnableDogleg{true};
     /**
      *  The length of the dogleg. Group 41.
      */
-    double Length{};
+    double DoglegLength{};
     /**
      *  The block that draws the arrowheads; none for the default arrowhead. Group 342.
      */
-    Handle Arrow{};
+    Handle Arrowhead{};
     /**
      *  The size of the arrowheads. Group 42.
      */
-    double Size{};
+    double ArrowheadSize{};
     /**
      *  The content: 0 none, 1 a block, 2 an MTEXT, 3 a tolerance. Group 172.
      */
-    int Content{2};
+    int ContentType{2};
     /**
      *  The text style. Group 343.
      */
-    Handle Lettering{};
+    Handle TextStyle{};
     /**
      *  How text attaches to a leader on its left. Group 173.
      */
-    int Left{1};
+    int TextLeftAttachment{1};
     /**
      *  How text attaches to a leader on its right. Group 95.
      */
-    int Right{1};
+    int TextRightAttachment{1};
     /**
      *  How the text is turned: 0 along the last leader segment, 1 horizontal, 2 along it but kept
      *  upright. Group 174.
      */
-    int Angle{1};
+    int TextAngleType{1};
     /**
      *  The alignment of the text: 0 left, 1 center, 2 right. Group 175.
      */
-    int Align{};
+    int TextAlignment{};
     /**
      *  The color of the text, as a packed color. Group 92.
      */
-    int Tint{Inherited};
+    int TextColor{Inherited};
     /**
      *  Whether the text has a frame. Group 292.
      */
-    bool Framed{};
+    bool TextFrame{};
     /**
      *  The block record of the content. Group 344.
      */
-    Handle Block{};
+    Handle BlockContent{};
     /**
      *  The color of the block, as a packed color. Group 93.
      */
-    int Shade{Inherited};
+    int BlockColor{Inherited};
     /**
      *  The scale of the block along each axis. Groups 10, 20, 30.
      */
-    Vector Sized{.X = 1, .Y = 1, .Z = 1};
+    Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
     /**
      *  The rotation of the block. Group 43.
      */
-    double Turned{};
+    double BlockRotation{};
     /**
      *  Where the block meets the leaders: 0 the center of its extents, 1 its insertion point. Group
      *  176.
      */
-    int Connection{};
+    int BlockConnection{};
     /**
      *  Whether the MULTILEADER is annotative. Group 293.
      */
@@ -525,47 +529,50 @@ namespace DxfIO::Entities
     /**
      *  The arrowheads of the leader lines, each opened by group 94.
      */
-    std::vector<Tip> Tips{};
+    std::vector<MultiLeaders::Arrowhead> Arrowheads{};
     /**
      *  The values of the block's attributes, each opened by group 330.
      */
-    std::vector<Label> Labels{};
+    std::vector<BlockAttribute> BlockAttributes{};
     /**
      *  Whether the text runs in the negative direction. Group 294.
      */
-    bool Negative{};
+    bool TextDirectionNegative{};
     /**
      *  The alignment of the text while it is edited in place. Group 178.
      */
-    int Pinned{};
+    int IpeAlignment{};
     /**
      *  The attachment point of the text: 1 left, 2 center, 3 right. Group 179.
      */
-    int Point{1};
+    int TextAttachmentPoint{1};
     /**
      *  The overall scale. Group 45.
      */
-    double Factor{1};
+    double OverallScale{1};
     /**
      *  How text attaches to the leaders: 0 horizontally, 1 vertically. Group 271, from R2010.
      */
-    int Attachment{};
+    int TextAttachmentDirection{};
     /**
      *  How text attaches to a leader below it, 9 at its center. Group 272, from R2010.
      */
-    int Bottom{9};
+    int TextBottomAttachment{9};
     /**
      *  How text attaches to a leader above it, 9 at its center. Group 273, from R2010.
      */
-    int Top{9};
+    int TextTopAttachment{9};
     /**
      *  Whether the leaders extend to the text. Group 295, from R2013.
      */
-    bool Extended{};
+    bool ExtendToText{};
 
-    auto operator==(const Callout &) const -> bool = default;
+    auto operator==(const MLeader &) const -> bool = default;
   };
+} // namespace DxfIO::Entities::MultiLeaders
 
+namespace DxfIO::Entities
+{
   /**
    *  A MULTILEADER: one or more leaders that point from a text, a block or a tolerance.
    */
@@ -584,7 +591,7 @@ namespace DxfIO::Entities
      *  The leaders, their content and what they override of their style, from the AcDbMLeader
      *  subclass.
      */
-    Boxed<Entities::Callout> Callout{};
+    Boxed<MultiLeaders::MLeader> MLeader{};
 
     auto operator==(const MultiLeader &) const -> bool = default;
   };

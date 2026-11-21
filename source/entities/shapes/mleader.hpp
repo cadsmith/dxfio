@@ -28,242 +28,255 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Entities::Gap> = std::tuple{
-      Fields::Field{.Code = 90, .Member = &Entities::Gap::Index},
-      Fields::Field{.Code = 11, .Member = &Entities::Gap::Start},
-      Fields::Field{.Code = 12, .Member = &Entities::Gap::End},
+  inline constexpr auto Shapes<Entities::MultiLeaders::LineBreak> = std::tuple{
+      Fields::Field{.Code = 90, .Member = &Entities::MultiLeaders::LineBreak::Index},
+      Fields::Field{.Code = 11, .Member = &Entities::MultiLeaders::LineBreak::Start},
+      Fields::Field{.Code = 12, .Member = &Entities::MultiLeaders::LineBreak::End},
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Stem> = std::tuple{
-      Fields::Many{.Code = 10, .Member = &Entities::Stem::Points},
+  inline constexpr auto Shapes<Entities::MultiLeaders::LeaderLine> = std::tuple{
+      Fields::Many{.Code = 10, .Member = &Entities::MultiLeaders::LeaderLine::Vertices},
       Fields::Run{
           .Opener = 90,
-          .Member = &Entities::Stem::Gaps,
-          .Fields = Shapes<Entities::Gap>,
+          .Member = &Entities::MultiLeaders::LeaderLine::Breaks,
+          .Fields = Shapes<Entities::MultiLeaders::LineBreak>,
       },
-      Fields::Field{.Code = 91, .Member = &Entities::Stem::Index},
-      Fields::Field{.Code = 92, .Member = &Entities::Stem::Color},
-      Fields::Field{.Code = 170, .Member = &Entities::Stem::Kind},
-      Fields::Field{.Code = 340, .Member = &Entities::Stem::Linetype, .Fallback = Handle{}},
-      Fields::Field{.Code = 171, .Member = &Entities::Stem::Lineweight},
-      Fields::Field{.Code = 40, .Member = &Entities::Stem::Arrow},
-      Fields::Field{.Code = 341, .Member = &Entities::Stem::Head, .Fallback = Handle{}},
-      Fields::Field{.Code = 94, .Member = &Entities::Stem::Overrides},
+      Fields::Field{.Code = 91, .Member = &Entities::MultiLeaders::LeaderLine::Index},
+      Fields::Field{.Code = 92, .Member = &Entities::MultiLeaders::LeaderLine::Color},
+      Fields::Field{.Code = 170, .Member = &Entities::MultiLeaders::LeaderLine::LeaderType},
+      Fields::Field{.Code     = 340,
+                    .Member   = &Entities::MultiLeaders::LeaderLine::Linetype,
+                    .Fallback = Handle{}},
+      Fields::Field{.Code = 171, .Member = &Entities::MultiLeaders::LeaderLine::Lineweight},
+      Fields::Field{.Code = 40, .Member = &Entities::MultiLeaders::LeaderLine::ArrowheadSize},
+      Fields::Field{.Code     = 341,
+                    .Member   = &Entities::MultiLeaders::LeaderLine::Arrowhead,
+                    .Fallback = Handle{}},
+      Fields::Field{.Code = 94, .Member = &Entities::MultiLeaders::LeaderLine::Overrides},
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Span> = std::tuple{
-      Fields::Field{.Code = 12, .Member = &Entities::Span::Start},
-      Fields::Field{.Code = 13, .Member = &Entities::Span::End},
+  inline constexpr auto Shapes<Entities::MultiLeaders::DoglegBreak> = std::tuple{
+      Fields::Field{.Code = 12, .Member = &Entities::MultiLeaders::DoglegBreak::Start},
+      Fields::Field{.Code = 13, .Member = &Entities::MultiLeaders::DoglegBreak::End},
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Branch> = std::tuple{
-      Fields::Field{.Code = 290, .Member = &Entities::Branch::Lasting},
-      Fields::Field{.Code = 291, .Member = &Entities::Branch::Bent},
-      Fields::Field{.Code = 10, .Member = &Entities::Branch::Last},
-      Fields::Field{.Code = 11, .Member = &Entities::Branch::Dogleg},
+  inline constexpr auto Shapes<Entities::MultiLeaders::LeaderRoot> = std::tuple{
+      Fields::Field{.Code = 290, .Member = &Entities::MultiLeaders::LeaderRoot::HasLastPoint},
+      Fields::Field{.Code = 291, .Member = &Entities::MultiLeaders::LeaderRoot::HasDoglegVector},
+      Fields::Field{.Code = 10, .Member = &Entities::MultiLeaders::LeaderRoot::LastPoint},
+      Fields::Field{.Code = 11, .Member = &Entities::MultiLeaders::LeaderRoot::DoglegVector},
       Fields::Run{
           .Opener = 12,
-          .Member = &Entities::Branch::Spans,
-          .Fields = Shapes<Entities::Span>,
+          .Member = &Entities::MultiLeaders::LeaderRoot::Breaks,
+          .Fields = Shapes<Entities::MultiLeaders::DoglegBreak>,
       },
-      Fields::Field{.Code = 90, .Member = &Entities::Branch::Index},
-      Fields::Field{.Code = 40, .Member = &Entities::Branch::Length},
+      Fields::Field{.Code = 90, .Member = &Entities::MultiLeaders::LeaderRoot::Index},
+      Fields::Field{.Code = 40, .Member = &Entities::MultiLeaders::LeaderRoot::DoglegLength},
       Fields::Braced{
           .Opener = 304,
           .Name   = "LEADER_LINE{",
           .Closer = 305,
-          .Member = &Entities::Branch::Stems,
-          .Fields = Shapes<Entities::Stem>,
+          .Member = &Entities::MultiLeaders::LeaderRoot::Lines,
+          .Fields = Shapes<Entities::MultiLeaders::LeaderLine>,
       },
       Fields::Since{
           .Release = Version::R2010,
           .Fields  = std::tuple{Fields::Field{
               .Code   = 271,
-              .Member = &Entities::Branch::Attachment,
+              .Member = &Entities::MultiLeaders::LeaderRoot::AttachmentDirection,
           }},
       },
   };
 
   namespace Entities
   {
-    inline auto Worded(const Note &one) -> bool
+    inline auto Worded(const MultiLeaders::ContextData &one) -> bool
     {
-      return one.Texted;
+      return one.HasMText;
     }
 
-    inline auto Placing(const Note &one) -> bool
+    inline auto Placing(const MultiLeaders::ContextData &one) -> bool
     {
-      return one.Blocked;
+      return one.HasBlock;
     }
 
     inline constexpr std::tuple Wording{
-        Fields::Field{.Code = 304, .Member = &Note::Text},
-        Fields::Field{.Code = 11, .Member = &Note::Normal},
-        Fields::Field{.Code = 340, .Member = &Note::Style},
-        Fields::Field{.Code = 12, .Member = &Note::Location},
-        Fields::Field{.Code = 13, .Member = &Note::Direction},
-        Fields::Field{.Code = 42, .Member = &Note::Rotation},
-        Fields::Field{.Code = 43, .Member = &Note::Width},
-        Fields::Field{.Code = 44, .Member = &Note::Tall},
-        Fields::Field{.Code = 45, .Member = &Note::Spacing},
-        Fields::Field{.Code = 170, .Member = &Note::Spaced},
-        Fields::Field{.Code = 90, .Member = &Note::Color},
-        Fields::Field{.Code = 171, .Member = &Note::Attachment},
-        Fields::Field{.Code = 172, .Member = &Note::Flow},
-        Fields::Field{.Code = 91, .Member = &Note::Background},
-        Fields::Field{.Code = 141, .Member = &Note::Margin},
-        Fields::Field{.Code = 92, .Member = &Note::Transparency},
-        Fields::Field{.Code = 291, .Member = &Note::Backed},
-        Fields::Field{.Code = 292, .Member = &Note::Filled},
-        Fields::Field{.Code = 173, .Member = &Note::Columns},
-        Fields::Field{.Code = 293, .Member = &Note::Grows},
-        Fields::Field{.Code = 142, .Member = &Note::Column},
-        Fields::Field{.Code = 143, .Member = &Note::Gutter},
-        Fields::Field{.Code = 294, .Member = &Note::Reversed},
-        Fields::Many{.Code = 144, .Member = &Note::Heights},
-        Fields::Field{.Code = 295, .Member = &Note::Breaks},
+        Fields::Field{.Code = 304, .Member = &MultiLeaders::ContextData::Text},
+        Fields::Field{.Code = 11, .Member = &MultiLeaders::ContextData::TextNormal},
+        Fields::Field{.Code = 340, .Member = &MultiLeaders::ContextData::TextStyle},
+        Fields::Field{.Code = 12, .Member = &MultiLeaders::ContextData::TextLocation},
+        Fields::Field{.Code = 13, .Member = &MultiLeaders::ContextData::TextDirection},
+        Fields::Field{.Code = 42, .Member = &MultiLeaders::ContextData::TextRotation},
+        Fields::Field{.Code = 43, .Member = &MultiLeaders::ContextData::BoundaryWidth},
+        Fields::Field{.Code = 44, .Member = &MultiLeaders::ContextData::BoundaryHeight},
+        Fields::Field{.Code = 45, .Member = &MultiLeaders::ContextData::LineSpacingFactor},
+        Fields::Field{.Code = 170, .Member = &MultiLeaders::ContextData::LineSpacingStyle},
+        Fields::Field{.Code = 90, .Member = &MultiLeaders::ContextData::TextColor},
+        Fields::Field{.Code = 171, .Member = &MultiLeaders::ContextData::TextAttachment},
+        Fields::Field{.Code = 172, .Member = &MultiLeaders::ContextData::FlowDirection},
+        Fields::Field{.Code = 91, .Member = &MultiLeaders::ContextData::BackgroundColor},
+        Fields::Field{.Code = 141, .Member = &MultiLeaders::ContextData::BackgroundScale},
+        Fields::Field{.Code = 92, .Member = &MultiLeaders::ContextData::BackgroundTransparency},
+        Fields::Field{.Code = 291, .Member = &MultiLeaders::ContextData::BackgroundFill},
+        Fields::Field{.Code = 292, .Member = &MultiLeaders::ContextData::BackgroundMask},
+        Fields::Field{.Code = 173, .Member = &MultiLeaders::ContextData::ColumnType},
+        Fields::Field{.Code = 293, .Member = &MultiLeaders::ContextData::AutoHeight},
+        Fields::Field{.Code = 142, .Member = &MultiLeaders::ContextData::ColumnWidth},
+        Fields::Field{.Code = 143, .Member = &MultiLeaders::ContextData::ColumnGutter},
+        Fields::Field{.Code = 294, .Member = &MultiLeaders::ContextData::ColumnFlowReversed},
+        Fields::Many{.Code = 144, .Member = &MultiLeaders::ContextData::ColumnHeights},
+        Fields::Field{.Code = 295, .Member = &MultiLeaders::ContextData::WordBreak},
     };
 
     inline constexpr std::tuple Blocking{
-        Fields::Field{.Code = 341, .Member = &Note::Block},
-        Fields::Field{.Code = 14, .Member = &Note::Facing},
-        Fields::Field{.Code = 15, .Member = &Note::Placed},
-        Fields::Field{.Code = 16, .Member = &Note::Sized},
-        Fields::Field{.Code = 46, .Member = &Note::Turned},
-        Fields::Field{.Code = 93, .Member = &Note::Tint},
-        Fields::Field{.Code = 47, .Member = &Note::Frame},
+        Fields::Field{.Code = 341, .Member = &MultiLeaders::ContextData::BlockContent},
+        Fields::Field{.Code = 14, .Member = &MultiLeaders::ContextData::BlockNormal},
+        Fields::Field{.Code = 15, .Member = &MultiLeaders::ContextData::BlockPosition},
+        Fields::Field{.Code = 16, .Member = &MultiLeaders::ContextData::BlockScale},
+        Fields::Field{.Code = 46, .Member = &MultiLeaders::ContextData::BlockRotation},
+        Fields::Field{.Code = 93, .Member = &MultiLeaders::ContextData::BlockColor},
+        Fields::Field{.Code = 47, .Member = &MultiLeaders::ContextData::BlockTransform},
     };
   } // namespace Entities
 
   template <>
-  inline constexpr auto Shapes<Entities::Note> =
-      std::tuple{
-          Fields::Field{.Code = 40, .Member = &Entities::Note::Scale},
-          Fields::Field{.Code = 10, .Member = &Entities::Note::Base},
-          Fields::Field{.Code = 41, .Member = &Entities::Note::Height},
-          Fields::Field{.Code = 140, .Member = &Entities::Note::Arrow},
-          Fields::Field{.Code = 145, .Member = &Entities::Note::Landing},
-          Fields::Field{.Code = 174, .Member = &Entities::Note::Left},
-          Fields::Field{.Code = 175, .Member = &Entities::Note::Right},
-          Fields::Field{.Code = 176, .Member = &Entities::Note::Align},
-          Fields::Field{.Code = 177, .Member = &Entities::Note::Attach},
-          Fields::Field{.Code = 290, .Member = &Entities::Note::Texted},
-          Fields::When{.Test = Entities::Worded, .Fields = Entities::Wording},
-          Fields::Field{.Code = 296, .Member = &Entities::Note::Blocked},
-          Fields::When{.Test = Entities::Placing, .Fields = Entities::Blocking},
-          Fields::Field{.Code = 110, .Member = &Entities::Note::Origin},
-          Fields::Field{.Code = 111, .Member = &Entities::Note::Across},
-          Fields::Field{.Code = 112, .Member = &Entities::Note::Along},
-          Fields::Field{.Code = 297, .Member = &Entities::Note::Flipped},
-          Fields::Braced{
-              .Opener = 302,
-              .Name   = "LEADER{",
-              .Closer = 303,
-              .Member = &Entities::Note::Branches,
-              .Fields = Shapes<Entities::Branch>,
-          },
-          Fields::Since{
-              .Release = Version::R2010,
-              .Fields =
-                  std::tuple{
-                      Fields::Field{.Code = 272, .Member = &Entities::Note::Bottom},
-                      Fields::Field{.Code = 273, .Member = &Entities::Note::Top},
+  inline constexpr auto Shapes<Entities::MultiLeaders::ContextData> = std::tuple{
+      Fields::Field{.Code = 40, .Member = &Entities::MultiLeaders::ContextData::ContentScale},
+      Fields::Field{.Code = 10, .Member = &Entities::MultiLeaders::ContextData::ContentBasePoint},
+      Fields::Field{.Code = 41, .Member = &Entities::MultiLeaders::ContextData::TextHeight},
+      Fields::Field{.Code = 140, .Member = &Entities::MultiLeaders::ContextData::ArrowheadSize},
+      Fields::Field{.Code = 145, .Member = &Entities::MultiLeaders::ContextData::LandingGap},
+      Fields::Field{.Code   = 174,
+                    .Member = &Entities::MultiLeaders::ContextData::TextLeftAttachment},
+      Fields::Field{.Code   = 175,
+                    .Member = &Entities::MultiLeaders::ContextData::TextRightAttachment},
+      Fields::Field{.Code = 176, .Member = &Entities::MultiLeaders::ContextData::TextAlignment},
+      Fields::Field{.Code = 177, .Member = &Entities::MultiLeaders::ContextData::AttachmentType},
+      Fields::Field{.Code = 290, .Member = &Entities::MultiLeaders::ContextData::HasMText},
+      Fields::When{.Test = Entities::Worded, .Fields = Entities::Wording},
+      Fields::Field{.Code = 296, .Member = &Entities::MultiLeaders::ContextData::HasBlock},
+      Fields::When{.Test = Entities::Placing, .Fields = Entities::Blocking},
+      Fields::Field{.Code = 110, .Member = &Entities::MultiLeaders::ContextData::PlaneOrigin},
+      Fields::Field{.Code = 111, .Member = &Entities::MultiLeaders::ContextData::PlaneXAxis},
+      Fields::Field{.Code = 112, .Member = &Entities::MultiLeaders::ContextData::PlaneYAxis},
+      Fields::Field{.Code   = 297,
+                    .Member = &Entities::MultiLeaders::ContextData::PlaneNormalReversed},
+      Fields::Braced{
+          .Opener = 302,
+          .Name   = "LEADER{",
+          .Closer = 303,
+          .Member = &Entities::MultiLeaders::ContextData::Leaders,
+          .Fields = Shapes<Entities::MultiLeaders::LeaderRoot>,
+      },
+      Fields::Since{
+          .Release = Version::R2010,
+          .Fields =
+              std::tuple{
+                  Fields::Field{.Code = 272,
+                                .Member =
+                                    &Entities::MultiLeaders::ContextData::TextBottomAttachment},
+                  Fields::Field{.Code   = 273,
+                                .Member = &Entities::MultiLeaders::ContextData::TextTopAttachment},
+              },
+      },
+  };
+
+  template <>
+  inline constexpr auto Shapes<Entities::MultiLeaders::Arrowhead> = std::tuple{
+      Fields::Field{.Code = 94, .Member = &Entities::MultiLeaders::Arrowhead::Index},
+      Fields::Field{.Code = 345, .Member = &Entities::MultiLeaders::Arrowhead::Block},
+  };
+
+  template <>
+  inline constexpr auto Shapes<Entities::MultiLeaders::BlockAttribute> = std::tuple{
+      Fields::Field{.Code = 330, .Member = &Entities::MultiLeaders::BlockAttribute::Definition},
+      Fields::Field{.Code = 177, .Member = &Entities::MultiLeaders::BlockAttribute::Index},
+      Fields::Field{.Code = 44, .Member = &Entities::MultiLeaders::BlockAttribute::Width},
+      Fields::Field{.Code = 302, .Member = &Entities::MultiLeaders::BlockAttribute::Text},
+  };
+
+  template <>
+  inline constexpr auto Shapes<Entities::MultiLeaders::MLeader> = std::tuple{
+      Fields::Sequence{.Marker = "AcDbMLeader"},
+      Fields::Since{
+          .Release = Version::R2010,
+          .Fields  = std::tuple{Fields::Field{
+              .Code   = 270,
+              .Member = &Entities::MultiLeaders::MLeader::Version,
+          }},
+      },
+      Fields::Literal{.Code = 300, .Text = "CONTEXT_DATA{"},
+      Fields::Part{
+          .Member = &Entities::MultiLeaders::MLeader::Context,
+          .Fields = Shapes<Entities::MultiLeaders::ContextData>,
+      },
+      Fields::Literal{.Code = 301, .Text = Fields::Closed},
+      Fields::Field{.Code = 340, .Member = &Entities::MultiLeaders::MLeader::Style},
+      Fields::Field{.Code = 90, .Member = &Entities::MultiLeaders::MLeader::Overrides},
+      Fields::Field{.Code = 170, .Member = &Entities::MultiLeaders::MLeader::LeaderType},
+      Fields::Field{.Code = 91, .Member = &Entities::MultiLeaders::MLeader::LineColor},
+      Fields::Field{.Code = 341, .Member = &Entities::MultiLeaders::MLeader::Linetype},
+      Fields::Field{.Code = 171, .Member = &Entities::MultiLeaders::MLeader::Lineweight},
+      Fields::Field{.Code = 290, .Member = &Entities::MultiLeaders::MLeader::EnableLanding},
+      Fields::Field{.Code = 291, .Member = &Entities::MultiLeaders::MLeader::EnableDogleg},
+      Fields::Field{.Code = 41, .Member = &Entities::MultiLeaders::MLeader::DoglegLength},
+      Fields::Field{
+          .Code = 342, .Member = &Entities::MultiLeaders::MLeader::Arrowhead, .Fallback = Handle{}},
+      Fields::Field{.Code = 42, .Member = &Entities::MultiLeaders::MLeader::ArrowheadSize},
+      Fields::Field{.Code = 172, .Member = &Entities::MultiLeaders::MLeader::ContentType},
+      Fields::Field{.Code = 343, .Member = &Entities::MultiLeaders::MLeader::TextStyle},
+      Fields::Field{.Code = 173, .Member = &Entities::MultiLeaders::MLeader::TextLeftAttachment},
+      Fields::Field{.Code = 95, .Member = &Entities::MultiLeaders::MLeader::TextRightAttachment},
+      Fields::Field{.Code = 174, .Member = &Entities::MultiLeaders::MLeader::TextAngleType},
+      Fields::Field{.Code = 175, .Member = &Entities::MultiLeaders::MLeader::TextAlignment},
+      Fields::Field{.Code = 92, .Member = &Entities::MultiLeaders::MLeader::TextColor},
+      Fields::Field{.Code = 292, .Member = &Entities::MultiLeaders::MLeader::TextFrame},
+      Fields::Field{.Code     = 344,
+                    .Member   = &Entities::MultiLeaders::MLeader::BlockContent,
+                    .Fallback = Handle{}},
+      Fields::Field{.Code = 93, .Member = &Entities::MultiLeaders::MLeader::BlockColor},
+      Fields::Field{.Code = 10, .Member = &Entities::MultiLeaders::MLeader::BlockScale},
+      Fields::Field{.Code = 43, .Member = &Entities::MultiLeaders::MLeader::BlockRotation},
+      Fields::Field{.Code = 176, .Member = &Entities::MultiLeaders::MLeader::BlockConnection},
+      Fields::Field{.Code = 293, .Member = &Entities::MultiLeaders::MLeader::Annotative},
+      Fields::Run{
+          .Opener = 94,
+          .Member = &Entities::MultiLeaders::MLeader::Arrowheads,
+          .Fields = Shapes<Entities::MultiLeaders::Arrowhead>,
+      },
+      Fields::Run{
+          .Opener = 330,
+          .Member = &Entities::MultiLeaders::MLeader::BlockAttributes,
+          .Fields = Shapes<Entities::MultiLeaders::BlockAttribute>,
+      },
+      Fields::Field{.Code = 294, .Member = &Entities::MultiLeaders::MLeader::TextDirectionNegative},
+      Fields::Field{.Code = 178, .Member = &Entities::MultiLeaders::MLeader::IpeAlignment},
+      Fields::Field{.Code = 179, .Member = &Entities::MultiLeaders::MLeader::TextAttachmentPoint},
+      Fields::Field{.Code = 45, .Member = &Entities::MultiLeaders::MLeader::OverallScale},
+      Fields::Since{
+          .Release = Version::R2010,
+          .Fields =
+              std::tuple{
+                  Fields::Field{
+                      .Code   = 271,
+                      .Member = &Entities::MultiLeaders::MLeader::TextAttachmentDirection,
                   },
-          },
-  };
-
-  template <>
-  inline constexpr auto Shapes<Entities::Tip> = std::tuple{
-      Fields::Field{.Code = 94, .Member = &Entities::Tip::Index},
-      Fields::Field{.Code = 345, .Member = &Entities::Tip::Block},
-  };
-
-  template <>
-  inline constexpr auto Shapes<Entities::Label> = std::tuple{
-      Fields::Field{.Code = 330, .Member = &Entities::Label::Definition},
-      Fields::Field{.Code = 177, .Member = &Entities::Label::Index},
-      Fields::Field{.Code = 44, .Member = &Entities::Label::Width},
-      Fields::Field{.Code = 302, .Member = &Entities::Label::Text},
-  };
-
-  template <>
-  inline constexpr auto Shapes<Entities::Callout> =
-      std::tuple{
-          Fields::Sequence{.Marker = "AcDbMLeader"},
-          Fields::Since{
-              .Release = Version::R2010,
-              .Fields  = std::tuple{Fields::Field{
-                  .Code   = 270,
-                  .Member = &Entities::Callout::Version,
-              }},
-          },
-          Fields::Literal{.Code = 300, .Text = "CONTEXT_DATA{"},
-          Fields::Part{
-              .Member = &Entities::Callout::Context,
-              .Fields = Shapes<Entities::Note>,
-          },
-          Fields::Literal{.Code = 301, .Text = Fields::Closed},
-          Fields::Field{.Code = 340, .Member = &Entities::Callout::Style},
-          Fields::Field{.Code = 90, .Member = &Entities::Callout::Overrides},
-          Fields::Field{.Code = 170, .Member = &Entities::Callout::Line},
-          Fields::Field{.Code = 91, .Member = &Entities::Callout::Color},
-          Fields::Field{.Code = 341, .Member = &Entities::Callout::Linetype},
-          Fields::Field{.Code = 171, .Member = &Entities::Callout::Lineweight},
-          Fields::Field{.Code = 290, .Member = &Entities::Callout::Landing},
-          Fields::Field{.Code = 291, .Member = &Entities::Callout::Bent},
-          Fields::Field{.Code = 41, .Member = &Entities::Callout::Length},
-          Fields::Field{.Code = 342, .Member = &Entities::Callout::Arrow, .Fallback = Handle{}},
-          Fields::Field{.Code = 42, .Member = &Entities::Callout::Size},
-          Fields::Field{.Code = 172, .Member = &Entities::Callout::Content},
-          Fields::Field{.Code = 343, .Member = &Entities::Callout::Lettering},
-          Fields::Field{.Code = 173, .Member = &Entities::Callout::Left},
-          Fields::Field{.Code = 95, .Member = &Entities::Callout::Right},
-          Fields::Field{.Code = 174, .Member = &Entities::Callout::Angle},
-          Fields::Field{.Code = 175, .Member = &Entities::Callout::Align},
-          Fields::Field{.Code = 92, .Member = &Entities::Callout::Tint},
-          Fields::Field{.Code = 292, .Member = &Entities::Callout::Framed},
-          Fields::Field{.Code = 344, .Member = &Entities::Callout::Block, .Fallback = Handle{}},
-          Fields::Field{.Code = 93, .Member = &Entities::Callout::Shade},
-          Fields::Field{.Code = 10, .Member = &Entities::Callout::Sized},
-          Fields::Field{.Code = 43, .Member = &Entities::Callout::Turned},
-          Fields::Field{.Code = 176, .Member = &Entities::Callout::Connection},
-          Fields::Field{.Code = 293, .Member = &Entities::Callout::Annotative},
-          Fields::Run{
-              .Opener = 94,
-              .Member = &Entities::Callout::Tips,
-              .Fields = Shapes<Entities::Tip>,
-          },
-          Fields::Run{
-              .Opener = 330,
-              .Member = &Entities::Callout::Labels,
-              .Fields = Shapes<Entities::Label>,
-          },
-          Fields::Field{.Code = 294, .Member = &Entities::Callout::Negative},
-          Fields::Field{.Code = 178, .Member = &Entities::Callout::Pinned},
-          Fields::Field{.Code = 179, .Member = &Entities::Callout::Point},
-          Fields::Field{.Code = 45, .Member = &Entities::Callout::Factor},
-          Fields::Since{
-              .Release = Version::R2010,
-              .Fields =
-                  std::tuple{
-                      Fields::Field{
-                          .Code   = 271,
-                          .Member = &Entities::Callout::Attachment,
-                      },
-                      Fields::Field{.Code = 272, .Member = &Entities::Callout::Bottom},
-                      Fields::Field{.Code = 273, .Member = &Entities::Callout::Top},
-                  },
-          },
-          Fields::Since{
-              .Release = Version::R2013,
-              .Fields  = std::tuple{Fields::Field{
-                  .Code   = 295,
-                  .Member = &Entities::Callout::Extended,
-              }},
-          },
+                  Fields::Field{.Code   = 272,
+                                .Member = &Entities::MultiLeaders::MLeader::TextBottomAttachment},
+                  Fields::Field{.Code   = 273,
+                                .Member = &Entities::MultiLeaders::MLeader::TextTopAttachment},
+              },
+      },
+      Fields::Since{
+          .Release = Version::R2013,
+          .Fields  = std::tuple{Fields::Field{
+              .Code   = 295,
+              .Member = &Entities::MultiLeaders::MLeader::ExtendToText,
+          }},
+      },
   };
 
   template <>
@@ -271,8 +284,8 @@ namespace DxfIO
       Entities::Part<Entities::MultiLeader>,
       Fields::Picture{.Member = &Entities::MultiLeader::Picture},
       Fields::Part{
-          .Member = &Entities::MultiLeader::Callout,
-          .Fields = Shapes<Entities::Callout>,
+          .Member = &Entities::MultiLeader::MLeader,
+          .Fields = Shapes<Entities::MultiLeaders::MLeader>,
       },
   };
 

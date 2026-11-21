@@ -130,7 +130,7 @@ namespace DxfIO::Down
     const int attachment = body.Attachment >= 1 && body.Attachment <= 9 ? body.Attachment - 1 : 0;
     const int row        = attachment / Columns;
     const int column     = attachment % Columns;
-    const double pitch   = body.Height * Pitch * body.Factor;
+    const double pitch   = body.Height * Pitch * body.LineSpacingFactor;
     const Axes   plane   = Arbitrary(body.Extrusion);
     const Vector origin  = Seen(body.Position, plane);
     const double angle   = Turned(body, plane);

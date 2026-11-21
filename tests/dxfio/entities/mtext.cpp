@@ -49,17 +49,17 @@ namespace DxfIO::Entities
   {
     const MText one = Alikened(Marked("2D4"));
     CHECK(one.Record.Base.Extra.empty());
-    CHECK(one.Paragraph->Position   == Vector{.X = 80});
-    CHECK(one.Paragraph->Height     == 1.5);
-    CHECK(one.Paragraph->Width      == 30);
-    CHECK(one.Paragraph->Defined    == 0);
-    CHECK(one.Paragraph->Attachment == 2);
-    CHECK(one.Paragraph->Flow       == 5);
-    CHECK(one.Paragraph->Value      == "attached");
-    CHECK(one.Paragraph->Style      == "Standard");
-    CHECK(one.Paragraph->Extrusion  == Up);
-    CHECK(one.Paragraph->Spacing    == 1);
-    CHECK(one.Paragraph->Factor     == 1);
+    CHECK(one.Paragraph->Position         == Vector{.X = 80});
+    CHECK(one.Paragraph->Height           == 1.5);
+    CHECK(one.Paragraph->Width            == 30);
+    CHECK(one.Paragraph->Defined          == 0);
+    CHECK(one.Paragraph->Attachment       == 2);
+    CHECK(one.Paragraph->Flow             == 5);
+    CHECK(one.Paragraph->Value            == "attached");
+    CHECK(one.Paragraph->Style            == "Standard");
+    CHECK(one.Paragraph->Extrusion        == Up);
+    CHECK(one.Paragraph->LineSpacingStyle == 1);
+    CHECK(one.Paragraph->LineSpacingFactor == 1);
     CHECK_FALSE(one.Paragraph->Direction);
     CHECK_FALSE(one.Paragraph->Rotation);
     CHECK(one.Paragraph->Fill == 0);
@@ -82,11 +82,11 @@ namespace DxfIO::Entities
   TEST_CASE("mtext: its line spacing, its turn and what it stands in")
   {
     const MText least = Alikened(Marked("2DF"));
-    CHECK(least.Paragraph->Spacing == 1);
-    CHECK(least.Paragraph->Factor  == 1.5);
+    CHECK(least.Paragraph->LineSpacingStyle  == 1);
+    CHECK(least.Paragraph->LineSpacingFactor == 1.5);
     const MText exact = Alikened(Marked("2E0"));
-    CHECK(exact.Paragraph->Spacing == 2);
-    CHECK(exact.Paragraph->Factor  == 0.5);
+    CHECK(exact.Paragraph->LineSpacingStyle  == 2);
+    CHECK(exact.Paragraph->LineSpacingFactor == 0.5);
     REQUIRE(Alikened(Marked("2E2")).Paragraph->Direction);
     CHECK(*Alikened(Marked("2E2")).Paragraph->Direction == Vector{.Y = 1});
     CHECK(Alikened(Marked("2E4")).Paragraph->Extrusion  == Vector{.Z = -1});
@@ -111,9 +111,9 @@ namespace DxfIO::Entities
     CHECK(one.Paragraph->Style     == "tall");
     CHECK(one.Paragraph->Extrusion == Vector{.Z = -1});
     REQUIRE(one.Paragraph->Direction);
-    CHECK(one.Paragraph->Spacing      == 2);
-    CHECK(one.Paragraph->Fill         == 1);
-    CHECK(one.Paragraph->Color        == 5);
+    CHECK(one.Paragraph->LineSpacingStyle == 2);
+    CHECK(one.Paragraph->Fill             == 1);
+    CHECK(one.Paragraph->Color            == 5);
     CHECK(one.Paragraph->Rgb          == 255);
     CHECK(one.Paragraph->Book         == "DIC COLOR GUIDE(R)$DIC 1");
     CHECK(one.Paragraph->Margin       == 2);
@@ -247,10 +247,10 @@ namespace DxfIO::Entities
   TEST_CASE("mtext: what a record leaves out, AutoCAD's defaults written")
   {
     const MText one = DxfIO::Read<MText>(Held(""));
-    CHECK(one.Paragraph->Attachment == 1);
-    CHECK(one.Paragraph->Flow       == 5);
-    CHECK(one.Paragraph->Spacing    == 1);
-    CHECK(one.Paragraph->Factor     == 1);
+    CHECK(one.Paragraph->Attachment       == 1);
+    CHECK(one.Paragraph->Flow             == 5);
+    CHECK(one.Paragraph->LineSpacingStyle == 1);
+    CHECK(one.Paragraph->LineSpacingFactor == 1);
     CHECK(one.Paragraph->Value.empty());
     CHECK(Alike(Written(one), Held(" 10\r\n0.0\r\n 20\r\n0.0\r\n 30\r\n0.0\r\n"
                                    " 40\r\n0.0\r\n 41\r\n0.0\r\n 46\r\n0.0\r\n"
@@ -271,11 +271,11 @@ namespace DxfIO::Entities
   {
     const MText one = DxfIO::Read<MText>(Held(" 71\r\n    10\r\n 72\r\n     2\r\n 73\r\n     3\r\n"
                                               " 44\r\n9.0\r\n 40\r\n-1.0\r\n"));
-    CHECK(one.Paragraph->Attachment == 10);
-    CHECK(one.Paragraph->Flow       == 2);
-    CHECK(one.Paragraph->Spacing    == 3);
-    CHECK(one.Paragraph->Factor     == 9);
-    CHECK(one.Paragraph->Height     == -1);
+    CHECK(one.Paragraph->Attachment       == 10);
+    CHECK(one.Paragraph->Flow             == 2);
+    CHECK(one.Paragraph->LineSpacingStyle == 3);
+    CHECK(one.Paragraph->LineSpacingFactor == 9);
+    CHECK(one.Paragraph->Height            == -1);
   }
 
   TEST_CASE("mtext: what AutoCAD reads as columns kept with no object")

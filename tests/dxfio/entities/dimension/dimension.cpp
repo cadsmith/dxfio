@@ -162,7 +162,7 @@ namespace DxfIO::Entities
   TEST_CASE("dimension: its text's attachment hides no multileader's")
   {
     using namespace DxfIO::Objects::MLeaderStyles;
-    CHECK(Objects::MLeaderStyles::Text{}.Top == Centered);
+    CHECK(Objects::MLeaderStyles::Text{}.TopAttachment == Centered);
   }
 
   TEST_CASE("dimension: its block and style symbols, as a layer is")

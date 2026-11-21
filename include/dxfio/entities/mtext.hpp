@@ -140,11 +140,11 @@ namespace DxfIO::Entities
     /**
      *  The line spacing style: 1 at least, 2 exactly. Group 73.
      */
-    int Spacing{1};
+    int LineSpacingStyle{1};
     /**
      *  The line spacing, as a factor of the default. Group 44.
      */
-    double Factor{1};
+    double LineSpacingFactor{1};
     /**
      *  The background: 0 none, 1 a color, 2 the drawing window's color, and 16 a frame from R2018.
      *  Group 90, from R2004.

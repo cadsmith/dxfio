@@ -151,8 +151,8 @@ namespace DxfIO
           .Read  = Entities::Turned,
           .Write = Entities::Turning,
       },
-      Fields::Field{.Code = 73, .Member = &Entities::Paragraph::Spacing},
-      Fields::Field{.Code = 44, .Member = &Entities::Paragraph::Factor},
+      Fields::Field{.Code = 73, .Member = &Entities::Paragraph::LineSpacingStyle},
+      Fields::Field{.Code = 44, .Member = &Entities::Paragraph::LineSpacingFactor},
       Fields::Since{.Release = Version::R2004, .Fields = Entities::Background},
       Fields::Since{
           .Release = Version::R2018,
