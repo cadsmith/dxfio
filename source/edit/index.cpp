@@ -2,7 +2,7 @@
 
 namespace DxfIO::Edit
 {
-  Index::Index(const Document &drawing) : m_Drawing{&drawing}
+  Index::Index(const Drawing &drawing) : m_Drawing{&drawing}
   {
     for (const Entity &one : drawing.Entities)
     {
@@ -21,7 +21,7 @@ namespace DxfIO::Edit
     }
   }
 
-  auto Index::Drawn() const -> const Document &
+  auto Index::Drawn() const -> const Drawing &
   {
     return *m_Drawing;
   }

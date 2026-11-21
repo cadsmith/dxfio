@@ -32,7 +32,7 @@ namespace DxfIO
      */
     Exists,
     /**
-     *  An edit or a save the document cannot take, such as a record with no name.
+     *  An edit or a save the drawing cannot take, such as a record with no name.
      */
     Refused,
   };

@@ -25,8 +25,8 @@ if (!loaded)
 }
 DxfIO::Entities::Line line{};
 line.End = DxfIO::Vector{.X = 100, .Y = 50, .Z = 0};
-DxfIO::Edit::Add(loaded->Document, line);
-const auto saved = DxfIO::SaveFile(loaded->Document, "plan-r2010.dxf",
+DxfIO::Edit::Add(loaded->Drawing, line);
+const auto saved = DxfIO::SaveFile(loaded->Drawing, "plan-r2010.dxf",
                                    {.Release = DxfIO::Version::R2010});
 ```
 

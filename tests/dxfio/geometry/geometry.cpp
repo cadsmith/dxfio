@@ -30,7 +30,7 @@ namespace DxfIO::Geometry
     const auto loaded = Load(Acad("entities-r2000.dxf"));
     REQUIRE(loaded);
     const Entities::Circle *turned = nullptr;
-    for (const Entity &one : loaded->Document.Entities)
+    for (const Entity &one : loaded->Drawing.Entities)
     {
       const auto *circle = std::get_if<Entities::Circle>(&one);
       if (circle != nullptr && circle->Extrusion.Y < -0.5)
@@ -84,7 +84,7 @@ namespace DxfIO::Geometry
       CAPTURE(name);
       const auto loaded = Load(Acad(name));
       REQUIRE(loaded);
-      const Document   &drawing = loaded->Document;
+      const Drawing    &drawing = loaded->Drawing;
       const Edit::Index index{drawing};
       CHECK(&index.Drawn() == &drawing);
       for (const Entity &one : drawing.Entities)

@@ -6,13 +6,13 @@ Reading and setting the units of a drawing, which live in its HEADER section as 
 
 ## Header variables [#header]
 
-`Document::Header` holds every variable of the HEADER section in file order: its name, such as `$INSUNITS`, and the groups of its value. A small lookup finds one by name.
+`Drawing::Header` holds every variable of the HEADER section in file order: its name, such as `$INSUNITS`, and the groups of its value. A small lookup finds one by name.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
-auto variable = [](DxfIO::Document &document, const char *name) -> DxfIO::Header::Variable * {
-  for (DxfIO::Header::Variable &one : document.Header)
+auto variable = [](DxfIO::Drawing &drawing, const char *name) -> DxfIO::Header::Variable * {
+  for (DxfIO::Header::Variable &one : drawing.Header)
   {
     if (one.Name == name)
     {
@@ -51,7 +51,7 @@ variable(drawing, "$LUPREC")->Values.front().Value = std::int64_t{2};
 `$INSUNITS` came with R2000: a drawing made for R12 has none, and saving to R12 leaves it out.
 
 ```cpp
-DxfIO::Document old = DxfIO::Create(DxfIO::Version::R12);
+DxfIO::Drawing old = DxfIO::Create(DxfIO::Version::R12);
 std::println("an R12 drawing has $INSUNITS: {}", variable(old, "$INSUNITS") != nullptr);
 ```
 

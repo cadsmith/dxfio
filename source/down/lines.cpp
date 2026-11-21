@@ -15,7 +15,7 @@ namespace DxfIO::Down
   {
     constexpr double Reach = 1000;
 
-    auto Point(const Document &from, std::string_view name) -> std::optional<Vector>
+    auto Point(const Drawing &from, std::string_view name) -> std::optional<Vector>
     {
       const auto found = std::ranges::find(from.Header, name, &Header::Variable::Name);
       if (found == from.Header.end())
@@ -121,7 +121,7 @@ namespace DxfIO::Down
     }
   } // namespace
 
-  auto Bounded(const Document &from) -> Extents
+  auto Bounded(const Drawing &from) -> Extents
   {
     const std::optional<Vector> low  = Point(from, "$EXTMIN");
     const std::optional<Vector> high = Point(from, "$EXTMAX");

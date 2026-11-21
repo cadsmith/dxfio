@@ -18,7 +18,7 @@ namespace DxfIO::Edit
 {
   namespace
   {
-    auto Seed(const Document &drawing) -> Handle
+    auto Seed(const Drawing &drawing) -> Handle
     {
       return std::get<Handle>(
           std::ranges::find(drawing.Header, "$HANDSEED", &Header::Variable::Name)
@@ -26,14 +26,14 @@ namespace DxfIO::Edit
               .Value);
     }
 
-    void Exhaust(Document &drawing)
+    void Exhaust(Drawing &drawing)
     {
       std::ranges::find(drawing.Header, "$HANDSEED", &Header::Variable::Name)
           ->Values.front()
           .Value = Handle{.Value = std::numeric_limits<std::uint64_t>::max()};
     }
 
-    auto Recorded(const Document &drawing, std::string_view name) -> Handle
+    auto Recorded(const Drawing &drawing, std::string_view name) -> Handle
     {
       return Find(drawing.BlockRecord, name)->Record.Base.Self;
     }
@@ -54,7 +54,7 @@ namespace DxfIO::Edit
     }
 
     template <class RecordT>
-    void Listed(Document &drawing, Tables::Table<RecordT> &table, std::string_view name)
+    void Listed(Drawing &drawing, Tables::Table<RecordT> &table, std::string_view name)
     {
       const auto count = table.Records.size();
       const auto self  = Add(drawing, Called<RecordT>(name));
@@ -68,7 +68,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("add: a polyline's vertices take the flags its kind asks, their own fitting bits kept")
   {
-    Document         drawing = Create();
+    Drawing          drawing = Create();
     Entities::Vertex plain{};
     Entities::Vertex fitted{};
     fitted.Flags = 1 + 32;
@@ -114,7 +114,7 @@ namespace DxfIO::Edit
   TEST_CASE(
       "add: a block given an attribute definition that is not constant is flagged as holding them")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     REQUIRE(AddBlock(drawing, "TAGGED"));
     REQUIRE(AddBlock(drawing, "FIXED"));
     Entities::AttDef constant{};
@@ -129,14 +129,14 @@ namespace DxfIO::Edit
     CHECK(FindBlock(drawing, "*Paper_Space")->Block.Flags == 2);
     REQUIRE(Add(drawing, Entities::AttDef{}, "TAGGED"));
     CHECK(FindBlock(drawing, "TAGGED")->Block.Flags == 2);
-    Document old = Create(Version::R12);
+    Drawing old = Create(Version::R12);
     REQUIRE(Add(old, Entities::AttDef{}, Space::Model));
     CHECK(FindBlock(old, "*Model_Space") == nullptr);
   }
 
   TEST_CASE("add: a record or a block with no name is refused")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     CHECK(Add(drawing, Tables::Layer{})
           == std::unexpected{
               Failure{.Code = FailureCode::Refused, .What = "layer with no name refused"}});
@@ -153,7 +153,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: an entity added to model space takes the seed and the space's record")
   {
-    Document       drawing = Create();
+    Drawing        drawing = Create();
     const Handle   seed    = Seed(drawing);
     Entities::Line line{};
     line.End        = Vector{.X = 10, .Y = 0, .Z = 0};
@@ -171,7 +171,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: an entity added to paper space is flagged so, and owned by its record")
   {
-    Document   drawing = Create();
+    Drawing    drawing = Create();
     const auto self    = Add(drawing, Entities::Circle{}, Space::Paper);
     REQUIRE(self);
     const auto &added = std::get<Entities::Circle>(drawing.Entities.front());
@@ -182,7 +182,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: the vertices an entity carries take handles, owned by the entity")
   {
-    Document           drawing = Create();
+    Drawing            drawing = Create();
     Entities::Polyline polyline{};
     polyline.Vertices.Children.resize(3);
     const auto self = Add(drawing, polyline);
@@ -198,7 +198,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: a polyline added with vertices and no SEQEND is given one, as AutoCAD needs")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     REQUIRE(Add(drawing, Named("Walls")));
     Entities::Polyline polyline{};
     polyline.Record.Layer = Symbol{"Walls"};
@@ -218,12 +218,12 @@ namespace DxfIO::Edit
     const auto read = Load(saved->Bytes);
     REQUIRE(read);
     CHECK(read->Issues.empty());
-    CHECK(std::get<Entities::Polyline>(read->Document.Entities.front()).Vertices.Closing);
+    CHECK(std::get<Entities::Polyline>(read->Drawing.Entities.front()).Vertices.Closing);
   }
 
   TEST_CASE("edit: an insert added with attributes says they follow, and is given its SEQEND")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     REQUIRE(AddBlock(drawing, "Valve"));
     Entities::Insert valve{};
     valve.Block = Symbol{"Valve"};
@@ -240,15 +240,15 @@ namespace DxfIO::Edit
     const auto read = Load(saved->Bytes);
     REQUIRE(read);
     CHECK(read->Issues.empty());
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(std::get<Entities::Insert>(read->Document.Entities.front()).Attributes.Children.size()
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(std::get<Entities::Insert>(read->Drawing.Entities.front()).Attributes.Children.size()
           == 2);
   }
 
   TEST_CASE(
       "edit: an insert with no attributes takes no SEQEND, a polyline always one, its own kept")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     REQUIRE(Add(drawing, Entities::Polyline{}));
     Entities::Insert space{};
     space.Block = Symbol{"*Model_Space"};
@@ -269,7 +269,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: an entity that brings its own handle keeps it, and the seed moves past it")
   {
-    Document       drawing = Create();
+    Drawing        drawing = Create();
     Entities::Line line{};
     line.Record.Base.Self = Handle{.Value = 0x5000};
     CHECK(Add(drawing, line) == Handle{.Value = 0x5000});
@@ -278,7 +278,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: an entity added to a block is owned by the block's record")
   {
-    Document   drawing = Create();
+    Drawing    drawing = Create();
     const auto begin   = AddBlock(drawing, "Door");
     REQUIRE(begin);
     const Blocks::Definition *door = FindBlock(drawing, "door");
@@ -300,12 +300,12 @@ namespace DxfIO::Edit
     REQUIRE(saved);
     const auto read = Load(saved->Bytes);
     REQUIRE(read);
-    CHECK(FindEntity(read->Document, *self) != nullptr);
+    CHECK(FindEntity(read->Drawing, *self) != nullptr);
   }
 
   TEST_CASE("edit: the spaces' own blocks take entities as the spaces do")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     REQUIRE(Add(drawing, Entities::Line{}, "*model_space"));
     REQUIRE(Add(drawing, Entities::Line{}, "*PAPER_SPACE"));
     REQUIRE(drawing.Entities.size() == 2);
@@ -316,7 +316,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: a block of a layout's paper space flags what it takes")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     REQUIRE(AddBlock(drawing, "*Paper_Space0"));
     Blocks::Definition *sheet = FindBlock(drawing, "*Paper_Space0");
     sheet->Block.Record.Paper = true;
@@ -326,7 +326,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: a block missing, or one named twice, is refused")
   {
-    Document   drawing = Create();
+    Drawing    drawing = Create();
     const auto missing = Add(drawing, Entities::Line{}, "Door");
     REQUIRE_FALSE(missing);
     CHECK(missing.error().What == "block Door missing");
@@ -339,7 +339,7 @@ namespace DxfIO::Edit
   TEST_CASE(
       "edit: an R12 drawing has no block records, and its blocks and entities are owned by none")
   {
-    Document   drawing = Create(Version::R12);
+    Drawing    drawing = Create(Version::R12);
     const auto records = drawing.BlockRecord.Records.size();
     REQUIRE(AddBlock(drawing, "Door"));
     CHECK(drawing.BlockRecord.Records.size() == records);
@@ -353,7 +353,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: every table takes a record, owned by the table, its count kept")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     Listed(drawing, drawing.VPort, "*Active");
     Listed(drawing, drawing.LType, "Dashed");
     Listed(drawing, drawing.Layer, "Walls");
@@ -367,7 +367,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: a layer takes layer 0's plot style and material, unless it names its own")
   {
-    Document            drawing = Create();
+    Drawing             drawing = Create();
     const Tables::Layer zero    = *Find(drawing.Layer, "0");
     REQUIRE(zero.Style);
     REQUIRE(Add(drawing, Named("Walls")));
@@ -388,7 +388,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: a record whose name the table holds is refused, but for a viewport")
   {
-    Document   drawing = Create();
+    Drawing    drawing = Create();
     const auto twice   = Add(drawing, Named("0"));
     REQUIRE_FALSE(twice);
     CHECK(twice.error().What == "layer 0 exists");
@@ -399,7 +399,7 @@ namespace DxfIO::Edit
   TEST_CASE(
       "edit: a record that brings its own handle keeps it, and a count past the records stays")
   {
-    Document      drawing    = Create();
+    Drawing       drawing    = Create();
     Tables::Layer walls      = Named("Walls");
     walls.Record.Base.Self   = Handle{.Value = 0x6000};
     drawing.Layer.Head.Count = 40;
@@ -410,7 +410,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: past the last handle there is, nothing is added")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     Exhaust(drawing);
     CHECK_FALSE(Add(drawing, Entities::Line{}));
     CHECK_FALSE(Add(drawing, Entities::Line{}, Space::Paper));

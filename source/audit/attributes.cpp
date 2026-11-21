@@ -24,7 +24,7 @@ namespace DxfIO::Audit
      *  Whether a block holds an ATTDEF that is not constant: in its own entities, or, for a space's
      *  block, in those of the ENTITIES section drawn in that space.
      */
-    auto Defining(const Document &drawing, const Blocks::Definition &block) -> bool
+    auto Defining(const Drawing &drawing, const Blocks::Definition &block) -> bool
     {
       if (std::ranges::any_of(block.Entities, Entities::Attributing))
       {
@@ -46,8 +46,8 @@ namespace DxfIO::Audit
    *  flagged as holding them: a block holding one and not flagged so is a warning, and flagged when
    *  the checks fix.
    */
-  template <class DocumentT>
-  void Attributed(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Attributed(Auditor<DrawingT> &with)
   {
     for (auto &block : with.Drawing->Blocks)
     {
@@ -59,14 +59,14 @@ namespace DxfIO::Audit
           Severity::Warning,
           std::format("block {} holds attribute definitions, not flagged so", block.Block.Name),
           block.Block.Record.Base.Self);
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         block.Block.Flags += Holding;
       }
     }
   }
 
-  template void Attributed(Auditor<Document> &with);
+  template void Attributed(Auditor<Drawing> &with);
 
-  template void Attributed(Auditor<const Document> &with);
+  template void Attributed(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

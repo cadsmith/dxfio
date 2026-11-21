@@ -1,5 +1,5 @@
-#ifndef DXFIO_DOCUMENT_HPP
-#define DXFIO_DOCUMENT_HPP
+#ifndef DXFIO_DRAWING_HPP
+#define DXFIO_DRAWING_HPP
 
 #include "dxfio/api.hpp"
 #include "dxfio/blocks/definition.hpp"
@@ -29,7 +29,7 @@ namespace DxfIO
    *  A DXF drawing: one member for each section, and one for each table of the TABLES section. A
    *  table whose head has no name, as when the file had no such table, is not written.
    */
-  struct DXFIO_API Document
+  struct DXFIO_API Drawing
   {
     /**
      *  The names of the sections, such as "HEADER", in the order the file gave them. Save writes
@@ -105,8 +105,8 @@ namespace DxfIO
      */
     std::vector<Section> Sections{};
 
-    auto operator==(const Document &) const -> bool = default;
+    auto operator==(const Drawing &) const -> bool = default;
   };
 } // namespace DxfIO
 
-#endif /* DXFIO_DOCUMENT_HPP */
+#endif /* DXFIO_DRAWING_HPP */

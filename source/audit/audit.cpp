@@ -20,11 +20,11 @@ namespace DxfIO::Audit
       return one.Level == Severity::Error && !one.Fixed;
     }
 
-    template <class DocumentT>
-    auto Run(DocumentT &drawing) -> Report
+    template <class DrawingT>
+    auto Run(DrawingT &drawing) -> Report
     {
-      Auditor<DocumentT> with{.Drawing = &drawing, .Handles = Seed{}};
-      if constexpr (Auditor<DocumentT>::Fix)
+      Auditor<DrawingT> with{.Drawing = &drawing, .Handles = Seed{}};
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         with.Handles = Seed{Past(drawing)};
       }
@@ -42,7 +42,7 @@ namespace DxfIO::Audit
       Attributed(with);
       Grouped(with);
       Classed(with);
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         const Handle past = Past(drawing);
         WriteSeed(drawing, past ? past : Last);
@@ -67,12 +67,12 @@ namespace DxfIO::Audit
         std::ranges::count(Findings, Severity::Warning, &Finding::Level));
   }
 
-  auto Check(const Document &drawing) -> Report
+  auto Check(const Drawing &drawing) -> Report
   {
     return Run(drawing);
   }
 
-  auto Repair(Document &drawing) -> Report
+  auto Repair(Drawing &drawing) -> Report
   {
     return Run(drawing);
   }

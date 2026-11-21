@@ -8,8 +8,8 @@ namespace DxfIO::Edit
 {
   namespace
   {
-    template <class DocumentT>
-    auto Entity(DocumentT &drawing, Handle self) -> auto *
+    template <class DrawingT>
+    auto Entity(DrawingT &drawing, Handle self) -> auto *
     {
       using Found = decltype(&drawing.Entities.front());
       if (!self)
@@ -36,8 +36,8 @@ namespace DxfIO::Edit
       return static_cast<Found>(nullptr);
     }
 
-    template <class DocumentT>
-    auto Object(DocumentT &drawing, Handle self) -> auto *
+    template <class DrawingT>
+    auto Object(DrawingT &drawing, Handle self) -> auto *
     {
       const auto found =
           !self ? drawing.Objects.end()
@@ -46,8 +46,8 @@ namespace DxfIO::Edit
       return found == drawing.Objects.end() ? nullptr : &*found;
     }
 
-    template <class DocumentT>
-    auto Block(DocumentT &drawing, std::string_view name) -> auto *
+    template <class DrawingT>
+    auto Block(DrawingT &drawing, std::string_view name) -> auto *
     {
       const auto found =
           std::ranges::find_if(drawing.Blocks, [name](const Blocks::Definition &one) -> bool
@@ -61,32 +61,32 @@ namespace DxfIO::Edit
     return Ascii::Same(one, other);
   }
 
-  auto FindEntity(Document &drawing, Handle self) -> DxfIO::Entity *
+  auto FindEntity(Drawing &drawing, Handle self) -> DxfIO::Entity *
   {
     return Entity(drawing, self);
   }
 
-  auto FindEntity(const Document &drawing, Handle self) -> const DxfIO::Entity *
+  auto FindEntity(const Drawing &drawing, Handle self) -> const DxfIO::Entity *
   {
     return Entity(drawing, self);
   }
 
-  auto FindObject(Document &drawing, Handle self) -> DxfIO::Object *
+  auto FindObject(Drawing &drawing, Handle self) -> DxfIO::Object *
   {
     return Object(drawing, self);
   }
 
-  auto FindObject(const Document &drawing, Handle self) -> const DxfIO::Object *
+  auto FindObject(const Drawing &drawing, Handle self) -> const DxfIO::Object *
   {
     return Object(drawing, self);
   }
 
-  auto FindBlock(Document &drawing, std::string_view name) -> Blocks::Definition *
+  auto FindBlock(Drawing &drawing, std::string_view name) -> Blocks::Definition *
   {
     return Block(drawing, name);
   }
 
-  auto FindBlock(const Document &drawing, std::string_view name) -> const Blocks::Definition *
+  auto FindBlock(const Drawing &drawing, std::string_view name) -> const Blocks::Definition *
   {
     return Block(drawing, name);
   }

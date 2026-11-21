@@ -9,7 +9,7 @@ A block defined once with its own entities and attribute definitions, then place
 `Edit::AddBlock` makes an empty block, with its block record where the drawing has block records. Entities added under the block's name go into it, in the block's own coordinates: an insert puts the block's base point, `Begin.Origin`, at its own position.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 DxfIO::Edit::AddBlock(drawing, "Valve");
 
 DxfIO::Entities::Circle body{};

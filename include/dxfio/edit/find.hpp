@@ -3,7 +3,7 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/blocks/definition.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/object.hpp"
@@ -26,35 +26,35 @@ namespace DxfIO::Edit
    *  The pointer holds until the list it points into changes, as Edit::Add and Audit::Repair change
    *  it.
    */
-  [[nodiscard]] DXFIO_API auto FindEntity(Document &drawing, Handle self) -> Entity *;
+  [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
 
   /**
    *  Finds the entity of that handle in the ENTITIES section or in a block, or null, as the other
    *  FindEntity does.
    */
-  [[nodiscard]] DXFIO_API auto FindEntity(const Document &drawing, Handle self) -> const Entity *;
+  [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
 
   /**
    *  Finds the object of that handle in the OBJECTS section, or null; the null handle finds null.
    */
-  [[nodiscard]] DXFIO_API auto FindObject(Document &drawing, Handle self) -> Object *;
+  [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
 
   /**
    *  Finds the object of that handle in the OBJECTS section, or null; the null handle finds null.
    */
-  [[nodiscard]] DXFIO_API auto FindObject(const Document &drawing, Handle self) -> const Object *;
+  [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
 
   /**
    *  Finds the block of that name, or null. The pointer holds until the list of blocks changes, as
    *  Edit::AddBlock changes it.
    */
-  [[nodiscard]] DXFIO_API auto FindBlock(Document &drawing, std::string_view name)
+  [[nodiscard]] DXFIO_API auto FindBlock(Drawing &drawing, std::string_view name)
       -> Blocks::Definition *;
 
   /**
    *  Finds the block of that name, or null, as the other FindBlock does.
    */
-  [[nodiscard]] DXFIO_API auto FindBlock(const Document &drawing, std::string_view name)
+  [[nodiscard]] DXFIO_API auto FindBlock(const Drawing &drawing, std::string_view name)
       -> const Blocks::Definition *;
 
   /**

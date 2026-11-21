@@ -9,7 +9,7 @@ Extended data carries an application's own values on an entity: register the app
 Each set of extended data names the application it belongs to, and the APPID table registers that name. `Edit::Add` adds the record, and fails when the table holds that name already.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Tables::AppId application{};
 application.Record.Name = "WALLPLAN";
@@ -57,7 +57,7 @@ if (!loaded)
   std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
   return 1;
 }
-const DxfIO::Entity *found = DxfIO::Edit::FindEntity(loaded->Document, *handle);
+const DxfIO::Entity *found = DxfIO::Edit::FindEntity(loaded->Drawing, *handle);
 for (const DxfIO::Xdata &data : DxfIO::BaseOf(*found).Extended)
 {
   if (!DxfIO::Edit::Same(data.Application, "WALLPLAN"))

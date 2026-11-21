@@ -5,7 +5,7 @@
 #include "seed.hpp"
 
 #include "dxfio/audit/audit.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/handle.hpp"
 
 #include <string>
@@ -19,24 +19,24 @@ namespace DxfIO::Audit
    *  A part of the drawing as the checks reach it: read only when they check, open to change when
    *  they repair.
    */
-  template <class DocumentT, class PartT>
-  using Part = std::conditional_t<std::is_const_v<DocumentT>, const PartT, PartT>;
+  template <class DrawingT, class PartT>
+  using Part = std::conditional_t<std::is_const_v<DrawingT>, const PartT, PartT>;
 
   /**
    *  What the checks share as they run: the drawing, read only for Check, which so copies nothing,
    *  or to fix for Repair.
    */
-  template <class DocumentT>
+  template <class DrawingT>
   struct Auditor
   {
     /**
      *  Whether the checks fix what they find, which they do only to a drawing they may change.
      */
-    static constexpr bool Fix = !std::is_const_v<DocumentT>;
+    static constexpr bool Fix = !std::is_const_v<DrawingT>;
 
-    DocumentT *Drawing{};
-    Seed       Handles;
-    Report     Out{};
+    DrawingT *Drawing{};
+    Seed      Handles;
+    Report    Out{};
 
     /**
      *  Adds a finding, fixed when the checks fix.
@@ -65,58 +65,58 @@ namespace DxfIO::Audit
     }
   };
 
-  void Localized(Tables::Layer &one, const Document &drawing);
+  void Localized(Tables::Layer &one, const Drawing &drawing);
 
-  void Localized(Tables::DimStyle &one, const Document &drawing);
+  void Localized(Tables::DimStyle &one, const Drawing &drawing);
 
-  void Localized(Tables::VPort &one, const Document &drawing);
+  void Localized(Tables::VPort &one, const Drawing &drawing);
 
   template <class RecordT>
-  void Localized(RecordT & /*one*/, const Document & /*drawing*/)
+  void Localized(RecordT & /*one*/, const Drawing & /*drawing*/)
   {
   }
 
-  template <class DocumentT>
-  void Seeded(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Seeded(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Handled(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Handled(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Unnamed(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Unnamed(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Tabled(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Tabled(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Applied(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Applied(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Referred(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Referred(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Weighted(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Weighted(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Meshed(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Meshed(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Curved(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Curved(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Led(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Led(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Sequenced(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Sequenced(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Classed(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Classed(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Attributed(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Attributed(Auditor<DrawingT> &with);
 
-  template <class DocumentT>
-  void Grouped(Auditor<DocumentT> &with);
+  template <class DrawingT>
+  void Grouped(Auditor<DrawingT> &with);
 } // namespace DxfIO::Audit
 
 #endif /* DXFIO_AUDIT_CHECKS_HPP */

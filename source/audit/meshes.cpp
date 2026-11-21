@@ -21,8 +21,8 @@ namespace DxfIO::Audit
       return mesh.Data->Vertices.empty() || mesh.Data->Faces.empty();
     }
 
-    template <class DocumentT>
-    void Creased(Auditor<DocumentT> &with, Part<DocumentT, Entities::Mesh> &mesh)
+    template <class DrawingT>
+    void Creased(Auditor<DrawingT> &with, Part<DrawingT, Entities::Mesh> &mesh)
     {
       const std::size_t edges = mesh.Data->Edges.size() / 2;
       if (mesh.Data->Creases.size() == edges)
@@ -32,14 +32,14 @@ namespace DxfIO::Audit
       with.Note(Severity::Warning,
                 std::format("mesh with {} creases for {} edges", mesh.Data->Creases.size(), edges),
                 mesh.Record.Base.Self);
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         mesh.Data->Creases.resize(edges);
       }
     }
 
-    template <class DocumentT>
-    void Checked(Auditor<DocumentT> &with, Part<DocumentT, Entities::Mesh> &mesh)
+    template <class DrawingT>
+    void Checked(Auditor<DrawingT> &with, Part<DrawingT, Entities::Mesh> &mesh)
     {
       if (!Empty(mesh))
       {
@@ -63,8 +63,8 @@ namespace DxfIO::Audit
    *  A MESH with no vertices or no faces is invalid to AutoCAD: an error, and left out when the
    *  checks fix. One with a crease count that is not its edge count is given one crease per edge.
    */
-  template <class DocumentT>
-  void Meshed(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Meshed(Auditor<DrawingT> &with)
   {
     Lists(*with.Drawing,
           [&with](auto &all) -> void
@@ -76,14 +76,14 @@ namespace DxfIO::Audit
                 Checked(with, *mesh);
               }
             }
-            if constexpr (Auditor<DocumentT>::Fix)
+            if constexpr (Auditor<DrawingT>::Fix)
             {
               std::erase_if(all, Hollow);
             }
           });
   }
 
-  template void Meshed(Auditor<Document> &with);
+  template void Meshed(Auditor<Drawing> &with);
 
-  template void Meshed(Auditor<const Document> &with);
+  template void Meshed(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

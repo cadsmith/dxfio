@@ -9,7 +9,7 @@ Add layers with their own color and lineweight, put entities on them, and turn a
 A new drawing has one layer, 0, and a new entity is on it.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 for (const DxfIO::Tables::Layer &layer : drawing.Layer.Records)
 {
   std::println("{}: color {}, linetype {}, lineweight {}", layer.Record.Name, layer.Color, layer.Linetype,

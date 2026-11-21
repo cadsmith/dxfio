@@ -9,7 +9,7 @@ Two SPLINE entities in model space of a new drawing: one given by its control po
 `ControlPoints` are the points the curve is drawn toward, in world coordinates, and `Degree` its degree. A curve of degree 3 on six control points takes 6 + 3 + 1 = 10 knots; the first and last repeated four times make it start on the first control point and end on the last. Flag 8 says the curve lies in a plane, and `Normal` gives that plane.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Entities::Spline controlled{};
 controlled.Curve->Flags = 8;

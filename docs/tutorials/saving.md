@@ -15,7 +15,7 @@ if (!plan)
   std::println("line {}: {}", plan.error().Line.value_or(0), plan.error().What);
   return 1;
 }
-const DxfIO::Document &drawing = plan->Document;
+const DxfIO::Drawing &drawing = plan->Drawing;
 ```
 
 ## Print what a save reports [#issues]
@@ -106,7 +106,7 @@ ASCII 129595 bytes, binary 67615 bytes
 Before R2007 a file's text is in a code page: the drawing's own, `$DWGCODEPAGE`, unless `Codepage` names another. A character the page lacks is written as a `\U+` escape: Ø is not in ANSI 1251, the Cyrillic page. `Release` is R2018 unless set, whatever the drawing's own, and R2018 writes UTF-8, so name the release too.
 
 ```cpp
-DxfIO::Document note = DxfIO::Create(DxfIO::Version::R2004);
+DxfIO::Drawing note = DxfIO::Create(DxfIO::Version::R2004);
 DxfIO::Entities::Text text{};
 text.Lettering.Height = 2.5;
 text.Lettering.Value = "Ø 20";

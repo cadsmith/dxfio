@@ -160,7 +160,7 @@ namespace DxfIO::Empty
     }
   } // namespace
 
-  void Tables(Document &drawing, const Roots &ids, Seed &handles)
+  void Tables(Drawing &drawing, const Roots &ids, Seed &handles)
   {
     drawing.VPort    = Tabled("VPORT", std::vector{Active()}, handles);
     drawing.LType    = Tabled("LTYPE", Linetypes(ids), handles);

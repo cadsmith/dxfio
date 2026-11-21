@@ -3,7 +3,7 @@
 
 #include "seed.hpp"
 
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/entities/ellipse.hpp"
 #include "dxfio/entities/line.hpp"
 #include "dxfio/entities/mtext.hpp"
@@ -40,7 +40,7 @@ namespace DxfIO::Down
 
   [[nodiscard]] auto Child(const Entities::Record &parent, Seed &handles) -> Entities::Record;
 
-  [[nodiscard]] auto Bounded(const Document &from) -> Extents;
+  [[nodiscard]] auto Bounded(const Drawing &from) -> Extents;
 
   [[nodiscard]] auto Traced(const Entities::Ellipse &one, Seed &handles) -> Entities::Polyline;
 

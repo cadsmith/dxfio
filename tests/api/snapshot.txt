@@ -18,7 +18,7 @@
 #endif
 == dxfio/audit/audit.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/handle.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -46,8 +46,8 @@ namespace DxfIO::Audit
     [[nodiscard]] auto Errors() const -> std::size_t;
     [[nodiscard]] auto Warnings() const -> std::size_t;
   };
-  [[nodiscard]] DXFIO_API auto Check(const Document &drawing) -> Report;
-  DXFIO_API auto Repair(Document &drawing) -> Report;
+  [[nodiscard]] DXFIO_API auto Check(const Drawing &drawing) -> Report;
+  DXFIO_API auto Repair(Drawing &drawing) -> Report;
 }
 == dxfio/base.hpp
 #include "dxfio/api.hpp"
@@ -229,13 +229,13 @@ namespace DxfIO
 }
 == dxfio/create.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/version.hpp"
 namespace DxfIO
 {
-  [[nodiscard]] DXFIO_API auto Create(Version release = Version::R2018) -> Document;
+  [[nodiscard]] DXFIO_API auto Create(Version release = Version::R2018) -> Drawing;
 }
-== dxfio/document.hpp
+== dxfio/drawing.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/blocks/definition.hpp"
 #include "dxfio/entity.hpp"
@@ -258,7 +258,7 @@ namespace DxfIO
 #include <vector>
 namespace DxfIO
 {
-  struct DXFIO_API Document
+  struct DXFIO_API Drawing
   {
     std::vector<std::string> Order{};
     std::vector<Header::Variable> Header{};
@@ -277,13 +277,13 @@ namespace DxfIO
     DxfIO::Entities::List Entities{};
     std::vector<Object> Objects{};
     std::vector<Section> Sections{};
-    auto operator==(const Document &) const -> bool = default;
+    auto operator==(const Drawing &) const -> bool = default;
   };
 }
 == dxfio/dxfio.hpp
 #include "dxfio/audit/audit.hpp"
 #include "dxfio/create.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/edit/add.hpp"
 #include "dxfio/edit/find.hpp"
 #include "dxfio/edit/handles.hpp"
@@ -300,7 +300,7 @@ namespace DxfIO
 #include "dxfio/version.hpp"
 == dxfio/edit/add.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/edit/space.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/failure.hpp"
@@ -309,25 +309,25 @@ namespace DxfIO
 #include <string_view>
 namespace DxfIO::Edit
 {
-  DXFIO_API auto Add(Document &drawing, Entity one, Space space = Space::Model)
+  DXFIO_API auto Add(Drawing &drawing, Entity one, Space space = Space::Model)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Entity one, std::string_view block)
+  DXFIO_API auto Add(Drawing &drawing, Entity one, std::string_view block)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto AddBlock(Document &drawing, std::string_view name)
+  DXFIO_API auto AddBlock(Drawing &drawing, std::string_view name)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::VPort one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::LType one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Layer one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Style one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::View one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::AppId one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::VPort one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::LType one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::Layer one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::Style one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::View one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::AppId one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>;
 }
 == dxfio/edit/find.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/blocks/definition.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/object.hpp"
@@ -337,13 +337,13 @@ namespace DxfIO::Edit
 namespace DxfIO::Edit
 {
   [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
-  [[nodiscard]] DXFIO_API auto FindEntity(Document &drawing, Handle self) -> Entity *;
-  [[nodiscard]] DXFIO_API auto FindEntity(const Document &drawing, Handle self) -> const Entity *;
-  [[nodiscard]] DXFIO_API auto FindObject(Document &drawing, Handle self) -> Object *;
-  [[nodiscard]] DXFIO_API auto FindObject(const Document &drawing, Handle self) -> const Object *;
-  [[nodiscard]] DXFIO_API auto FindBlock(Document &drawing, std::string_view name)
+  [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
+  [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
+  [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
+  [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
+  [[nodiscard]] DXFIO_API auto FindBlock(Drawing &drawing, std::string_view name)
       -> Blocks::Definition *;
-  [[nodiscard]] DXFIO_API auto FindBlock(const Document &drawing, std::string_view name)
+  [[nodiscard]] DXFIO_API auto FindBlock(const Drawing &drawing, std::string_view name)
       -> const Blocks::Definition *;
   template <class RecordT>
     requires requires(const RecordT &record) { record.Record.Name; }
@@ -365,17 +365,17 @@ namespace DxfIO::Edit
 }
 == dxfio/edit/handles.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/handle.hpp"
 #include <expected>
 namespace DxfIO::Edit
 {
-  [[nodiscard]] DXFIO_API auto NewHandle(Document &drawing) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
 }
 == dxfio/edit/index.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/object.hpp"
@@ -386,12 +386,12 @@ namespace DxfIO::Edit
   class DXFIO_API Index
   {
   public:
-    explicit Index(const Document &drawing);
-    [[nodiscard]] auto Drawn() const -> const Document &;
+    explicit Index(const Drawing &drawing);
+    [[nodiscard]] auto Drawn() const -> const Drawing &;
     [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
     [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
   private:
-    const Document                                   *m_Drawing;
+    const Drawing                                    *m_Drawing;
     std::unordered_map<std::uint64_t, const Entity *> m_Entities;
     std::unordered_map<std::uint64_t, const Object *> m_Objects;
   };
@@ -2195,7 +2195,7 @@ namespace DxfIO
 }
 == dxfio/load.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 #include <expected>
@@ -2207,7 +2207,7 @@ namespace DxfIO
 {
   struct DXFIO_API Loaded
   {
-    DxfIO::Document Document{};
+    DxfIO::Drawing Drawing{};
     std::vector<Issue> Issues{};
   };
   struct DXFIO_API LoadOptions
@@ -2859,7 +2859,7 @@ namespace DxfIO
 }
 == dxfio/save.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 #include "dxfio/version.hpp"
@@ -2882,12 +2882,12 @@ namespace DxfIO
     std::string Bytes{};
     std::vector<Issue> Issues{};
   };
-  [[nodiscard]] DXFIO_API auto Save(const Document &drawing, const SaveOptions &with = {})
+  [[nodiscard]] DXFIO_API auto Save(const Drawing &drawing, const SaveOptions &with = {})
       -> std::expected<Saved, Failure>;
-  [[nodiscard]] DXFIO_API auto Save(const Document &drawing, std::ostream &to,
+  [[nodiscard]] DXFIO_API auto Save(const Drawing &drawing, std::ostream &to,
                                     const SaveOptions &with = {})
       -> std::expected<std::vector<Issue>, Failure>;
-  [[nodiscard]] DXFIO_API auto SaveFile(const Document &drawing, const std::filesystem::path &file,
+  [[nodiscard]] DXFIO_API auto SaveFile(const Drawing &drawing, const std::filesystem::path &file,
                                         const SaveOptions &with = {})
       -> std::expected<std::vector<Issue>, Failure>;
 }

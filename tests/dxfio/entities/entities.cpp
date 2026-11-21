@@ -230,7 +230,7 @@ namespace DxfIO::Entities
         const auto        read   = Load(theirs);
         REQUIRE(read);
         CHECK(read->Issues.empty());
-        const auto ours = Tests::Written(read->Document, SaveOptions{.Release = release});
+        const auto ours = Tests::Written(read->Drawing, SaveOptions{.Release = release});
         REQUIRE(ours);
         CHECK(Section(*ours) == Section(theirs));
       }
@@ -249,7 +249,7 @@ namespace DxfIO::Entities
         const auto        read   = Load(theirs);
         REQUIRE(read);
         CHECK(read->Issues.empty());
-        const auto ours = Tests::Written(read->Document, SaveOptions{.Release = release});
+        const auto ours = Tests::Written(read->Drawing, SaveOptions{.Release = release});
         REQUIRE(ours);
         CHECK(Alike(Section(*ours), Section(theirs)));
         CHECK(Alike(Section(*ours, "BLOCKS"), Section(theirs, "BLOCKS")));
@@ -262,22 +262,22 @@ namespace DxfIO::Entities
     const auto read = Load(Acad(Fixture("entities", Version::R12)));
     REQUIRE(read);
     CHECK(read->Issues.empty());
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     REQUIRE(all.size() == 29);
     CHECK(std::get<Line>(all.front()).End    == Vector{.X = 100, .Y = 50, .Z = 0});
     CHECK(std::get<Circle>(all.at(2)).Radius == 25);
-    const auto ours = Tests::Written(read->Document, SaveOptions{.Release = Version::R12});
+    const auto ours = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R12});
     REQUIRE(ours);
     const auto again = Load(*ours);
     REQUIRE(again);
-    CHECK(again->Document.Entities == all);
+    CHECK(again->Drawing.Entities == all);
   }
 
   TEST_CASE("entities: each of a kind, none left unknown")
   {
     const auto read = Load(Acad(Fixture("entities", Version::R2018)));
     REQUIRE(read);
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     REQUIRE(all.size() == 29);
     const auto loose = std::ranges::count_if(all, [](const Entity &one) -> bool
                                              { return std::holds_alternative<Unknown>(one); });

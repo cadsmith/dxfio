@@ -123,7 +123,7 @@ export default function HomePage() {
           <p className="eyebrow">Compatibility</p>
           <h2 id="releases-title">Ten releases, read and written</h2>
           <p>
-            Every release AutoCAD has written since 1988 reads into the same document, and saves to any other.{' '}
+            Every release AutoCAD has written since 1988 reads into the same drawing, and saves to any other.{' '}
             <Link href="/concepts/releases/">What each release keeps</Link>
           </p>
         </header>

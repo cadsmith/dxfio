@@ -2,7 +2,7 @@
 #define DXFIO_LIFT_LIFT_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/version.hpp"
 
 namespace DxfIO::Lift
@@ -13,7 +13,7 @@ namespace DxfIO::Lift
    *  classes and the ByLayer and ByBlock linetypes of the release, and every owner that follows.
    *  Entities keep their handles; the rest take those the drawing leaves free.
    */
-  [[nodiscard]] DXFIO_API auto Lifted(Document from, Version release) -> Document;
+  [[nodiscard]] DXFIO_API auto Lifted(Drawing from, Version release) -> Drawing;
 } // namespace DxfIO::Lift
 
 #endif /* DXFIO_LIFT_LIFT_HPP */

@@ -76,9 +76,9 @@ namespace DxfIO::Down
      *  A drawing of each kind R12 has not but draws: an ellipse, a spline, a ray, a construction
      *  line, and in a block an MTEXT of two lines.
      */
-    auto Unkinded() -> Document
+    auto Unkinded() -> Drawing
     {
-      Document out = Create(Version::R2018);
+      Drawing out = Create(Version::R2018);
       out.Entities.emplace_back(
           Entities::Ellipse{.Record = {.Base = {.Self = Handle{.Value = 0x900}}}});
       out.Entities.emplace_back(Bezier());
@@ -258,7 +258,7 @@ namespace DxfIO::Down
 
   TEST_CASE("drawn: the extents a drawing declares, when it declares them")
   {
-    Document drawing = Create(Version::R2018);
+    Drawing drawing = Create(Version::R2018);
     for (Header::Variable &one : drawing.Header)
     {
       if (one.Name == "$EXTMIN")
@@ -390,9 +390,9 @@ namespace DxfIO::Down
 
   TEST_CASE("drawn: R12 draws what it has no kind for, each told")
   {
-    const Document     from = Unkinded();
+    const Drawing      from = Unkinded();
     std::vector<Issue> told;
-    const Document     out = Narrowed(from, Version::R12, &told);
+    const Drawing      out = Narrowed(from, Version::R12, &told);
     REQUIRE(told.size()      == 5);
     CHECK(told.front().What  == "MTEXT drawn as TEXT for R12");
     CHECK(told.at(1).What    == "ELLIPSE drawn as POLYLINE for R12");
@@ -405,14 +405,14 @@ namespace DxfIO::Down
 
   TEST_CASE("drawn: what R12 draws reads back, and R13 draws nothing")
   {
-    const Document from  = Unkinded();
-    const auto     saved = Tests::Written(from, SaveOptions{.Release = Version::R12});
+    const Drawing from  = Unkinded();
+    const auto    saved = Tests::Written(from, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     const auto back = Load(*saved);
     REQUIRE(back);
     CHECK(back->Issues.empty());
     CHECK(Narrowed(from, Version::R13, nullptr).Entities.size() == from.Entities.size());
-    CHECK(Narrowed(from, Version::R12, nullptr).Entities.size() == back->Document.Entities.size());
+    CHECK(Narrowed(from, Version::R12, nullptr).Entities.size() == back->Drawing.Entities.size());
   }
 } // namespace DxfIO::Down
 
@@ -420,7 +420,7 @@ namespace DxfIO::Down
 {
   TEST_CASE("drawn: extents of other groups or of four reals take the first three")
   {
-    Document drawing = Create(Version::R2018);
+    Drawing drawing = Create(Version::R2018);
     for (Header::Variable &one : drawing.Header)
     {
       if (one.Name == "$EXTMIN")

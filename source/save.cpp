@@ -34,7 +34,7 @@ namespace DxfIO
 {
   namespace
   {
-    using Writing = std::expected<void, Failure> (*)(Fields::Writing &to, const Document &from,
+    using Writing = std::expected<void, Failure> (*)(Fields::Writing &to, const Drawing &from,
                                                      std::string_view name);
 
     struct Known
@@ -46,43 +46,43 @@ namespace DxfIO
     constexpr std::array Knowns{
         Known{
             .Name  = "HEADER",
-            .Write = [](Fields::Writing &to, const Document &from,
+            .Write = [](Fields::Writing &to, const Drawing &from,
                         std::string_view) -> std::expected<void, Failure>
             { return Header::Write(to, from.Header); },
         },
         Known{
             .Name  = "CLASSES",
-            .Write = [](Fields::Writing &to, const Document &from,
+            .Write = [](Fields::Writing &to, const Drawing &from,
                         std::string_view) -> std::expected<void, Failure>
             { return Put(to, from.Classes); },
         },
         Known{
             .Name  = "TABLES",
-            .Write = [](Fields::Writing &to, const Document &from,
+            .Write = [](Fields::Writing &to, const Drawing &from,
                         std::string_view) -> std::expected<void, Failure>
             { return Tables::Write(to, from); },
         },
         Known{
             .Name  = "BLOCKS",
-            .Write = [](Fields::Writing &to, const Document &from,
+            .Write = [](Fields::Writing &to, const Drawing &from,
                         std::string_view) -> std::expected<void, Failure>
             { return Blocks::Write(to, from.Blocks); },
         },
         Known{
             .Name  = "ENTITIES",
-            .Write = [](Fields::Writing &to, const Document &from,
+            .Write = [](Fields::Writing &to, const Drawing &from,
                         std::string_view) -> std::expected<void, Failure>
             { return Entities::Write(to, from.Entities); },
         },
         Known{
             .Name  = "OBJECTS",
-            .Write = [](Fields::Writing &to, const Document &from,
+            .Write = [](Fields::Writing &to, const Drawing &from,
                         std::string_view) -> std::expected<void, Failure>
             { return Objects::Write(to, from.Objects); },
         },
     };
 
-    auto Foreign(Fields::Writing &to, const Document &from, std::string_view name)
+    auto Foreign(Fields::Writing &to, const Drawing &from, std::string_view name)
         -> std::expected<void, Failure>
     {
       const auto found = std::ranges::find(from.Sections, name, &Section::Name);
@@ -114,7 +114,7 @@ namespace DxfIO
       return one.Head.Name.size() + one.Records.size() != 0;
     }
 
-    auto Tabled(const Document &drawing) -> bool
+    auto Tabled(const Drawing &drawing) -> bool
     {
       const std::array filled{
           Filled(drawing.VPort),  Filled(drawing.LType),    Filled(drawing.Layer),
@@ -128,7 +128,7 @@ namespace DxfIO
     /**
      *  Whether a drawing holds something for the section of that name, so that the file needs it.
      */
-    auto Holds(const Document &drawing, std::string_view name) -> bool
+    auto Holds(const Drawing &drawing, std::string_view name) -> bool
     {
       if (name == "TABLES")
       {
@@ -161,7 +161,7 @@ namespace DxfIO
      *  The sections to write: those the order names, as it names them, and after that any other the
      *  drawing holds something for, each where DXF puts it.
      */
-    auto Planned(const Document &drawing) -> std::vector<std::string>
+    auto Planned(const Drawing &drawing) -> std::vector<std::string>
     {
       std::vector<std::string> out = drawing.Order;
       for (const std::string_view name : Defined)
@@ -195,7 +195,7 @@ namespace DxfIO
       return Fields::Word(to, 0, text);
     }
 
-    auto Text(const Document &drawing, const SaveOptions &with) -> Encoding::Scheme
+    auto Text(const Drawing &drawing, const SaveOptions &with) -> Encoding::Scheme
     {
       const Encoding::Codepage *asked = Encoding::Find(with.Codepage);
       if (asked != nullptr)
@@ -216,7 +216,7 @@ namespace DxfIO
       return with.Release < Version::R13 ? Tags::Form::Narrow : Tags::Form::Wide;
     }
 
-    auto Written(const Document &drawing, const SaveOptions &with)
+    auto Written(const Drawing &drawing, const SaveOptions &with)
         -> std::expected<std::string, Failure>
     {
       std::string out;
@@ -251,13 +251,13 @@ namespace DxfIO
           .transform([&out] -> std::string { return std::move(out); });
     }
 
-    auto Moved(const Document &drawing, Version release, std::vector<Issue> *issues) -> Document
+    auto Moved(const Drawing &drawing, Version release, std::vector<Issue> *issues) -> Drawing
     {
       if (release >= Version::R13 && Header::Declared(drawing.Header) < Version::R13)
       {
         return Lift::Lifted(drawing, release);
       }
-      Document out = Down::Narrowed(drawing, release, issues);
+      Drawing out = Down::Narrowed(drawing, release, issues);
       if (release > Header::Declared(out.Header))
       {
         out.Objects = Plan::Foreign(std::move(out.Objects));
@@ -266,7 +266,7 @@ namespace DxfIO
     }
   } // namespace
 
-  auto Save(const Document &drawing, const SaveOptions &with) -> std::expected<Saved, Failure>
+  auto Save(const Drawing &drawing, const SaveOptions &with) -> std::expected<Saved, Failure>
   {
     if (!with.Codepage.empty() && Encoding::Find(with.Codepage) == nullptr)
     {
@@ -285,7 +285,7 @@ namespace DxfIO
     return out;
   }
 
-  auto Save(const Document &drawing, std::ostream &to, const SaveOptions &with)
+  auto Save(const Drawing &drawing, std::ostream &to, const SaveOptions &with)
       -> std::expected<std::vector<Issue>, Failure>
   {
     return Save(drawing, with)
@@ -303,7 +303,7 @@ namespace DxfIO
             });
   }
 
-  auto SaveFile(const Document &drawing, const std::filesystem::path &file, const SaveOptions &with)
+  auto SaveFile(const Drawing &drawing, const std::filesystem::path &file, const SaveOptions &with)
       -> std::expected<std::vector<Issue>, Failure>
   {
     std::ofstream to{file, std::ios::binary | std::ios::trunc};

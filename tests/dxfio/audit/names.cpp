@@ -8,8 +8,8 @@ namespace DxfIO::Audit
 {
   TEST_CASE("audit: the names of a table and of the blocks are found without case")
   {
-    const Document drawing   = Create(Version::R2018);
-    const Names    linetypes = Named(drawing.LType);
+    const Drawing drawing   = Create(Version::R2018);
+    const Names   linetypes = Named(drawing.LType);
     CHECK(linetypes.size() == drawing.LType.Records.size());
     CHECK(linetypes.contains("CONTINUOUS"));
     CHECK(linetypes.contains("byblock"));

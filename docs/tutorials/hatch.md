@@ -9,7 +9,7 @@ A solid fill and a pattern, each over a closed polyline whose outline the hatch 
 A hatch holds its boundary itself, as paths. Path flag 2 makes a polyline path, whose `Vertices` carry their bulges in `Weight` when `Bulged` is 1; flag 1 marks it external, and `Closed` 1 closes it.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 const auto traced = [](const DxfIO::Entities::LwPolyline &outline) -> DxfIO::Entities::Path
 {

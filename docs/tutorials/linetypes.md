@@ -9,7 +9,7 @@ Define a dash-dot linetype in the LTYPE table, then draw with it through a layer
 A new drawing's LTYPE table holds ByBlock, ByLayer and Continuous, none with a pattern.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 for (const DxfIO::Tables::LType &ltype : drawing.LType.Records)
 {
   std::println("{}: {} elements", ltype.Record.Name, ltype.Dashes.size());

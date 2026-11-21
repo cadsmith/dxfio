@@ -119,8 +119,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("insert: its attributes and SEQEND its own")
   {
-    const DxfIO::Document file  = Opened("inserts", Version::R2018);
-    const Insert         &taken = Found(file.Entities, 0x2e1);
+    const DxfIO::Drawing file  = Opened("inserts", Version::R2018);
+    const Insert        &taken = Found(file.Entities, 0x2e1);
     CHECK(taken.Follows);
     REQUIRE(taken.Attributes.Children.size()    == 2);
     CHECK(taken.Attributes.Children.front().Tag == "ONE");
@@ -131,8 +131,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("insert: extended data on it and on an attribute")
   {
-    const DxfIO::Document file  = Opened("inserts", Version::R2018);
-    const Insert         &taken = Found(file.Entities, 0x2fb);
+    const DxfIO::Drawing file  = Opened("inserts", Version::R2018);
+    const Insert        &taken = Found(file.Entities, 0x2fb);
     CHECK(taken.Record.Base.Extended.size() == 1);
     CHECK(taken.Attributes.Children.front().Record.Base.Extended.size() == 1);
   }
@@ -142,8 +142,8 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      const DxfIO::Document file = Opened("inserts", release);
-      const auto            nest =
+      const DxfIO::Drawing file = Opened("inserts", release);
+      const auto           nest =
           std::ranges::find(file.Blocks, "nest", [](const Blocks::Definition &one) -> std::string
                             { return one.Block.Name; });
       REQUIRE(nest != file.Blocks.end());
@@ -158,7 +158,7 @@ namespace DxfIO::Entities
     const auto read = Load(Acad(Fixture("inserts", Version::R12)));
     REQUIRE(read);
     CHECK(read->Issues.empty());
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     CHECK(Found(all, 0x2de).Columns == 3);
     CHECK(Found(all, 0x2e1).Attributes.Children.size() == 2);
     for (const Entity &one : all)
@@ -178,7 +178,7 @@ namespace DxfIO::Entities
   {
     const auto read = Load(Drawing(Joined({Plain, Tagged, Closing})));
     REQUIRE(read);
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     REQUIRE(all.size() == 3);
     CHECK(std::get<Insert>(all.at(0)).Attributes.Children.empty());
     CHECK(std::get<Unknown>(all.at(1)).Type == "ATTRIB");
@@ -190,11 +190,11 @@ namespace DxfIO::Entities
   {
     const auto read = Load(Drawing(Joined({Open, Stray})));
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 2);
-    CHECK(std::get<Insert>(read->Document.Entities.front()).Follows);
+    REQUIRE(read->Drawing.Entities.size() == 2);
+    CHECK(std::get<Insert>(read->Drawing.Entities.front()).Follows);
     REQUIRE(read->Issues.size()     == 1);
     CHECK(read->Issues.front().What == "INSERT has no SEQEND");
-    const auto saved = Tests::Written(read->Document, SaveOptions{});
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{});
     REQUIRE(saved);
     CHECK(saved->contains(Open));
   }
@@ -203,11 +203,11 @@ namespace DxfIO::Entities
   {
     const auto lone = Load(Drawing(Joined({Open, Closing})));
     REQUIRE(lone);
-    CHECK(std::get<Insert>(lone->Document.Entities.front()).Attributes.Closing);
+    CHECK(std::get<Insert>(lone->Drawing.Entities.front()).Attributes.Closing);
     CHECK(lone->Issues.empty());
     const auto cut = Load(Drawing(Joined({Open, Tagged})));
     REQUIRE(cut);
-    CHECK(std::get<Insert>(cut->Document.Entities.front()).Attributes.Children.size() == 1);
+    CHECK(std::get<Insert>(cut->Drawing.Entities.front()).Attributes.Children.size() == 1);
     CHECK(cut->Issues.size() == 1);
   }
 
@@ -215,7 +215,7 @@ namespace DxfIO::Entities
   {
     const auto read = Load(Drawing(Joined({Open, Tagged, Stray, Tagged, Closing})));
     REQUIRE(read);
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     REQUIRE(all.size() == 4);
     CHECK(std::get<Insert>(all.at(0)).Attributes.Children.size() == 1);
     CHECK(std::holds_alternative<Line>(all.at(1)));
@@ -229,7 +229,7 @@ namespace DxfIO::Entities
     vertex.replace(vertex.find("ATTRIB"), 6, "VERTEX");
     const auto read = Load(Drawing(Joined({Open, vertex, Closing})));
     REQUIRE(read);
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     REQUIRE(all.size() == 3);
     CHECK(std::get<Insert>(all.at(0)).Attributes.Children.empty());
   }

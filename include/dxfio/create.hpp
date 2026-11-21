@@ -2,7 +2,7 @@
 #define DXFIO_CREATE_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/version.hpp"
 
 namespace DxfIO
@@ -12,7 +12,7 @@ namespace DxfIO
    *  linetypes, text and dimension styles, model and paper space, and the objects the release
    *  needs.
    */
-  [[nodiscard]] DXFIO_API auto Create(Version release = Version::R2018) -> Document;
+  [[nodiscard]] DXFIO_API auto Create(Version release = Version::R2018) -> Drawing;
 } // namespace DxfIO
 
 #endif /* DXFIO_CREATE_HPP */

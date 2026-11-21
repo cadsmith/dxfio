@@ -75,8 +75,8 @@ namespace DxfIO::Audit
       }
     }
 
-    template <class DocumentT>
-    void Checked(Auditor<DocumentT> &with, Part<DocumentT, Entities::Ellipse> &one)
+    template <class DrawingT>
+    void Checked(Auditor<DrawingT> &with, Part<DrawingT, Entities::Ellipse> &one)
     {
       if (Fits(one.Ratio))
       {
@@ -84,7 +84,7 @@ namespace DxfIO::Audit
       }
       with.Note(Severity::Error, std::format("ellipse ratio {} not between 0 and 1", one.Ratio),
                 one.Record.Base.Self);
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         if (one.Ratio > 1)
         {
@@ -101,8 +101,8 @@ namespace DxfIO::Audit
    *  and 1: such a ratio is an error; above 1 the axes are swapped, which draws the same curve,
    *  else the ratio is raised to the least taken.
    */
-  template <class DocumentT>
-  void Curved(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Curved(Auditor<DrawingT> &with)
   {
     Lists(*with.Drawing,
           [&with](auto &all) -> void
@@ -117,7 +117,7 @@ namespace DxfIO::Audit
           });
   }
 
-  template void Curved(Auditor<Document> &with);
+  template void Curved(Auditor<Drawing> &with);
 
-  template void Curved(Auditor<const Document> &with);
+  template void Curved(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

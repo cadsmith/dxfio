@@ -15,7 +15,7 @@ if (!loaded)
   std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
   return 1;
 }
-DxfIO::Document &drawing = loaded->Document;
+DxfIO::Drawing &drawing = loaded->Drawing;
 std::println("{} entities, {} issues", drawing.Entities.size(), loaded->Issues.size());
 ```
 
@@ -82,7 +82,7 @@ CIRCLE 2D0 on walls: color 30, true color 0xFF8000
 
 ## By handle [#handle]
 
-A handle's `Value` is the number DXF writes in hex. `Edit::FindEntity` looks for it in the ENTITIES section and in every block, and returns a pointer into the document, or null. `std::get_if` gives null for a null pointer too, so one test covers both.
+A handle's `Value` is the number DXF writes in hex. `Edit::FindEntity` looks for it in the ENTITIES section and in every block, and returns a pointer into the drawing, or null. `std::get_if` gives null for a null pointer too, so one test covers both.
 
 ```cpp
 DxfIO::Entity *found = DxfIO::Edit::FindEntity(drawing, DxfIO::Handle{.Value = 0x2D5});

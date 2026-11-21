@@ -29,7 +29,7 @@ namespace DxfIO::Down
 {
   namespace
   {
-    auto Fresh() -> Document
+    auto Fresh() -> Drawing
     {
       return Create(Version::R2018);
     }
@@ -78,7 +78,7 @@ namespace DxfIO::Down
      */
     auto Kept(const Entity &one, Version release) -> std::size_t
     {
-      Document from = Fresh();
+      Drawing from = Fresh();
       from.Entities.push_back(one);
       return Narrowed(from, release, nullptr).Entities.size();
     }
@@ -126,7 +126,7 @@ namespace DxfIO::Down
     /**
      *  The handles of the images and wipeouts R13 has not, and of the reactors of the images.
      */
-    auto Pictures(const Document &from) -> std::set<Handle>
+    auto Pictures(const Drawing &from) -> std::set<Handle>
     {
       std::set<Handle> out;
       for (const Entity &one : from.Entities)
@@ -153,9 +153,9 @@ namespace DxfIO::Down
      *  A drawing with a layer named by a star, and entities on it or holding one on it, in its
      *  entities and a block.
      */
-    auto Starred() -> Document
+    auto Starred() -> Drawing
     {
-      Document      out   = Fresh();
+      Drawing       out   = Fresh();
       Tables::Layer layer = out.Layer.Records.front();
       layer.Record.Name   = Constraints;
       out.Layer.Records.push_back(layer);
@@ -227,7 +227,7 @@ namespace DxfIO::Down
      *  Saves a drawing to a release and reads it back: the tables told left out for their body's
      *  form, and those kept.
      */
-    auto Untable(const Document &from, Version release) -> Untabled
+    auto Untable(const Drawing &from, Version release) -> Untabled
     {
       std::vector<Issue> told;
       const auto         saved = Tests::Written(from, SaveOptions{.Release = release}, &told);
@@ -238,7 +238,7 @@ namespace DxfIO::Down
           std::format("ACAD_TABLE left out, its body is not in {}'s form", NameOf(release));
       return Untabled{
           .Told = std::ranges::count(told, what, &Issue::What),
-          .Kept = std::ranges::count_if(back->Document.Entities, Tabular),
+          .Kept = std::ranges::count_if(back->Drawing.Entities, Tabular),
       };
     }
 
@@ -250,7 +250,7 @@ namespace DxfIO::Down
     /**
      *  Whether an object of the drawing still lists one of those handles among its reactors.
      */
-    auto Watches(const Document &from, const std::set<Handle> &left) -> bool
+    auto Watches(const Drawing &from, const std::set<Handle> &left) -> bool
     {
       for (const Object &one : from.Objects)
       {
@@ -268,10 +268,10 @@ namespace DxfIO::Down
 
   TEST_CASE("down: a drawing for R12 holds no section R12 has not")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Sections.push_back(Section{.Name = "ACDSDATA", .Tags = {}});
     from.Order.emplace_back("ACDSDATA");
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     CHECK(out.Order == std::vector<std::string>{"HEADER", "TABLES", "BLOCKS", "ENTITIES"});
     CHECK(out.Classes.empty());
     CHECK(out.Objects.empty());
@@ -282,7 +282,7 @@ namespace DxfIO::Down
 
   TEST_CASE("down: table records keep no handle, R12 reads none")
   {
-    const Document out = Narrowed(Fresh(), Version::R12, nullptr);
+    const Drawing out = Narrowed(Fresh(), Version::R12, nullptr);
     CHECK_FALSE(out.Layer.Head.Base.Self);
     REQUIRE_FALSE(out.Layer.Records.empty());
     CHECK_FALSE(out.Layer.Records.front().Record.Base.Self);
@@ -291,19 +291,19 @@ namespace DxfIO::Down
 
   TEST_CASE("down: ByBlock and ByLayer are no linetypes of R12")
   {
-    const Document out = Narrowed(Fresh(), Version::R12, nullptr);
+    const Drawing out = Narrowed(Fresh(), Version::R12, nullptr);
     CHECK(out.LType.Records.size() == 1);
     CHECK(out.LType.Records.front().Record.Name == "Continuous");
   }
 
   TEST_CASE("down: the two spaces take R12's names, other sheets are left out")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Blocks.push_back(Blocks::Definition{});
     from.Blocks.back().Block.Name = "*Paper_Space7";
     from.Blocks.push_back(Blocks::Definition{});
     from.Blocks.back().Block.Name = "Door";
-    const Document out            = Narrowed(from, Version::R12, nullptr);
+    const Drawing out             = Narrowed(from, Version::R12, nullptr);
     REQUIRE(out.Blocks.size()      == 3);
     CHECK(out.Blocks[0].Block.Name == "$MODEL_SPACE");
     CHECK(out.Blocks[1].Block.Name == "$PAPER_SPACE");
@@ -313,24 +313,24 @@ namespace DxfIO::Down
 
   TEST_CASE("down: R10 has neither applications nor dimension styles")
   {
-    const Document out = Narrowed(Fresh(), Version::R10, nullptr);
+    const Drawing out = Narrowed(Fresh(), Version::R10, nullptr);
     CHECK(out.AppId.Head.Name.empty());
     CHECK(out.DimStyle.Head.Name.empty());
-    const Document kept = Narrowed(Fresh(), Version::R12, nullptr);
+    const Drawing kept = Narrowed(Fresh(), Version::R12, nullptr);
     CHECK_FALSE(kept.AppId.Head.Name.empty());
     CHECK_FALSE(kept.DimStyle.Head.Name.empty());
   }
 
   TEST_CASE("down: a kind R12 has stays, its handle and extended data with it")
   {
-    Document       from = Fresh();
+    Drawing        from = Fresh();
     Entities::Line line{};
     line.Record.Base.Self  = Handle{0xB0};
     line.Record.Base.Owner = Handle{0x1F};
     line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Tags = {}});
     line.Record.Base.Reactors.push_back(Handle{0x20});
     from.Entities.emplace_back(line);
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     REQUIRE(out.Entities.size() == 1);
     const Base &base = Entities::Based(out.Entities.front());
     CHECK(base.Self == Handle{0xB0});
@@ -341,14 +341,14 @@ namespace DxfIO::Down
 
   TEST_CASE("down: a kind R12 has not is left out and told")
   {
-    Document       from = Fresh();
+    Drawing        from = Fresh();
     Entities::Mesh mesh{};
     mesh.Record.Base.Self = Handle{0xC0};
     from.Entities.emplace_back(mesh);
     from.Entities.emplace_back(Unknown{.Type = Symbol{"MESH"}});
     from.Entities.emplace_back(Entities::Line{});
     std::vector<Issue> issues;
-    const Document     out = Narrowed(from, Version::R12, &issues);
+    const Drawing      out = Narrowed(from, Version::R12, &issues);
     REQUIRE(out.Entities.size() == 1);
     CHECK(std::holds_alternative<Entities::Line>(out.Entities.front()));
     REQUIRE(issues.size()   == 2);
@@ -360,9 +360,9 @@ namespace DxfIO::Down
 
   TEST_CASE("down: a lightweight polyline becomes the POLYLINE R12 has")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Entities.emplace_back(Light(1 + 128));
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     REQUIRE(out.Entities.size() == 1);
     const auto &heavy = std::get<Entities::Polyline>(out.Entities.front());
     CHECK(heavy.Record.Layer     == "Walls");
@@ -376,11 +376,11 @@ namespace DxfIO::Down
 
   TEST_CASE("down: the POLYLINE made of a lightweight one has its vertices, then a SEQEND")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Entities.emplace_back(Light(1 + 128));
-    const Handle   first = Handle{Past(from).Value};
-    const Document out   = Narrowed(from, Version::R12, nullptr);
-    const auto    &heavy = std::get<Entities::Polyline>(out.Entities.front());
+    const Handle  first = Handle{Past(from).Value};
+    const Drawing out   = Narrowed(from, Version::R12, nullptr);
+    const auto   &heavy = std::get<Entities::Polyline>(out.Entities.front());
     REQUIRE(heavy.Vertices.Children.size() == 2);
     const Entities::Vertex &bulged = heavy.Vertices.Children[0];
     CHECK(bulged.Position         == Vector{.X = 1, .Y = 2});
@@ -395,27 +395,27 @@ namespace DxfIO::Down
 
   TEST_CASE("down: flags R12 has not stay out of a polyline made")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Entities.emplace_back(Light(2));
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     CHECK(std::get<Entities::Polyline>(out.Entities.front()).Flags == 0);
   }
 
   TEST_CASE("down: a polyline with no width takes none")
   {
-    Document             from = Fresh();
+    Drawing              from = Fresh();
     Entities::LwPolyline one  = Light(0);
     one.Width                 = std::nullopt;
     from.Entities.emplace_back(one);
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     CHECK(std::get<Entities::Polyline>(out.Entities.front()).StartWidth == 0.0);
   }
 
   TEST_CASE("down: the seed passes the handles a conversion took")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Entities.emplace_back(Light(0));
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     CHECK(Past(out).Value
           <= std::get<Handle>(std::ranges::find(out.Header, "$HANDSEED", &Header::Variable::Name)
                                   ->Values.front()
@@ -425,18 +425,18 @@ namespace DxfIO::Down
 
   TEST_CASE("down: a header with no seed is left so")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     std::erase_if(from.Header,
                   [](const Header::Variable &one) -> bool { return one.Name == "$HANDSEED"; });
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     CHECK(std::ranges::find(out.Header, "$HANDSEED", &Header::Variable::Name) == out.Header.end());
   }
 
   TEST_CASE("down: a seed with no value is left so")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     std::ranges::find(from.Header, "$HANDSEED", &Header::Variable::Name)->Values.clear();
-    const Document out = Narrowed(from, Version::R12, nullptr);
+    const Drawing out = Narrowed(from, Version::R12, nullptr);
     CHECK(std::ranges::find(out.Header, "$HANDSEED", &Header::Variable::Name)->Values.empty());
   }
 
@@ -445,8 +445,7 @@ namespace DxfIO::Down
     const auto read = Load(Bytes("entities-r2018.dxf"));
     REQUIRE(read);
     std::vector<Issue> issues;
-    const auto         saved =
-        Tests::Written(read->Document, SaveOptions{.Release = Version::R12}, &issues);
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R12}, &issues);
     REQUIRE(saved);
     CHECK(saved->contains("AC1009"));
     CHECK_FALSE(saved->contains("AcDbEntity"));
@@ -460,9 +459,9 @@ namespace DxfIO::Down
   {
     const auto read = Load(Bytes("entities-r2018.dxf"));
     REQUIRE(read);
-    CHECK(Narrowed(read->Document, Version::R2018, nullptr) == read->Document);
-    const Document narrowed = Narrowed(read->Document, Version::R2000, nullptr);
-    const auto     declares = [&narrowed](std::string_view name) -> bool
+    CHECK(Narrowed(read->Drawing, Version::R2018, nullptr) == read->Drawing);
+    const Drawing narrowed = Narrowed(read->Drawing, Version::R2000, nullptr);
+    const auto    declares = [&narrowed](std::string_view name) -> bool
     {
       return std::ranges::any_of(narrowed.Classes,
                                  [name](const Raw &one) -> bool
@@ -474,11 +473,11 @@ namespace DxfIO::Down
     };
     CHECK(declares("LAYOUT"));
     CHECK(declares("ACDBPLACEHOLDER"));
-    const auto saved = Tests::Written(read->Document, SaveOptions{.Release = Version::R2000});
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(saved);
     const auto again = Load(*saved);
     REQUIRE(again);
-    for (const Audit::Finding &one : Audit::Check(again->Document).Findings)
+    for (const Audit::Finding &one : Audit::Check(again->Drawing).Findings)
     {
       CHECK_FALSE(one.What.starts_with("no CLASS for"));
     }
@@ -489,22 +488,22 @@ namespace DxfIO::Down
     const std::string text = Bytes("empty-r12.dxf");
     const auto        read = Load(text);
     REQUIRE(read);
-    const auto saved = Tests::Written(read->Document, SaveOptions{.Release = Version::R12});
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     CHECK(saved->contains("$MODEL_SPACE"));
   }
 
   TEST_CASE("down: from R2000 a drawing keeps its sections")
   {
-    const Document from = Fresh();
+    const Drawing from = Fresh();
     CHECK(Narrowed(from, Version::R2000, nullptr).Order == from.Order);
     CHECK(Narrowed(from, Version::R2013, nullptr)       == from);
   }
 
   TEST_CASE("down: R13 and R14 keep their sections and handles")
   {
-    const Document from = Fresh();
-    const Document out  = Narrowed(from, Version::R14, nullptr);
+    const Drawing from = Fresh();
+    const Drawing out  = Narrowed(from, Version::R14, nullptr);
     CHECK(out.Order == from.Order);
     CHECK(out.Layer.Records.front().Record.Base.Self
           == from.Layer.Records.front().Record.Base.Self);
@@ -516,12 +515,12 @@ namespace DxfIO::Down
 
   TEST_CASE("down: R13 and R14 name no section they leave out")
   {
-    Document                       from  = Fresh();
+    Drawing                        from  = Fresh();
     const std::vector<std::string> order = from.Order;
     from.Sections.push_back(
         Section{.Name = "THUMBNAILIMAGE", .Tags = {Tag{.Code = 90, .Value = std::int64_t{0}}}});
     from.Order.emplace_back("THUMBNAILIMAGE");
-    const Document out = Narrowed(from, Version::R14, nullptr);
+    const Drawing out = Narrowed(from, Version::R14, nullptr);
     CHECK(out.Sections.empty());
     CHECK(out.Order == order);
     const auto saved = Tests::Written(from, SaveOptions{.Release = Version::R13});
@@ -531,7 +530,7 @@ namespace DxfIO::Down
 
   TEST_CASE("down: R13 and R14 hold no object they have no kind for")
   {
-    const Document out = Narrowed(Fresh(), Version::R14, nullptr);
+    const Drawing out = Narrowed(Fresh(), Version::R14, nullptr);
     CHECK(std::ranges::none_of(out.Objects, Unkept));
     const auto &root = std::get<Objects::Dictionary>(out.Objects.front());
     REQUIRE(root.Entries.size() == 2);
@@ -542,11 +541,11 @@ namespace DxfIO::Down
 
   TEST_CASE("down: an image's reactor stays with its image")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Objects.emplace_back(Objects::ImageDefReactor{
         .Base = {.Self = Handle{0x900}, .Owner = Handle{0x901}},
     });
-    const Document out = Narrowed(from, Version::R14, nullptr);
+    const Drawing out = Narrowed(from, Version::R14, nullptr);
     CHECK(std::ranges::any_of(out.Objects, [](const Object &one) -> bool
                               { return std::holds_alternative<Objects::ImageDefReactor>(one); }));
   }
@@ -555,19 +554,19 @@ namespace DxfIO::Down
   {
     const auto read = Load(Bytes("rasters-r2018.dxf"));
     REQUIRE(read);
-    const std::set<Handle> left = Pictures(read->Document);
+    const std::set<Handle> left = Pictures(read->Drawing);
     REQUIRE(left.size() == 7);
-    const Document out = Narrowed(read->Document, Version::R13, nullptr);
+    const Drawing out = Narrowed(read->Drawing, Version::R13, nullptr);
     REQUIRE(std::ranges::any_of(out.Objects, Pictured));
     CHECK(std::ranges::none_of(out.Objects, Watching));
     CHECK_FALSE(Watches(out, left));
-    CHECK(std::ranges::count_if(Narrowed(read->Document, Version::R14, nullptr).Objects, Watching)
+    CHECK(std::ranges::count_if(Narrowed(read->Drawing, Version::R14, nullptr).Objects, Watching)
           == 2);
   }
 
   TEST_CASE("down: R13 takes what it leaves out from a group, and the reactors it owned")
   {
-    Document        from = Fresh();
+    Drawing         from = Fresh();
     Entities::Image image{};
     image.Record.Base.Self = Handle{0x900};
     Entities::Line line{};
@@ -596,7 +595,7 @@ namespace DxfIO::Down
     from.Objects.emplace_back(
         Objects::ImageDefReactor{.Base = {.Self = Handle{0x904}, .Owner = Handle{0x901}}});
     from.Objects.emplace_back(Objects::ImageDefReactor{.Base = {.Self = Handle{0x905}}});
-    const Document out = Narrowed(from, Version::R13, nullptr);
+    const Drawing out = Narrowed(from, Version::R13, nullptr);
     const auto kept = std::ranges::find_if(out.Objects, [](const Object &one) -> bool
                                            { return std::holds_alternative<Objects::Group>(one); });
     REQUIRE(kept != out.Objects.end());
@@ -609,30 +608,30 @@ namespace DxfIO::Down
 
   TEST_CASE("down: an entry may name its record by a hard pointer")
   {
-    Document   from = Fresh();
+    Drawing    from = Fresh();
     auto      &root = std::get<Objects::Dictionary>(from.Objects.front());
     const auto held = std::ranges::find(root.Entries, "ACAD_GROUP", &Objects::Entry::Name);
     REQUIRE(held != root.Entries.end());
-    held->Hard         = held->Soft;
-    held->Soft         = {};
-    const Document out = Narrowed(from, Version::R14, nullptr);
+    held->Hard        = held->Soft;
+    held->Soft        = {};
+    const Drawing out = Narrowed(from, Version::R14, nullptr);
     CHECK(out.Objects.size() == 4);
   }
 
   TEST_CASE("down: a dictionary naming no record leaves nothing behind")
   {
-    Document   from = Fresh();
+    Drawing    from = Fresh();
     auto      &root = std::get<Objects::Dictionary>(from.Objects.front());
     const auto held = std::ranges::find(root.Entries, "ACAD_GROUP", &Objects::Entry::Name);
     REQUIRE(held != root.Entries.end());
-    held->Soft         = Handle{0xFFFF};
-    const Document out = Narrowed(from, Version::R14, nullptr);
+    held->Soft        = Handle{0xFFFF};
+    const Drawing out = Narrowed(from, Version::R14, nullptr);
     CHECK(out.Objects.size() == 3);
   }
 
   TEST_CASE("down: dictionaries that name each other end")
   {
-    Document   from = Fresh();
+    Drawing    from = Fresh();
     auto      &root = std::get<Objects::Dictionary>(from.Objects.front());
     const auto held = std::ranges::find(root.Entries, "ACAD_GROUP", &Objects::Entry::Name);
     REQUIRE(held != root.Entries.end());
@@ -651,24 +650,24 @@ namespace DxfIO::Down
 
   TEST_CASE("down: a drawing with no root dictionary keeps no object")
   {
-    Document none = Fresh();
+    Drawing none = Fresh();
     none.Objects.clear();
     CHECK(Narrowed(none, Version::R14, nullptr).Objects.empty());
 
-    Document odd        = Fresh();
+    Drawing odd         = Fresh();
     odd.Objects.front() = Objects::Scale{};
     CHECK(Narrowed(odd, Version::R14, nullptr).Objects.empty());
   }
 
   TEST_CASE("down: a block record keeps no layout, an extra sheet goes")
   {
-    Document            from = Fresh();
+    Drawing             from = Fresh();
     Tables::BlockRecord sheet{};
     sheet.Record.Name = "*Paper_Space3";
     from.BlockRecord.Records.push_back(sheet);
     from.Blocks.push_back(Blocks::Definition{});
     from.Blocks.back().Block.Name = "*Paper_Space3";
-    const Document out            = Narrowed(from, Version::R14, nullptr);
+    const Drawing out             = Narrowed(from, Version::R14, nullptr);
     for (const Tables::BlockRecord &one : out.BlockRecord.Records)
     {
       CHECK_FALSE(one.Layout);
@@ -697,18 +696,18 @@ namespace DxfIO::Down
 
   TEST_CASE("down: a lightweight polyline stays from R14, turns before it")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Entities.emplace_back(Light(0));
     CHECK(std::holds_alternative<Entities::LwPolyline>(
         Narrowed(from, Version::R14, nullptr).Entities.front()));
-    const Document out   = Narrowed(from, Version::R13, nullptr);
-    const auto    &heavy = std::get<Entities::Polyline>(out.Entities.front());
+    const Drawing out   = Narrowed(from, Version::R13, nullptr);
+    const auto   &heavy = std::get<Entities::Polyline>(out.Entities.front());
     CHECK(heavy.Vertices.Children[0].Record.Base.Owner == heavy.Record.Base.Self);
   }
 
   TEST_CASE("down: R13 keeps an entity's owner, its dictionary and reactors go")
   {
-    Document       from = Fresh();
+    Drawing        from = Fresh();
     Entities::Line line{};
     line.Record.Base.Self       = Handle{0xB0};
     line.Record.Base.Owner      = Handle{0x1F};
@@ -724,8 +723,8 @@ namespace DxfIO::Down
     Objects::Scale scale{};
     scale.Base.Self = Handle{0x21};
     from.Objects.emplace_back(scale);
-    const Document out  = Narrowed(from, Version::R13, nullptr);
-    const Base    &base = Entities::Based(out.Entities.front());
+    const Drawing out  = Narrowed(from, Version::R13, nullptr);
+    const Base   &base = Entities::Based(out.Entities.front());
     CHECK(base.Owner == Handle{0x1F});
     CHECK_FALSE(base.Dictionary);
     CHECK(base.Reactors.empty());
@@ -735,7 +734,7 @@ namespace DxfIO::Down
 
   TEST_CASE("down: R10 keeps no extended data, it has no applications")
   {
-    Document       from = Fresh();
+    Drawing        from = Fresh();
     Entities::Line line{};
     line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Tags = {}});
     from.Entities.emplace_back(line);
@@ -744,7 +743,7 @@ namespace DxfIO::Down
 
   TEST_CASE("down: R14 keeps the reactors of what it keeps")
   {
-    Document       from = Fresh();
+    Drawing        from = Fresh();
     Entities::Line line{};
     line.Record.Base.Self = Handle{0xB0};
     line.Record.Base.Reactors.push_back(Handle{0xC1});
@@ -752,23 +751,23 @@ namespace DxfIO::Down
     boundary.Record.Base.Self = Handle{0xC1};
     from.Entities.emplace_back(line);
     from.Entities.emplace_back(boundary);
-    const Document out = Narrowed(from, Version::R14, nullptr);
+    const Drawing out = Narrowed(from, Version::R14, nullptr);
     CHECK(Entities::Based(out.Entities.front()).Reactors.size() == 1);
   }
 
   TEST_CASE("down: what is in a block is held to the same rules")
   {
-    Document       from = Fresh();
+    Drawing        from = Fresh();
     Entities::Line line{};
     line.Record.Base.Dictionary = Handle{0x20};
     from.Blocks.front().Entities.emplace_back(line);
-    const Document out = Narrowed(from, Version::R14, nullptr);
+    const Drawing out = Narrowed(from, Version::R14, nullptr);
     CHECK_FALSE(Entities::Based(out.Blocks.front().Entities.front()).Dictionary);
   }
 
   TEST_CASE("down: a class stays only for a kind R13 and R14 declare")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Classes.clear();
     from.Classes.push_back(Raw{
         .Type = "CLASS",
@@ -783,15 +782,15 @@ namespace DxfIO::Down
         .Tags = {Tag{.Code = 1, .Value = std::int64_t{1}}},
     });
     from.Classes.push_back(Raw{.Type = "CLASS", .Tags = {}});
-    const Document out = Narrowed(from, Version::R14, nullptr);
+    const Drawing out = Narrowed(from, Version::R14, nullptr);
     REQUIRE(out.Classes.size() == 1);
     CHECK(std::get<std::string>(out.Classes.front().Tags.front().Value) == "IMAGE");
   }
 
   TEST_CASE("down: objects newer than R2007 go below it, their entries too")
   {
-    Document from = Fresh();
-    Unknown  table{.Type = Symbol{"TABLECONTENT"}};
+    Drawing from = Fresh();
+    Unknown table{.Type = Symbol{"TABLECONTENT"}};
     table.Base.Self = Handle{0x900};
     Unknown other{.Type = Symbol{"SOMETHING"}};
     other.Base.Self = Handle{0x901};
@@ -800,7 +799,7 @@ namespace DxfIO::Down
     auto &root = std::get<Objects::Dictionary>(from.Objects.front());
     root.Entries.push_back(Objects::Entry{.Name = "NEW", .Soft = Handle{0x900}, .Hard = {}});
     root.Entries.push_back(Objects::Entry{.Name = "OLD", .Soft = {}, .Hard = Handle{0x900}});
-    const Document out = Narrowed(from, Version::R2004, nullptr);
+    const Drawing out = Narrowed(from, Version::R2004, nullptr);
     CHECK(out.Objects.size() == from.Objects.size() - 1);
     CHECK(std::get<Objects::Dictionary>(out.Objects.front()).Entries.size()
           == std::get<Objects::Dictionary>(from.Objects.front()).Entries.size() - 2);
@@ -809,22 +808,22 @@ namespace DxfIO::Down
 
   TEST_CASE("down: an object gone with no handle takes no entry with it")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Objects.emplace_back(Unknown{.Type = Symbol{"TABLECONTENT"}});
     const std::size_t entries = std::get<Objects::Dictionary>(from.Objects.front()).Entries.size();
     REQUIRE(entries > 0);
-    const Document out = Narrowed(from, Version::R2004, nullptr);
+    const Drawing out = Narrowed(from, Version::R2004, nullptr);
     CHECK(out.Objects.size() == from.Objects.size() - 1);
     CHECK(std::get<Objects::Dictionary>(out.Objects.front()).Entries.size() == entries);
   }
 
   TEST_CASE("down: a visual style gone with no handle is told, and takes no entry")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Objects.emplace_back(Objects::VisualStyle{});
     const std::size_t  entries = std::get<Objects::Dictionary>(from.Objects.front()).Entries.size();
     std::vector<Issue> told;
-    const Document     out = Narrowed(from, Version::R2010, &told);
+    const Drawing      out = Narrowed(from, Version::R2010, &told);
     CHECK(out.Objects.size() == from.Objects.size() - 1);
     CHECK(std::get<Objects::Dictionary>(out.Objects.front()).Entries.size() == entries);
     REQUIRE(told.size()     == 1);
@@ -833,10 +832,10 @@ namespace DxfIO::Down
 
   TEST_CASE("down: told which release has no such entity")
   {
-    Document from = Fresh();
+    Drawing from = Fresh();
     from.Entities.emplace_back(Entities::Hatch{});
     std::vector<Issue> issues;
-    const Document     out = Narrowed(from, Version::R13, &issues);
+    const Drawing      out = Narrowed(from, Version::R13, &issues);
     REQUIRE(issues.size()     == 1);
     CHECK(issues.front().What == "HATCH left out, R13 has no such entity");
   }
@@ -847,15 +846,15 @@ namespace DxfIO::Down
     REQUIRE(drawn);
     std::vector<Issue> told;
     const auto         saved =
-        Tests::Written(drawn->Document, SaveOptions{.Release = Version::R2010}, &told);
+        Tests::Written(drawn->Drawing, SaveOptions{.Release = Version::R2010}, &told);
     REQUIRE(saved);
     REQUIRE(told.size()     == 13);
     CHECK(told.front().What == "visual styles left out, R2010 holds them otherwise");
     CHECK(told.at(1).What   == "3DSOLID left out, its body is not in R2010's form");
     const auto back = Load(*saved);
     REQUIRE(back);
-    CHECK(std::ranges::none_of(back->Document.Entities, Bodily));
-    CHECK(std::ranges::any_of(back->Document.Entities, Coiled));
+    CHECK(std::ranges::none_of(back->Drawing.Entities, Bodily));
+    CHECK(std::ranges::any_of(back->Drawing.Entities, Coiled));
   }
 
   TEST_CASE("down: a body in lines has no form from R2013, it goes the same way")
@@ -864,7 +863,7 @@ namespace DxfIO::Down
     REQUIRE(drawn);
     std::vector<Issue> told;
     const auto         saved =
-        Tests::Written(drawn->Document, SaveOptions{.Release = Version::R2018}, &told);
+        Tests::Written(drawn->Drawing, SaveOptions{.Release = Version::R2018}, &told);
     REQUIRE(saved);
     REQUIRE(told.size()   == 13);
     CHECK(told.at(1).What == "3DSOLID left out, its body is not in R2018's form");
@@ -875,27 +874,27 @@ namespace DxfIO::Down
     const auto drawn = Load(Bytes("kinds-r2007.dxf"));
     REQUIRE(drawn);
     std::vector<Issue> told;
-    REQUIRE(Tests::Written(drawn->Document, SaveOptions{.Release = Version::R2000}, &told));
+    REQUIRE(Tests::Written(drawn->Drawing, SaveOptions{.Release = Version::R2000}, &told));
     CHECK(told.empty());
   }
 
   TEST_CASE("down: a body with nothing of its own stays, whatever the release")
   {
-    Document drawing = Fresh();
+    Drawing drawing = Fresh();
     drawing.Entities.emplace_back(Entities::Solid3d{});
-    const Document one = Narrowed(drawing, Version::R2010, nullptr);
+    const Drawing one = Narrowed(drawing, Version::R2010, nullptr);
     CHECK(one.Entities.size() == drawing.Entities.size());
-    const Document two = Narrowed(drawing, Version::R2018, nullptr);
+    const Drawing two = Narrowed(drawing, Version::R2018, nullptr);
     CHECK(two.Entities.size() == drawing.Entities.size());
   }
 
   TEST_CASE("down: a body in a block goes as well, no list of issues asked")
   {
-    Document          drawing = Fresh();
+    Drawing           drawing = Fresh();
     Entities::Solid3d solid{};
     solid.Geometry->Guid = "{0}";
     drawing.Blocks.front().Entities.emplace_back(solid);
-    const Document one = Narrowed(drawing, Version::R2010, nullptr);
+    const Drawing one = Narrowed(drawing, Version::R2010, nullptr);
     CHECK(one.Blocks.front().Entities.empty());
   }
 
@@ -903,7 +902,7 @@ namespace DxfIO::Down
   {
     const auto drawn = Load(Bytes("kinds-r2018.dxf"));
     REQUIRE(drawn);
-    const Document one = Narrowed(drawn->Document, Version::R12, nullptr);
+    const Drawing one = Narrowed(drawn->Drawing, Version::R12, nullptr);
     CHECK(std::ranges::none_of(one.Layer.Records, [](const Tables::Layer &layer) -> bool
                                { return layer.Record.Name.starts_with('*'); }));
   }
@@ -911,7 +910,7 @@ namespace DxfIO::Down
   TEST_CASE("down: R12 moves what is on a layer named by a star to layer 0, each told")
   {
     std::vector<Issue> told;
-    const Document     out = Narrowed(Starred(), Version::R12, &told);
+    const Drawing      out = Narrowed(Starred(), Version::R12, &told);
     REQUIRE(told.size() == 4);
     CHECK(told.front().What
           == "POLYLINE moved from layer *ADSK_CONSTRAINTS to 0, R12 has no layer named by a star");
@@ -927,28 +926,28 @@ namespace DxfIO::Down
 
   TEST_CASE("down: R10 moves them the same, untold, and the audit finds every layer")
   {
-    const Document from = Starred();
+    const Drawing from = Starred();
     CHECK(Narrowed(from, Version::R10, nullptr).Entities
           == Narrowed(from, Version::R12, nullptr).Entities);
     const auto saved = Tests::Written(from, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     const auto back = Load(*saved);
     REQUIRE(back);
-    CHECK(std::ranges::none_of(Audit::Check(back->Document).Findings, Unlayered));
+    CHECK(std::ranges::none_of(Audit::Check(back->Drawing).Findings, Unlayered));
   }
 
   TEST_CASE("down: a table whose cells another release lays out otherwise is left out, told")
   {
     const auto read = Load(Bytes("schedules-r2018.dxf"));
     REQUIRE(read);
-    REQUIRE(std::ranges::count_if(read->Document.Entities, Tabular) == 3);
-    const Untabled seven = Untable(read->Document, Version::R2007);
+    REQUIRE(std::ranges::count_if(read->Drawing.Entities, Tabular) == 3);
+    const Untabled seven = Untable(read->Drawing, Version::R2007);
     CHECK(seven.Told == 3);
     CHECK(seven.Kept == 0);
-    const Untabled four = Untable(read->Document, Version::R2004);
+    const Untabled four = Untable(read->Drawing, Version::R2004);
     CHECK(four.Told == 3);
     CHECK(four.Kept == 0);
-    const Untabled two = Untable(read->Document, Version::R2000);
+    const Untabled two = Untable(read->Drawing, Version::R2000);
     CHECK(two.Told == 3);
     CHECK(two.Kept == 0);
   }
@@ -957,18 +956,18 @@ namespace DxfIO::Down
   {
     const auto read = Load(Bytes("schedules-r2018.dxf"));
     REQUIRE(read);
-    CHECK(std::ranges::count_if(Narrowed(read->Document, Version::R2010, nullptr).Entities, Tabular)
+    CHECK(std::ranges::count_if(Narrowed(read->Drawing, Version::R2010, nullptr).Entities, Tabular)
           == 3);
     const auto old = Load(Bytes("schedules-r2000.dxf"));
     REQUIRE(old);
-    CHECK(std::ranges::count_if(Narrowed(old->Document, Version::R2004, nullptr).Entities, Tabular)
+    CHECK(std::ranges::count_if(Narrowed(old->Drawing, Version::R2004, nullptr).Entities, Tabular)
           == 3);
-    Document drawing = Fresh();
+    Drawing drawing = Fresh();
     drawing.Entities.emplace_back(Entities::AcadTable{});
     CHECK(std::ranges::count_if(Narrowed(drawing, Version::R2007, nullptr).Entities, Tabular) == 1);
     std::vector<Issue> told;
-    CHECK(Narrowed(read->Document, Version::R14, &told).Entities.size()
-          < read->Document.Entities.size());
+    CHECK(Narrowed(read->Drawing, Version::R14, &told).Entities.size()
+          < read->Drawing.Entities.size());
     CHECK(std::ranges::count(told, "ACAD_TABLE left out, R14 has no such entity", &Issue::What)
           == 3);
   }
@@ -977,7 +976,7 @@ namespace DxfIO::Down
   {
     const auto drawn = Load(Bytes("schedules-r2004.dxf"));
     REQUIRE(drawn);
-    const Document old = Narrowed(drawn->Document, Version::R2000, nullptr);
+    const Drawing old = Narrowed(drawn->Drawing, Version::R2000, nullptr);
     CHECK(std::ranges::count_if(old.Objects, Dated) == 3);
     CHECK(std::ranges::none_of(old.Objects, Datum));
     const auto saved = Tests::Written(old, SaveOptions{.Release = Version::R2000});
@@ -990,7 +989,7 @@ namespace DxfIO::Down
   {
     const auto back = Load(Bytes("schedules-r2000.dxf"));
     REQUIRE(back);
-    const Document lifted = Narrowed(back->Document, Version::R2004, nullptr);
+    const Drawing lifted = Narrowed(back->Drawing, Version::R2004, nullptr);
     CHECK(std::ranges::count_if(lifted.Objects, Datum) == 3);
   }
 
@@ -1000,12 +999,12 @@ namespace DxfIO::Down
     const auto drawn = Load(Bytes("kinds-r2004.dxf"));
     REQUIRE(drawn);
     std::vector<Issue> told;
-    const Document     lifted = Narrowed(drawn->Document, Version::R2018, &told);
+    const Drawing      lifted = Narrowed(drawn->Drawing, Version::R2018, &told);
     CHECK(std::ranges::none_of(lifted.Objects, Looking));
     REQUIRE_FALSE(told.empty());
     CHECK(told.front().What == "visual styles left out, R2018 holds them otherwise");
     CHECK(std::ranges::none_of(lifted.VPort.Records, Pointing, &Tables::VPort::VisualStyle));
-    const Document same = Narrowed(drawn->Document, Version::R2007, nullptr);
+    const Drawing same = Narrowed(drawn->Drawing, Version::R2007, nullptr);
     CHECK(std::ranges::any_of(same.Objects, Looking));
   }
 
@@ -1013,15 +1012,15 @@ namespace DxfIO::Down
   {
     const auto newer = Load(Bytes("kinds-r2018.dxf"));
     REQUIRE(newer);
-    const Document down = Narrowed(newer->Document, Version::R2010, nullptr);
-    const auto style = std::ranges::find(down.Header, "$INTERFEREOBJVS", &Header::Variable::Name);
+    const Drawing down = Narrowed(newer->Drawing, Version::R2010, nullptr);
+    const auto style   = std::ranges::find(down.Header, "$INTERFEREOBJVS", &Header::Variable::Name);
     REQUIRE(style != down.Header.end());
     CHECK_FALSE(std::get<Handle>(style->Values.front().Value));
   }
 
   TEST_CASE("down: a viewport and a view lose a style that goes, keep one that stays")
   {
-    Document             drawing = Create(Version::R2018);
+    Drawing              drawing = Create(Version::R2018);
     Objects::VisualStyle look{};
     look.Base.Self = Handle{.Value = 0x900};
     drawing.Objects.emplace_back(look);
@@ -1035,7 +1034,7 @@ namespace DxfIO::Down
     Tables::View view{};
     view.VisualStyle = Handle{.Value = 0x900};
     drawing.View.Records.push_back(view);
-    const Document down = Narrowed(drawing, Version::R2010, nullptr);
+    const Drawing down = Narrowed(drawing, Version::R2010, nullptr);
     CHECK_FALSE(
         std::get<Entities::Viewport>(down.Blocks.front().Entities.back()).Data->VisualStyle);
     CHECK(std::get<Entities::Viewport>(down.Entities.at(down.Entities.size() - 2)).Data->VisualStyle
@@ -1045,7 +1044,7 @@ namespace DxfIO::Down
 
   TEST_CASE("down: no visual style to leave out, nothing told")
   {
-    const Document     drawing = Create(Version::R2018);
+    const Drawing      drawing = Create(Version::R2018);
     std::vector<Issue> told;
     static_cast<void>(Narrowed(drawing, Version::R2010, &told));
     CHECK(told.empty());
@@ -1059,8 +1058,8 @@ namespace DxfIO::Down
   {
     const auto drawn = Load(Bytes("kinds-r2018.dxf"));
     REQUIRE(drawn);
-    Document drawing = drawn->Document;
-    Handle   look{};
+    Drawing drawing = drawn->Drawing;
+    Handle  look{};
     for (const Object &one : drawing.Objects)
     {
       if (const auto *held = std::get_if<Objects::VisualStyle>(&one))
@@ -1076,14 +1075,14 @@ namespace DxfIO::Down
     entry.Hard = look;
     hard.Entries.push_back(entry);
     drawing.Objects.emplace_back(hard);
-    const Document down = Narrowed(drawing, Version::R2010, nullptr);
+    const Drawing down = Narrowed(drawing, Version::R2010, nullptr);
     CHECK(std::get<Objects::Dictionary>(down.Objects.back()).Entries.empty());
   }
 
   TEST_CASE("down: R14 leaves out what a kept dictionary names but has no kind for")
   {
-    Document drawing = Create(Version::R2018);
-    Handle   group{};
+    Drawing drawing = Create(Version::R2018);
+    Handle  group{};
     for (const Objects::Entry &one : std::get<Objects::Dictionary>(drawing.Objects.front()).Entries)
     {
       if (one.Name == "ACAD_GROUP")
@@ -1107,16 +1106,16 @@ namespace DxfIO::Down
       }
     }
     drawing.Objects.emplace_back(scale);
-    const Document down = Narrowed(drawing, Version::R14, nullptr);
+    const Drawing down = Narrowed(drawing, Version::R14, nullptr);
     CHECK(std::ranges::none_of(down.Objects, [](const Object &one) -> bool
                                { return std::holds_alternative<Objects::Scale>(one); }));
   }
 
   TEST_CASE("down: R14 with no root first keeps an image's reactor as it is")
   {
-    Document drawing    = Create(Version::R2018);
-    drawing.Objects     = {Object{Objects::ImageDefReactor{}}};
-    const Document down = Narrowed(drawing, Version::R14, nullptr);
+    Drawing drawing    = Create(Version::R2018);
+    drawing.Objects    = {Object{Objects::ImageDefReactor{}}};
+    const Drawing down = Narrowed(drawing, Version::R14, nullptr);
     REQUIRE(down.Objects.size() == 1);
     CHECK(std::holds_alternative<Objects::ImageDefReactor>(down.Objects.front()));
   }

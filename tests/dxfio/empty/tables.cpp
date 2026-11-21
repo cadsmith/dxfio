@@ -24,9 +24,9 @@ namespace DxfIO::Empty
   {
     struct Made
     {
-      Seed     Handles;
-      Roots    Ids{Taken(Handles)};
-      Document Drawing{};
+      Seed           Handles;
+      Roots          Ids{Taken(Handles)};
+      DxfIO::Drawing Drawing{};
     };
 
     template <class KindT>
@@ -45,7 +45,7 @@ namespace DxfIO::Empty
   {
     Made fresh;
     Tables(fresh.Drawing, fresh.Ids, fresh.Handles);
-    const Document  &drawing = fresh.Drawing;
+    const Drawing   &drawing = fresh.Drawing;
     std::set<Handle> seen;
     Owned(drawing.VPort, seen);
     Owned(drawing.LType, seen);
@@ -103,7 +103,7 @@ namespace DxfIO::Empty
   {
     Made fresh;
     Tables(fresh.Drawing, fresh.Ids, fresh.Handles);
-    const Document &drawing = fresh.Drawing;
+    const Drawing &drawing = fresh.Drawing;
     for (const Version release : Releases)
     {
       const std::string source = Acad(Fixture("empty", release));

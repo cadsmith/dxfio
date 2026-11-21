@@ -10,7 +10,7 @@ set(DXFIO_HEADERS
   dxfio/colors.hpp
   dxfio/corners.hpp
   dxfio/create.hpp
-  dxfio/document.hpp
+  dxfio/drawing.hpp
   dxfio/dxfio.hpp
   dxfio/edit/add.hpp
   dxfio/edit/find.hpp

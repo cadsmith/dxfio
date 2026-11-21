@@ -79,7 +79,7 @@ auto main(int count, char **paths) -> int
       std::println("{}: issue on line {}: {}", paths[at], issue.Line.value_or(0), issue.What);
       ++failed;
     }
-    const DxfIO::Audit::Report report = DxfIO::Audit::Check(loaded->Document);
+    const DxfIO::Audit::Report report = DxfIO::Audit::Check(loaded->Drawing);
     for (const DxfIO::Audit::Finding &finding : report.Findings)
     {
       std::println("{}: audit: {}", paths[at], finding.What);

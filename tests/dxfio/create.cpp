@@ -85,14 +85,14 @@ namespace DxfIO
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      const Document drawing = Create(release);
+      const Drawing drawing = Create(release);
       CHECK(Header::Declared(drawing.Header) == release);
       const auto once = Tests::Written(drawing, SaveOptions{.Release = release});
       REQUIRE(once);
       const auto read = Load(*once);
       REQUIRE(read);
       CHECK(read->Issues.empty());
-      const auto twice = Tests::Written(read->Document, SaveOptions{.Release = release});
+      const auto twice = Tests::Written(read->Drawing, SaveOptions{.Release = release});
       REQUIRE(twice);
       CHECK(*twice == *once);
     }
@@ -114,14 +114,14 @@ namespace DxfIO
     for (const Version release : {Version::R10, Version::R12, Version::R13, Version::R14})
     {
       CAPTURE(release);
-      const Document drawing = Create(release);
+      const Drawing drawing = Create(release);
       CHECK(Header::Declared(drawing.Header) == release);
       const auto once = Tests::Written(drawing, SaveOptions{.Release = release});
       REQUIRE(once);
       const auto read = Load(*once);
       REQUIRE(read);
       CHECK(read->Issues.empty());
-      const auto twice = Tests::Written(read->Document, SaveOptions{.Release = release});
+      const auto twice = Tests::Written(read->Drawing, SaveOptions{.Release = release});
       REQUIRE(twice);
       CHECK(*twice == *once);
     }
@@ -131,7 +131,7 @@ namespace DxfIO
   {
     for (const Version release : {Version::R13, Version::R14})
     {
-      const Document drawing = Create(release);
+      const Drawing drawing = Create(release);
       CHECK(drawing.Objects.size() == 4);
       CHECK(drawing.Classes.empty());
       CHECK(drawing.DimStyle.Head.Base.Extra.empty());
@@ -142,7 +142,7 @@ namespace DxfIO
       CHECK_FALSE(drawing.Layer.Records.front().Style);
       CHECK_FALSE(drawing.Layer.Records.front().Material);
     }
-    const Document modern = Create(Version::R2000);
+    const Drawing modern = Create(Version::R2000);
     CHECK_FALSE(modern.DimStyle.Head.Base.Extra.empty());
     CHECK(modern.BlockRecord.Records.front().Layout);
     CHECK(modern.Layer.Records.front().Style);
@@ -150,7 +150,7 @@ namespace DxfIO
 
   TEST_CASE("created: R12 holds its own sections and its spaces' names")
   {
-    const Document drawing = Create(Version::R12);
+    const Drawing drawing = Create(Version::R12);
     CHECK(drawing.Order.size() == 4);
     CHECK(drawing.Objects.empty());
     CHECK(drawing.Blocks.front().Block.Name == "$MODEL_SPACE");

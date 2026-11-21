@@ -9,7 +9,7 @@ The color, lineweight and visibility every entity carries in its `Record`, set o
 A new entity takes its color and lineweight from its layer, 0 unless it names another: [Layers](/tutorials/layers/) sets them there.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Entities::Line plain{};
 plain.End = {.X = 100, .Y = 0, .Z = 0};

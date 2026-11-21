@@ -20,7 +20,7 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: an entity is found by its handle, in the entities or in a block")
   {
-    Document drawing = Create();
+    Drawing drawing = Create();
     REQUIRE(AddBlock(drawing, "Door"));
     const auto drawn = Add(drawing, Entities::Line{});
     const auto held  = Add(drawing, Entities::Circle{}, "Door");
@@ -29,8 +29,8 @@ namespace DxfIO::Edit
     Entity *line = FindEntity(drawing, *drawn);
     REQUIRE(line != nullptr);
     CHECK(std::holds_alternative<Entities::Line>(*line));
-    const Document &fixed  = drawing;
-    const Entity   *circle = FindEntity(fixed, *held);
+    const Drawing &fixed  = drawing;
+    const Entity  *circle = FindEntity(fixed, *held);
     REQUIRE(circle != nullptr);
     CHECK(std::holds_alternative<Entities::Circle>(*circle));
     CHECK(FindEntity(fixed, *drawn)  == line);
@@ -41,11 +41,11 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: the null handle finds nothing, though records with no handle are there")
   {
-    Document drawing = Create(Version::R12);
+    Drawing drawing = Create(Version::R12);
     drawing.Entities.emplace_back(Entities::Line{});
     drawing.Blocks.front().Entities.emplace_back(Entities::Circle{});
     drawing.Objects.emplace_back(Objects::Dictionary{});
-    const Document &fixed = drawing;
+    const Drawing &fixed = drawing;
     CHECK(FindEntity(drawing, Handle{}) == nullptr);
     CHECK(FindEntity(fixed, Handle{})   == nullptr);
     CHECK(FindObject(drawing, Handle{}) == nullptr);
@@ -54,12 +54,12 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: an object is found by its handle")
   {
-    Document     drawing = Create();
+    Drawing      drawing = Create();
     const Handle root    = BaseOf(drawing.Objects.front()).Self;
     Object      *found   = FindObject(drawing, root);
     REQUIRE(found != nullptr);
     CHECK(TypeOf(*found) == "DICTIONARY");
-    const Document &fixed = drawing;
+    const Drawing &fixed = drawing;
     CHECK(FindObject(fixed, root) == found);
     CHECK(FindObject(drawing, Handle{.Value = 0xfffff}) == nullptr);
     CHECK(FindObject(fixed, Handle{.Value = 0xfffff})   == nullptr);
@@ -67,11 +67,11 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: a block and a table record are found by name, without case")
   {
-    Document            drawing = Create();
+    Drawing             drawing = Create();
     Blocks::Definition *model   = FindBlock(drawing, "*MODEL_SPACE");
     REQUIRE(model != nullptr);
     CHECK(model->Block.Name == "*Model_Space");
-    const Document &fixed = drawing;
+    const Drawing &fixed = drawing;
     CHECK(FindBlock(fixed, "*paper_space") != nullptr);
     CHECK(FindBlock(drawing, "Door") == nullptr);
     CHECK(FindBlock(fixed, "Door")   == nullptr);

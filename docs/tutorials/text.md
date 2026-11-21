@@ -9,7 +9,7 @@ Single-line TEXT, justified and in a text style added to the STYLE table, and MT
 A STYLE record names the font and proportions text is drawn with: `Width` is the width of the letters over their height and `Oblique` their slant, in degrees. A `Height` of 0, the default, lets each text give its own.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Tables::Style narrow{};
 narrow.Record.Name = "Narrow";
@@ -100,13 +100,13 @@ DxfIO::Edit::Add(drawing, note);
 The codes are in the text itself. Saved to R12, which has no MTEXT, the note becomes plain TEXT, a new one only where the note breaks its own line and not where its width wraps it. What is left shows what is code: `\P` ends a line, and a code with a value, such as `\C1;`, runs to its semicolon.
 
 ```cpp
-DxfIO::Document alone = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing alone = DxfIO::Create(DxfIO::Version::R2018);
 DxfIO::Edit::Add(alone, note);
 const auto older = DxfIO::Save(alone, {.Release = DxfIO::Version::R12})
                        .and_then([](const DxfIO::Saved &flat) { return DxfIO::Load(flat.Bytes); });
 if (older)
 {
-  for (const DxfIO::Entity &one : older->Document.Entities)
+  for (const DxfIO::Entity &one : older->Drawing.Entities)
   {
     if (const auto *line = std::get_if<DxfIO::Entities::Text>(&one))
     {

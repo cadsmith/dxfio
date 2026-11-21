@@ -17,14 +17,14 @@
 
 namespace DxfIO::Entities
 {
-  inline auto Opened(std::string_view stem, Version release) -> DxfIO::Document
+  inline auto Opened(std::string_view stem, Version release) -> DxfIO::Drawing
   {
     const auto read = Load(Acad(Fixture(stem, release)));
     REQUIRE(read);
-    return read->Document;
+    return read->Drawing;
   }
 
-  inline auto Heavy(Version release = Version::R2018) -> DxfIO::Document
+  inline auto Heavy(Version release = Version::R2018) -> DxfIO::Drawing
   {
     return Opened("heavy", release);
   }

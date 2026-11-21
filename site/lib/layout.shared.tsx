@@ -20,6 +20,6 @@ export function baseOptions(): BaseLayoutProps {
 export const homeLinks: BaseLayoutProps['links'] = [
   { text: 'Guide', url: '/guide/start/' },
   { text: 'Tutorials', url: '/tutorials/reading/' },
-  { text: 'Concepts', url: '/concepts/document/' },
+  { text: 'Concepts', url: '/concepts/drawing/' },
   { text: 'Reference', url: '/reference/' },
 ]

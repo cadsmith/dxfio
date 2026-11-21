@@ -22,8 +22,8 @@ namespace DxfIO::Audit
     /**
      *  Reports each group of a code DXF does not define, and leaves it out when the checks fix.
      */
-    template <class DocumentT, class GroupsT>
-    void Checked(Auditor<DocumentT> &with, GroupsT &all, Handle self)
+    template <class DrawingT, class GroupsT>
+    void Checked(Auditor<DrawingT> &with, GroupsT &all, Handle self)
     {
       for (const Tag &one : all)
       {
@@ -33,14 +33,14 @@ namespace DxfIO::Audit
                     self);
         }
       }
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         std::erase_if(all, Undefined);
       }
     }
 
-    template <class DocumentT, class RecordT>
-    void Loosely(Auditor<DocumentT> &with, RecordT &one)
+    template <class DrawingT, class RecordT>
+    void Loosely(Auditor<DrawingT> &with, RecordT &one)
     {
       if (auto *kept = std::get_if<Unknown>(&one))
       {
@@ -54,8 +54,8 @@ namespace DxfIO::Audit
    *  group code": each is an error, in a record's extra groups, its extended data, or a record kept
    *  whole, and left out when fixed.
    */
-  template <class DocumentT>
-  void Grouped(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Grouped(Auditor<DrawingT> &with)
   {
     Bases(*with.Drawing,
           [&with](auto &base) -> void
@@ -87,7 +87,7 @@ namespace DxfIO::Audit
     }
   }
 
-  template void Grouped(Auditor<Document> &with);
+  template void Grouped(Auditor<Drawing> &with);
 
-  template void Grouped(Auditor<const Document> &with);
+  template void Grouped(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

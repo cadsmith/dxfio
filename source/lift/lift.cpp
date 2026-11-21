@@ -30,8 +30,8 @@ namespace DxfIO::Lift
      */
     struct Lifting
     {
-      Document *Into{};
-      Seed     *Handles{};
+      Drawing *Into{};
+      Seed    *Handles{};
     };
 
     /**
@@ -47,7 +47,7 @@ namespace DxfIO::Lift
                                                                          : std::string_view{};
     }
 
-    auto Free(const Document &from) -> Seed
+    auto Free(const Drawing &from) -> Seed
     {
       std::vector<Handle> used;
       Held(from, [&used](Handle one) -> void { used.push_back(one); });
@@ -66,7 +66,7 @@ namespace DxfIO::Lift
       base.Owner = owner;
     }
 
-    auto Record(const Document &drawing, std::string_view block) -> Handle
+    auto Record(const Drawing &drawing, std::string_view block) -> Handle
     {
       return Edit::Find(drawing.BlockRecord, block)->Record.Base.Self;
     }
@@ -98,9 +98,9 @@ namespace DxfIO::Lift
       into.Head.Count = std::max(into.Head.Count, static_cast<int>(into.Records.size()));
     }
 
-    void Tabled(const Lifting &with, Document &from)
+    void Tabled(const Lifting &with, Drawing &from)
     {
-      Document &into = *with.Into;
+      Drawing &into = *with.Into;
       Merged(with, into.VPort, std::move(from.VPort.Records));
       Merged(with, into.LType, std::move(from.LType.Records));
       Merged(with, into.Layer, std::move(from.Layer.Records));
@@ -133,7 +133,7 @@ namespace DxfIO::Lift
      */
     void Blocked(const Lifting &with, Blocks::Definition block)
     {
-      Document              &into  = *with.Into;
+      Drawing               &into  = *with.Into;
       const std::string_view space = Spaced(block.Block.Name);
       if (!space.empty())
       {
@@ -162,7 +162,7 @@ namespace DxfIO::Lift
 
     void Drawn(const Lifting &with, Entities::List all)
     {
-      Document    &into  = *with.Into;
+      Drawing     &into  = *with.Into;
       const Handle model = Record(into, Model);
       const Handle paper = Record(into, Paper);
       for (Entity &one : all)
@@ -175,7 +175,7 @@ namespace DxfIO::Lift
     /**
      *  The lifted drawing's header variables over the release's own, each in the place of its name.
      */
-    void Headed(Document &into, std::vector<Header::Variable> all)
+    void Headed(Drawing &into, std::vector<Header::Variable> all)
     {
       for (Header::Variable &one : all)
       {
@@ -189,20 +189,20 @@ namespace DxfIO::Lift
       }
     }
 
-    void Seeded(Document &into)
+    void Seeded(Drawing &into)
     {
       WriteSeed(into, Handle{.Value = Past(into).Value + 1});
     }
   } // namespace
 
-  auto Lifted(Document from, Version release) -> Document
+  auto Lifted(Drawing from, Version release) -> Drawing
   {
     if (Header::Declared(from.Header) >= Version::R13)
     {
       return from;
     }
     Seed          handles = Free(from);
-    Document      into    = Empty::Whole(release, handles);
+    Drawing       into    = Empty::Whole(release, handles);
     const Lifting with{.Into = &into, .Handles = &handles};
     Headed(into, std::move(from.Header));
     Tabled(with, from);

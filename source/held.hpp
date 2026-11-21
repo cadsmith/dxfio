@@ -4,7 +4,7 @@
 #include "based.hpp"
 #include "objects/io.hpp"
 
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/entities/sequence.hpp"
 #include "dxfio/handle.hpp"
 
@@ -86,7 +86,7 @@ namespace DxfIO
    *  its entities and what they carry, its objects, and the handles a draw order names.
    */
   template <class VisitT>
-  void Held(const Document &from, const VisitT &visit)
+  void Held(const Drawing &from, const VisitT &visit)
   {
     Held(from.VPort, visit);
     Held(from.LType, visit);

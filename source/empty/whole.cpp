@@ -25,7 +25,7 @@ namespace DxfIO::Empty
       }
     }
 
-    void Pruned(Document &drawing)
+    void Pruned(Drawing &drawing)
     {
       drawing.DimStyle.Head.Base.Extra.clear();
       for (Tables::BlockRecord &one : drawing.BlockRecord.Records)
@@ -39,10 +39,10 @@ namespace DxfIO::Empty
 
   } // namespace
 
-  auto Whole(Version release, Seed &handles) -> Document
+  auto Whole(Version release, Seed &handles) -> Drawing
   {
     const Empty::Roots ids = Empty::Taken(handles);
-    Document           out{};
+    Drawing            out{};
     out.Order = {"HEADER", "CLASSES", "TABLES", "BLOCKS", "ENTITIES", "OBJECTS"};
     Empty::Tables(out, ids, handles);
     out.Blocks          = Empty::Blocks(ids, handles);

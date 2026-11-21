@@ -198,11 +198,11 @@ namespace DxfIO::Entities
     const auto theirs = Load(Acad(Fixture("attdefs", Version::R12)));
     REQUIRE(theirs);
     CHECK(theirs->Issues.empty());
-    const auto ours = Tests::Written(theirs->Document, SaveOptions{.Release = Version::R12});
+    const auto ours = Tests::Written(theirs->Drawing, SaveOptions{.Release = Version::R12});
     REQUIRE(ours);
     const auto again = Load(*ours);
     REQUIRE(again);
-    CHECK(again->Document.Entities == theirs->Document.Entities);
-    CHECK(again->Document.Blocks   == theirs->Document.Blocks);
+    CHECK(again->Drawing.Entities == theirs->Drawing.Entities);
+    CHECK(again->Drawing.Blocks   == theirs->Drawing.Blocks);
   }
 } // namespace DxfIO::Entities

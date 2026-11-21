@@ -31,7 +31,7 @@ namespace DxfIO
   {
     const std::filesystem::path Fuzz{DXFIO_FUZZ_DIR};
 
-    auto Entries(const Document &drawing) -> std::size_t
+    auto Entries(const Drawing &drawing) -> std::size_t
     {
       std::size_t out = 0;
       for (const Object &one : drawing.Objects)
@@ -48,9 +48,9 @@ namespace DxfIO
     /**
      *  A thousand lines, one of them broken when asked, in a drawing of the release given.
      */
-    auto Lined(bool broken) -> Document
+    auto Lined(bool broken) -> Drawing
     {
-      Document drawing = Create(Version::R2018);
+      Drawing drawing = Create(Version::R2018);
       for (int at = 0; at < 1000; ++at)
       {
         Entities::Line line;
@@ -69,8 +69,8 @@ namespace DxfIO
   TEST_CASE(
       "save: a drawing written on several threads is the bytes written on one, in either form")
   {
-    const Document drawing = Lined(false);
-    const auto     alone   = Save(drawing, SaveOptions{.Threads = 1});
+    const Drawing drawing = Lined(false);
+    const auto    alone   = Save(drawing, SaveOptions{.Threads = 1});
     REQUIRE(alone);
     const auto packed = Save(drawing, SaveOptions{.Binary = true, .Threads = 1});
     REQUIRE(packed);
@@ -87,13 +87,13 @@ namespace DxfIO
     }
     const auto read = Load(alone->Bytes, LoadOptions{.Threads = 8});
     REQUIRE(read);
-    CHECK(read->Document.Entities.size() == 1000);
+    CHECK(read->Drawing.Entities.size() == 1000);
   }
 
   TEST_CASE("save: a failure in a later part names the line the one thread would")
   {
-    const Document drawing = Lined(true);
-    const auto     alone   = Save(drawing, SaveOptions{.Threads = 1});
+    const Drawing drawing = Lined(true);
+    const auto    alone   = Save(drawing, SaveOptions{.Threads = 1});
     REQUIRE_FALSE(alone);
     CHECK(alone.error().Line > 1000);
     const auto together = Save(drawing, SaveOptions{.Threads = 8});
@@ -106,18 +106,18 @@ namespace DxfIO
 
   TEST_CASE("save: up, an unknown object with no handle leaves every dictionary whole")
   {
-    Document drawing = Create(Version::R2000);
+    Drawing drawing = Create(Version::R2000);
     drawing.Objects.emplace_back(Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Tags = {}});
     const auto older = Tests::Written(drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(older);
     const auto read = Load(*older);
     REQUIRE(read);
-    const auto newer = Tests::Written(read->Document, SaveOptions{.Release = Version::R2004});
+    const auto newer = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2004});
     REQUIRE(newer);
     const auto again = Load(*newer);
     REQUIRE(again);
-    CHECK(Entries(read->Document) > 0);
-    CHECK(Entries(again->Document) == Entries(read->Document));
+    CHECK(Entries(read->Drawing) > 0);
+    CHECK(Entries(again->Drawing) == Entries(read->Drawing));
   }
 
   TEST_CASE("save: every sample drawing saves to a fixed point, nothing lost")
@@ -129,12 +129,12 @@ namespace DxfIO
       CHECK(Broken(text).empty());
       const auto first = Load(text);
       REQUIRE(first);
-      const SaveOptions with{.Release = Header::Declared(first->Document.Header)};
-      const auto        once = Tests::Written(first->Document, with);
+      const SaveOptions with{.Release = Header::Declared(first->Drawing.Header)};
+      const auto        once = Tests::Written(first->Drawing, with);
       REQUIRE(once);
       const auto second = Load(*once);
       REQUIRE(second);
-      CHECK(second->Document == first->Document);
+      CHECK(second->Drawing == first->Drawing);
     }
   }
 
@@ -148,12 +148,12 @@ namespace DxfIO
       const auto first = Load(text);
       REQUIRE(first);
       CHECK(first->Issues.empty());
-      const SaveOptions with{.Release = Header::Declared(first->Document.Header)};
-      const auto        once = Tests::Written(first->Document, with);
+      const SaveOptions with{.Release = Header::Declared(first->Drawing.Header)};
+      const auto        once = Tests::Written(first->Drawing, with);
       REQUIRE(once);
       const auto second = Load(*once);
       REQUIRE(second);
-      CHECK(second->Document == first->Document);
+      CHECK(second->Drawing == first->Drawing);
     }
   }
 
@@ -168,12 +168,12 @@ namespace DxfIO
     const auto read = Load(text);
     REQUIRE(read);
     CHECK(read->Issues.size() == 1);
-    const auto same = Tests::Written(read->Document, SaveOptions{.Release = Version::R2000});
+    const auto same = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(same);
     CHECK(same->contains("  3\r\nDOS850\r\n"));
     CHECK(same->contains(chinese));
     const auto chosen = Tests::Written(
-        read->Document, SaveOptions{.Release = Version::R2000, .Codepage = "ANSI_1252"});
+        read->Drawing, SaveOptions{.Release = Version::R2000, .Codepage = "ANSI_1252"});
     REQUIRE(chosen);
     CHECK(chosen->contains("  3\r\nANSI_1252\r\n"));
   }
@@ -189,10 +189,10 @@ namespace DxfIO
     const auto read = Load(text);
     REQUIRE(read);
     CHECK(read->Issues.empty());
-    const auto same = Tests::Written(read->Document, SaveOptions{.Release = Version::R2000});
+    const auto same = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(same);
     CHECK(same->contains("\r\n" + chinese + "\r\n"));
-    const auto wide = Tests::Written(read->Document, SaveOptions{.Release = Version::R2018});
+    const auto wide = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
     REQUIRE(wide);
     CHECK(wide->contains("\r\n\u4e2d\u6587\r\n"));
   }
@@ -201,7 +201,7 @@ namespace DxfIO
   {
     const auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    const auto older = Tests::Written(read->Document, SaveOptions{.Release = Version::R2000});
+    const auto older = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(older);
     CHECK(older->contains("$ACADVER\r\n  1\r\nAC1015\r\n"));
     CHECK_FALSE(older->contains("$LASTSAVEDBY"));
@@ -212,8 +212,8 @@ namespace DxfIO
   {
     const auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    CHECK(read->Document.Header.size() > 200);
-    const auto older = Tests::Written(read->Document, SaveOptions{.Release = Version::R2004});
+    CHECK(read->Drawing.Header.size() > 200);
+    const auto older = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2004});
     REQUIRE(older);
     CHECK(older->contains("$XCLIPFRAME\r\n290\r\n     0\r\n"));
   }
@@ -222,7 +222,7 @@ namespace DxfIO
   {
     const auto read = Load(Bytes(Acad() / "empty-r2000.dxf"));
     REQUIRE(read);
-    const auto newer = Tests::Written(read->Document, SaveOptions{.Release = Version::R2018});
+    const auto newer = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
     REQUIRE(newer);
     CHECK(newer->contains("$LASTSAVEDBY"));
     CHECK(newer->contains("$DIMTXTDIRECTION"));
@@ -232,7 +232,7 @@ namespace DxfIO
   {
     const auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    const auto older = Tests::Written(read->Document, SaveOptions{.Release = Version::R2013});
+    const auto older = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2013});
     REQUIRE(older);
     CHECK(older->contains("100\r\nAcDbDimStyleTable\r\n 71\r\n"));
   }
@@ -241,7 +241,7 @@ namespace DxfIO
   {
     const auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    const auto older = Tests::Written(read->Document, SaveOptions{.Release = Version::R2000});
+    const auto older = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(older);
     const std::string_view head = "  0\r\nCLASS\r\n";
     const std::string_view text = *older;
@@ -250,7 +250,7 @@ namespace DxfIO
     CHECK_FALSE(one.contains(" 91\r\n"));
     const auto back = Load(Bytes(Acad() / "empty-r2000.dxf"));
     REQUIRE(back);
-    const auto newer = Tests::Written(back->Document, SaveOptions{.Release = Version::R2018});
+    const auto newer = Tests::Written(back->Drawing, SaveOptions{.Release = Version::R2018});
     REQUIRE(newer);
     CHECK(newer->contains(" 91\r\n        0\r\n280\r\n"));
   }
@@ -259,9 +259,9 @@ namespace DxfIO
   {
     const auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    CHECK(Tests::Written(read->Document, SaveOptions{.Release = Version::R2013})
+    CHECK(Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2013})
               ->contains("ACDSDATA"));
-    CHECK_FALSE(Tests::Written(read->Document, SaveOptions{.Release = Version::R2010})
+    CHECK_FALSE(Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2010})
                     ->contains("ACDSDATA"));
   }
 
@@ -269,7 +269,7 @@ namespace DxfIO
   {
     const auto read = Load(Bytes(Fuzz / "found" / "word-with-a-line-end.dxf"));
     REQUIRE(read);
-    const auto saved = Tests::Written(read->Document, SaveOptions{.Release = Version::R2018});
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
     REQUIRE(saved);
     CHECK(Load(*saved));
   }
@@ -284,30 +284,30 @@ namespace DxfIO
     }
   }
 
-  TEST_CASE("save: text before R2007 in the page asked for, the document's else")
+  TEST_CASE("save: text before R2007 in the page asked for, the drawing's else")
   {
     const auto read = Load("  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n"
                            "  1\nAC1032\n  0\nENDSEC\n"
                            "  0\nSECTION\n  2\nENTITIES\n  0\nTEXT\n"
                            "  1\n\xd8\xa7\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    const auto latin = Tests::Written(read->Document, SaveOptions{.Release = Version::R2004});
+    const auto latin = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2004});
     REQUIRE(latin);
     CHECK(latin->find("\\U+0627") != std::string::npos);
     const auto arabic = Tests::Written(
-        read->Document, SaveOptions{.Release = Version::R2004, .Codepage = "ANSI_1256"});
+        read->Drawing, SaveOptions{.Release = Version::R2004, .Codepage = "ANSI_1256"});
     REQUIRE(arabic);
     CHECK(arabic->find('\xc7') != std::string::npos);
     CHECK(arabic->find("$ACADVER\r\n  1\r\nAC1018\r\n") != std::string::npos);
     const auto again = Load(*arabic);
     REQUIRE(again);
-    CHECK(std::get<Entities::Text>(again->Document.Entities.front()).Lettering.Value == "\xd8\xa7");
+    CHECK(std::get<Entities::Text>(again->Drawing.Entities.front()).Lettering.Value == "\xd8\xa7");
   }
 
   TEST_CASE("save: a code page no page is named for is a failure")
   {
-    const Document drawing = Create(Version::R2000);
-    const auto     refused =
+    const Drawing drawing = Create(Version::R2000);
+    const auto    refused =
         Save(drawing, SaveOptions{.Release = Version::R2000, .Codepage = "ANSI_9999"});
     REQUIRE_FALSE(refused);
     CHECK(refused.error().What == "no code page named ANSI_9999");
@@ -325,7 +325,7 @@ namespace DxfIO
     SaveOptions with{.Release = Version::R2004};
     with.Codepage = name;
     name.replace(0, name.size(), "ANSI_1252");
-    const auto arabic = Tests::Written(read->Document, with);
+    const auto arabic = Tests::Written(read->Drawing, with);
     REQUIRE(arabic);
     CHECK(arabic->find('\xc7') != std::string::npos);
   }
@@ -340,9 +340,9 @@ namespace DxfIO
     text.erase(start, end - start);
     auto read = Load(text);
     REQUIRE(read);
-    CHECK_FALSE(std::ranges::contains(read->Document.Order, "ENTITIES"));
-    REQUIRE(Edit::Add(read->Document, Entities::Line{}));
-    const auto saved = Tests::Written(read->Document, {.Release = Version::R2000});
+    CHECK_FALSE(std::ranges::contains(read->Drawing.Order, "ENTITIES"));
+    REQUIRE(Edit::Add(read->Drawing, Entities::Line{}));
+    const auto saved = Tests::Written(read->Drawing, {.Release = Version::R2000});
     REQUIRE(saved);
     const std::size_t blocks   = saved->find("  2\r\nBLOCKS\r\n");
     const std::size_t entities = saved->find("  2\r\nENTITIES\r\n");
@@ -351,13 +351,13 @@ namespace DxfIO
     CHECK(blocks < entities);
     CHECK(entities < objects);
     CHECK(saved->find("  0\r\nLINE\r\n", entities) < objects);
-    CHECK_FALSE(std::ranges::contains(read->Document.Order, "ENTITIES"));
+    CHECK_FALSE(std::ranges::contains(read->Drawing.Order, "ENTITIES"));
   }
 
   TEST_CASE("save: a drawing made by hand writes its sections in DXF's order, and a table its "
             "records hold")
   {
-    Document drawing{};
+    Drawing drawing{};
     drawing.Entities.push_back(Entities::Line{});
     Tables::Layer layer{};
     layer.Record.Name = "WALLS";
@@ -380,8 +380,8 @@ namespace DxfIO
   {
     auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    read->Document.Order.emplace_back("NOSUCHSECTION");
-    const auto saved = Tests::Written(read->Document, SaveOptions{.Release = Version::R2018});
+    read->Drawing.Order.emplace_back("NOSUCHSECTION");
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
     REQUIRE(saved);
     CHECK(saved->contains("NOSUCHSECTION\r\n  0\r\nENDSEC"));
   }
@@ -390,14 +390,14 @@ namespace DxfIO
   {
     auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    read->Document.Header.push_back(Header::Variable{
+    read->Drawing.Header.push_back(Header::Variable{
         .Name   = "$NOSUCH",
         .Values = {Tag{.Code = 3, .Value = std::int64_t{1}}},
     });
-    const auto down = Tests::Written(read->Document, SaveOptions{.Release = Version::R2013});
+    const auto down = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2013});
     REQUIRE(down);
     CHECK(down->contains("$NOSUCH"));
-    const auto same = Tests::Written(read->Document, SaveOptions{.Release = Version::R2018});
+    const auto same = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
     REQUIRE(same);
     CHECK(same->contains("$NOSUCH"));
   }
@@ -406,18 +406,18 @@ namespace DxfIO
   {
     auto read = Load(Bytes(Acad() / "empty-r2018.dxf"));
     REQUIRE(read);
-    auto &header = read->Document.Header;
+    auto &header = read->Drawing.Header;
     auto  found  = std::ranges::find(header, "$DWGCODEPAGE", &Header::Variable::Name);
     REQUIRE(found != header.end());
     found->Values    = {Tag{.Code = 1, .Value = std::string{"ANSI_1252"}}};
-    const auto saved = Tests::Written(read->Document, SaveOptions{.Release = Version::R2018});
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
     REQUIRE(saved);
     CHECK(saved->contains("$DWGCODEPAGE\r\n  1\r\nANSI_1252"));
   }
 
   TEST_CASE("save: a value its group cannot hold fails in ASCII as in binary")
   {
-    Document drawing = Create(Version::R2018);
+    Drawing drawing = Create(Version::R2018);
     drawing.Objects.emplace_back(
         Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Tags = {Tag{.Code = 70, .Value = 1e30}}});
     CHECK_FALSE(Save(drawing));
@@ -432,7 +432,7 @@ namespace DxfIO
                 "  0\r\nSECTION\r\n  2\r\nACME\r\n1070\r\n40000\r\n  0\r\nENDSEC\r\n");
     const auto read = Load(text);
     REQUIRE(read);
-    CHECK(Save(read->Document, SaveOptions{.Release = Version::R2018, .Binary = true}));
+    CHECK(Save(read->Drawing, SaveOptions{.Release = Version::R2018, .Binary = true}));
   }
 
   TEST_CASE("save: binary, every drawing AutoCAD wrote reads back the same")
@@ -442,13 +442,13 @@ namespace DxfIO
       CAPTURE(path.filename().string());
       const auto read = Load(Bytes(path));
       REQUIRE(read);
-      const SaveOptions with{.Release = Header::Declared(read->Document.Header), .Binary = true};
-      const auto        bytes = Tests::Written(read->Document, with);
+      const SaveOptions with{.Release = Header::Declared(read->Drawing.Header), .Binary = true};
+      const auto        bytes = Tests::Written(read->Drawing, with);
       REQUIRE(bytes);
       CHECK(bytes->starts_with(Tags::Sentinel()));
       const auto again = Load(*bytes);
       REQUIRE(again);
-      CHECK(again->Document == read->Document);
+      CHECK(again->Drawing == read->Drawing);
     }
   }
 
@@ -458,12 +458,12 @@ namespace DxfIO
          {Version::R10, Version::R12, Version::R13, Version::R14, Version::R2000, Version::R2018})
     {
       CAPTURE(release);
-      const Document drawing = Create(release);
+      const Drawing drawing = Create(release);
       const auto bytes = Tests::Written(drawing, SaveOptions{.Release = release, .Binary = true});
       REQUIRE(bytes);
       const auto read = Load(*bytes);
       REQUIRE(read);
-      CHECK(Tests::Written(read->Document, SaveOptions{.Release = release})
+      CHECK(Tests::Written(read->Drawing, SaveOptions{.Release = release})
             == Tests::Written(drawing, SaveOptions{.Release = release}));
     }
   }
@@ -478,7 +478,7 @@ namespace DxfIO
     text.replace(text.find(page), page.size(), "$DWGCODEPAGE\r\n  1\r\n");
     const auto read = Load(text);
     REQUIRE(read);
-    const auto same = Tests::Written(read->Document, SaveOptions{.Release = Version::R2000});
+    const auto same = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(same);
     CHECK_FALSE(same->contains("$DWGCODEPAGE\r\n  1\r\n"));
     CHECK(same->contains("$DWGCODEPAGE\r\n  3\r\n"));
@@ -486,7 +486,7 @@ namespace DxfIO
 
   TEST_CASE("save: a variable with no value, or not as many, takes the release's own")
   {
-    Document drawing = Create(Version::R2018);
+    Drawing drawing = Create(Version::R2018);
     for (Header::Variable &one : drawing.Header)
     {
       if (one.Name == "$INSUNITS")
@@ -510,7 +510,7 @@ namespace DxfIO
 
   TEST_CASE("save: what a release cannot hold is noted beside the bytes")
   {
-    Document drawing = Create(Version::R2018);
+    Drawing drawing = Create(Version::R2018);
     drawing.Entities.emplace_back(Entities::MultiLeader{});
     const auto saved = Save(drawing, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
@@ -523,8 +523,8 @@ namespace DxfIO
 
   TEST_CASE("save: a drawing writes to a stream and to a file")
   {
-    const Document drawing = Create(Version::R2018);
-    const auto     whole   = Save(drawing);
+    const Drawing drawing = Create(Version::R2018);
+    const auto    whole   = Save(drawing);
     REQUIRE(whole);
     std::ostringstream to;
     const auto         streamed = Save(drawing, to, SaveOptions{});
@@ -542,7 +542,7 @@ namespace DxfIO
   TEST_CASE(
       "save: a drawing that cannot be written, a stream that fails or a file out of reach is told")
   {
-    Document       drawing = Create(Version::R2018);
+    Drawing        drawing = Create(Version::R2018);
     Entities::Line line{};
     line.Start.X = std::numeric_limits<double>::quiet_NaN();
     drawing.Entities.emplace_back(line);
@@ -551,7 +551,7 @@ namespace DxfIO
     CHECK_FALSE(Save(drawing, unused));
     CHECK(unused.str().empty());
 
-    const Document     fresh = Create(Version::R2018);
+    const Drawing      fresh = Create(Version::R2018);
     std::ostringstream broken;
     broken.setstate(std::ios::badbit);
     const auto refused = Save(fresh, broken);

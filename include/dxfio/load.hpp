@@ -2,7 +2,7 @@
 #define DXFIO_LOAD_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 
@@ -22,7 +22,7 @@ namespace DxfIO
     /**
      *  The drawing, every section and every group the file held.
      */
-    DxfIO::Document Document{};
+    DxfIO::Drawing Drawing{};
     /**
      *  What the reader kept, mended or left out, with the line it found it on.
      */

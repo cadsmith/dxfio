@@ -20,7 +20,7 @@ namespace DxfIO::Audit
      *  Registers an application for the extended data that names it: a record of the APPID table,
      *  owned by it.
      */
-    void Registered(Document &drawing, const std::string &name, Handle self)
+    void Registered(Drawing &drawing, const std::string &name, Handle self)
     {
       Tables::Table<Tables::AppId> &table = drawing.AppId;
       Tables::AppId                 made{};
@@ -37,8 +37,8 @@ namespace DxfIO::Audit
    *  register: each such application is an error, told once, and registered when the checks fix.
    *  One the release requires anyway is the required records' finding, not this one.
    */
-  template <class DocumentT>
-  void Applied(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Applied(Auditor<DrawingT> &with)
   {
     Names known = Named(with.Drawing->AppId);
     for (const Tables::AppId &one : Create(Header::Declared(with.Drawing->Header)).AppId.Records)
@@ -57,7 +57,7 @@ namespace DxfIO::Audit
               with.Note(Severity::Error,
                         std::format("application {} not registered", one.Application), base.Self);
               known.emplace(one.Application);
-              if constexpr (Auditor<DocumentT>::Fix)
+              if constexpr (Auditor<DrawingT>::Fix)
               {
                 const Handle self = with.Drawing->AppId.Head.Base.Self ? with.Take() : Handle{};
                 Registered(*with.Drawing, one.Application, self);
@@ -66,7 +66,7 @@ namespace DxfIO::Audit
           });
   }
 
-  template void Applied(Auditor<Document> &with);
+  template void Applied(Auditor<Drawing> &with);
 
-  template void Applied(Auditor<const Document> &with);
+  template void Applied(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

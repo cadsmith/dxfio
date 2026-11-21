@@ -264,7 +264,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Restyled(Document &from, Version release, std::vector<Issue> *issues)
+    void Restyled(Drawing &from, Version release, std::vector<Issue> *issues)
     {
       if (Era(release) == Era(Header::Declared(from.Header)))
       {
@@ -349,7 +349,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Retabled(Document &from, Version release)
+    void Retabled(Drawing &from, Version release)
     {
       const bool early = release <= Version::R2000;
       for (Object &one : from.Objects)
@@ -557,7 +557,7 @@ namespace DxfIO::Down
       return name.starts_with(Paper) && name != Paper;
     }
 
-    void Blocked(Document &from, Seed &handles, const Narrowing &with)
+    void Blocked(Drawing &from, Seed &handles, const Narrowing &with)
     {
       std::erase_if(from.Blocks,
                     [](const Blocks::Definition &one) -> bool { return Sheet(one.Block.Name); });
@@ -645,7 +645,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Thinned(Document &from, std::set<Handle> &gone)
+    void Thinned(Drawing &from, std::set<Handle> &gone)
     {
       std::erase_if(from.Classes, [](const Raw &one) -> bool { return !Listed(one); });
       const auto *root =
@@ -719,7 +719,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Seeded(Document &from, Handle next)
+    void Seeded(Drawing &from, Handle next)
     {
       const auto seed = std::ranges::find(from.Header, "$HANDSEED", &Header::Variable::Name);
       if (seed != from.Header.end() && !seed->Values.empty())
@@ -728,7 +728,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Dated(Document &from)
+    void Dated(Drawing &from)
     {
       std::set<Handle> gone;
       std::erase_if(from.Objects,
@@ -752,14 +752,14 @@ namespace DxfIO::Down
       }
     }
 
-    void Unsectioned(Document &from)
+    void Unsectioned(Drawing &from)
     {
       std::erase_if(from.Order, [&from](const std::string &name) -> bool
                     { return std::ranges::contains(from.Sections, name, &Section::Name); });
       from.Sections.clear();
     }
 
-    void Eldest(Document &from)
+    void Eldest(Drawing &from)
     {
       from.Order.assign(Sections.begin(), Sections.end());
       from.Objects.clear();
@@ -779,7 +779,7 @@ namespace DxfIO::Down
                     { return one.Record.Name.starts_with('*'); });
     }
 
-    void Elder(Document &from, std::set<Handle> &gone)
+    void Elder(Drawing &from, std::set<Handle> &gone)
     {
       Thinned(from, gone);
       Loosened(from.VPort);
@@ -802,7 +802,7 @@ namespace DxfIO::Down
     /**
      *  The drawing as the release holds it, before the CLASS records it needs.
      */
-    auto Converted(Document from, Version release, std::vector<Issue> *issues) -> Document
+    auto Converted(Drawing from, Version release, std::vector<Issue> *issues) -> Drawing
     {
       if (release >= Version::R2000)
       {
@@ -865,10 +865,10 @@ namespace DxfIO::Down
    *  R2000: a drawing given a release not its own gets the records that release needs for what it
    *  still holds. One kept at its own release is written as it came.
    */
-  auto Narrowed(Document from, Version release, std::vector<Issue> *issues) -> Document
+  auto Narrowed(Drawing from, Version release, std::vector<Issue> *issues) -> Drawing
   {
     const Version own = Header::Declared(from.Header);
-    Document      out = Converted(std::move(from), release, issues);
+    Drawing       out = Converted(std::move(from), release, issues);
     if (release >= Version::R13 && release != own)
     {
       std::ranges::move(Empty::Undeclared(out, release), std::back_inserter(out.Classes));

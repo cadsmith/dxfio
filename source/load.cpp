@@ -60,7 +60,7 @@ namespace DxfIO
             {
               return File::Sections::Header(from.Body).transform(
                   [&into, &with](const std::vector<File::Variable> &parts) -> void
-                  { into.Document.Header = Header::Read(parts, with); });
+                  { into.Drawing.Header = Header::Read(parts, with); });
             },
         },
         Known{
@@ -70,7 +70,7 @@ namespace DxfIO
             {
               return File::Sections::Records(from.Body).transform(
                   [&into, &with](const std::vector<File::Record> &parts) -> void
-                  { into.Document.Classes = Copied(parts, with); });
+                  { into.Drawing.Classes = Copied(parts, with); });
             },
         },
         Known{
@@ -80,7 +80,7 @@ namespace DxfIO
             {
               return File::Sections::Tables(from.Body).transform(
                   [&into, &with](const std::vector<File::Nest> &parts) -> void
-                  { Tables::Read(parts, into.Document, with); });
+                  { Tables::Read(parts, into.Drawing, with); });
             },
         },
         Known{
@@ -90,7 +90,7 @@ namespace DxfIO
             {
               return File::Sections::Blocks(from.Body).transform(
                   [&into, &with](const std::vector<File::Nest> &parts) -> void
-                  { into.Document.Blocks = Blocks::Read(parts, with); });
+                  { into.Drawing.Blocks = Blocks::Read(parts, with); });
             },
         },
         Known{
@@ -100,7 +100,7 @@ namespace DxfIO
             {
               return File::Sections::Records(from.Body).transform(
                   [&into, &with](const std::vector<File::Record> &parts) -> void
-                  { into.Document.Entities = Entities::Read(parts, with); });
+                  { into.Drawing.Entities = Entities::Read(parts, with); });
             },
         },
         Known{
@@ -110,7 +110,7 @@ namespace DxfIO
             {
               return File::Sections::Records(from.Body).transform(
                   [&into, &with](const std::vector<File::Record> &parts) -> void
-                  { into.Document.Objects = Objects::Read(parts, with); });
+                  { into.Drawing.Objects = Objects::Read(parts, with); });
             },
         },
     };
@@ -123,7 +123,7 @@ namespace DxfIO
       {
         held.Tags.push_back(Fields::Owned(one, with.Text));
       }
-      into.Document.Sections.push_back(std::move(held));
+      into.Drawing.Sections.push_back(std::move(held));
       return {};
     }
 
@@ -147,7 +147,7 @@ namespace DxfIO
     auto Taken(const File::Section &one, Loaded &into, const Fields::Reading &with) -> Filled
     {
       const std::string name{one.Name};
-      if (std::ranges::contains(into.Document.Order, name))
+      if (std::ranges::contains(into.Drawing.Order, name))
       {
         into.Issues.push_back(Issue{
             .Code = IssueCode::Damaged,
@@ -155,11 +155,11 @@ namespace DxfIO
         });
         return {};
       }
-      into.Document.Order.push_back(name);
+      into.Drawing.Order.push_back(name);
       return Filler(one.Name)(one, into, with);
     }
 
-    auto Seeded(Document &drawing) -> Handle *
+    auto Seeded(Drawing &drawing) -> Handle *
     {
       const auto found = std::ranges::find(drawing.Header, "$HANDSEED", &Header::Variable::Name);
       if (found == drawing.Header.end() || found->Values.empty())
@@ -200,8 +200,8 @@ namespace DxfIO
           .Code = IssueCode::Damaged,
           .What = "no $ACADVER, read as R2000 for the subclass markers its records carry",
       });
-      into.Document.Header.insert(
-          into.Document.Header.begin(),
+      into.Drawing.Header.insert(
+          into.Drawing.Header.begin(),
           Header::Variable{
               .Name   = std::string{Named},
               .Values = {Tag{.Code = 1, .Value = std::string{AcadverOf(Version::R2000)}}},
@@ -210,12 +210,12 @@ namespace DxfIO
 
     void Raised(Loaded &into)
     {
-      Handle *seed = Seeded(into.Document);
+      Handle *seed = Seeded(into.Drawing);
       if (seed == nullptr || !*seed)
       {
         return;
       }
-      const Handle past = Past(into.Document);
+      const Handle past = Past(into.Drawing);
       if (past <= *seed)
       {
         return;

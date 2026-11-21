@@ -17,8 +17,8 @@ namespace DxfIO::Audit
    *  that need it misread a file without one: a kind present with no CLASS is an error, and given
    *  the record AutoCAD writes when fixed.
    */
-  template <class DocumentT>
-  void Classed(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Classed(Auditor<DrawingT> &with)
   {
     const Version release = Header::Declared(with.Drawing->Header);
     if (release < Version::R13)
@@ -29,14 +29,14 @@ namespace DxfIO::Audit
     {
       with.Note(Severity::Error,
                 std::format("no CLASS for {}", std::get<std::string>(one.Tags.front().Value)), {});
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         with.Drawing->Classes.push_back(std::move(one));
       }
     }
   }
 
-  template void Classed(Auditor<Document> &with);
+  template void Classed(Auditor<Drawing> &with);
 
-  template void Classed(Auditor<const Document> &with);
+  template void Classed(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

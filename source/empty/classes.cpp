@@ -275,7 +275,7 @@ namespace DxfIO::Empty
     return out;
   }
 
-  auto Undeclared(const Document &drawing, Version release) -> std::vector<Raw>
+  auto Undeclared(const Drawing &drawing, Version release) -> std::vector<Raw>
   {
     std::vector<Counted> kinds;
     for (const DxfIO::Entity &one : drawing.Entities)

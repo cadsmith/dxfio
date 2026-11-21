@@ -115,11 +115,11 @@ auto main(int argc, char **argv) -> int
     std::fprintf(stderr, "load: %s\n", loaded.error().What.c_str());
     return 1;
   }
-  std::printf("  %zu entities, %zu objects, %zu issues\n", loaded->Document.Entities.size(),
-              loaded->Document.Objects.size(), loaded->Issues.size());
+  std::printf("  %zu entities, %zu objects, %zu issues\n", loaded->Drawing.Entities.size(),
+              loaded->Drawing.Objects.size(), loaded->Issues.size());
   std::expected<DxfIO::Saved, DxfIO::Failure> ascii;
   Timed("save", bytes.size(), runs, [&] -> void
-        { ascii = DxfIO::Save(loaded->Document, DxfIO::SaveOptions{.Threads = threads}); });
+        { ascii = DxfIO::Save(loaded->Drawing, DxfIO::SaveOptions{.Threads = threads}); });
   if (!ascii)
   {
     std::fprintf(stderr, "save: %s\n", ascii.error().What.c_str());
@@ -130,7 +130,7 @@ auto main(int argc, char **argv) -> int
         [&] -> void
         {
           binary =
-              DxfIO::Save(loaded->Document, DxfIO::SaveOptions{.Binary = true, .Threads = threads});
+              DxfIO::Save(loaded->Drawing, DxfIO::SaveOptions{.Binary = true, .Threads = threads});
         });
   if (!binary)
   {
