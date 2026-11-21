@@ -2063,8 +2063,8 @@ namespace DxfIO
     requires std::is_enum_v<FlagT>
   [[nodiscard]] constexpr auto Has(int flags, FlagT flag) -> bool
   {
-    const int bits = static_cast<int>(std::to_underlying(flag));
-    return (flags & bits) == bits;
+    const auto bits = static_cast<unsigned>(std::to_underlying(flag));
+    return (static_cast<unsigned>(flags) & bits) == bits;
   }
 }
 == dxfio/geometry/coordinates.hpp

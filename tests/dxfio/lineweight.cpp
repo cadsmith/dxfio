@@ -27,6 +27,7 @@ namespace DxfIO
     CHECK(Has(flags, Entities::PolylineFlags::Closed));
     CHECK(Has(flags, Entities::PolylineFlags::Polyline3d));
     CHECK_FALSE(Has(flags, Entities::PolylineFlags::PolyfaceMesh));
+    CHECK(Has(-1, Entities::PolylineFlags::PolyfaceMesh));
   }
 
   TEST_CASE("library: the version string is the three numbers, as the project declares them")
