@@ -7,6 +7,7 @@
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
@@ -84,7 +85,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The plane, its line and its indicator, from the AcDbSection subclass.
      */

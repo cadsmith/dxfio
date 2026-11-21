@@ -7,7 +7,7 @@
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
 
-#include <string>
+#include <cstddef>
 #include <vector>
 
 namespace DxfIO::Entities
@@ -113,7 +113,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  Where the picture lies, how it is shown and how it is clipped, from the AcDbRasterImage
      *  subclass.
@@ -136,7 +136,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  Where the area lies and the boundary that shapes it, from the AcDbWipeout subclass.
      */

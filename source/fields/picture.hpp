@@ -7,20 +7,21 @@
 #include "dxfio/api.hpp"
 #include "dxfio/failure.hpp"
 
+#include <cstddef>
 #include <expected>
-#include <string>
+#include <vector>
 
 namespace DxfIO::Fields
 {
   template <class OwnerT>
   struct Picture
   {
-    std::string OwnerT::*Member{};
+    std::vector<std::byte> OwnerT::*Member{};
   };
 
-  [[nodiscard]] DXFIO_API auto Pictured(Walk &in) -> std::string;
+  [[nodiscard]] DXFIO_API auto Pictured(Walk &in) -> std::vector<std::byte>;
 
-  [[nodiscard]] DXFIO_API auto Show(Writing &to, const std::string &held)
+  [[nodiscard]] DXFIO_API auto Show(Writing &to, const std::vector<std::byte> &held)
       -> std::expected<void, Failure>;
 
   template <class OwnerT>

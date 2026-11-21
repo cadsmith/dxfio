@@ -126,7 +126,7 @@ namespace DxfIO::Entities
     Region flat{};
     CHECK(flat == Region{});
     Body body{};
-    body.Picture = "x";
+    body.Picture = {std::byte{'x'}};
     CHECK(body != Body{});
     LoftedSurface sheet{};
     sheet.UIsolines = 1;

@@ -1,5 +1,7 @@
 #include "dxfio/tag.hpp"
 
+#include "bytes.hpp"
+
 #include <doctest/doctest.h>
 
 #include <cstdint>
@@ -15,7 +17,7 @@ namespace DxfIO
                 == Tag{.Code = 1071, .Value = std::int64_t{1}});
     CHECK_FALSE(Tag{.Code = 1005, .Value = Handle{1}}
                 == Tag{.Code = 1005, .Value = std::int64_t{1}});
-    CHECK(Tag{.Code = 1004, .Value = Chunk{std::string{"\x01\x02"}}}
-          == Tag{.Code = 1004, .Value = Chunk{std::string{"\x01\x02"}}});
+    CHECK(Tag{.Code = 1004, .Value = Chunk{Tests::BytesOf("\x01\x02")}}
+          == Tag{.Code = 1004, .Value = Chunk{Tests::BytesOf("\x01\x02")}});
   }
 } // namespace DxfIO

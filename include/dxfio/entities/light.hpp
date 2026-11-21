@@ -6,7 +6,9 @@
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstddef>
 #include <string>
+#include <vector>
 
 namespace DxfIO::Entities
 {
@@ -115,7 +117,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The kind, color and place of the light, from the AcDbLight subclass.
      */

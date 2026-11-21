@@ -7,6 +7,7 @@
 #include "dxfio/handle.hpp"
 #include "dxfio/tag.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -53,7 +54,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The ACIS body, from the AcDbModelerGeometry subclass.
      */
@@ -75,7 +76,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The ACIS body, from the AcDbModelerGeometry subclass.
      */
@@ -97,7 +98,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The ACIS body, from the AcDbModelerGeometry subclass.
      */
@@ -160,7 +161,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The ACIS body, from the AcDbModelerGeometry subclass.
      */

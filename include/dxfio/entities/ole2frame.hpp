@@ -6,7 +6,9 @@
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstddef>
 #include <string>
+#include <vector>
 
 namespace DxfIO::Entities
 {
@@ -43,7 +45,7 @@ namespace DxfIO::Entities
     /**
      *  The bytes of the OLE object. Groups 90 and 310.
      */
-    std::string Data{};
+    std::vector<std::byte> Data{};
 
     auto operator==(const Ole2FrameData &) const -> bool = default;
   };

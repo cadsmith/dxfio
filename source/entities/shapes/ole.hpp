@@ -1,6 +1,7 @@
 #ifndef DXFIO_ENTITIES_SHAPES_OLE_HPP
 #define DXFIO_ENTITIES_SHAPES_OLE_HPP
 
+#include "bytes.hpp"
 #include "fields/braced.hpp"
 #include "fields/custom.hpp"
 #include "fields/field.hpp"
@@ -39,7 +40,7 @@ namespace DxfIO
         const Tag part = Fields::Owned(*held, in.With().Text);
         if (const auto *bytes = std::get_if<Chunk>(&part.Value))
         {
-          one.Data += bytes->Bytes;
+          one.Data.insert(one.Data.end(), bytes->Bytes.begin(), bytes->Bytes.end());
         }
         else
         {
@@ -62,7 +63,7 @@ namespace DxfIO
                 }
                 return to.To->Put(Tags::Tag{
                     .Code  = Binary,
-                    .Value = Tags::Chunk{std::string_view{one.Data}},
+                    .Value = Tags::Chunk{Viewed(one.Data)},
                 });
               });
     }

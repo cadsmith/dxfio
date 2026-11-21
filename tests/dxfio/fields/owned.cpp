@@ -1,5 +1,6 @@
 #include "fields/owned.hpp"
 
+#include "../bytes.hpp"
 #include "tags/tags.hpp"
 
 #include <doctest/doctest.h>
@@ -27,7 +28,7 @@ namespace DxfIO::Fields
     CHECK(Owned(Tags::Tag{.Code = 5, .Value = std::string_view{"ARROW"}}, utf8)
           == Tag{.Code = 5, .Value = std::string{"ARROW"}});
     CHECK(Owned(Tags::Tag{.Code = 310, .Value = std::string_view{"DEAD01"}}, utf8)
-          == Tag{.Code = 310, .Value = Chunk{std::string{"\xde\xad\x01"}}});
+          == Tag{.Code = 310, .Value = Chunk{Tests::BytesOf("\xde\xad\x01")}});
   }
 
   TEST_CASE("owned: a word of the format kept as it is, escapes and all")

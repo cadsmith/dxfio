@@ -1,5 +1,6 @@
 #include "fields/picture.hpp"
 
+#include "bytes.hpp"
 #include "fields/numbers.hpp"
 #include "fields/owned.hpp"
 #include "tags/tag.hpp"
@@ -7,9 +8,9 @@
 #include "dxfio/version.hpp"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
-#include <string>
-#include <string_view>
+#include <vector>
 
 namespace DxfIO::Fields
 {
@@ -24,11 +25,11 @@ namespace DxfIO::Fields
     constexpr std::array<int, 1> Pieces = {Bytes};
   } // namespace
 
-  auto Pictured(Walk &in) -> std::string
+  auto Pictured(Walk &in) -> std::vector<std::byte>
   {
     static_cast<void>(Value<std::int64_t>::Read(in, Older));
     static_cast<void>(Value<std::int64_t>::Read(in, Larger));
-    std::string out;
+    std::vector<std::byte> out;
     for (const Tags::Tag *one : in.Gather(Pieces))
     {
       if (!Appended(out, *one))
@@ -39,7 +40,7 @@ namespace DxfIO::Fields
     return out;
   }
 
-  auto Show(Writing &to, const std::string &held) -> std::expected<void, Failure>
+  auto Show(Writing &to, const std::vector<std::byte> &held) -> std::expected<void, Failure>
   {
     if (held.empty() || to.Release != to.From)
     {
@@ -53,7 +54,7 @@ namespace DxfIO::Fields
             {
               return to.To->Put(Tags::Tag{
                   .Code  = Bytes,
-                  .Value = Tags::Chunk{std::string_view{held}},
+                  .Value = Tags::Chunk{Viewed(held)},
               });
             });
   }

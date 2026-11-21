@@ -1,5 +1,6 @@
 #include "entities/shapes/ole.hpp"
 
+#include "../bytes.hpp"
 #include "../kind.hpp"
 #include "entities/io.hpp"
 
@@ -32,14 +33,14 @@ namespace DxfIO::Entities
     CHECK(one.Data->Lower       == Vector{.X = 6, .Y = 1});
     CHECK(one.Data->Kind        == 2);
     CHECK(one.Data->Space       == 0);
-    CHECK(one.Data->Data        == std::string{"\xDE\xAD\xBE\xEF"});
+    CHECK(one.Data->Data        == Tests::BytesOf("\xDE\xAD\xBE\xEF"));
   }
 
   TEST_CASE("ole: bytes past one line split as AutoCAD splits them")
   {
     Ole2Frame one{};
     one.Record.Base.Self   = Handle{.Value = 0x2a};
-    one.Data->Data         = std::string(300, '\x7f');
+    one.Data->Data         = std::vector<std::byte>(300, std::byte{0x7f});
     const std::string text = Written(one);
     CHECK(text.find(" 90\r\n      300\r\n") != std::string::npos);
     const Ole2Frame back = DxfIO::Read<Ole2Frame>(text);

@@ -7,7 +7,8 @@
 #include "dxfio/entities/spline.hpp"
 #include "dxfio/vector.hpp"
 
-#include <string>
+#include <cstddef>
+#include <vector>
 
 namespace DxfIO::Entities
 {
@@ -74,7 +75,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The spline that draws the helix, from the AcDbSpline subclass.
      */

@@ -4,9 +4,11 @@
 #include "dxfio/api.hpp"
 #include "dxfio/handle.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace DxfIO
 {
@@ -19,7 +21,7 @@ namespace DxfIO
     /**
      *  The bytes, of any value, zero included.
      */
-    std::string Bytes{};
+    std::vector<std::byte> Bytes{};
 
     auto operator==(const Chunk &) const -> bool = default;
   };
