@@ -56,12 +56,12 @@ namespace DxfIO::Entities
      *  One pixel's step along the bottom edge of the image, in world coordinates. Groups 11, 21,
      *  31.
      */
-    Vector Across{};
+    Vector UVector{};
     /**
      *  One pixel's step up the left edge of the image, from the insertion point, in world
      *  coordinates. Groups 12, 22, 32.
      */
-    Vector Down{};
+    Vector VVector{};
     /**
      *  The width and height of the image, in pixels. Groups 13, 23.
      */
@@ -102,7 +102,7 @@ namespace DxfIO::Entities
     /**
      *  The shape of the clipping boundary: 1 a rectangle, as for a new one, 2 a polygon. Group 71.
      */
-    int Kind{1};
+    int ClipShape{1};
     /**
      *  The vertices of the clipping boundary, two opposite corners for a rectangle; group 91 counts
      *  them.

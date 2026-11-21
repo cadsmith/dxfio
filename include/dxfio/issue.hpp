@@ -23,7 +23,7 @@ namespace DxfIO
      *  The handle of the record it concerns; null when it concerns no one record, or the record has
      *  no handle.
      */
-    Handle Record{};
+    Handle Subject{};
     /**
      *  What was noted, in a sentence such as "group 330 given again, one kept".
      */

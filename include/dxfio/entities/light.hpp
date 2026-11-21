@@ -75,11 +75,11 @@ namespace DxfIO::Entities
     /**
      *  The distance the light starts to reach from, when it is limited. Group 41.
      */
-    double Start{1};
+    double AttenuationStart{1};
     /**
      *  The distance the light stops reaching at, when it is limited. Group 42.
      */
-    double End{10};
+    double AttenuationEnd{10};
     /**
      *  The angle of a spot light's bright inner cone, in degrees. Group 50.
      */
@@ -91,7 +91,7 @@ namespace DxfIO::Entities
     /**
      *  Whether the light casts shadows. Group 293.
      */
-    bool Casting{true};
+    bool CastShadows{true};
     /**
      *  The kind of shadow: 0 ray traced, 1 shadow map. Group 73.
      */

@@ -27,9 +27,9 @@ const auto told = [](const std::vector<DxfIO::Issue> &issues)
 {
   for (const DxfIO::Issue &issue : issues)
   {
-    if (issue.Record)
+    if (issue.Subject)
     {
-      std::println("  {}: {}", DxfIO::Hex(issue.Record), issue.What);
+      std::println("  {}: {}", DxfIO::Hex(issue.Subject), issue.What);
     }
     else
     {

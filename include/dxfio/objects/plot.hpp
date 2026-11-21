@@ -94,11 +94,11 @@ namespace DxfIO::Objects
     /**
      *  The paper units of a custom scale. Group 142.
      */
-    double Paper{1};
+    double PaperUnits{1};
     /**
      *  The drawing units of a custom scale. Group 143.
      */
-    double Drawing{1};
+    double DrawingUnits{1};
     /**
      *  Bits: 1 viewport borders, 2 plot styles shown, 4 centered, 8 hidden, 16 standard scale, 32
      *  plot styles, 64 lineweights scaled, 128 lineweights, 512 viewports first, 1024 model space.

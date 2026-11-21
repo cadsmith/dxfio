@@ -65,8 +65,8 @@ namespace DxfIO::Entities
   {
     CHECK(Edge<Edges::Line>(Alikened(Marked("2D0"))).End.X != 0);
     const Edges::Arc round = Edge<Edges::Arc>(Alikened(Marked("2D3")));
-    CHECK(round.Radius  == 10);
-    CHECK(round.Counter == 1);
+    CHECK(round.Radius           == 10);
+    CHECK(round.CounterClockwise == 1);
     CHECK(Edge<Edges::Ellipse>(Alikened(Marked("2D5"))).Ratio == 0.5);
     const Hatch mixed = Alikened(Marked("2D9"));
     CHECK(std::holds_alternative<Edges::Line>(mixed.Fill->Paths.front().Edges.at(0)));
@@ -79,12 +79,12 @@ namespace DxfIO::Entities
     const Edges::Spline &curve = *Edge<Boxed<Edges::Spline>>(one);
     CHECK(curve.Degree       == 3);
     CHECK(curve.Knots.size() == 11);
-    CHECK(curve.Poles.size() == 7);
-    CHECK(curve.Fits.size()  == 5);
-    CHECK(curve.Start.Y != 0);
+    CHECK(curve.ControlPoints.size() == 7);
+    CHECK(curve.FitPoints.size()     == 5);
+    CHECK(curve.StartTangent.Y != 0);
     const Hatch old = Alikened(Marked("2D7", Version::R2007), Version::R2007);
-    CHECK(Edge<Boxed<Edges::Spline>>(old)->Fits.empty());
-    CHECK(Edge<Boxed<Edges::Spline>>(old)->Poles.size() == 7);
+    CHECK(Edge<Boxed<Edges::Spline>>(old)->FitPoints.empty());
+    CHECK(Edge<Boxed<Edges::Spline>>(old)->ControlPoints.size() == 7);
   }
 
   TEST_CASE("hatch: a polyline boundary, its bulges given")

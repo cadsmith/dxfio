@@ -26,21 +26,21 @@ namespace DxfIO::Empty
                               .Height = 297,
                               .Origin =
                                   Vector{.X = 11.54999923706054, .Y = -13.65000009536743, .Z = 0},
-                              .Lower      = Vector{},
-                              .Upper      = Vector{},
-                              .Paper      = 1,
-                              .Drawing    = 8.704084754739808,
-                              .Flags      = 11952,
-                              .Units      =     1,
-                              .Rotation   =     0,
-                              .Type       =     0,
-                              .Style      = "",
-                              .Standard   = 0,
-                              .Factor     = 0.1148885871608098,
-                              .Shading    = 0,
-                              .Resolution = Objects::Normal,
-                              .Dots       = Objects::Dpi,
-                              .Image      = Vector{}};
+                              .Lower        = Vector{},
+                              .Upper        = Vector{},
+                              .PaperUnits   = 1,
+                              .DrawingUnits = 8.704084754739808,
+                              .Flags        = 11952,
+                              .Units        =     1,
+                              .Rotation     =     0,
+                              .Type         =     0,
+                              .Style        = "",
+                              .Standard     = 0,
+                              .Factor       = 0.1148885871608098,
+                              .Shading      = 0,
+                              .Resolution   = Objects::Normal,
+                              .Dots         = Objects::Dpi,
+                              .Image        = Vector{}};
       return out;
     }
   } // namespace

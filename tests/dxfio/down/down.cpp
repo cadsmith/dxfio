@@ -351,10 +351,10 @@ namespace DxfIO::Down
     const Document     out = Narrowed(from, Version::R12, &issues);
     REQUIRE(out.Entities.size() == 1);
     CHECK(std::holds_alternative<Entities::Line>(out.Entities.front()));
-    REQUIRE(issues.size()  == 2);
-    CHECK(issues[0].Record == Handle{0xC0});
-    CHECK(issues[0].What   == "MESH left out, R12 has no such entity");
-    CHECK(issues[1].What   == "MESH left out, R12 has no such entity");
+    REQUIRE(issues.size()   == 2);
+    CHECK(issues[0].Subject == Handle{0xC0});
+    CHECK(issues[0].What    == "MESH left out, R12 has no such entity");
+    CHECK(issues[1].What    == "MESH left out, R12 has no such entity");
     CHECK(Narrowed(from, Version::R12, nullptr).Entities.size() == 1);
   }
 
@@ -915,7 +915,7 @@ namespace DxfIO::Down
     REQUIRE(told.size() == 4);
     CHECK(told.front().What
           == "POLYLINE moved from layer *ADSK_CONSTRAINTS to 0, R12 has no layer named by a star");
-    CHECK(told.at(1).Record == Handle{0xB0});
+    CHECK(told.at(1).Subject == Handle{0xB0});
     CHECK(told.at(1).What
           == "LINE moved from layer *ADSK_CONSTRAINTS to 0, R12 has no layer named by a star");
     CHECK(told.at(2).What

@@ -42,7 +42,7 @@ namespace DxfIO::Tables
     /**
      *  The height the style was last used at. Group 42.
      */
-    double Previous{Last};
+    double LastHeight{Last};
     /**
      *  The font file, such as "txt" or "arial.ttf". Group 3.
      */

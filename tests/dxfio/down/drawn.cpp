@@ -38,10 +38,10 @@ namespace DxfIO::Down
     auto Bezier(std::vector<double> weights = {}) -> Entities::Spline
     {
       Entities::Spline out{};
-      out.Curve->Degree  = 2;
-      out.Curve->Knots   = {0, 0, 0, 1, 1, 1};
-      out.Curve->Poles   = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
-      out.Curve->Weights = std::move(weights);
+      out.Curve->Degree        = 2;
+      out.Curve->Knots         = {0, 0, 0, 1, 1, 1};
+      out.Curve->ControlPoints = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
+      out.Curve->Weights       = std::move(weights);
       return out;
     }
 
@@ -167,7 +167,7 @@ namespace DxfIO::Down
   {
     Seed             handles;
     Entities::Spline fitted{};
-    fitted.Curve->Fits = {Vector{.X = 1}, Vector{.X = 2}, Vector{.X = 3}};
+    fitted.Curve->FitPoints = {Vector{.X = 1}, Vector{.X = 2}, Vector{.X = 3}};
     CHECK(Traced(fitted, handles).Vertices.Children.size() == 3);
     Entities::Spline broken        = Bezier();
     broken.Curve->Knots            = {0, 1};
@@ -191,9 +191,9 @@ namespace DxfIO::Down
   TEST_CASE("drawn: a spline of several spans, 128 steps at least, 16 a span")
   {
     Entities::Spline out{};
-    out.Curve->Degree = 1;
-    out.Curve->Knots  = {0, 0, 0.5, 0.5, 1, 1};
-    out.Curve->Poles  = {Vector{}, Vector{.X = 1}, Vector{.X = 1, .Y = 1}, Vector{.Y = 1}};
+    out.Curve->Degree        = 1;
+    out.Curve->Knots         = {0, 0, 0.5, 0.5, 1, 1};
+    out.Curve->ControlPoints = {Vector{}, Vector{.X = 1}, Vector{.X = 1, .Y = 1}, Vector{.Y = 1}};
     Seed                     handles;
     const Entities::Polyline made = Traced(out, handles);
     REQUIRE(made.Vertices.Children.size() == 129);
@@ -203,7 +203,7 @@ namespace DxfIO::Down
     many.Curve->Knots  = {0};
     for (int at = 0; at <= 10; ++at)
     {
-      many.Curve->Poles.push_back(Vector{.X = static_cast<double>(at)});
+      many.Curve->ControlPoints.push_back(Vector{.X = static_cast<double>(at)});
       many.Curve->Knots.push_back(static_cast<double>(at));
     }
     many.Curve->Knots.push_back(10);
@@ -213,9 +213,9 @@ namespace DxfIO::Down
   TEST_CASE("drawn: a spline whose end knot repeats past its degree ends on the last span")
   {
     Entities::Spline out{};
-    out.Curve->Degree = 1;
-    out.Curve->Knots  = {0, 0, 1, 1, 1};
-    out.Curve->Poles  = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
+    out.Curve->Degree        = 1;
+    out.Curve->Knots         = {0, 0, 1, 1, 1};
+    out.Curve->ControlPoints = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
     Seed                     handles;
     const Entities::Polyline made = Traced(out, handles);
     REQUIRE(made.Vertices.Children.size() == 129);
@@ -392,11 +392,11 @@ namespace DxfIO::Down
     const Document     from = Unkinded();
     std::vector<Issue> told;
     const Document     out = Narrowed(from, Version::R12, &told);
-    REQUIRE(told.size()     == 5);
-    CHECK(told.front().What == "MTEXT drawn as TEXT for R12");
-    CHECK(told.at(1).What   == "ELLIPSE drawn as POLYLINE for R12");
-    CHECK(told.at(1).Record == Handle{.Value = 0x900});
-    CHECK(told.back().What  == "XLINE drawn as LINE for R12");
+    REQUIRE(told.size()      == 5);
+    CHECK(told.front().What  == "MTEXT drawn as TEXT for R12");
+    CHECK(told.at(1).What    == "ELLIPSE drawn as POLYLINE for R12");
+    CHECK(told.at(1).Subject == Handle{.Value = 0x900});
+    CHECK(told.back().What   == "XLINE drawn as LINE for R12");
     CHECK(std::holds_alternative<Entities::Polyline>(out.Entities.at(out.Entities.size() - 4)));
     CHECK(std::holds_alternative<Entities::Line>(out.Entities.back()));
     CHECK(std::ranges::count_if(out.Blocks.front().Entities, Textual) == 2);

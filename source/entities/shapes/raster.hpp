@@ -32,8 +32,8 @@ namespace DxfIO
   inline constexpr auto Shapes<Entities::Raster> = std::tuple{
       Fields::Field{.Code = 90, .Member = &Entities::Raster::Version},
       Fields::Field{.Code = 10, .Member = &Entities::Raster::Origin},
-      Fields::Field{.Code = 11, .Member = &Entities::Raster::Across},
-      Fields::Field{.Code = 12, .Member = &Entities::Raster::Down},
+      Fields::Field{.Code = 11, .Member = &Entities::Raster::UVector},
+      Fields::Field{.Code = 12, .Member = &Entities::Raster::VVector},
       Fields::Flat{.Code = 13, .Member = &Entities::Raster::Size},
       Fields::Field{.Code = 340, .Member = &Entities::Raster::Definition},
       Fields::Field{.Code = 70, .Member = &Entities::Raster::Flags},
@@ -49,7 +49,7 @@ namespace DxfIO
           }},
       },
       Fields::Field{.Code = 360, .Member = &Entities::Raster::Reactor},
-      Fields::Field{.Code = 71, .Member = &Entities::Raster::Kind},
+      Fields::Field{.Code = 71, .Member = &Entities::Raster::ClipShape},
       Fields::Count{.Code = 91, .Member = &Entities::Raster::Corners},
       Fields::Every{
           .Opener = 14,

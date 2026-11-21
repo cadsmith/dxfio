@@ -119,8 +119,8 @@ namespace DxfIO
     if (!one.Vertices.Closing)
     {
       with.Tell(Issue{
-          .Record = one.Record.Base.Self,
-          .What   = "POLYLINE has no SEQEND",
+          .Subject = one.Record.Base.Self,
+          .What    = "POLYLINE has no SEQEND",
       });
     }
   }

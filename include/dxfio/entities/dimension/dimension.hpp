@@ -59,27 +59,27 @@ namespace DxfIO::Entities
     /**
      *  An angular dimension between two lines.
      */
-    struct DXFIO_API Angular
+    struct DXFIO_API Angular2Line
     {
       /**
        *  The start of the first line, in world coordinates. Groups 13, 23, 33.
        */
-      Vector Start{};
+      Vector FirstStart{};
       /**
        *  The end of the first line, in world coordinates. Groups 14, 24, 34.
        */
-      Vector End{};
+      Vector FirstEnd{};
       /**
        *  The start of the second line, which the definition point ends, in world coordinates.
        *  Groups 15, 25, 35.
        */
-      Vector From{};
+      Vector SecondStart{};
       /**
        *  A point on the dimension arc, in the entity's own coordinate system. Groups 16, 26, 36.
        */
-      Vector To{};
+      Vector ArcPoint{};
 
-      auto operator==(const Angular &) const -> bool = default;
+      auto operator==(const Angular2Line &) const -> bool = default;
     };
 
     /**
@@ -121,7 +121,7 @@ namespace DxfIO::Entities
     /**
      *  An angular dimension by three points: the vertex of the angle and a point on each side.
      */
-    struct DXFIO_API Points
+    struct DXFIO_API Angular3Point
     {
       /**
        *  A point on the first side, in world coordinates. Groups 13, 23, 33.
@@ -136,7 +136,7 @@ namespace DxfIO::Entities
        */
       Vector Vertex{};
 
-      auto operator==(const Points &) const -> bool = default;
+      auto operator==(const Angular3Point &) const -> bool = default;
     };
 
     /**
@@ -160,7 +160,8 @@ namespace DxfIO::Entities
      *  The kind of a DIMENSION, as the low three bits of group 70 give it, with the points that
      *  kind adds. It is what those bits are written from.
      */
-    using Form = std::variant<Linear, Aligned, Angular, Diameter, Radial, Points, Ordinate>;
+    using Form =
+        std::variant<Linear, Aligned, Angular2Line, Diameter, Radial, Angular3Point, Ordinate>;
   } // namespace Forms
 
   /**
@@ -225,23 +226,23 @@ namespace DxfIO::Entities
     /**
      *  The angle the measured part starts at. Group 40.
      */
-    double From{};
+    double StartAngle{};
     /**
      *  The angle the measured part ends at. Group 41.
      */
-    double To{};
+    double EndAngle{};
     /**
      *  1 when the dimension has a leader. Group 71.
      */
-    int Led{};
+    int HasLeader{};
     /**
      *  The first point of the leader, in world coordinates. Groups 16, 26, 36.
      */
-    Vector Near{};
+    Vector FirstLeaderPoint{};
     /**
      *  The second point of the leader, in world coordinates. Groups 17, 27, 37.
      */
-    Vector Far{};
+    Vector SecondLeaderPoint{};
 
     auto operator==(const Bend &) const -> bool = default;
   };
@@ -290,11 +291,11 @@ namespace DxfIO::Entities
     /**
      *  The point of the jog, in world coordinates. Groups 14, 24, 34.
      */
-    Vector Turn{};
+    Vector JogPoint{};
     /**
      *  The angle of the jog. Group 40.
      */
-    double Angle{};
+    double JogAngle{};
 
     auto operator==(const Jog &) const -> bool = default;
   };

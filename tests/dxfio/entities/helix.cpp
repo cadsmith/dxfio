@@ -32,15 +32,15 @@ namespace DxfIO::Entities
     const Helix one = Alikened(Sampled());
     CHECK(one.Curve->Degree       == 3);
     CHECK(one.Curve->Knots.size() == 58);
-    CHECK(one.Curve->Poles.size() == 54);
-    CHECK(one.Coil.Major          == 33);
-    CHECK(one.Coil.Base           == Vector{.X = 80});
-    CHECK(one.Coil.Start          == Vector{.X = 85});
-    CHECK(one.Coil.Axis           == Up);
-    CHECK(one.Coil.Radius         == 3);
-    CHECK(one.Coil.Turns          == 3);
-    CHECK(one.Coil.Rise           == doctest::Approx(10.0 / 3));
-    CHECK(one.Coil.Right);
+    CHECK(one.Curve->ControlPoints.size() == 54);
+    CHECK(one.Coil.Major     == 33);
+    CHECK(one.Coil.BasePoint == Vector{.X = 80});
+    CHECK(one.Coil.Start     == Vector{.X = 85});
+    CHECK(one.Coil.Axis      == Up);
+    CHECK(one.Coil.Radius    == 3);
+    CHECK(one.Coil.Turns     == 3);
+    CHECK(one.Coil.Rise      == doctest::Approx(10.0 / 3));
+    CHECK(one.Coil.RightHanded);
     CHECK(one.Coil.Constraint == 1);
     CHECK_FALSE(one.Picture.empty());
   }
@@ -58,7 +58,7 @@ namespace DxfIO::Entities
   {
     const Helix one{};
     CHECK(one.Coil.Axis == Up);
-    CHECK(one.Coil.Right);
+    CHECK(one.Coil.RightHanded);
     CHECK(one.Coil.Turns == 1);
   }
 

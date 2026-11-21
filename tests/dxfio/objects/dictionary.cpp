@@ -46,7 +46,7 @@ namespace DxfIO::Objects
                                        "  3\r\nAcDbVariableDictionary\r\n"
                                        "350\r\n5E\r\n";
     const Dictionary           taken = Read<Dictionary>(text);
-    CHECK_FALSE(taken.Hard);
+    CHECK_FALSE(taken.HardOwner);
     CHECK(taken.Cloning            == 1);
     REQUIRE(taken.Entries.size()   == 16);
     CHECK(taken.Entries.at(3).Name == "ACAD_GROUP");
@@ -65,7 +65,7 @@ namespace DxfIO::Objects
                                        "  3\r\nACAD_LAYERSTATES\r\n"
                                        "360\r\n200\r\n";
     const Dictionary           taken = Read<Dictionary>(text);
-    CHECK(taken.Hard);
+    CHECK(taken.HardOwner);
     REQUIRE(taken.Entries.size()     == 1);
     CHECK(taken.Entries.front().Hard == Handle{.Value = 0x200});
     CHECK_FALSE(taken.Entries.front().Soft);

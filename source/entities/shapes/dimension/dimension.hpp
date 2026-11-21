@@ -62,11 +62,11 @@ namespace DxfIO
       Fields::Field{.Code = 14, .Member = &Entities::Bend::End},
       Fields::Field{.Code = 15, .Member = &Entities::Bend::Center},
       Fields::Field{.Code = 70, .Member = &Entities::Bend::Partial},
-      Fields::Field{.Code = 40, .Member = &Entities::Bend::From},
-      Fields::Field{.Code = 41, .Member = &Entities::Bend::To},
-      Fields::Field{.Code = 71, .Member = &Entities::Bend::Led},
-      Fields::Field{.Code = 16, .Member = &Entities::Bend::Near},
-      Fields::Field{.Code = 17, .Member = &Entities::Bend::Far},
+      Fields::Field{.Code = 40, .Member = &Entities::Bend::StartAngle},
+      Fields::Field{.Code = 41, .Member = &Entities::Bend::EndAngle},
+      Fields::Field{.Code = 71, .Member = &Entities::Bend::HasLeader},
+      Fields::Field{.Code = 16, .Member = &Entities::Bend::FirstLeaderPoint},
+      Fields::Field{.Code = 17, .Member = &Entities::Bend::SecondLeaderPoint},
   };
 
   template <>
@@ -77,9 +77,9 @@ namespace DxfIO
       },
       Fields::Subclass{.Marker = "AcDbRadialDimensionLarge"},
       Fields::Field{.Code = 13, .Member = &Entities::Jog::Center},
-      Fields::Field{.Code = 14, .Member = &Entities::Jog::Turn},
+      Fields::Field{.Code = 14, .Member = &Entities::Jog::JogPoint},
       Fields::Field{.Code = 15, .Member = &Entities::Jog::Chord},
-      Fields::Field{.Code = 40, .Member = &Entities::Jog::Angle},
+      Fields::Field{.Code = 40, .Member = &Entities::Jog::JogAngle},
   };
 
   template <>

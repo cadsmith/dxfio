@@ -47,13 +47,13 @@ namespace DxfIO::Entities
   {
     const Dimension one = Alikened<Dimension>(Marked("2CD"));
     const Measure  &all = one.Figure->Measure;
-    CHECK(all.Block      == "*D1");
-    CHECK(all.Point      == Vector{.X = 100, .Y = -20});
-    CHECK(all.Flags      == 32);
-    CHECK(all.Attachment == 5);
-    CHECK(all.Measured   == 100);
-    CHECK(all.Style      == "ISO-25");
-    CHECK(all.Normal     == Up);
+    CHECK(all.Block           == "*D1");
+    CHECK(all.DefinitionPoint == Vector{.X = 100, .Y = -20});
+    CHECK(all.Flags           == 32);
+    CHECK(all.Attachment      == 5);
+    CHECK(all.Measured        == 100);
+    CHECK(all.Style           == "ISO-25");
+    CHECK(all.Normal          == Up);
     CHECK(all.Text.empty());
   }
 
@@ -62,8 +62,8 @@ namespace DxfIO::Entities
     CHECK(Formed<Forms::Linear>("2CD").End   == Vector{.X = 100, .Y = 30});
     CHECK(Formed<Forms::Linear>("2DC").Angle == 90);
     CHECK(Formed<Forms::Aligned>("311").End  == Vector{.X = 100, .Y = 30});
-    CHECK(Formed<Forms::Angular>("32D").Start != Vector{});
-    CHECK(Formed<Forms::Points>("345").Vertex != Vector{});
+    CHECK(Formed<Forms::Angular2Line>("32D").FirstStart != Vector{});
+    CHECK(Formed<Forms::Angular3Point>("345").Vertex != Vector{});
     CHECK(Formed<Forms::Diameter>("355").Leader == 0);
     CHECK(Formed<Forms::Radial>("36B").Chord != Vector{});
     CHECK(Formed<Forms::Ordinate>("390").Leader != Vector{});
@@ -234,15 +234,15 @@ namespace DxfIO::Entities
       CAPTURE(release);
       const LargeRadialDimension one =
           Alikened<LargeRadialDimension>(Marked("3CD", release), release);
-      const Vector &center = one.Jog->Measure.Point;
+      const Vector &center = one.Jog->Measure.DefinitionPoint;
       CHECK(std::hypot(one.Jog->Chord.X - center.X, one.Jog->Chord.Y - center.Y)
             == doctest::Approx(30.0));
-      CHECK(one.Jog->Chord.X  == doctest::Approx(411.1417202906233));
-      CHECK(one.Jog->Chord.Y  == doctest::Approx(-27.85430072655778));
-      CHECK(one.Jog->Center.X == doctest::Approx(380.0));
-      CHECK(one.Jog->Center.Y == doctest::Approx(-60.0));
-      CHECK(one.Jog->Turn.X   == doctest::Approx(393.375880569281));
-      CHECK(one.Jog->Turn.Y   == doctest::Approx(-38.43970142320205));
+      CHECK(one.Jog->Chord.X    == doctest::Approx(411.1417202906233));
+      CHECK(one.Jog->Chord.Y    == doctest::Approx(-27.85430072655778));
+      CHECK(one.Jog->Center.X   == doctest::Approx(380.0));
+      CHECK(one.Jog->Center.Y   == doctest::Approx(-60.0));
+      CHECK(one.Jog->JogPoint.X == doctest::Approx(393.375880569281));
+      CHECK(one.Jog->JogPoint.Y == doctest::Approx(-38.43970142320205));
     }
   }
 

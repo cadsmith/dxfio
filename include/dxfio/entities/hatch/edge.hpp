@@ -85,7 +85,7 @@ namespace DxfIO::Entities::Edges
     /**
      *  1 when the arc runs counterclockwise. Group 73.
      */
-    int Counter{};
+    int CounterClockwise{};
 
     auto operator==(const Arc &) const -> bool = default;
   };
@@ -118,7 +118,7 @@ namespace DxfIO::Entities::Edges
     /**
      *  1 when the arc runs counterclockwise. Group 73.
      */
-    int Counter{};
+    int CounterClockwise{};
 
     auto operator==(const Ellipse &) const -> bool = default;
   };
@@ -147,19 +147,19 @@ namespace DxfIO::Entities::Edges
     /**
      *  The control points, with their weights when the spline is rational; group 96 counts them.
      */
-    std::vector<Node> Poles{};
+    std::vector<Node> ControlPoints{};
     /**
      *  The points the spline passes through; group 97 counts them. From R2010.
      */
-    std::vector<Place> Fits{};
+    std::vector<Place> FitPoints{};
     /**
      *  The tangent at the start, when the spline has fit points. Groups 12, 22, from R2010.
      */
-    Vector Start{};
+    Vector StartTangent{};
     /**
      *  The tangent at the end, when the spline has fit points. Groups 13, 23, from R2010.
      */
-    Vector End{};
+    Vector EndTangent{};
 
     auto operator==(const Spline &) const -> bool = default;
   };

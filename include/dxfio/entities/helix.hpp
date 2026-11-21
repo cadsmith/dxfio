@@ -27,7 +27,7 @@ namespace DxfIO::Entities
     /**
      *  The base point of the axis, in world coordinates. Groups 10, 20, 30.
      */
-    Vector Base{};
+    Vector BasePoint{};
     /**
      *  The point the helix starts at, in world coordinates. Groups 11, 21, 31.
      */
@@ -51,7 +51,7 @@ namespace DxfIO::Entities
     /**
      *  Whether the helix turns right-handed. Group 290.
      */
-    bool Right{true};
+    bool RightHanded{true};
     /**
      *  What is kept when the helix is edited: 0 the height of a turn, 1 the turns, 2 the height.
      *  Group 280.

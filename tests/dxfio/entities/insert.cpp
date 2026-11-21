@@ -91,16 +91,16 @@ namespace DxfIO::Entities
   TEST_CASE("insert: a MINSERT, its marker and both counts, 1 too")
   {
     const Insert grid = Replayed<Insert>(Marked("2DE"));
-    CHECK(grid.Columns == 3);
-    CHECK(grid.Rows    == 2);
-    CHECK(grid.Across  == 5);
-    CHECK(grid.Down    == 4);
+    CHECK(grid.Columns       == 3);
+    CHECK(grid.Rows          == 2);
+    CHECK(grid.ColumnSpacing == 5);
+    CHECK(grid.RowSpacing    == 4);
     const Insert row = Replayed<Insert>(Marked("2DF"));
-    CHECK(row.Rows == 1);
-    CHECK(row.Down == 0);
+    CHECK(row.Rows       == 1);
+    CHECK(row.RowSpacing == 0);
     const Insert column = Replayed<Insert>(Marked("2E0"));
-    CHECK(column.Columns == 1);
-    CHECK(column.Across  == 0);
+    CHECK(column.Columns       == 1);
+    CHECK(column.ColumnSpacing == 0);
   }
 
   TEST_CASE("insert: an array of one is a plain reference, as AutoCAD writes it")

@@ -47,12 +47,12 @@ namespace DxfIO
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Forms::Angular> = std::tuple{
+  inline constexpr auto Shapes<Entities::Forms::Angular2Line> = std::tuple{
       Fields::Subclass{.Marker = "AcDb2LineAngularDimension"},
-      Fields::Field{.Code = 13, .Member = &Entities::Forms::Angular::Start},
-      Fields::Field{.Code = 14, .Member = &Entities::Forms::Angular::End},
-      Fields::Field{.Code = 15, .Member = &Entities::Forms::Angular::From},
-      Fields::Field{.Code = 16, .Member = &Entities::Forms::Angular::To},
+      Fields::Field{.Code = 13, .Member = &Entities::Forms::Angular2Line::FirstStart},
+      Fields::Field{.Code = 14, .Member = &Entities::Forms::Angular2Line::FirstEnd},
+      Fields::Field{.Code = 15, .Member = &Entities::Forms::Angular2Line::SecondStart},
+      Fields::Field{.Code = 16, .Member = &Entities::Forms::Angular2Line::ArcPoint},
   };
 
   template <>
@@ -70,11 +70,11 @@ namespace DxfIO
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Forms::Points> = std::tuple{
+  inline constexpr auto Shapes<Entities::Forms::Angular3Point> = std::tuple{
       Fields::Subclass{.Marker = "AcDb3PointAngularDimension"},
-      Fields::Field{.Code = 13, .Member = &Entities::Forms::Points::Start},
-      Fields::Field{.Code = 14, .Member = &Entities::Forms::Points::End},
-      Fields::Field{.Code = 15, .Member = &Entities::Forms::Points::Vertex},
+      Fields::Field{.Code = 13, .Member = &Entities::Forms::Angular3Point::Start},
+      Fields::Field{.Code = 14, .Member = &Entities::Forms::Angular3Point::End},
+      Fields::Field{.Code = 15, .Member = &Entities::Forms::Angular3Point::Vertex},
   };
 
   template <>

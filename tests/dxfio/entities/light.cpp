@@ -41,7 +41,7 @@ namespace DxfIO::Entities
     CHECK_FALSE(point.Lamp->Limited);
     CHECK(point.Lamp->Hotspot == 45);
     CHECK(point.Lamp->Falloff == 50);
-    CHECK(point.Lamp->Casting);
+    CHECK(point.Lamp->CastShadows);
     CHECK(point.Lamp->Size           == 256);
     CHECK(Alikened("320").Lamp->Kind == 3);
     CHECK(Alikened("323").Lamp->Kind == 1);

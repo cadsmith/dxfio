@@ -478,13 +478,13 @@ namespace DxfIO::Entities
       double Angle{};
       auto operator==(const Aligned &) const -> bool = default;
     };
-    struct DXFIO_API Angular
+    struct DXFIO_API Angular2Line
     {
-      Vector Start{};
-      Vector End{};
-      Vector From{};
-      Vector To{};
-      auto operator==(const Angular &) const -> bool = default;
+      Vector FirstStart{};
+      Vector FirstEnd{};
+      Vector SecondStart{};
+      Vector ArcPoint{};
+      auto operator==(const Angular2Line &) const -> bool = default;
     };
     struct DXFIO_API Diameter
     {
@@ -498,12 +498,12 @@ namespace DxfIO::Entities
       double Leader{};
       auto operator==(const Radial &) const -> bool = default;
     };
-    struct DXFIO_API Points
+    struct DXFIO_API Angular3Point
     {
       Vector Start{};
       Vector End{};
       Vector Vertex{};
-      auto operator==(const Points &) const -> bool = default;
+      auto operator==(const Angular3Point &) const -> bool = default;
     };
     struct DXFIO_API Ordinate
     {
@@ -511,7 +511,8 @@ namespace DxfIO::Entities
       Vector Leader{};
       auto operator==(const Ordinate &) const -> bool = default;
     };
-    using Form = std::variant<Linear, Aligned, Angular, Diameter, Radial, Points, Ordinate>;
+    using Form =
+        std::variant<Linear, Aligned, Angular2Line, Diameter, Radial, Angular3Point, Ordinate>;
   }
   struct DXFIO_API Figure
   {
@@ -532,11 +533,11 @@ namespace DxfIO::Entities
     Vector End{};
     Vector Center{};
     int Partial{};
-    double From{};
-    double To{};
-    int Led{};
-    Vector Near{};
-    Vector Far{};
+    double StartAngle{};
+    double EndAngle{};
+    int HasLeader{};
+    Vector FirstLeaderPoint{};
+    Vector SecondLeaderPoint{};
     auto operator==(const Bend &) const -> bool = default;
   };
   struct DXFIO_API ArcDimension
@@ -551,8 +552,8 @@ namespace DxfIO::Entities
     Entities::Measure Measure{};
     Vector Chord{};
     Vector Center{};
-    Vector Turn{};
-    double Angle{};
+    Vector JogPoint{};
+    double JogAngle{};
     auto operator==(const Jog &) const -> bool = default;
   };
   struct DXFIO_API LargeRadialDimension
@@ -577,9 +578,9 @@ namespace DxfIO::Entities
   {
     int Version{};
     Symbol Block{};
-    Vector Point{};
-    Vector Middle{};
-    std::optional<Vector> Clone{};
+    Vector DefinitionPoint{};
+    Vector TextMiddle{};
+    std::optional<Vector> CloneInsertion{};
     int Flags{};
     std::string Text{};
     int Attachment{MiddleCenter};
@@ -587,12 +588,12 @@ namespace DxfIO::Entities
     std::optional<double> LineSpacingFactor{};
     double Measured{Unmeasured};
     int Above{};
-    int First{};
-    int Second{};
+    int FlipFirst{};
+    int FlipSecond{};
     std::optional<double> Oblique{};
-    std::optional<double> Rotation{};
-    std::optional<double> Turned{};
-    std::optional<double> Horizontal{};
+    std::optional<double> TextRotation{};
+    std::optional<double> BlockRotation{};
+    std::optional<double> HorizontalDirection{};
     Vector Normal{Up};
     Symbol Style{};
     auto operator==(const Measure &) const -> bool = default;
@@ -664,7 +665,7 @@ namespace DxfIO::Entities::Edges
     double Radius{};
     double Start{};
     double End{};
-    int Counter{};
+    int CounterClockwise{};
     auto operator==(const Arc &) const -> bool = default;
   };
   struct DXFIO_API Ellipse
@@ -674,7 +675,7 @@ namespace DxfIO::Entities::Edges
     double Ratio{};
     double Start{};
     double End{};
-    int Counter{};
+    int CounterClockwise{};
     auto operator==(const Ellipse &) const -> bool = default;
   };
   struct DXFIO_API Spline
@@ -683,10 +684,10 @@ namespace DxfIO::Entities::Edges
     int Rational{};
     int Periodic{};
     std::vector<double> Knots{};
-    std::vector<Node> Poles{};
-    std::vector<Place> Fits{};
-    Vector Start{};
-    Vector End{};
+    std::vector<Node> ControlPoints{};
+    std::vector<Place> FitPoints{};
+    Vector StartTangent{};
+    Vector EndTangent{};
     auto operator==(const Spline &) const -> bool = default;
   };
   using Edge = std::variant<Line, Arc, Ellipse, Boxed<Spline>>;
@@ -798,13 +799,13 @@ namespace DxfIO::Entities
   {
     int Major{};
     int Minor{};
-    Vector Base{};
+    Vector BasePoint{};
     Vector Start{};
     Vector Axis{Up};
     double Radius{1};
     double Turns{1};
     double Rise{1};
-    bool Right{true};
+    bool RightHanded{true};
     int Constraint{};
     auto operator==(const Coil &) const -> bool = default;
   };
@@ -837,8 +838,8 @@ namespace DxfIO::Entities
     double Rotation{};
     std::optional<int> Columns{};
     std::optional<int> Rows{};
-    double Across{};
-    double Down{};
+    double ColumnSpacing{};
+    double RowSpacing{};
     Vector Extrusion{Up};
     Sequence<Attrib> Attributes{};
     auto operator==(const Insert &) const -> bool = default;
@@ -931,11 +932,11 @@ namespace DxfIO::Entities
     Vector Target{};
     int Fading{};
     bool Limited{};
-    double Start{1};
-    double End{10};
+    double AttenuationStart{1};
+    double AttenuationEnd{10};
     double Hotspot{45};
     double Falloff{50};
-    bool Casting{true};
+    bool CastShadows{true};
     int Shading{};
     int Size{256};
     int Softness{1};
@@ -1480,8 +1481,8 @@ namespace DxfIO::Entities
   {
     int Version{};
     Vector Origin{};
-    Vector Across{};
-    Vector Down{};
+    Vector UVector{};
+    Vector VVector{};
     Vector Size{};
     Handle Definition{};
     int Flags{Displayed};
@@ -1491,7 +1492,7 @@ namespace DxfIO::Entities
     int Fade{};
     bool Outside{};
     Handle Reactor{};
-    int Kind{1};
+    int ClipShape{1};
     std::vector<Pixel> Corners{};
     auto operator==(const Raster &) const -> bool = default;
   };
@@ -1668,15 +1669,15 @@ namespace DxfIO::Entities
     std::optional<Vector> Normal{};
     int Flags{};
     int Degree{3};
-    double Knotted{Knotting};
-    double Framed{Framing};
-    std::optional<double> Fitted{};
-    std::optional<Vector> Start{};
-    std::optional<Vector> End{};
+    double KnotTolerance{Knotting};
+    double ControlTolerance{Framing};
+    std::optional<double> FitTolerance{};
+    std::optional<Vector> StartTangent{};
+    std::optional<Vector> EndTangent{};
     std::vector<double> Knots{};
-    std::vector<Vector> Poles{};
+    std::vector<Vector> ControlPoints{};
     std::vector<double> Weights{};
-    std::vector<Vector> Fits{};
+    std::vector<Vector> FitPoints{};
     auto operator==(const Curve &) const -> bool = default;
   };
   struct DXFIO_API Spline
@@ -2035,7 +2036,7 @@ namespace DxfIO
   struct DXFIO_API Issue
   {
     std::size_t Line{};
-    Handle Record{};
+    Handle Subject{};
     std::string What{};
     auto operator==(const Issue &) const -> bool = default;
   };
@@ -2197,7 +2198,7 @@ namespace DxfIO::Objects
   struct DXFIO_API Dictionary
   {
     DxfIO::Base Base{};
-    bool Hard{};
+    bool HardOwner{};
     int Cloning{1};
     std::vector<Objects::Entry> Entries{};
     auto operator==(const Dictionary &) const -> bool = default;
@@ -2526,8 +2527,8 @@ namespace DxfIO::Objects
     Vector Origin{};
     Vector Lower{};
     Vector Upper{};
-    double Paper{1};
-    double Drawing{1};
+    double PaperUnits{1};
+    double DrawingUnits{1};
     int Flags{Plotted};
     int Units{};
     int Rotation{};
@@ -3087,7 +3088,7 @@ namespace DxfIO::Tables
     double Width{1};
     double Oblique{};
     int Generation{};
-    double Previous{Last};
+    double LastHeight{Last};
     std::string Font{"txt"};
     std::string Bigfont{};
     auto operator==(const Style &) const -> bool = default;

@@ -55,7 +55,7 @@ namespace DxfIO
               std::tuple{
                   Fields::Field{
                       .Code     = 280,
-                      .Member   = &Objects::Dictionary::Hard,
+                      .Member   = &Objects::Dictionary::HardOwner,
                       .Fallback = false,
                   },
                   Fields::Field{

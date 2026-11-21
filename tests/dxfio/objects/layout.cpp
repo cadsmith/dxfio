@@ -92,11 +92,11 @@ namespace DxfIO::Objects
     CHECK(taken.Order          == 0);
     CHECK(taken.Plot->Size     == "ISO_A4_(210.00_x_297.00_MM)");
     CHECK(taken.Plot->Origin.Y == -13.65000009536743);
-    CHECK(taken.Plot->Drawing  == 8.704084754739808);
-    CHECK(taken.Plot->Flags    == 11952);
-    CHECK(taken.Block          == Handle{.Value = 0x1f});
-    CHECK(taken.Viewport       == Handle{.Value = 0xea});
-    CHECK(taken.Base.Owner     == Handle{.Value = 0x1a});
+    CHECK(taken.Plot->DrawingUnits == 8.704084754739808);
+    CHECK(taken.Plot->Flags        == 11952);
+    CHECK(taken.Block      == Handle{.Value = 0x1f});
+    CHECK(taken.Viewport   == Handle{.Value = 0xea});
+    CHECK(taken.Base.Owner == Handle{.Value = 0x1a});
     CHECK(taken.Base.Extended.size() == 1);
     CHECK(Written(taken)             == text);
   }
