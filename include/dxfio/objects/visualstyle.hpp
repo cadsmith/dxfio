@@ -3,7 +3,7 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <optional>
 #include <string>
@@ -41,7 +41,7 @@ namespace DxfIO::Objects
     /**
      *  The properties that follow, as groups in the order they came.
      */
-    std::vector<DxfIO::Group> Properties{};
+    std::vector<DxfIO::Tag> Properties{};
 
     auto operator==(const VisualStyle &) const -> bool = default;
   };

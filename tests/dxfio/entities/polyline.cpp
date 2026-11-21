@@ -164,8 +164,8 @@ namespace DxfIO::Entities
     const DxfIO::Document file = Heavy();
     CHECK(Traced(file.Entities, 0x4a6).Record.Paper);
     const auto found =
-        std::ranges::find(file.Blocks, "held",
-                          [](const Blocks::Block &one) -> std::string { return one.Begin.Name; });
+        std::ranges::find(file.Blocks, "held", [](const Blocks::Definition &one) -> std::string
+                          { return one.Begin.Name; });
     REQUIRE(found != file.Blocks.end());
     REQUIRE(found->Entities.size() == 1);
     CHECK(std::get<Polyline>(found->Entities.front()).Vertices.Children.size() == 3);
@@ -221,7 +221,7 @@ namespace DxfIO::Entities
     CHECK_FALSE(taken.Vertices.Closing);
     REQUIRE(read->Issues.size()     == 1);
     CHECK(read->Issues.front().What == "POLYLINE has no SEQEND");
-    const auto saved = Tests::Written(read->Document, Options{});
+    const auto saved = Tests::Written(read->Document, SaveOptions{});
     REQUIRE(saved);
     CHECK_FALSE(saved->contains("SEQEND"));
   }
@@ -252,7 +252,7 @@ namespace DxfIO::Entities
     text.replace(text.find(" 30\r\n0.0\r\n"), 10, " 30\r\n0.0\r\n 70\r\n     8\r\n");
     const auto read = Load(Drawing(Joined({text, Closing})));
     REQUIRE(read);
-    const auto saved = Tests::Written(read->Document, Options{});
+    const auto saved = Tests::Written(read->Document, SaveOptions{});
     REQUIRE(saved);
     CHECK(saved->contains("AcDb3dPolyline"));
     CHECK_FALSE(saved->contains("AcDb2dPolyline"));
@@ -292,7 +292,7 @@ namespace DxfIO::Entities
     CHECK(std::holds_alternative<Line>(all.at(1)));
     CHECK(std::get<Unknown>(all.at(2)).Type == "VERTEX");
     CHECK(std::get<Unknown>(all.at(3)).Type == "SEQEND");
-    const auto saved = Tests::Written(read->Document, Options{});
+    const auto saved = Tests::Written(read->Document, SaveOptions{});
     REQUIRE(saved);
     CHECK(saved->contains(Joined({Stray, Other, Closing})));
   }

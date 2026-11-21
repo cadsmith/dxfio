@@ -72,7 +72,7 @@ namespace DxfIO::Tables
                                        "421\r\n  3355443\r\n"
                                        "1001\r\nACAD_NAV_VCDISPLAY\r\n"
                                        "1070\r\n     3\r\n";
-    const Vport                taken = Read<Vport>(text);
+    const VPort                taken = Read<VPort>(text);
     CHECK(taken.Record.Name == "*Active");
     CHECK(taken.Lower       == Vector{.X = 0.5, .Y = 0, .Z = 0});
     CHECK(taken.Zoom        == Viewres);
@@ -84,7 +84,7 @@ namespace DxfIO::Tables
 
   TEST_CASE("viewport: R2000 has no style nor lighting")
   {
-    Vport later = Read<Vport>("  0\r\nVPORT\r\n"
+    VPort later = Read<VPort>("  0\r\nVPORT\r\n"
                               "  5\r\nEA\r\n"
                               "330\r\n8\r\n"
                               "100\r\nAcDbSymbolTableRecord\r\n"

@@ -204,7 +204,7 @@ namespace DxfIO
           into.Document.Header.begin(),
           Header::Variable{
               .Name   = std::string{Named},
-              .Values = {Group{.Code = 1, .Value = std::string{Acadver(Version::R2000)}}},
+              .Values = {Tag{.Code = 1, .Value = std::string{AcadverOf(Version::R2000)}}},
           });
     }
 
@@ -229,7 +229,7 @@ namespace DxfIO
     }
   } // namespace
 
-  auto Load(std::string_view bytes, const Loading &with) -> std::expected<Loaded, Failure>
+  auto Load(std::string_view bytes, const LoadOptions &with) -> std::expected<Loaded, Failure>
   {
     Loaded     out;
     const auto all = Tags::All(bytes, &out.Issues);
@@ -277,7 +277,7 @@ namespace DxfIO
     return out;
   }
 
-  auto Load(std::istream &from, const Loading &with) -> std::expected<Loaded, Failure>
+  auto Load(std::istream &from, const LoadOptions &with) -> std::expected<Loaded, Failure>
   {
     if (from.fail())
     {
@@ -287,7 +287,7 @@ namespace DxfIO
     return Load(bytes, with);
   }
 
-  auto LoadFile(const std::filesystem::path &file, const Loading &with)
+  auto LoadFile(const std::filesystem::path &file, const LoadOptions &with)
       -> std::expected<Loaded, Failure>
   {
     std::ifstream from{file, std::ios::binary};

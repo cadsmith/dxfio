@@ -15,7 +15,7 @@
 #include "tags/tag.hpp"
 
 #include "dxfio/entities/ole2frame.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <cstdint>
 #include <expected>
@@ -36,7 +36,7 @@ namespace DxfIO
       static_cast<void>(Fields::Value<std::int64_t>::Read(in, Sized));
       while (const Tags::Tag *held = in.Take(Binary))
       {
-        const Group part = Fields::Owned(*held, in.With().Text);
+        const Tag part = Fields::Owned(*held, in.With().Text);
         if (const auto *bytes = std::get_if<Chunk>(&part.Value))
         {
           one.Data += bytes->Bytes;

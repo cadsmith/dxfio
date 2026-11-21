@@ -14,8 +14,8 @@ namespace DxfIO
     {
       return {};
     }
-    const Options with{.Release = Header::Declared(first->Document.Header)};
-    const auto    once = Save(first->Document, with);
+    const SaveOptions with{.Release = Header::Declared(first->Document.Header)};
+    const auto        once = Save(first->Document, with);
     if (!once)
     {
       return "the document read did not save: " + once.error().What;
@@ -37,7 +37,7 @@ namespace DxfIO
     for (const Version release : {Version::R10, Version::R12, Version::R13, Version::R14,
                                   Version::R2000, Version::R2007, Version::R2018})
     {
-      const auto other = Save(first->Document, Options{.Release = release});
+      const auto other = Save(first->Document, SaveOptions{.Release = release});
       if (!other)
       {
         continue;

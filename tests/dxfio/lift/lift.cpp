@@ -54,7 +54,7 @@ namespace DxfIO::Lift
   {
     for (const Version release : {Version::R2000, Version::R2004, Version::R2018})
     {
-      CAPTURE(Name(release));
+      CAPTURE(NameOf(release));
       const Loaded back = Raised(Drawn(Version::R12), release);
       CHECK(back.Issues.empty());
       CHECK(Header::Declared(back.Document.Header) == release);
@@ -63,8 +63,8 @@ namespace DxfIO::Lift
                                         "OBJECTS"});
       CHECK(Edit::Find(back.Document.BlockRecord, "*Model_Space") != nullptr);
       CHECK(Edit::Find(back.Document.BlockRecord, "*Paper_Space") != nullptr);
-      CHECK(Edit::Find(back.Document.Ltype, "ByLayer") != nullptr);
-      CHECK(Edit::Find(back.Document.Ltype, "ByBlock") != nullptr);
+      CHECK(Edit::Find(back.Document.LType, "ByLayer") != nullptr);
+      CHECK(Edit::Find(back.Document.LType, "ByBlock") != nullptr);
       CHECK_FALSE(back.Document.Objects.empty());
       CHECK_FALSE(back.Document.Classes.empty());
       CHECK(back.Document.Layer.Head.Base.Self);
@@ -129,9 +129,9 @@ namespace DxfIO::Lift
     Document drawing = Create(Version::R12);
     REQUIRE(Edit::AddBlock(drawing, "PART"));
     REQUIRE(Edit::Add(drawing, Entities::Circle{}, "PART"));
-    const Loaded         back   = Raised(drawing, Version::R2000);
-    const Handle         record = Owner(back.Document, "PART");
-    const Blocks::Block *block  = Edit::FindBlock(back.Document, "PART");
+    const Loaded              back   = Raised(drawing, Version::R2000);
+    const Handle              record = Owner(back.Document, "PART");
+    const Blocks::Definition *block  = Edit::FindBlock(back.Document, "PART");
     REQUIRE(block != nullptr);
     CHECK(block->Begin.Record.Base.Owner == record);
     CHECK(block->End.Record.Base.Owner   == record);
@@ -152,13 +152,13 @@ namespace DxfIO::Lift
     CHECK(Edit::FindBlock(back.Document, "$PAPER_SPACE")        == nullptr);
     CHECK(Edit::Find(back.Document.BlockRecord, "$PAPER_SPACE") == nullptr);
     CHECK(Edit::FindBlock(back.Document, "$MODEL_SPACE")        == nullptr);
-    const Blocks::Block *model = Edit::FindBlock(back.Document, "*Model_Space");
+    const Blocks::Definition *model = Edit::FindBlock(back.Document, "*Model_Space");
     REQUIRE(model != nullptr);
     REQUIRE(model->Entities.size() == 1);
     CHECK(BaseOf(model->Entities.front()).Owner == Owner(back.Document, "*Model_Space"));
     CHECK_FALSE(Entities::Paper(model->Entities.front()));
-    const Handle         paper = Owner(back.Document, "*Paper_Space");
-    const Blocks::Block *sheet = Edit::FindBlock(back.Document, "*Paper_Space");
+    const Handle              paper = Owner(back.Document, "*Paper_Space");
+    const Blocks::Definition *sheet = Edit::FindBlock(back.Document, "*Paper_Space");
     REQUIRE(sheet != nullptr);
     REQUIRE(sheet->Entities.size() == 1);
     CHECK(BaseOf(sheet->Entities.front()).Owner == paper);

@@ -37,7 +37,7 @@ namespace DxfIO
       return text;
     }
 
-    auto Seed(const Document &drawing) -> std::vector<Group>
+    auto Seed(const Document &drawing) -> std::vector<Tag>
     {
       const auto found = std::ranges::find(drawing.Header, "$HANDSEED", &Header::Variable::Name);
       REQUIRE(found != drawing.Header.end());
@@ -51,7 +51,7 @@ namespace DxfIO
     REQUIRE(read);
     const Handle past = Past(read->Document);
     CHECK(past > Handle{2});
-    CHECK(Seed(read->Document)  == std::vector{Group{.Code = 5, .Value = past}});
+    CHECK(Seed(read->Document)  == std::vector{Tag{.Code = 5, .Value = past}});
     REQUIRE(read->Issues.size() == 1);
     CHECK(read->Issues.front().What
           == std::format("$HANDSEED 2 is not past the handles in use, raised to {}", Hex(past)));
@@ -86,8 +86,8 @@ namespace DxfIO
                                       "OBJECTS"});
     CHECK(Header::Declared(drawing.Header) == Version::R2018);
     CHECK(drawing.Layer.Records.size() > 0);
-    CHECK(drawing.Appid.Head.Name == "APPID");
-    CHECK(drawing.Ltype.Records.size() > 0);
+    CHECK(drawing.AppId.Head.Name == "APPID");
+    CHECK(drawing.LType.Records.size() > 0);
     CHECK(drawing.Loose.empty());
     CHECK_FALSE(drawing.Entities.empty());
     CHECK_FALSE(drawing.Objects.empty());
@@ -113,7 +113,7 @@ namespace DxfIO
     CHECK(read->Document.Entities.empty());
     REQUIRE(read->Document.Sections.size() == 1);
     CHECK(read->Document.Sections.front().Groups.size() == 2);
-    const auto saved = Tests::Written(read->Document, Options{});
+    const auto saved = Tests::Written(read->Document, SaveOptions{});
     REQUIRE(saved);
     CHECK(saved->contains("\\U+0045NTITIES"));
     CHECK(saved->contains("2A"));
@@ -249,7 +249,7 @@ namespace DxfIO
     CHECK(Header::Declared(read->Document.Header) == Version::R2000);
     CHECK(read->Document.Header.front()
           == Header::Variable{.Name   = "$ACADVER",
-                              .Values = {Group{.Code = 1, .Value = std::string{"AC1015"}}}});
+                              .Values = {Tag{.Code = 1, .Value = std::string{"AC1015"}}}});
     CHECK(read->Issues
           == std::vector{Issue{
               .Line = 0,
@@ -310,7 +310,7 @@ namespace DxfIO
     REQUIRE(read);
     REQUIRE(read->Document.Entities.size() == 1);
     CHECK(BaseOf(read->Document.Entities.front()).Extra
-          == std::vector{Group{.Code = 250, .Value = std::string{"2"}}});
+          == std::vector{Tag{.Code = 250, .Value = std::string{"2"}}});
     CHECK(read->Issues == std::vector{Issue{.Line = 7, .What = "group 250 is no DXF group, kept"}});
   }
 
@@ -379,7 +379,7 @@ namespace DxfIO
   TEST_CASE("load: a drawing read on several threads is the drawing read on one, issues and all")
   {
     const std::string text  = Spanning();
-    const auto        alone = Load(text, Loading{.Threads = 1});
+    const auto        alone = Load(text, LoadOptions{.Threads = 1});
     REQUIRE(alone);
     REQUIRE(alone->Document.Entities.size() == 955);
     CHECK(alone->Document.Objects.size()    == 600);
@@ -393,13 +393,13 @@ namespace DxfIO
     for (const int threads : {0, 2, 8})
     {
       CAPTURE(threads);
-      const auto together = Load(text, Loading{.Threads = threads});
+      const auto together = Load(text, LoadOptions{.Threads = threads});
       REQUIRE(together);
       CHECK(together->Document == alone->Document);
       CHECK(together->Issues   == alone->Issues);
     }
     std::istringstream from{text};
-    const auto         streamed = Load(from, Loading{.Threads = 4});
+    const auto         streamed = Load(from, LoadOptions{.Threads = 4});
     REQUIRE(streamed);
     CHECK(streamed->Document == alone->Document);
   }

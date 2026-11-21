@@ -19,9 +19,9 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Objects::Sortents::Entry> = std::tuple{
-      Fields::Field{.Code = 331, .Member = &Objects::Sortents::Entry::Entity},
-      Fields::Field{.Code = 5, .Member = &Objects::Sortents::Entry::Key},
+  inline constexpr auto Shapes<Objects::SortEntsTables::Entry> = std::tuple{
+      Fields::Field{.Code = 331, .Member = &Objects::SortEntsTables::Entry::Entity},
+      Fields::Field{.Code = 5, .Member = &Objects::SortEntsTables::Entry::Key},
   };
 
   template <>
@@ -36,7 +36,7 @@ namespace DxfIO
                   Fields::Every{
                       .Opener = 331,
                       .Member = &Objects::SortEntsTable::Entries,
-                      .Fields = Shapes<Objects::Sortents::Entry>,
+                      .Fields = Shapes<Objects::SortEntsTables::Entry>,
                   },
               },
       },

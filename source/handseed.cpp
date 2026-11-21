@@ -26,8 +26,8 @@ namespace DxfIO
 
   void WriteSeed(Document &drawing, Handle next)
   {
-    const Group value{.Code = Code, .Value = next};
-    const auto  found = std::ranges::find(drawing.Header, Variable, &Header::Variable::Name);
+    const Tag  value{.Code = Code, .Value = next};
+    const auto found = std::ranges::find(drawing.Header, Variable, &Header::Variable::Name);
     if (found == drawing.Header.end())
     {
       drawing.Header.push_back(Header::Variable{.Name = std::string{Variable}, .Values = {value}});

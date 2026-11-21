@@ -20,9 +20,9 @@ namespace DxfIO::Empty
 {
   TEST_CASE("block: named, owned, in paper space, on handles of its own")
   {
-    Seed                handles{Handle{.Value = 0x40}};
-    const Handle        record{.Value = 0x31};
-    const Blocks::Block sheet =
+    Seed                     handles{Handle{.Value = 0x40}};
+    const Handle             record{.Value = 0x31};
+    const Blocks::Definition sheet =
         Block("*Paper_Space7", Space{.Record = record, .Paper = true}, handles);
     CHECK(sheet.Begin.Name             == "*Paper_Space7");
     CHECK(sheet.Begin.Record.Base.Self == Handle{.Value = 0x40});
@@ -37,9 +37,9 @@ namespace DxfIO::Empty
 
   TEST_CASE("blocks: a new drawing's two spaces, each of its own record")
   {
-    Seed                             handles;
-    const Roots                      ids = Taken(handles);
-    const std::vector<Blocks::Block> all = Blocks(ids, handles);
+    Seed                                  handles;
+    const Roots                           ids = Taken(handles);
+    const std::vector<Blocks::Definition> all = Blocks(ids, handles);
     REQUIRE(all.size()           == 2);
     CHECK(all.front().Begin.Name == "*Model_Space");
     CHECK(all.front().Begin.Record.Base.Owner == ids.Records.Model);

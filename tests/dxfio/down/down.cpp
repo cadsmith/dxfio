@@ -168,7 +168,7 @@ namespace DxfIO::Down
       line.Record.Base.Self = Handle{0xB1};
       line.Record.Layer     = Symbol{"Walls"};
       out.Entities.emplace_back(line);
-      out.Blocks.push_back(Blocks::Block{});
+      out.Blocks.push_back(Blocks::Definition{});
       out.Blocks.back().Begin.Name = "Door";
       Entities::Insert held{};
       held.Block = Symbol{"Door"};
@@ -177,7 +177,7 @@ namespace DxfIO::Down
       held.Attributes.Children.push_back(tag);
       tag.Record.Layer = Symbol{Constraints};
       held.Attributes.Children.push_back(tag);
-      held.Attributes.Closing = Boxed{Entities::Seqend{.Record = tag.Record}};
+      held.Attributes.Closing = Boxed{Entities::SeqEnd{.Record = tag.Record}};
       out.Entities.emplace_back(held);
       Entities::Insert bare{};
       bare.Block        = Symbol{"Door"};
@@ -230,12 +230,12 @@ namespace DxfIO::Down
     auto Untable(const Document &from, Version release) -> Untabled
     {
       std::vector<Issue> told;
-      const auto         saved = Tests::Written(from, Options{.Release = release}, &told);
+      const auto         saved = Tests::Written(from, SaveOptions{.Release = release}, &told);
       REQUIRE(saved);
       const auto back = Load(*saved);
       REQUIRE(back);
       const std::string what =
-          std::format("ACAD_TABLE left out, its body is not in {}'s form", Name(release));
+          std::format("ACAD_TABLE left out, its body is not in {}'s form", NameOf(release));
       return Untabled{
           .Told = std::ranges::count(told, what, &Issue::What),
           .Kept = std::ranges::count_if(back->Document.Entities, Tabular),
@@ -292,16 +292,16 @@ namespace DxfIO::Down
   TEST_CASE("down: ByBlock and ByLayer are no linetypes of R12")
   {
     const Document out = Narrowed(Fresh(), Version::R12, nullptr);
-    CHECK(out.Ltype.Records.size() == 1);
-    CHECK(out.Ltype.Records.front().Record.Name == "Continuous");
+    CHECK(out.LType.Records.size() == 1);
+    CHECK(out.LType.Records.front().Record.Name == "Continuous");
   }
 
   TEST_CASE("down: the two spaces take R12's names, other sheets are left out")
   {
     Document from = Fresh();
-    from.Blocks.push_back(Blocks::Block{});
+    from.Blocks.push_back(Blocks::Definition{});
     from.Blocks.back().Begin.Name = "*Paper_Space7";
-    from.Blocks.push_back(Blocks::Block{});
+    from.Blocks.push_back(Blocks::Definition{});
     from.Blocks.back().Begin.Name = "Door";
     const Document out            = Narrowed(from, Version::R12, nullptr);
     REQUIRE(out.Blocks.size()      == 3);
@@ -314,11 +314,11 @@ namespace DxfIO::Down
   TEST_CASE("down: R10 has neither applications nor dimension styles")
   {
     const Document out = Narrowed(Fresh(), Version::R10, nullptr);
-    CHECK(out.Appid.Head.Name.empty());
-    CHECK(out.Dimstyle.Head.Name.empty());
+    CHECK(out.AppId.Head.Name.empty());
+    CHECK(out.DimStyle.Head.Name.empty());
     const Document kept = Narrowed(Fresh(), Version::R12, nullptr);
-    CHECK_FALSE(kept.Appid.Head.Name.empty());
-    CHECK_FALSE(kept.Dimstyle.Head.Name.empty());
+    CHECK_FALSE(kept.AppId.Head.Name.empty());
+    CHECK_FALSE(kept.DimStyle.Head.Name.empty());
   }
 
   TEST_CASE("down: a kind R12 has stays, its handle and extended data with it")
@@ -390,7 +390,7 @@ namespace DxfIO::Down
     CHECK(bulged.Record.Base.Self == first);
     CHECK_FALSE(heavy.Vertices.Children[1].Start);
     REQUIRE(heavy.Vertices.Closing);
-    CHECK(heavy.Vertices.Closing.value_or(Boxed<Entities::Seqend>{})->Record.Base.Self);
+    CHECK(heavy.Vertices.Closing.value_or(Boxed<Entities::SeqEnd>{})->Record.Base.Self);
   }
 
   TEST_CASE("down: flags R12 has not stay out of a polyline made")
@@ -445,7 +445,8 @@ namespace DxfIO::Down
     const auto read = Load(Bytes("entities-r2018.dxf"));
     REQUIRE(read);
     std::vector<Issue> issues;
-    const auto saved = Tests::Written(read->Document, Options{.Release = Version::R12}, &issues);
+    const auto         saved =
+        Tests::Written(read->Document, SaveOptions{.Release = Version::R12}, &issues);
     REQUIRE(saved);
     CHECK(saved->contains("AC1009"));
     CHECK_FALSE(saved->contains("AcDbEntity"));
@@ -468,12 +469,12 @@ namespace DxfIO::Down
                                  {
                                    return !one.Groups.empty()
                                        && one.Groups.front()
-                                              == Group{.Code = 1, .Value = std::string{name}};
+                                              == Tag{.Code = 1, .Value = std::string{name}};
                                  });
     };
     CHECK(declares("LAYOUT"));
     CHECK(declares("ACDBPLACEHOLDER"));
-    const auto saved = Tests::Written(read->Document, Options{.Release = Version::R2000});
+    const auto saved = Tests::Written(read->Document, SaveOptions{.Release = Version::R2000});
     REQUIRE(saved);
     const auto again = Load(*saved);
     REQUIRE(again);
@@ -488,7 +489,7 @@ namespace DxfIO::Down
     const std::string text = Bytes("empty-r12.dxf");
     const auto        read = Load(text);
     REQUIRE(read);
-    const auto saved = Tests::Written(read->Document, Options{.Release = Version::R12});
+    const auto saved = Tests::Written(read->Document, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     CHECK(saved->contains("$MODEL_SPACE"));
   }
@@ -510,7 +511,7 @@ namespace DxfIO::Down
     CHECK(out.Blocks.front().Begin.Name == "*Model_Space");
     CHECK(out.Blocks.front().Begin.Record.Base.Self);
     CHECK(out.Classes.empty());
-    CHECK(out.Dimstyle.Head.Base.Extra.empty());
+    CHECK(out.DimStyle.Head.Base.Extra.empty());
   }
 
   TEST_CASE("down: R13 and R14 name no section they leave out")
@@ -518,12 +519,12 @@ namespace DxfIO::Down
     Document                       from  = Fresh();
     const std::vector<std::string> order = from.Order;
     from.Sections.push_back(
-        Section{.Name = "THUMBNAILIMAGE", .Groups = {Group{.Code = 90, .Value = std::int64_t{0}}}});
+        Section{.Name = "THUMBNAILIMAGE", .Groups = {Tag{.Code = 90, .Value = std::int64_t{0}}}});
     from.Order.emplace_back("THUMBNAILIMAGE");
     const Document out = Narrowed(from, Version::R14, nullptr);
     CHECK(out.Sections.empty());
     CHECK(out.Order == order);
-    const auto saved = Tests::Written(from, Options{.Release = Version::R13});
+    const auto saved = Tests::Written(from, SaveOptions{.Release = Version::R13});
     REQUIRE(saved);
     CHECK_FALSE(saved->contains("THUMBNAILIMAGE"));
   }
@@ -665,7 +666,7 @@ namespace DxfIO::Down
     Tables::BlockRecord sheet{};
     sheet.Record.Name = "*Paper_Space3";
     from.BlockRecord.Records.push_back(sheet);
-    from.Blocks.push_back(Blocks::Block{});
+    from.Blocks.push_back(Blocks::Definition{});
     from.Blocks.back().Begin.Name = "*Paper_Space3";
     const Document out            = Narrowed(from, Version::R14, nullptr);
     for (const Tables::BlockRecord &one : out.BlockRecord.Records)
@@ -771,15 +772,15 @@ namespace DxfIO::Down
     from.Classes.clear();
     from.Classes.push_back(Raw{
         .Type   = "CLASS",
-        .Groups = {Group{.Code = 1, .Value = std::string{"IMAGE"}}},
+        .Groups = {Tag{.Code = 1, .Value = std::string{"IMAGE"}}},
     });
     from.Classes.push_back(Raw{
         .Type   = "CLASS",
-        .Groups = {Group{.Code = 1, .Value = std::string{"SCALE"}}},
+        .Groups = {Tag{.Code = 1, .Value = std::string{"SCALE"}}},
     });
     from.Classes.push_back(Raw{
         .Type   = "CLASS",
-        .Groups = {Group{.Code = 1, .Value = std::int64_t{1}}},
+        .Groups = {Tag{.Code = 1, .Value = std::int64_t{1}}},
     });
     from.Classes.push_back(Raw{.Type = "CLASS", .Groups = {}});
     const Document out = Narrowed(from, Version::R14, nullptr);
@@ -845,7 +846,8 @@ namespace DxfIO::Down
     const auto drawn = Load(Bytes("kinds-r2018.dxf"));
     REQUIRE(drawn);
     std::vector<Issue> told;
-    const auto saved = Tests::Written(drawn->Document, Options{.Release = Version::R2010}, &told);
+    const auto         saved =
+        Tests::Written(drawn->Document, SaveOptions{.Release = Version::R2010}, &told);
     REQUIRE(saved);
     REQUIRE(told.size()     == 13);
     CHECK(told.front().What == "visual styles left out, R2010 holds them otherwise");
@@ -861,7 +863,8 @@ namespace DxfIO::Down
     const auto drawn = Load(Bytes("kinds-r2007.dxf"));
     REQUIRE(drawn);
     std::vector<Issue> told;
-    const auto saved = Tests::Written(drawn->Document, Options{.Release = Version::R2018}, &told);
+    const auto         saved =
+        Tests::Written(drawn->Document, SaveOptions{.Release = Version::R2018}, &told);
     REQUIRE(saved);
     REQUIRE(told.size()   == 13);
     CHECK(told.at(1).What == "3DSOLID left out, its body is not in R2018's form");
@@ -872,7 +875,7 @@ namespace DxfIO::Down
     const auto drawn = Load(Bytes("kinds-r2007.dxf"));
     REQUIRE(drawn);
     std::vector<Issue> told;
-    REQUIRE(Tests::Written(drawn->Document, Options{.Release = Version::R2000}, &told));
+    REQUIRE(Tests::Written(drawn->Document, SaveOptions{.Release = Version::R2000}, &told));
     CHECK(told.empty());
   }
 
@@ -927,7 +930,7 @@ namespace DxfIO::Down
     const Document from = Starred();
     CHECK(Narrowed(from, Version::R10, nullptr).Entities
           == Narrowed(from, Version::R12, nullptr).Entities);
-    const auto saved = Tests::Written(from, Options{.Release = Version::R12});
+    const auto saved = Tests::Written(from, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     const auto back = Load(*saved);
     REQUIRE(back);
@@ -977,7 +980,7 @@ namespace DxfIO::Down
     const Document old = Narrowed(drawn->Document, Version::R2000, nullptr);
     CHECK(std::ranges::count_if(old.Objects, Dated) == 3);
     CHECK(std::ranges::none_of(old.Objects, Datum));
-    const auto saved = Tests::Written(old, Options{.Release = Version::R2000});
+    const auto saved = Tests::Written(old, SaveOptions{.Release = Version::R2000});
     REQUIRE(saved);
     CHECK(saved->find("\r\n  1\r\nACDBDATATABLE\r\n") != std::string::npos);
     CHECK(saved->find("\r\n  1\r\nDATATABLE\r\n") == std::string::npos);
@@ -1001,7 +1004,7 @@ namespace DxfIO::Down
     CHECK(std::ranges::none_of(lifted.Objects, Looking));
     REQUIRE_FALSE(told.empty());
     CHECK(told.front().What == "visual styles left out, R2018 holds them otherwise");
-    CHECK(std::ranges::none_of(lifted.Vport.Records, Pointing, &Tables::Vport::Style));
+    CHECK(std::ranges::none_of(lifted.VPort.Records, Pointing, &Tables::VPort::Style));
     const Document same = Narrowed(drawn->Document, Version::R2007, nullptr);
     CHECK(std::ranges::any_of(same.Objects, Looking));
   }

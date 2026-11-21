@@ -51,7 +51,7 @@ namespace DxfIO
   {
     Base shown{};
     shown.Extended = {
-        Xdata{.Application = "ACAD", .Groups = {Group{.Code = 1070, .Value = std::int64_t{3}}}}};
+        Xdata{.Application = "ACAD", .Groups = {Tag{.Code = 1070, .Value = std::int64_t{3}}}}};
     Fields::Sheet page;
     REQUIRE(Tail(page.To, shown));
     CHECK(page.Out == "1001\r\nACAD\r\n1070\r\n     3\r\n");

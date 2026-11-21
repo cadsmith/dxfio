@@ -4,7 +4,7 @@
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
 #include "dxfio/entities/record.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/vector.hpp"
 
 #include <string>
@@ -54,7 +54,7 @@ namespace DxfIO::Entities
     /**
      *  The overrides that follow, kept as the groups they came in.
      */
-    std::vector<Group> Overrides{};
+    std::vector<Tag> Overrides{};
 
     auto operator==(const Net &) const -> bool = default;
   };

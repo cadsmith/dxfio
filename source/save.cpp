@@ -90,7 +90,7 @@ namespace DxfIO
       {
         return {};
       }
-      return Chained(found->Groups, [&](const Group &one) -> std::expected<void, Failure>
+      return Chained(found->Groups, [&](const Tag &one) -> std::expected<void, Failure>
                      { return Fields::Put(to, one); });
     }
 
@@ -117,9 +117,9 @@ namespace DxfIO
     auto Tabled(const Document &drawing) -> bool
     {
       const std::array filled{
-          Filled(drawing.Vport),  Filled(drawing.Ltype),    Filled(drawing.Layer),
+          Filled(drawing.VPort),  Filled(drawing.LType),    Filled(drawing.Layer),
           Filled(drawing.Style),  Filled(drawing.View),     Filled(drawing.Ucs),
-          Filled(drawing.Appid),  Filled(drawing.Dimstyle), Filled(drawing.BlockRecord),
+          Filled(drawing.AppId),  Filled(drawing.DimStyle), Filled(drawing.BlockRecord),
           !drawing.Loose.empty(),
       };
       return std::ranges::any_of(filled, std::identity{});
@@ -195,7 +195,7 @@ namespace DxfIO
       return Fields::Word(to, 0, text);
     }
 
-    auto Text(const Document &drawing, const Options &with) -> Encoding::Scheme
+    auto Text(const Document &drawing, const SaveOptions &with) -> Encoding::Scheme
     {
       const Encoding::Codepage *asked = Encoding::Find(with.Codepage);
       if (asked != nullptr)
@@ -207,7 +207,7 @@ namespace DxfIO
                : Encoding::Of(with.Release, Header::Named(drawing.Header));
     }
 
-    auto Form(const Options &with) -> Tags::Form
+    auto Form(const SaveOptions &with) -> Tags::Form
     {
       if (!with.Binary)
       {
@@ -216,7 +216,7 @@ namespace DxfIO
       return with.Release < Version::R13 ? Tags::Form::Narrow : Tags::Form::Wide;
     }
 
-    auto Written(const Document &drawing, const Options &with)
+    auto Written(const Document &drawing, const SaveOptions &with)
         -> std::expected<std::string, Failure>
     {
       std::string out;
@@ -266,7 +266,7 @@ namespace DxfIO
     }
   } // namespace
 
-  auto Save(const Document &drawing, const Options &with) -> std::expected<Saved, Failure>
+  auto Save(const Document &drawing, const SaveOptions &with) -> std::expected<Saved, Failure>
   {
     if (!with.Codepage.empty() && Encoding::Find(with.Codepage) == nullptr)
     {
@@ -285,7 +285,7 @@ namespace DxfIO
     return out;
   }
 
-  auto Save(const Document &drawing, std::ostream &to, const Options &with)
+  auto Save(const Document &drawing, std::ostream &to, const SaveOptions &with)
       -> std::expected<std::vector<Issue>, Failure>
   {
     return Save(drawing, with)
@@ -303,7 +303,7 @@ namespace DxfIO
             });
   }
 
-  auto SaveFile(const Document &drawing, const std::filesystem::path &file, const Options &with)
+  auto SaveFile(const Document &drawing, const std::filesystem::path &file, const SaveOptions &with)
       -> std::expected<std::vector<Issue>, Failure>
   {
     std::ofstream to{file, std::ios::binary | std::ios::trunc};

@@ -65,7 +65,7 @@ namespace DxfIO::Tables
    *  A DIMSTYLE table record: the dimension variables a dimension is drawn with, each named after
    *  its own.
    */
-  struct DXFIO_API Dimstyle
+  struct DXFIO_API DimStyle
   {
     /**
      *  The name, flags and handles every table record carries.
@@ -385,7 +385,7 @@ namespace DxfIO::Tables
      */
     int Dimlwe{-2};
 
-    auto operator==(const Dimstyle &) const -> bool = default;
+    auto operator==(const DimStyle &) const -> bool = default;
   };
 } // namespace DxfIO::Tables
 

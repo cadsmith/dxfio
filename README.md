@@ -60,9 +60,9 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH=/some/prefix
 ```
 
 `Load` and `Save` read and write a drawing's entities and objects on every core
-the machine has; `Loading{.Threads = 1}` and `Options{.Threads = 1}` keep them to
-the calling thread, and the drawing, its issues and the bytes come out the same
-either way.
+the machine has; `LoadOptions{.Threads = 1}` and `SaveOptions{.Threads = 1}`
+keep them to the calling thread, and the drawing, its issues and the bytes come
+out the same either way.
 
 It needs nothing but the standard library: tests and doctest only when dxfio is
 the top level project. That library must read a `double` with `std::from_chars`:

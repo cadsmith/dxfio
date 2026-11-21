@@ -2,7 +2,7 @@
 #define DXFIO_DOCUMENT_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/header/header.hpp"
 #include "dxfio/object.hpp"
@@ -48,11 +48,11 @@ namespace DxfIO
     /**
      *  The VPORT table: the tiled viewport configurations of model space.
      */
-    Tables::Table<Tables::Vport> Vport{};
+    Tables::Table<Tables::VPort> VPort{};
     /**
      *  The LTYPE table: the linetypes.
      */
-    Tables::Table<Tables::Ltype> Ltype{};
+    Tables::Table<Tables::LType> LType{};
     /**
      *  The LAYER table.
      */
@@ -72,11 +72,11 @@ namespace DxfIO
     /**
      *  The APPID table: the applications registered to attach extended data.
      */
-    Tables::Table<Tables::Appid> Appid{};
+    Tables::Table<Tables::AppId> AppId{};
     /**
      *  The DIMSTYLE table: the dimension styles.
      */
-    Tables::Table<Tables::Dimstyle> Dimstyle{};
+    Tables::Table<Tables::DimStyle> DimStyle{};
     /**
      *  The BLOCK_RECORD table, from R13: one record for each block.
      */
@@ -89,7 +89,7 @@ namespace DxfIO
     /**
      *  The BLOCKS section: each block with its entities.
      */
-    std::vector<Blocks::Block> Blocks{};
+    std::vector<Blocks::Definition> Blocks{};
     /**
      *  The ENTITIES section: the entities of model space and of the active paper space layout.
      */

@@ -11,7 +11,7 @@ Each set of extended data names the application it belongs to, and the APPID tab
 ```cpp
 DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
 
-DxfIO::Tables::Appid application{};
+DxfIO::Tables::AppId application{};
 application.Record.Name = "WALLPLAN";
 DxfIO::Edit::Add(drawing, application);
 ```

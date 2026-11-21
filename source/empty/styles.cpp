@@ -38,16 +38,16 @@ namespace DxfIO::Empty
       return out;
     }
 
-    auto Line(double offset) -> Objects::Mline::Element
+    auto Line(double offset) -> Objects::MLineStyles::Element
     {
-      Objects::Mline::Element out{};
+      Objects::MLineStyles::Element out{};
       out.Offset = offset;
       return out;
     }
 
-    auto Cell(double height, int alignment) -> Objects::Table::Cell
+    auto Cell(double height, int alignment) -> Objects::TableStyles::RowStyle
     {
-      Objects::Table::Cell out{};
+      Objects::TableStyles::RowStyle out{};
       out.Style     = "Standard";
       out.Height    = height;
       out.Alignment = alignment;
@@ -89,9 +89,9 @@ namespace DxfIO::Empty
     out.Base.Self   = handles.Take();
     out.Description = "Standard";
     out.Cells       = {
-        Cell(Objects::Table::Height, Centered),
+        Cell(Objects::TableStyles::Height, Centered),
         Cell(Title, Middle),
-        Cell(Objects::Table::Height, Middle),
+        Cell(Objects::TableStyles::Height, Middle),
     };
     return out;
   }

@@ -8,7 +8,7 @@
 #include <optional>
 #include <vector>
 
-namespace DxfIO::Objects::Sortents
+namespace DxfIO::Objects::SortEntsTables
 {
   /**
    *  One entity whose place in the draw order is not its handle's.
@@ -26,7 +26,7 @@ namespace DxfIO::Objects::Sortents
 
     auto operator==(const Entry &) const -> bool = default;
   };
-} // namespace DxfIO::Objects::Sortents
+} // namespace DxfIO::Objects::SortEntsTables
 
 namespace DxfIO::Objects
 {
@@ -47,7 +47,7 @@ namespace DxfIO::Objects
     /**
      *  The entities it moves in the draw order.
      */
-    std::vector<Sortents::Entry> Entries{};
+    std::vector<SortEntsTables::Entry> Entries{};
 
     auto operator==(const SortEntsTable &) const -> bool = default;
   };

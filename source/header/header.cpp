@@ -33,7 +33,7 @@ namespace DxfIO::Header
       return Tags::Text(held);
     }
 
-    auto Spelled(const Group &held) -> std::string_view
+    auto Spelled(const Tag &held) -> std::string_view
     {
       const auto *text = std::get_if<std::string>(&held.Value);
       return text == nullptr ? std::string_view{} : std::string_view{*text};
@@ -70,7 +70,7 @@ namespace DxfIO::Header
           || (one.Name == Codepage && held.Code == Secondary);
     }
 
-    auto Worded(Fields::Writing &to, const Group &held) -> std::expected<void, Failure>
+    auto Worded(Fields::Writing &to, const Tag &held) -> std::expected<void, Failure>
     {
       const auto *text = std::get_if<std::string>(&held.Value);
       return held.Code == Secondary && text != nullptr ? Fields::Word(to, held.Code, *text)
@@ -82,15 +82,15 @@ namespace DxfIO::Header
       if (one.Name == Acadver)
       {
         return Fields::Put(
-            to, Group{.Code = Primary, .Value = std::string{DxfIO::Acadver(to.Release)}});
+            to, Tag{.Code = Primary, .Value = std::string{DxfIO::AcadverOf(to.Release)}});
       }
       if (one.Name == Codepage && to.Text.Page != nullptr)
       {
-        return Fields::Put(to, Group{.Code = Secondary, .Value = std::string{to.Text.Page->Name}});
+        return Fields::Put(to, Tag{.Code = Secondary, .Value = std::string{to.Text.Page->Name}});
       }
       if (one.Name == Codepage)
       {
-        return Chained(one.Values, [&to](const Group &held) -> std::expected<void, Failure>
+        return Chained(one.Values, [&to](const Tag &held) -> std::expected<void, Failure>
                        { return Worded(to, held); });
       }
       return Fields::Put(to, one.Values);
@@ -145,7 +145,7 @@ namespace DxfIO::Header
 
   auto Declared(std::span<const File::Variable> all) -> Version
   {
-    return Release(Valued(all, Acadver, Primary)).value_or(Version::R12);
+    return ReleaseOf(Valued(all, Acadver, Primary)).value_or(Version::R12);
   }
 
   auto Named(std::span<const File::Variable> all) -> const Encoding::Codepage &
@@ -160,7 +160,7 @@ namespace DxfIO::Header
 
   auto Declared(std::span<const Variable> all) -> Version
   {
-    return Release(Valued(all, Acadver, Primary)).value_or(Version::R12);
+    return ReleaseOf(Valued(all, Acadver, Primary)).value_or(Version::R12);
   }
 
   auto Opaque(std::span<const File::Variable> all) -> bool
@@ -184,7 +184,7 @@ namespace DxfIO::Header
       for (const Tags::Tag &held : one.Values)
       {
         kept.Values.push_back(Deciding(one, held)
-                                  ? Group{.Code = held.Code, .Value = std::string{Tags::Text(held)}}
+                                  ? Tag{.Code = held.Code, .Value = std::string{Tags::Text(held)}}
                                   : Fields::Owned(held, with.Text));
       }
       out.push_back(std::move(kept));

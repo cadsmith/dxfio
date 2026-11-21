@@ -34,8 +34,8 @@ namespace DxfIO::Fields
 
     struct Outcome
     {
-      Word               Taken{};
-      std::vector<Group> Kept;
+      Word             Taken{};
+      std::vector<Tag> Kept;
     };
 
     auto Read(std::string_view text, Version release = Version::R2018) -> Outcome

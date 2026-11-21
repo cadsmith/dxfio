@@ -12,7 +12,7 @@ namespace DxfIO
   {
     constexpr Handle Seeded{.Value = 0x2a};
 
-    auto Declared(std::vector<Group> values) -> Document
+    auto Declared(std::vector<Tag> values) -> Document
     {
       Document out{};
       out.Header = {Header::Variable{.Name = "$ACADVER", .Values = {}},
@@ -23,19 +23,19 @@ namespace DxfIO
 
   TEST_CASE("handseed: read from its first group, none when it holds no handle")
   {
-    CHECK(ReadSeed(Declared({Group{.Code = 5, .Value = Seeded}})) == Seeded);
+    CHECK(ReadSeed(Declared({Tag{.Code = 5, .Value = Seeded}})) == Seeded);
     CHECK_FALSE(ReadSeed(Declared({})));
-    CHECK_FALSE(ReadSeed(Declared({Group{.Code = 5, .Value = std::string{"2A"}}})));
+    CHECK_FALSE(ReadSeed(Declared({Tag{.Code = 5, .Value = std::string{"2A"}}})));
     CHECK_FALSE(ReadSeed(Document{}));
   }
 
   TEST_CASE("handseed: written as its one group 5, added at the end when missing")
   {
-    Document held = Declared(
-        {Group{.Code = 5, .Value = std::string{"2A"}}, Group{.Code = 5, .Value = Handle{}}});
+    Document held =
+        Declared({Tag{.Code = 5, .Value = std::string{"2A"}}, Tag{.Code = 5, .Value = Handle{}}});
     WriteSeed(held, Seeded);
     REQUIRE(held.Header.size()      == 2);
-    CHECK(held.Header.back().Values == std::vector{Group{.Code = 5, .Value = Seeded}});
+    CHECK(held.Header.back().Values == std::vector{Tag{.Code = 5, .Value = Seeded}});
 
     Document missing{};
     missing.Header = {Header::Variable{.Name = "$ACADVER", .Values = {}}};

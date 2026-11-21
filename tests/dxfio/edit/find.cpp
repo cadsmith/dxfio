@@ -67,8 +67,8 @@ namespace DxfIO::Edit
 
   TEST_CASE("edit: a block and a table record are found by name, without case")
   {
-    Document       drawing = Create();
-    Blocks::Block *model   = FindBlock(drawing, "*MODEL_SPACE");
+    Document            drawing = Create();
+    Blocks::Definition *model   = FindBlock(drawing, "*MODEL_SPACE");
     REQUIRE(model != nullptr);
     CHECK(model->Begin.Name == "*Model_Space");
     const Document &fixed = drawing;
@@ -76,7 +76,7 @@ namespace DxfIO::Edit
     CHECK(FindBlock(drawing, "Door") == nullptr);
     CHECK(FindBlock(fixed, "Door")   == nullptr);
 
-    Tables::Ltype *continuous = Find(drawing.Ltype, "CONTINUOUS");
+    Tables::LType *continuous = Find(drawing.LType, "CONTINUOUS");
     REQUIRE(continuous != nullptr);
     CHECK(continuous->Record.Name      == "Continuous");
     CHECK(Find(fixed.Layer, "0")       == &drawing.Layer.Records.front());

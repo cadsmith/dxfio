@@ -18,7 +18,7 @@ namespace DxfIO
   /**
    *  How a drawing is written.
    */
-  struct DXFIO_API Options
+  struct DXFIO_API SaveOptions
   {
     /**
      *  The release to write. A drawing of a newer release is narrowed to it, and what it cannot
@@ -59,21 +59,21 @@ namespace DxfIO
   /**
    *  Writes a drawing as the bytes of a DXF file.
    */
-  [[nodiscard]] DXFIO_API auto Save(const Document &drawing, const Options &with = {})
+  [[nodiscard]] DXFIO_API auto Save(const Document &drawing, const SaveOptions &with = {})
       -> std::expected<Saved, Failure>;
 
   /**
    *  Writes a drawing to a stream.
    */
   [[nodiscard]] DXFIO_API auto Save(const Document &drawing, std::ostream &to,
-                                    const Options &with = {})
+                                    const SaveOptions &with = {})
       -> std::expected<std::vector<Issue>, Failure>;
 
   /**
    *  Writes a drawing to a file, replacing it.
    */
   [[nodiscard]] DXFIO_API auto SaveFile(const Document &drawing, const std::filesystem::path &file,
-                                        const Options &with = {})
+                                        const SaveOptions &with = {})
       -> std::expected<std::vector<Issue>, Failure>;
 } // namespace DxfIO
 

@@ -46,8 +46,8 @@ namespace DxfIO::Tables
     CHECK(drawing.Layer.Head.Count       == 9);
     REQUIRE(drawing.Layer.Records.size() == 1);
     CHECK(drawing.Layer.Records.front().Record.Name == "0");
-    CHECK(drawing.Vport.Head.Name    == "VPORT");
-    CHECK(drawing.Dimstyle.Head.Name == "DIMSTYLE");
+    CHECK(drawing.VPort.Head.Name    == "VPORT");
+    CHECK(drawing.DimStyle.Head.Name == "DIMSTYLE");
     CHECK(drawing.Loose.size()       == 1);
     CHECK(drawing.Style.Head.Name.empty());
   }

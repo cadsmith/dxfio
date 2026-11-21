@@ -45,12 +45,12 @@ namespace DxfIO::Edit
    *  has no name, or when the table holds a record of that name, but for VPORT, whose tiled
    *  viewports share one.
    */
-  DXFIO_API auto Add(Document &drawing, Tables::Vport one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Document &drawing, Tables::VPort one) -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a linetype. Fails when the LTYPE table holds one of that name.
    */
-  DXFIO_API auto Add(Document &drawing, Tables::Ltype one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Document &drawing, Tables::LType one) -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a layer. One that names no plot style or material takes layer 0's: AutoCAD refuses a
@@ -76,12 +76,12 @@ namespace DxfIO::Edit
   /**
    *  Registers an application for extended data. Fails when the APPID table holds one of that name.
    */
-  DXFIO_API auto Add(Document &drawing, Tables::Appid one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Document &drawing, Tables::AppId one) -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a dimension style. Fails when the DIMSTYLE table holds one of that name.
    */
-  DXFIO_API auto Add(Document &drawing, Tables::Dimstyle one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Document &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>;
 } // namespace DxfIO::Edit
 
 #endif /* DXFIO_EDIT_ADD_HPP */

@@ -42,7 +42,7 @@ namespace DxfIO::Header::Rows
       REQUIRE(found != All().end());
       const auto *text = std::get_if<std::string_view>(&found->Value);
       REQUIRE(text != nullptr);
-      CHECK(DxfIO::Release(*text) == release);
+      CHECK(DxfIO::ReleaseOf(*text) == release);
     }
   }
 } // namespace DxfIO::Header::Rows

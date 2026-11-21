@@ -12,10 +12,10 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Entities::Seqend> = std::tuple{Entities::Part<Entities::Seqend>};
+  inline constexpr auto Shapes<Entities::SeqEnd> = std::tuple{Entities::Part<Entities::SeqEnd>};
 
   template <>
-  inline constexpr std::string_view Type<Entities::Seqend> = "SEQEND";
+  inline constexpr std::string_view Type<Entities::SeqEnd> = "SEQEND";
 } // namespace DxfIO
 
 #endif /* DXFIO_ENTITIES_SHAPES_SEQEND_HPP */

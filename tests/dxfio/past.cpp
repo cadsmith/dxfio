@@ -40,17 +40,17 @@ namespace DxfIO
 
     auto Closed(Handle last) -> Entities::Insert
     {
-      Entities::Seqend end{};
+      Entities::SeqEnd end{};
       end.Record.Base.Self = last;
       Entities::Insert out{};
-      out.Attributes.Closing = Boxed<Entities::Seqend>{end};
+      out.Attributes.Closing = Boxed<Entities::SeqEnd>{end};
       return out;
     }
 
-    auto Order(Objects::Sortents::Entry one) -> Objects::SortEntsTable
+    auto Order(Objects::SortEntsTables::Entry one) -> Objects::SortEntsTable
     {
       Objects::SortEntsTable out{};
-      out.Entries = {Objects::Sortents::Entry{}, one};
+      out.Entries = {Objects::SortEntsTables::Entry{}, one};
       return out;
     }
 
@@ -66,7 +66,7 @@ namespace DxfIO
       CHECK(Past(record) == Above);
     }
 
-    auto Seeded(Group value) -> Header::Variable
+    auto Seeded(Tag value) -> Header::Variable
     {
       value.Code = 5;
       return {.Name = "$HANDSEED", .Values = {std::move(value)}};
@@ -94,14 +94,14 @@ namespace DxfIO
 
   TEST_CASE("past: above the head and the records of every table")
   {
-    Pinned(&Document::Vport);
-    Pinned(&Document::Ltype);
+    Pinned(&Document::VPort);
+    Pinned(&Document::LType);
     Pinned(&Document::Layer);
     Pinned(&Document::Style);
     Pinned(&Document::View);
     Pinned(&Document::Ucs);
-    Pinned(&Document::Appid);
-    Pinned(&Document::Dimstyle);
+    Pinned(&Document::AppId);
+    Pinned(&Document::DimStyle);
     Pinned(&Document::BlockRecord);
   }
 
@@ -120,16 +120,16 @@ namespace DxfIO
 
   TEST_CASE("past: above a block's two ends and what it holds")
   {
-    Blocks::Block begin{};
+    Blocks::Definition begin{};
     begin.Begin.Record.Base.Self = High;
-    Blocks::Block end{};
+    Blocks::Definition end{};
     end.End.Record.Base.Self = High;
-    Blocks::Block held{};
+    Blocks::Definition held{};
     held.Entities.emplace_back(Chain(High));
-    for (const Blocks::Block &one : {begin, end, held})
+    for (const Blocks::Definition &one : {begin, end, held})
     {
       Document drawing{};
-      drawing.Blocks = {Blocks::Block{}, one};
+      drawing.Blocks = {Blocks::Definition{}, one};
       CHECK(Past(drawing) == Above);
     }
   }
@@ -146,7 +146,7 @@ namespace DxfIO
     last.Entities.emplace_back(Closed(High));
     CHECK(Past(last) == Above);
     Entities::Polyline closed = Chain(Handle{.Value = 2});
-    closed.Vertices.Closing   = Boxed{Entities::Seqend{.Record = {.Base = {.Self = High}}}};
+    closed.Vertices.Closing   = Boxed{Entities::SeqEnd{.Record = {.Base = {.Self = High}}}};
     Document both{};
     both.Entities.emplace_back(closed);
     CHECK(Past(both) == Above);
@@ -160,17 +160,17 @@ namespace DxfIO
     own.Objects.emplace_back(held);
     CHECK(Past(own) == Above);
     Document key{};
-    key.Objects.emplace_back(Order(Objects::Sortents::Entry{.Entity = {}, .Key = High}));
+    key.Objects.emplace_back(Order(Objects::SortEntsTables::Entry{.Entity = {}, .Key = High}));
     CHECK(Past(key) == Above);
     Document named{};
-    named.Objects.emplace_back(Order(Objects::Sortents::Entry{.Entity = High, .Key = {}}));
+    named.Objects.emplace_back(Order(Objects::SortEntsTables::Entry{.Entity = High, .Key = {}}));
     CHECK(Past(named) == Above);
   }
 
   TEST_CASE("past: a $HANDSEED kept when higher, passed when stale")
   {
     Document drawing{};
-    drawing.Header = {Seeded(Group{.Code = 5, .Value = High})};
+    drawing.Header = {Seeded(Tag{.Code = 5, .Value = High})};
     CHECK(Past(drawing) == High);
     drawing.Entities.emplace_back(Lone(High));
     CHECK(Past(drawing) == Above);
@@ -181,9 +181,9 @@ namespace DxfIO
   TEST_CASE("past: a $HANDSEED that holds no handle, and others' handles")
   {
     Document drawing{};
-    drawing.Header = {Seeded(Group{.Code = 5, .Value = std::string{"ZZ"}})};
+    drawing.Header = {Seeded(Tag{.Code = 5, .Value = std::string{"ZZ"}})};
     CHECK(Past(drawing) == Seed{}.Next());
-    Header::Variable other = Seeded(Group{.Code = 5, .Value = High});
+    Header::Variable other = Seeded(Tag{.Code = 5, .Value = High});
     other.Name             = "$CLAYER";
     drawing.Header         = {other};
     CHECK(Past(drawing) == Seed{}.Next());
@@ -194,13 +194,13 @@ namespace DxfIO
     Document taken{};
     taken.Entities.emplace_back(Lone(Ceiling));
     CHECK_FALSE(Past(taken));
-    taken.Header = {Seeded(Group{.Code = 5, .Value = High})};
+    taken.Header = {Seeded(Tag{.Code = 5, .Value = High})};
     CHECK_FALSE(Past(taken));
     Document spare{};
     spare.Entities.emplace_back(Lone(Handle{.Value = Ceiling.Value - 1}));
     CHECK_FALSE(Past(spare));
     Document declared{};
-    declared.Header = {Seeded(Group{.Code = 5, .Value = Ceiling})};
+    declared.Header = {Seeded(Tag{.Code = 5, .Value = Ceiling})};
     CHECK_FALSE(Past(declared));
     Document room{};
     room.Entities.emplace_back(Lone(Handle{.Value = Ceiling.Value - 2}));

@@ -2,7 +2,7 @@
 #define DXFIO_HEADER_HEADER_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <string>
 #include <vector>
@@ -23,7 +23,7 @@ namespace DxfIO::Header
      *  The groups of its value, as they follow the name: one group 1 for $ACADVER, groups 10, 20,
      *  30 for a point.
      */
-    std::vector<Group> Values{};
+    std::vector<Tag> Values{};
 
     auto operator==(const Variable &) const -> bool = default;
   };

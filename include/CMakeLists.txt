@@ -2,9 +2,9 @@ set(DXFIO_HEADERS
   dxfio/api.hpp
   dxfio/audit/audit.hpp
   dxfio/base.hpp
-  dxfio/blocks/begin.hpp
-  dxfio/blocks/blocks.hpp
-  dxfio/blocks/end.hpp
+  dxfio/blocks/block.hpp
+  dxfio/blocks/definition.hpp
+  dxfio/blocks/endblk.hpp
   dxfio/boxed.hpp
   dxfio/brace.hpp
   dxfio/colors.hpp
@@ -63,7 +63,6 @@ set(DXFIO_HEADERS
   dxfio/entities/xline.hpp
   dxfio/entity.hpp
   dxfio/failure.hpp
-  dxfio/group.hpp
   dxfio/handle.hpp
   dxfio/header/header.hpp
   dxfio/issue.hpp
@@ -109,6 +108,7 @@ set(DXFIO_HEADERS
   dxfio/tables/ucs.hpp
   dxfio/tables/view.hpp
   dxfio/tables/vport.hpp
+  dxfio/tag.hpp
   dxfio/unknown.hpp
   dxfio/vector.hpp
   dxfio/version.hpp

@@ -1,6 +1,6 @@
 #include "tables.hpp"
 
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/vector.hpp"
 #include "dxfio/xdata.hpp"
 
@@ -64,22 +64,22 @@ namespace DxfIO::Empty
       return out;
     }
 
-    auto Active() -> DxfIO::Tables::Vport
+    auto Active() -> DxfIO::Tables::VPort
     {
-      auto out   = Called<DxfIO::Tables::Vport>("*Active");
+      auto out   = Called<DxfIO::Tables::VPort>("*Active");
       out.Center = Vector{.X = Sheet.X / 2, .Y = Sheet.Y / 2, .Z = 0};
       out.Height = Sheet.Y;
       out.Aspect = Sheet.X / Sheet.Y;
       return out;
     }
 
-    auto Linetypes(const Roots &ids) -> std::vector<DxfIO::Tables::Ltype>
+    auto Linetypes(const Roots &ids) -> std::vector<DxfIO::Tables::LType>
     {
-      auto continuous        = Called<DxfIO::Tables::Ltype>("Continuous");
+      auto continuous        = Called<DxfIO::Tables::LType>("Continuous");
       continuous.Description = "Solid line";
       return {
-          Called<DxfIO::Tables::Ltype>("ByBlock", ids.Linetype),
-          Called<DxfIO::Tables::Ltype>("ByLayer"),
+          Called<DxfIO::Tables::LType>("ByBlock", ids.Linetype),
+          Called<DxfIO::Tables::LType>("ByLayer"),
           continuous,
       };
     }
@@ -100,16 +100,16 @@ namespace DxfIO::Empty
           .Application = "ACAD",
           .Groups =
               {
-                  Group{.Code = Typeface, .Value = std::string{"Arial"}},
-                  Group{.Code = Family, .Value = Pitch},
+                  Tag{.Code = Typeface, .Value = std::string{"Arial"}},
+                  Tag{.Code = Family, .Value = Pitch},
               },
       });
       return out;
     }
 
-    auto Metric(const Roots &ids) -> DxfIO::Tables::Dimstyle
+    auto Metric(const Roots &ids) -> DxfIO::Tables::DimStyle
     {
-      const DxfIO::Tables::Dimstyle iso{
+      const DxfIO::Tables::DimStyle iso{
           .Dimasz   = 2.5,
           .Dimexo   = 0.625,
           .Dimdli   = 3.75,
@@ -137,15 +137,15 @@ namespace DxfIO::Empty
       return out;
     }
 
-    auto Dimstyles(const Roots &ids, Seed &handles) -> DxfIO::Tables::Table<DxfIO::Tables::Dimstyle>
+    auto Dimstyles(const Roots &ids, Seed &handles) -> DxfIO::Tables::Table<DxfIO::Tables::DimStyle>
     {
-      auto imperial       = Called<DxfIO::Tables::Dimstyle>("Standard");
+      auto imperial       = Called<DxfIO::Tables::DimStyle>("Standard");
       imperial.Dimtxsty   = ids.Style;
       auto out            = Tabled("DIMSTYLE", std::vector{imperial, Metric(ids)}, handles);
       out.Head.Base.Extra = {
-          Group{.Code = Named, .Value = std::string{"AcDbDimStyleTable"}},
-          Group{.Code = Count, .Value = std::int64_t{1}},
-          Group{.Code = Entry, .Value = out.Records.back().Record.Base.Self},
+          Tag{.Code = Named, .Value = std::string{"AcDbDimStyleTable"}},
+          Tag{.Code = Count, .Value = std::int64_t{1}},
+          Tag{.Code = Entry, .Value = out.Records.back().Record.Base.Self},
       };
       return out;
     }
@@ -162,14 +162,14 @@ namespace DxfIO::Empty
 
   void Tables(Document &drawing, const Roots &ids, Seed &handles)
   {
-    drawing.Vport    = Tabled("VPORT", std::vector{Active()}, handles);
-    drawing.Ltype    = Tabled("LTYPE", Linetypes(ids), handles);
+    drawing.VPort    = Tabled("VPORT", std::vector{Active()}, handles);
+    drawing.LType    = Tabled("LTYPE", Linetypes(ids), handles);
     drawing.Layer    = Tabled("LAYER", std::vector{Zero(ids)}, handles);
     drawing.Style    = Tabled("STYLE", std::vector{Standard(ids)}, handles);
     drawing.View     = Tabled<DxfIO::Tables::View>("VIEW", {}, handles);
     drawing.Ucs      = Tabled<DxfIO::Tables::Ucs>("UCS", {}, handles);
-    drawing.Appid    = Tabled("APPID", std::vector{Called<DxfIO::Tables::Appid>("ACAD")}, handles);
-    drawing.Dimstyle = Dimstyles(ids, handles);
+    drawing.AppId    = Tabled("APPID", std::vector{Called<DxfIO::Tables::AppId>("ACAD")}, handles);
+    drawing.DimStyle = Dimstyles(ids, handles);
     drawing.BlockRecord = Tabled("BLOCK_RECORD", Records(ids), handles);
   }
 } // namespace DxfIO::Empty

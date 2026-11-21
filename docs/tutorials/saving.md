@@ -41,7 +41,7 @@ const auto told = [](const std::vector<DxfIO::Issue> &issues)
 
 ## R2000 [#r2000]
 
-`Options::Release` picks the release. R2000 holds every entity of this drawing, but not its visual styles, whose layout changes at R2010 and again at R2013: they are left out, and what names them is cleared.
+`SaveOptions::Release` picks the release. R2000 holds every entity of this drawing, but not its visual styles, whose layout changes at R2010 and again at R2013: they are left out, and what names them is cleared.
 
 ```cpp
 const auto r2000 = DxfIO::SaveFile(drawing, "saving-r2000.dxf", {.Release = DxfIO::Version::R2000});

@@ -42,10 +42,10 @@ namespace DxfIO::Fields
     REQUIRE(in.Subclass("AcDbOne"));
     CHECK_FALSE(Value<Handle>::Read(in, 340));
     REQUIRE(in.Subclass("AcDbTwo"));
-    const std::vector<Group> kept = in.Kept();
+    const std::vector<Tag> kept = in.Kept();
     CHECK(issues.empty());
     REQUIRE(kept.size() == 1);
-    CHECK(kept.front()  == Group{.Code = 340, .Value = std::string{"XYZ"}});
+    CHECK(kept.front()  == Tag{.Code = 340, .Value = std::string{"XYZ"}});
   }
 
   TEST_CASE("handles: written in upper case hex")

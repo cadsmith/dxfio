@@ -6,9 +6,9 @@
 #include "file/section.hpp"
 
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/begin.hpp"
-#include "dxfio/blocks/blocks.hpp"
-#include "dxfio/blocks/end.hpp"
+#include "dxfio/blocks/block.hpp"
+#include "dxfio/blocks/definition.hpp"
+#include "dxfio/blocks/endblk.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 
@@ -19,8 +19,8 @@
 namespace DxfIO::Blocks
 {
   [[nodiscard]] DXFIO_API auto Read(std::span<const File::Nest> all, const Fields::Reading &with)
-      -> std::vector<Block>;
-  [[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, std::span<const Block> all)
+      -> std::vector<Definition>;
+  [[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, std::span<const Definition> all)
       -> std::expected<void, Failure>;
 } // namespace DxfIO::Blocks
 

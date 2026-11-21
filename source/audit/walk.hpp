@@ -78,14 +78,14 @@ namespace DxfIO::Audit
   template <class DocumentT, class VisitT>
   void Bases(DocumentT &drawing, const VisitT &visit)
   {
-    Tabled(drawing.Vport, visit);
-    Tabled(drawing.Ltype, visit);
+    Tabled(drawing.VPort, visit);
+    Tabled(drawing.LType, visit);
     Tabled(drawing.Layer, visit);
     Tabled(drawing.Style, visit);
     Tabled(drawing.View, visit);
     Tabled(drawing.Ucs, visit);
-    Tabled(drawing.Appid, visit);
-    Tabled(drawing.Dimstyle, visit);
+    Tabled(drawing.AppId, visit);
+    Tabled(drawing.DimStyle, visit);
     Tabled(drawing.BlockRecord, visit);
     for (auto &one : drawing.Loose)
     {

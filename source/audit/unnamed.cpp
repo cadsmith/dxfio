@@ -1,7 +1,7 @@
 #include "../masked.hpp"
 #include "checks.hpp"
 
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 #include "dxfio/tables/style.hpp"
 
 #include <algorithm>
@@ -49,7 +49,7 @@ namespace DxfIO::Audit
       }
     }
 
-    auto Blank(const Blocks::Block &one) -> bool
+    auto Blank(const Blocks::Definition &one) -> bool
     {
       return one.Begin.Name.empty();
     }
@@ -59,16 +59,16 @@ namespace DxfIO::Audit
   void Unnamed(Auditor<DocumentT> &with)
   {
     DocumentT &drawing = *with.Drawing;
-    Listed(with, drawing.Vport, "viewport");
-    Listed(with, drawing.Ltype, "linetype");
+    Listed(with, drawing.VPort, "viewport");
+    Listed(with, drawing.LType, "linetype");
     Listed(with, drawing.Layer, "layer");
     Listed(with, drawing.Style, "text style");
     Listed(with, drawing.View, "view");
     Listed(with, drawing.Ucs, "ucs");
-    Listed(with, drawing.Appid, "application");
-    Listed(with, drawing.Dimstyle, "dimension style");
+    Listed(with, drawing.AppId, "application");
+    Listed(with, drawing.DimStyle, "dimension style");
     Listed(with, drawing.BlockRecord, "block record");
-    for (const Blocks::Block &one : drawing.Blocks)
+    for (const Blocks::Definition &one : drawing.Blocks)
     {
       if (Blank(one))
       {

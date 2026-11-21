@@ -126,7 +126,7 @@ namespace DxfIO::Audit
     one.Spare    = {};
   }
 
-  void Localized(Tables::Dimstyle &one, const Document &drawing)
+  void Localized(Tables::DimStyle &one, const Document &drawing)
   {
     one.Dimtxsty =
         std::ranges::min_element(drawing.Style.Records, {}, [](const Tables::Style &style) -> bool
@@ -141,7 +141,7 @@ namespace DxfIO::Audit
     one.Dimltex2  = {};
   }
 
-  void Localized(Tables::Vport &one, const Document & /*drawing*/)
+  void Localized(Tables::VPort &one, const Document & /*drawing*/)
   {
     one.Style      = {};
     one.Background = {};
@@ -158,11 +158,11 @@ namespace DxfIO::Audit
     const std::array acad{std::string_view{"ACAD"}};
     const std::array active{std::string_view{"*Active"}};
     Required(with, Only(fresh.Layer, zero), drawing.Layer);
-    Required(with, Only(fresh.Ltype, Kinds), drawing.Ltype);
+    Required(with, Only(fresh.LType, Kinds), drawing.LType);
     Required(with, Only(fresh.Style, standard), drawing.Style);
-    Required(with, Only(fresh.Dimstyle, standard), drawing.Dimstyle);
-    Required(with, Only(fresh.Appid, acad), drawing.Appid);
-    Required(with, Only(fresh.Vport, active), drawing.Vport);
+    Required(with, Only(fresh.DimStyle, standard), drawing.DimStyle);
+    Required(with, Only(fresh.AppId, acad), drawing.AppId);
+    Required(with, Only(fresh.VPort, active), drawing.VPort);
     Unstyled(with);
   }
 

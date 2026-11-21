@@ -25,8 +25,8 @@ namespace DxfIO::Blocks
     REQUIRE(all);
     const auto nests = File::Sections::Blocks(*all);
     REQUIRE(nests);
-    std::vector<Issue>       issues;
-    const std::vector<Block> taken = Read(*nests, Fields::Reading{.Issues = &issues});
+    std::vector<Issue>            issues;
+    const std::vector<Definition> taken = Read(*nests, Fields::Reading{.Issues = &issues});
     REQUIRE(taken.size()           == 1);
     CHECK(taken.front().Begin.Name == "bolt");
     CHECK(std::holds_alternative<Entities::Circle>(taken.front().Entities.front()));

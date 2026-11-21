@@ -141,9 +141,9 @@ namespace DxfIO::Tables
     };
 
     constexpr std::array Kinds{
-        Entry<&Document::Vport>, Entry<&Document::Ltype>,    Entry<&Document::Layer>,
+        Entry<&Document::VPort>, Entry<&Document::LType>,    Entry<&Document::Layer>,
         Entry<&Document::Style>, Entry<&Document::View>,     Entry<&Document::Ucs>,
-        Entry<&Document::Appid>, Entry<&Document::Dimstyle>, Entry<&Document::BlockRecord>,
+        Entry<&Document::AppId>, Entry<&Document::DimStyle>, Entry<&Document::BlockRecord>,
     };
 
     auto Named(std::string_view name) -> const Kind *

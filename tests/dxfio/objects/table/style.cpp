@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-namespace DxfIO::Objects::Table
+namespace DxfIO::Objects::TableStyles
 {
   TEST_CASE("style: AutoCAD's Standard read whole from R2018, its three cells")
   {
@@ -237,4 +237,4 @@ namespace DxfIO::Objects::Table
     CHECK(taken.Untitled == 1);
     CHECK(Written(taken) == text);
   }
-} // namespace DxfIO::Objects::Table
+} // namespace DxfIO::Objects::TableStyles

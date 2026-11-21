@@ -51,7 +51,7 @@ namespace DxfIO::Down
         child.Flags    = Pointed;
         out.Vertices.Children.push_back(std::move(child));
       }
-      out.Vertices.Closing = Boxed{Entities::Seqend{.Record = Child(record, handles)}};
+      out.Vertices.Closing = Boxed{Entities::SeqEnd{.Record = Child(record, handles)}};
       return out;
     }
 

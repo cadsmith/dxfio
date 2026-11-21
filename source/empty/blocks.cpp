@@ -19,18 +19,18 @@ namespace DxfIO::Empty
     }
   } // namespace
 
-  auto Block(std::string name, Space space, Seed &handles) -> Blocks::Block
+  auto Block(std::string name, Space space, Seed &handles) -> Blocks::Definition
   {
-    Blocks::Block out{};
+    Blocks::Definition out{};
     out.Begin.Record = Owned(space, handles);
     out.Begin.Name   = std::move(name);
     out.End.Record   = Owned(space, handles);
     return out;
   }
 
-  auto Blocks(const Roots &ids, Seed &handles) -> std::vector<Blocks::Block>
+  auto Blocks(const Roots &ids, Seed &handles) -> std::vector<Blocks::Definition>
   {
-    std::vector<Blocks::Block> out;
+    std::vector<Blocks::Definition> out;
     out.push_back(Block("*Model_Space", Space{.Record = ids.Records.Model}, handles));
     out.push_back(
         Block("*Paper_Space", Space{.Record = ids.Records.Paper, .Paper = true}, handles));

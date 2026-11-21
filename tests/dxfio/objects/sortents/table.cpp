@@ -9,7 +9,7 @@
 #include <string>
 #include <string_view>
 
-namespace DxfIO::Objects::Sortents
+namespace DxfIO::Objects::SortEntsTables
 {
   TEST_CASE("table: AutoCAD's, its pairs as they came, its 5s no handle of it")
   {
@@ -54,4 +54,4 @@ namespace DxfIO::Objects::Sortents
     CHECK(taken.Base.Extra.size()      == 3);
     CHECK(Written(taken, Version::R12) == text);
   }
-} // namespace DxfIO::Objects::Sortents
+} // namespace DxfIO::Objects::SortEntsTables

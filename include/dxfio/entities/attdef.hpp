@@ -14,7 +14,7 @@ namespace DxfIO::Entities
   /**
    *  An ATTDEF: an attribute a block defines, which each INSERT of the block gives a value.
    */
-  struct DXFIO_API Attdef
+  struct DXFIO_API AttDef
   {
     /**
      *  The layer, linetype, color and the rest every entity carries.
@@ -54,7 +54,7 @@ namespace DxfIO::Entities
      */
     bool Locked{};
 
-    auto operator==(const Attdef &) const -> bool = default;
+    auto operator==(const AttDef &) const -> bool = default;
   };
 } // namespace DxfIO::Entities
 

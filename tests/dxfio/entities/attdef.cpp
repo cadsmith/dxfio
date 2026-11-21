@@ -22,9 +22,9 @@ namespace DxfIO::Entities
       return Drawn(self, release, "attdefs");
     }
 
-    auto Alikened(const std::string &record, Version release = Version::R2018) -> Attdef
+    auto Alikened(const std::string &record, Version release = Version::R2018) -> AttDef
     {
-      const Attdef out = DxfIO::Read<Attdef>(record, release);
+      const AttDef out = DxfIO::Read<AttDef>(record, release);
       CHECK(out.Record.Base.Extra.empty());
       CHECK(Alike(Written(out, release), record));
       return out;
@@ -49,7 +49,7 @@ namespace DxfIO::Entities
 
   TEST_CASE("attdef: a plain one, its default, prompt and tag")
   {
-    const Attdef taken = Replayed<Attdef>(Marked("2D0"));
+    const AttDef taken = Replayed<AttDef>(Marked("2D0"));
     CHECK(taken.Lettering->Value  == "plain");
     CHECK(taken.Lettering->Height == 1);
     CHECK(taken.Prompt            == "Prompt");
@@ -78,18 +78,18 @@ namespace DxfIO::Entities
   TEST_CASE("attdef: no prompt, no default, each written all the same")
   {
     CHECK(Alikened(Marked("2D2")).Prompt.empty());
-    const Attdef bare = Alikened(Marked("2D5"));
+    const AttDef bare = Alikened(Marked("2D5"));
     CHECK(bare.Lettering->Value.empty());
     CHECK(bare.Prompt == "Empty");
   }
 
   TEST_CASE("attdef: aligned, 74 past its flags, its 11 given")
   {
-    const Attdef right = Alikened(Marked("2D8"));
+    const AttDef right = Alikened(Marked("2D8"));
     CHECK(right.Lettering->Horizontal == 2);
     CHECK(right.Vertical             == 3);
     CHECK(right.Lettering->Alignment == Vector{.X = 60, .Y = 5, .Z = 0});
-    const Attdef left = Alikened(Marked("2D9"));
+    const AttDef left = Alikened(Marked("2D9"));
     CHECK(left.Lettering->Horizontal == 0);
     CHECK(left.Vertical == 2);
     CHECK(Alikened(Marked("2DA")).Lettering->Horizontal == 3);
@@ -98,28 +98,28 @@ namespace DxfIO::Entities
 
   TEST_CASE("attdef: what an entity and a text hold, on another plane too")
   {
-    const Attdef made = Alikened(Marked("2DC"));
+    const AttDef made = Alikened(Marked("2DC"));
     CHECK(made.Lettering->Thickness == 3);
     CHECK(made.Lettering->Style     == "tall");
     CHECK(made.Record.Layer         == "notes");
     CHECK(made.Record.Color         == 1);
-    const Attdef behind = Alikened(Marked("2DD"));
+    const AttDef behind = Alikened(Marked("2DD"));
     CHECK(behind.Lettering->Extrusion.Z == -1);
     CHECK(behind.Vertical == 1);
   }
 
   TEST_CASE("attdef: locked, on the last 280 from R2010 and the one at R2007")
   {
-    const Attdef late = Alikened(Marked("2DF"));
+    const AttDef late = Alikened(Marked("2DF"));
     CHECK(late.Locked);
     CHECK(late.Revision == 0);
-    const Attdef early = Alikened(Marked("2DF", Version::R2007), Version::R2007);
+    const AttDef early = Alikened(Marked("2DF", Version::R2007), Version::R2007);
     CHECK(early.Locked);
   }
 
   TEST_CASE("attdef: locked at R2004 in extended data, kept as such")
   {
-    const Attdef old = DxfIO::Read<Attdef>(Marked("2DF", Version::R2004), Version::R2004);
+    const AttDef old = DxfIO::Read<AttDef>(Marked("2DF", Version::R2004), Version::R2004);
     CHECK_FALSE(old.Locked);
     CHECK(old.Record.Base.Extended.size() == 1);
     CHECK(Alike(Written(old, Version::R2004), Marked("2DF", Version::R2004)));
@@ -133,7 +133,7 @@ namespace DxfIO::Entities
   TEST_CASE("attdef: multi-line, what follows the lock kept and written back")
   {
     const std::string record = Marked("2E1");
-    const Attdef      many   = DxfIO::Read<Attdef>(record);
+    const AttDef      many   = DxfIO::Read<AttDef>(record);
     CHECK(many.Tag      == "MULTI");
     CHECK(many.Vertical == 3);
     CHECK_FALSE(many.Locked);
@@ -148,19 +148,19 @@ namespace DxfIO::Entities
       CAPTURE(release);
       CHECK(Alikened(Marked("2D8", release), release).Vertical == 3);
     }
-    const Attdef old = Alikened(Marked("2D8", Version::R12), Version::R12);
+    const AttDef old = Alikened(Marked("2D8", Version::R12), Version::R12);
     CHECK(old.Vertical == 3);
     CHECK(old.Prompt   == "Prompt");
   }
 
   TEST_CASE("attdef: its 280s as ATTRIB's, the first its version, a lone a lock")
   {
-    const Attdef both =
-        Replayed<Attdef>(Joined("280\r\n     0\r\n  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n"
+    const AttDef both =
+        Replayed<AttDef>(Joined("280\r\n     0\r\n  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n"
                                 "280\r\n     1\r\n"));
     CHECK(both.Locked);
-    const Attdef lone =
-        DxfIO::Read<Attdef>(Joined("  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n280\r\n     1\r\n"));
+    const AttDef lone =
+        DxfIO::Read<AttDef>(Joined("  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n280\r\n     1\r\n"));
     CHECK(lone.Locked);
     CHECK(lone.Revision == 0);
     CHECK(Written(lone).contains("280\r\n     0\r\n  3\r\np\r\n"));
@@ -168,8 +168,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("attdef: a first 280 not 0 kept as the version, written back")
   {
-    const Attdef taken =
-        Replayed<Attdef>(Joined("280\r\n     2\r\n  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n"
+    const AttDef taken =
+        Replayed<AttDef>(Joined("280\r\n     2\r\n  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n"
                                 "280\r\n     1\r\n"));
     CHECK(taken.Revision == 2);
     CHECK(taken.Locked);
@@ -177,18 +177,18 @@ namespace DxfIO::Entities
 
   TEST_CASE("attdef: a field length after its flags, where the table puts it")
   {
-    const Attdef taken =
-        Replayed<Attdef>(Joined("280\r\n     0\r\n  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n"
+    const AttDef taken =
+        Replayed<AttDef>(Joined("280\r\n     0\r\n  3\r\np\r\n  2\r\nT\r\n 70\r\n     0\r\n"
                                 " 73\r\n     5\r\n280\r\n     0\r\n"));
     CHECK(taken.Length == 5);
   }
 
   TEST_CASE("attdef: no larger than a text, its lettering boxed, and a copy its own")
   {
-    CHECK(sizeof(Attdef) <= sizeof(Text));
-    Attdef one{};
+    CHECK(sizeof(AttDef) <= sizeof(Text));
+    AttDef one{};
     one.Lettering->Value = "one";
-    Attdef two           = one;
+    AttDef two           = one;
     two.Lettering->Value = "two";
     CHECK(one.Lettering->Value == "one");
   }
@@ -198,7 +198,7 @@ namespace DxfIO::Entities
     const auto theirs = Load(Acad(Fixture("attdefs", Version::R12)));
     REQUIRE(theirs);
     CHECK(theirs->Issues.empty());
-    const auto ours = Tests::Written(theirs->Document, Options{.Release = Version::R12});
+    const auto ours = Tests::Written(theirs->Document, SaveOptions{.Release = Version::R12});
     REQUIRE(ours);
     const auto again = Load(*ours);
     REQUIRE(again);

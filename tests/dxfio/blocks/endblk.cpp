@@ -1,4 +1,4 @@
-#include "blocks/shapes/end.hpp"
+#include "blocks/shapes/endblk.hpp"
 
 #include "../kind.hpp"
 
@@ -14,7 +14,7 @@ namespace DxfIO::Blocks
                                        "100\r\nAcDbEntity\r\n"
                                        "  8\r\n0\r\n"
                                        "100\r\nAcDbBlockEnd\r\n";
-    const End                  taken = Read<End>(text);
+    const EndBlk               taken = Read<EndBlk>(text);
     CHECK(taken.Record.Base.Self == Handle{.Value = 0x21});
     CHECK_FALSE(taken.Record.Paper);
     CHECK(Written(taken) == text);

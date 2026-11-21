@@ -280,7 +280,7 @@ namespace DxfIO::Fields
     Walk               in{*all, Reading{.Issues = &issues}};
     CHECK(in.Take(8) != nullptr);
     CHECK(in.Take(40) != nullptr);
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()       == 1);
     CHECK(rest.front().Code   == 3);
     REQUIRE(issues.size()     == 1);
@@ -300,7 +300,7 @@ namespace DxfIO::Fields
     const Tags::Tag *name = in.Take(2);
     REQUIRE(name != nullptr);
     CHECK(std::get<std::string_view>(name->Value) == "name");
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()       == 1);
     CHECK(rest.front().Code   == 3);
     REQUIRE(issues.size()     == 1);
@@ -318,7 +318,7 @@ namespace DxfIO::Fields
     CHECK(in.Take(8) != nullptr);
     REQUIRE(in.Subclass("AcDbBlockReference"));
     CHECK(in.Take(2) != nullptr);
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()   == 3);
     CHECK(rest.at(0).Code == 100);
     CHECK(rest.at(1).Code == 2);
@@ -336,7 +336,7 @@ namespace DxfIO::Fields
     CHECK(in.Take(8) != nullptr);
     REQUIRE(in.Subclass("AcDbBlockReference"));
     CHECK(in.Take(2) != nullptr);
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()   == 2);
     CHECK(rest.at(0).Code == 101);
     CHECK(rest.at(1).Code == 2);
@@ -351,7 +351,7 @@ namespace DxfIO::Fields
     Walk               in{*all, Reading{.Release = Version::R12, .Issues = &issues}};
     CHECK(in.Take(8) != nullptr);
     CHECK(Real(in.Take(40)) == 1.0);
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()     == 2);
     CHECK(rest.front().Code == 40);
     CHECK(issues.empty());
@@ -366,7 +366,7 @@ namespace DxfIO::Fields
     CHECK(in.Take(8) != nullptr);
     REQUIRE(in.Subclass("AcDbLine"));
     CHECK(in.Take(40) != nullptr);
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()     == 2);
     CHECK(rest.front().Code == 8);
     CHECK(rest.back().Code  == 3);
@@ -381,7 +381,7 @@ namespace DxfIO::Fields
     Walk               in{*all, Reading{.Issues = &issues}};
     CHECK(in.Take(8) != nullptr);
     CHECK(Real(in.Take(40, Large)) == 9.0);
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()     == 1);
     CHECK(rest.front().Code == 40);
     CHECK(issues.empty());
@@ -396,7 +396,7 @@ namespace DxfIO::Fields
     in.Sequence("AcDbVisualStyle");
     CHECK(in.Take(2) != nullptr);
     CHECK(in.Take(70) != nullptr);
-    const std::vector<Group> rest = in.Rest();
+    const std::vector<Tag> rest = in.Rest();
     REQUIRE(rest.size()     == 2);
     CHECK(rest.front().Code == 70);
     CHECK(rest.back().Code  == 90);
@@ -411,7 +411,7 @@ namespace DxfIO::Fields
     Walk               in{*all, Reading{.Issues = &issues}};
     CHECK(in.Take(8) != nullptr);
     CHECK(in.Take(40) != nullptr);
-    const std::vector<Group> kept = in.Kept();
+    const std::vector<Tag> kept = in.Kept();
     REQUIRE(kept.empty());
     REQUIRE(issues.size()     == 1);
     CHECK(issues.front().Line == 5);

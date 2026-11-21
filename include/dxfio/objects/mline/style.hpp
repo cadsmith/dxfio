@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace DxfIO::Objects::Mline
+namespace DxfIO::Objects::MLineStyles
 {
   /**
    *  The start and end angle of a new multiline style, in degrees: square to the line.
@@ -35,7 +35,7 @@ namespace DxfIO::Objects::Mline
 
     auto operator==(const Element &) const -> bool = default;
   };
-} // namespace DxfIO::Objects::Mline
+} // namespace DxfIO::Objects::MLineStyles
 
 namespace DxfIO::Objects
 {
@@ -68,15 +68,15 @@ namespace DxfIO::Objects
     /**
      *  The angle of the start cap, in degrees. Group 51.
      */
-    double Start{Mline::Square};
+    double Start{MLineStyles::Square};
     /**
      *  The angle of the end cap, in degrees. Group 52.
      */
-    double End{Mline::Square};
+    double End{MLineStyles::Square};
     /**
      *  The lines, in order; their count is group 71.
      */
-    std::vector<Mline::Element> Elements{};
+    std::vector<MLineStyles::Element> Elements{};
 
     auto operator==(const MLineStyle &) const -> bool = default;
   };

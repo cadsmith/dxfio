@@ -1,5 +1,5 @@
-#ifndef DXFIO_GROUP_HPP
-#define DXFIO_GROUP_HPP
+#ifndef DXFIO_TAG_HPP
+#define DXFIO_TAG_HPP
 
 #include "dxfio/api.hpp"
 #include "dxfio/handle.hpp"
@@ -34,7 +34,7 @@ namespace DxfIO
   /**
    *  One group of a DXF file: a group code and the value that follows it.
    */
-  struct DXFIO_API Group
+  struct DXFIO_API Tag
   {
     /**
      *  The group code, such as 8 for a layer name or 10 for an x coordinate.
@@ -45,8 +45,8 @@ namespace DxfIO
      */
     Content Value{};
 
-    auto operator==(const Group &) const -> bool = default;
+    auto operator==(const Tag &) const -> bool = default;
   };
 } // namespace DxfIO
 
-#endif /* DXFIO_GROUP_HPP */
+#endif /* DXFIO_TAG_HPP */

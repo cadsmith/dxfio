@@ -31,7 +31,7 @@ namespace DxfIO
       return out;
     }
 
-    auto Counted(Fields::Writing &to, const Group &one) -> std::expected<void, Failure>
+    auto Counted(Fields::Writing &to, const Tag &one) -> std::expected<void, Failure>
     {
       if (one.Code == Instances && to.Release < Version::R2004)
       {
@@ -43,7 +43,7 @@ namespace DxfIO
           [&to, gained] -> std::expected<void, Failure>
           {
             return gained ? Fields::Put(to,
-                                        Group{
+                                        Tag{
                                             .Code  = Instances,
                                             .Value = std::int64_t{0},
                                         })
@@ -57,7 +57,7 @@ namespace DxfIO
           .and_then(
               [&to, &one] -> std::expected<void, Failure>
               {
-                return Chained(one.Groups, [&to](const Group &held) -> std::expected<void, Failure>
+                return Chained(one.Groups, [&to](const Tag &held) -> std::expected<void, Failure>
                                { return Counted(to, held); });
               });
     }

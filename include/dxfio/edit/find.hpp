@@ -2,7 +2,7 @@
 #define DXFIO_EDIT_FIND_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 #include "dxfio/document.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/handle.hpp"
@@ -49,13 +49,13 @@ namespace DxfIO::Edit
    *  Edit::AddBlock changes it.
    */
   [[nodiscard]] DXFIO_API auto FindBlock(Document &drawing, std::string_view name)
-      -> Blocks::Block *;
+      -> Blocks::Definition *;
 
   /**
    *  Finds the block of that name, or null, as the other FindBlock does.
    */
   [[nodiscard]] DXFIO_API auto FindBlock(const Document &drawing, std::string_view name)
-      -> const Blocks::Block *;
+      -> const Blocks::Definition *;
 
   /**
    *  Finds the record of that name in a table, such as `Find(drawing.Layer, "Walls")`, or null. The

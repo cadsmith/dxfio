@@ -263,8 +263,8 @@ namespace DxfIO::Down
     {
       if (one.Name == "$EXTMIN")
       {
-        one.Values = {Group{.Code = 10, .Value = 1.0}, Group{.Code = 20, .Value = 2.0},
-                      Group{.Code = 30, .Value = 3.0}};
+        one.Values = {Tag{.Code = 10, .Value = 1.0}, Tag{.Code = 20, .Value = 2.0},
+                      Tag{.Code = 30, .Value = 3.0}};
       }
     }
     const Extents box = Bounded(drawing);
@@ -276,7 +276,7 @@ namespace DxfIO::Down
     {
       if (one.Name == "$EXTMIN")
       {
-        one.Values = {Group{.Code = 10, .Value = 1.0}};
+        one.Values = {Tag{.Code = 10, .Value = 1.0}};
       }
     }
     CHECK(Bounded(drawing).High == Vector{});
@@ -405,7 +405,7 @@ namespace DxfIO::Down
   TEST_CASE("drawn: what R12 draws reads back, and R13 draws nothing")
   {
     const Document from  = Unkinded();
-    const auto     saved = Tests::Written(from, Options{.Release = Version::R12});
+    const auto     saved = Tests::Written(from, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     const auto back = Load(*saved);
     REQUIRE(back);
@@ -424,14 +424,14 @@ namespace DxfIO::Down
     {
       if (one.Name == "$EXTMIN")
       {
-        one.Values = {Group{.Code = 1, .Value = std::string{"x"}}, Group{.Code = 10, .Value = 1.0},
-                      Group{.Code = 20, .Value = 2.0},
-                      Group{.Code = 30, .Value = 3.0},
-                      Group{.Code = 40, .Value = 4.0}};
+        one.Values = {Tag{.Code = 1, .Value = std::string{"x"}}, Tag{.Code = 10, .Value = 1.0},
+                      Tag{.Code = 20, .Value = 2.0},
+                      Tag{.Code = 30, .Value = 3.0},
+                      Tag{.Code = 40, .Value = 4.0}};
       }
       if (one.Name == "$EXTMAX")
       {
-        one.Values = {Group{.Code = 10, .Value = 5.0}, Group{.Code = 20, .Value = 6.0}};
+        one.Values = {Tag{.Code = 10, .Value = 5.0}, Tag{.Code = 20, .Value = 6.0}};
       }
     }
     const Extents box = Bounded(drawing);

@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-namespace DxfIO::Objects::Mleader
+namespace DxfIO::Objects::MLeaderStyles
 {
   TEST_CASE("style: AutoCAD's Standard read whole from R2018")
   {
@@ -125,4 +125,4 @@ namespace DxfIO::Objects::Mleader
     CHECK(taken.Text->Direction          == 0);
     CHECK(Written(taken, Version::R2000) == text);
   }
-} // namespace DxfIO::Objects::Mleader
+} // namespace DxfIO::Objects::MLeaderStyles

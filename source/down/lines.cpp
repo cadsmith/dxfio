@@ -24,7 +24,7 @@ namespace DxfIO::Down
       }
       std::array<double, 3> axes{};
       std::size_t           read = 0;
-      for (const Group &one : found->Values)
+      for (const Tag &one : found->Values)
       {
         const auto *held = std::get_if<double>(&one.Value);
         if (held != nullptr && read < axes.size())

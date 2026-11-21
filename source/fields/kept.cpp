@@ -18,10 +18,10 @@ namespace DxfIO::Fields
    *  straight after the part's fields, is left out and told: under the marker written before them,
    *  it would be read in their place.
    */
-  auto Walk::Rest() const -> std::vector<Group>
+  auto Walk::Rest() const -> std::vector<Tag>
   {
-    std::vector<Group> out;
-    const std::size_t  uncovered = Uncovered();
+    std::vector<Tag>  out;
+    const std::size_t uncovered = Uncovered();
     for (std::size_t index = 0; index < m_Body.size(); ++index)
     {
       const Tags::Tag &one = At(index);
@@ -45,11 +45,11 @@ namespace DxfIO::Fields
     m_Used.assign(m_Body.size(), true);
   }
 
-  auto Walk::Kept() -> std::vector<Group>
+  auto Walk::Kept() -> std::vector<Tag>
   {
-    std::vector<Group> out;
-    bool               beyond = false;
-    const std::size_t  first  = Opening();
+    std::vector<Tag>  out;
+    bool              beyond = false;
+    const std::size_t first  = Opening();
     for (std::size_t index = 0; index < m_Body.size(); ++index)
     {
       const Tags::Tag &one = At(index);

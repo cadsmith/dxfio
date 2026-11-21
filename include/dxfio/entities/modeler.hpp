@@ -4,8 +4,8 @@
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
 #include "dxfio/entities/record.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/handle.hpp"
+#include "dxfio/tag.hpp"
 
 #include <cstdint>
 #include <optional>
@@ -27,7 +27,7 @@ namespace DxfIO::Entities
      *  The lines of the ACIS body, as DXF encodes them, kept as groups; empty when the body is in
      *  ACDSDATA. Groups 1 and 3.
      */
-    std::vector<Group> Lines{};
+    std::vector<Tag> Lines{};
     /**
      *  A flag of the R2013 layout, which DXF does not document. Group 290.
      */
@@ -176,7 +176,7 @@ namespace DxfIO::Entities
     /**
      *  The groups that follow the isolines, the kind's own data, kept as they came.
      */
-    std::vector<Group> Tail{};
+    std::vector<Tag> Tail{};
 
     auto operator==(const SurfaceOf &) const -> bool = default;
   };

@@ -41,7 +41,7 @@ namespace DxfIO::Tables
    *  A VPORT table record: a tiled viewport of model space. The tiled viewports on screen together
    *  share the name "*Active".
    */
-  struct DXFIO_API Vport
+  struct DXFIO_API VPort
   {
     /**
      *  The name, flags and handles every table record carries.
@@ -200,7 +200,7 @@ namespace DxfIO::Tables
      */
     Handle Shadow{};
 
-    auto operator==(const Vport &) const -> bool = default;
+    auto operator==(const VPort &) const -> bool = default;
   };
 } // namespace DxfIO::Tables
 

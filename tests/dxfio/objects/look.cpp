@@ -30,7 +30,7 @@ namespace DxfIO::Objects
     CHECK(one.Version  == 3);
     CHECK(one.Internal == false);
     REQUIRE_FALSE(one.Properties.empty());
-    CHECK(one.Properties.front() == DxfIO::Group{.Code = 70, .Value = std::int64_t{58}});
+    CHECK(one.Properties.front() == DxfIO::Tag{.Code = 70, .Value = std::int64_t{58}});
   }
 
   TEST_CASE("visual style: r2010 flags each field, r2007 lists them bare")

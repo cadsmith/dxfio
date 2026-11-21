@@ -18,10 +18,10 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Objects::Mline::Element> = std::tuple{
-      Fields::Field{.Code = 49, .Member = &Objects::Mline::Element::Offset},
-      Fields::Field{.Code = 62, .Member = &Objects::Mline::Element::Color},
-      Fields::Field{.Code = 6, .Member = &Objects::Mline::Element::Linetype},
+  inline constexpr auto Shapes<Objects::MLineStyles::Element> = std::tuple{
+      Fields::Field{.Code = 49, .Member = &Objects::MLineStyles::Element::Offset},
+      Fields::Field{.Code = 62, .Member = &Objects::MLineStyles::Element::Color},
+      Fields::Field{.Code = 6, .Member = &Objects::MLineStyles::Element::Linetype},
   };
 
   template <>
@@ -43,7 +43,7 @@ namespace DxfIO
       Fields::Each{
           .Opener = 49,
           .Member = &Objects::MLineStyle::Elements,
-          .Fields = Shapes<Objects::Mline::Element>,
+          .Fields = Shapes<Objects::MLineStyles::Element>,
       },
   };
 

@@ -32,7 +32,7 @@ namespace DxfIO::Tables
                                        "  9\r\nGAS\r\n"
                                        " 49\r\n-6.349999999999999\r\n"
                                        " 74\r\n     0\r\n";
-    const Ltype                taken = Read<Ltype>(text);
+    const LType                taken = Read<LType>(text);
     CHECK(taken.Record.Name         == "GAS_LINE");
     REQUIRE(taken.Dashes.size()     == 3);
     CHECK(taken.Dashes.at(1).Text   == "GAS");
@@ -77,7 +77,7 @@ namespace DxfIO::Tables
         " 45\r\n0.0\r\n"
         " 49\r\n-5.08\r\n"
         " 74\r\n     0\r\n";
-    const Ltype taken = Read<Ltype>(text);
+    const LType taken = Read<LType>(text);
     REQUIRE(taken.Dashes.size()       == 4);
     CHECK(taken.Dashes.at(2).Shape    == 131);
     CHECK(taken.Dashes.at(2).Rotation == 180.0);
@@ -92,11 +92,11 @@ namespace DxfIO::Tables
         "  3\r\nGas line ----GAS----GAS----GAS----GAS----GAS---\r\n"
         " 72\r\n    65\r\n 73\r\n     3\r\n 40\r\n24.13\r\n"
         " 49\r\n12.7\r\n 49\r\n-5.08\r\n 49\r\n-6.349999999999999\r\n";
-    const Ltype taken = Read<Ltype>(text, Version::R12);
+    const LType taken = Read<LType>(text, Version::R12);
     REQUIRE(taken.Dashes.size()        == 3);
     CHECK(taken.Dashes.at(1).Flags     == 0);
     CHECK(Written(taken, Version::R12) == text);
-    Ltype later        = taken;
+    LType later        = taken;
     later.Dashes.at(1) = Dash{.Length = -5.08, .Flags = 2, .Text = "GAS"};
     CHECK(Written(later, Version::R12) == text);
   }

@@ -19,7 +19,7 @@
 
 namespace DxfIO
 {
-  namespace Objects::Table
+  namespace Objects::TableStyles
   {
     template <int At>
     inline constexpr auto Edge = std::tuple{
@@ -27,58 +27,58 @@ namespace DxfIO
         Fields::Field<Border, bool>{.Code = 284 + At, .Member = &Border::Visible},
         Fields::Field<Border, int>{.Code = 64 + At, .Member = &Border::Color},
     };
-  } // namespace Objects::Table
+  } // namespace Objects::TableStyles
 
   template <>
-  inline constexpr auto Shapes<Objects::Table::Cell> =
+  inline constexpr auto Shapes<Objects::TableStyles::RowStyle> =
       std::tuple{
-          Fields::Field{.Code = 7, .Member = &Objects::Table::Cell::Style},
-          Fields::Field{.Code = 140, .Member = &Objects::Table::Cell::Height},
-          Fields::Field{.Code = 170, .Member = &Objects::Table::Cell::Alignment},
-          Fields::Field{.Code = 62, .Member = &Objects::Table::Cell::Color},
-          Fields::Field{.Code = 63, .Member = &Objects::Table::Cell::Fill},
-          Fields::Field{.Code = 283, .Member = &Objects::Table::Cell::Filled},
+          Fields::Field{.Code = 7, .Member = &Objects::TableStyles::RowStyle::Style},
+          Fields::Field{.Code = 140, .Member = &Objects::TableStyles::RowStyle::Height},
+          Fields::Field{.Code = 170, .Member = &Objects::TableStyles::RowStyle::Alignment},
+          Fields::Field{.Code = 62, .Member = &Objects::TableStyles::RowStyle::Color},
+          Fields::Field{.Code = 63, .Member = &Objects::TableStyles::RowStyle::Fill},
+          Fields::Field{.Code = 283, .Member = &Objects::TableStyles::RowStyle::Filled},
           Fields::Since{
               .Release = Version::R2007,
               .Fields =
                   std::tuple{
                       Fields::Field{
                           .Code   = 90,
-                          .Member = &Objects::Table::Cell::Type,
+                          .Member = &Objects::TableStyles::RowStyle::Type,
                       },
                       Fields::Field{
                           .Code   = 91,
-                          .Member = &Objects::Table::Cell::Unit,
+                          .Member = &Objects::TableStyles::RowStyle::Unit,
                       },
                       Fields::Field{
                           .Code   = 1,
-                          .Member = &Objects::Table::Cell::Format,
+                          .Member = &Objects::TableStyles::RowStyle::Format,
                       },
                   },
           },
           Fields::Part{
-              .Member = &Objects::Table::Cell::Top,
-              .Fields = Objects::Table::Edge<0>,
+              .Member = &Objects::TableStyles::RowStyle::Top,
+              .Fields = Objects::TableStyles::Edge<0>,
           },
           Fields::Part{
-              .Member = &Objects::Table::Cell::Middle,
-              .Fields = Objects::Table::Edge<1>,
+              .Member = &Objects::TableStyles::RowStyle::Middle,
+              .Fields = Objects::TableStyles::Edge<1>,
           },
           Fields::Part{
-              .Member = &Objects::Table::Cell::Bottom,
-              .Fields = Objects::Table::Edge<2>,
+              .Member = &Objects::TableStyles::RowStyle::Bottom,
+              .Fields = Objects::TableStyles::Edge<2>,
           },
           Fields::Part{
-              .Member = &Objects::Table::Cell::Left,
-              .Fields = Objects::Table::Edge<3>,
+              .Member = &Objects::TableStyles::RowStyle::Left,
+              .Fields = Objects::TableStyles::Edge<3>,
           },
           Fields::Part{
-              .Member = &Objects::Table::Cell::Center,
-              .Fields = Objects::Table::Edge<4>,
+              .Member = &Objects::TableStyles::RowStyle::Center,
+              .Fields = Objects::TableStyles::Edge<4>,
           },
           Fields::Part{
-              .Member = &Objects::Table::Cell::Right,
-              .Fields = Objects::Table::Edge<5>,
+              .Member = &Objects::TableStyles::RowStyle::Right,
+              .Fields = Objects::TableStyles::Edge<5>,
           },
   };
 
@@ -105,7 +105,7 @@ namespace DxfIO
       Fields::Every{
           .Opener = 7,
           .Member = &Objects::TableStyle::Cells,
-          .Fields = Shapes<Objects::Table::Cell>,
+          .Fields = Shapes<Objects::TableStyles::RowStyle>,
       },
   };
 

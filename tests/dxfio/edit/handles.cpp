@@ -54,7 +54,7 @@ namespace DxfIO::Edit
     drawing.Entities.emplace_back(Lined(Handle{.Value = 0x40}));
     CHECK(NewHandle(drawing)      == Handle{.Value = 0x41});
     REQUIRE(drawing.Header.size() == 1);
-    CHECK(Seeding(drawing).Values == std::vector{Group{.Code = 5, .Value = Handle{.Value = 0x42}}});
+    CHECK(Seeding(drawing).Values == std::vector{Tag{.Code = 5, .Value = Handle{.Value = 0x42}}});
     CHECK(NewHandle(drawing)      == Handle{.Value = 0x42});
   }
 
@@ -79,7 +79,7 @@ namespace DxfIO::Edit
     drawing.Header.push_back(Header::Variable{.Name = "$HANDSEED", .Values = {}});
     CHECK(NewHandle(drawing) == Handle{.Value = 0x41});
     CHECK(Seed(drawing)      == Handle{.Value = 0x42});
-    drawing.Header.front().Values.front() = Group{.Code = 5, .Value = std::string{"walls"}};
+    drawing.Header.front().Values.front() = Tag{.Code = 5, .Value = std::string{"walls"}};
     CHECK(NewHandle(drawing) == Handle{.Value = 0x41});
     CHECK(std::get<Handle>(drawing.Header.front().Values.front().Value) == Handle{.Value = 0x42});
   }

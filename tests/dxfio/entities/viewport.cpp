@@ -253,7 +253,7 @@ namespace DxfIO::Entities
     const auto theirs = Load(Acad(Fixture("viewports", Version::R12)));
     REQUIRE(theirs);
     CHECK(theirs->Issues.empty());
-    const auto ours = Tests::Written(theirs->Document, Options{.Release = Version::R12});
+    const auto ours = Tests::Written(theirs->Document, SaveOptions{.Release = Version::R12});
     REQUIRE(ours);
     const auto again = Load(*ours);
     REQUIRE(again);
@@ -264,6 +264,6 @@ namespace DxfIO::Entities
   TEST_CASE("viewport: its grid's major lines hide no table's spacing")
   {
     using namespace DxfIO::Tables;
-    CHECK(Vport{}.Snap.X == Snapunit);
+    CHECK(VPort{}.Snap.X == Snapunit);
   }
 } // namespace DxfIO::Entities

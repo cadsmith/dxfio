@@ -1,7 +1,7 @@
 #ifndef DXFIO_AUDIT_NAMES_HPP
 #define DXFIO_AUDIT_NAMES_HPP
 
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 
 #include <cstddef>
 #include <span>
@@ -60,7 +60,7 @@ namespace DxfIO::Audit
   /**
    *  The names of the blocks; one with no name gives none.
    */
-  auto Defined(std::span<const Blocks::Block> blocks) -> Names;
+  auto Defined(std::span<const Blocks::Definition> blocks) -> Names;
 } // namespace DxfIO::Audit
 
 #endif /* DXFIO_AUDIT_NAMES_HPP */

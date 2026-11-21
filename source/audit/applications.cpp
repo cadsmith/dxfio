@@ -22,8 +22,8 @@ namespace DxfIO::Audit
      */
     void Registered(Document &drawing, const std::string &name, Handle self)
     {
-      Tables::Table<Tables::Appid> &table = drawing.Appid;
-      Tables::Appid                 made{};
+      Tables::Table<Tables::AppId> &table = drawing.AppId;
+      Tables::AppId                 made{};
       made.Record.Name       = name;
       made.Record.Base.Self  = self;
       made.Record.Base.Owner = table.Head.Base.Self;
@@ -40,8 +40,8 @@ namespace DxfIO::Audit
   template <class DocumentT>
   void Applied(Auditor<DocumentT> &with)
   {
-    Names known = Named(with.Drawing->Appid);
-    for (const Tables::Appid &one : Create(Header::Declared(with.Drawing->Header)).Appid.Records)
+    Names known = Named(with.Drawing->AppId);
+    for (const Tables::AppId &one : Create(Header::Declared(with.Drawing->Header)).AppId.Records)
     {
       known.emplace(one.Record.Name);
     }
@@ -59,7 +59,7 @@ namespace DxfIO::Audit
               known.emplace(one.Application);
               if constexpr (Auditor<DocumentT>::Fix)
               {
-                const Handle self = with.Drawing->Appid.Head.Base.Self ? with.Take() : Handle{};
+                const Handle self = with.Drawing->AppId.Head.Base.Self ? with.Take() : Handle{};
                 Registered(*with.Drawing, one.Application, self);
               }
             }

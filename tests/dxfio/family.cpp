@@ -27,7 +27,7 @@ namespace DxfIO::Family
                                       "  0\r\nACDBNOTHING\r\n  5\r\n9\r\n330\r\nC\r\n"
                                       " 90\r\n        7\r\n";
 
-    auto Parsed() -> std::vector<Small>
+    auto ParseHandle() -> std::vector<Small>
     {
       const auto all = Tags::All(Text);
       REQUIRE(all);
@@ -42,7 +42,7 @@ namespace DxfIO::Family
 
   TEST_CASE("family: each record read by the kind its type names")
   {
-    const std::vector<Small> all = Parsed();
+    const std::vector<Small> all = ParseHandle();
     REQUIRE(all.size() == 3);
     CHECK(std::get<Objects::Scale>(all.at(0)).Name == "1:1");
     CHECK(std::holds_alternative<Objects::Placeholder>(all.at(1)));
@@ -51,7 +51,7 @@ namespace DxfIO::Family
 
   TEST_CASE("family: each value written under its type, as it was read")
   {
-    const std::vector<Small> all = Parsed();
+    const std::vector<Small> all = ParseHandle();
     CHECK(Type(all.at(0)) == "SCALE");
     CHECK(Type(all.at(1)) == "ACDBPLACEHOLDER");
     CHECK(Type(all.at(2)) == "ACDBNOTHING");

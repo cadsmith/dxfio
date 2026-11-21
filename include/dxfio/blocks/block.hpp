@@ -1,5 +1,5 @@
-#ifndef DXFIO_BLOCKS_BEGIN_HPP
-#define DXFIO_BLOCKS_BEGIN_HPP
+#ifndef DXFIO_BLOCKS_BLOCK_HPP
+#define DXFIO_BLOCKS_BLOCK_HPP
 
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
@@ -12,7 +12,7 @@ namespace DxfIO::Blocks
   /**
    *  A BLOCK: the record that opens a block, with its name and the base point inserts place it by.
    */
-  struct DXFIO_API Begin
+  struct DXFIO_API Block
   {
     /**
      *  The layer, linetype, color and the rest every entity carries.
@@ -40,8 +40,8 @@ namespace DxfIO::Blocks
      */
     std::string Description{};
 
-    auto operator==(const Begin &) const -> bool = default;
+    auto operator==(const Block &) const -> bool = default;
   };
 } // namespace DxfIO::Blocks
 
-#endif /* DXFIO_BLOCKS_BEGIN_HPP */
+#endif /* DXFIO_BLOCKS_BLOCK_HPP */

@@ -30,7 +30,7 @@ namespace DxfIO
 
     auto Took(const Tags::Tag &one, const Heading &to, const Fields::Reading &with) -> bool
     {
-      const std::optional<Handle> found  = Parsed(Tags::Text(one));
+      const std::optional<Handle> found  = ParseHandle(Tags::Text(one));
       const bool                  modern = with.Release >= Version::R13;
       if (one.Code == to.Code && found && *found)
       {

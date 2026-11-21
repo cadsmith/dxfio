@@ -3,8 +3,8 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/symbol.hpp"
+#include "dxfio/tag.hpp"
 
 #include <vector>
 
@@ -27,7 +27,7 @@ namespace DxfIO
     /**
      *  Every other group, subclass markers included, in the order the file gave them.
      */
-    std::vector<Group> Groups{};
+    std::vector<Tag> Groups{};
 
     auto operator==(const Unknown &) const -> bool = default;
   };

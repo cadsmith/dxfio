@@ -67,9 +67,9 @@ namespace DxfIO::Audit
 
   void Localized(Tables::Layer &one, const Document &drawing);
 
-  void Localized(Tables::Dimstyle &one, const Document &drawing);
+  void Localized(Tables::DimStyle &one, const Document &drawing);
 
-  void Localized(Tables::Vport &one, const Document &drawing);
+  void Localized(Tables::VPort &one, const Document &drawing);
 
   template <class RecordT>
   void Localized(RecordT & /*one*/, const Document & /*drawing*/)

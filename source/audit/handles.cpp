@@ -95,14 +95,14 @@ namespace DxfIO::Audit
             .Kind = "object",
         });
       }
-      Listed(drawing.Vport, out, "record");
-      Listed(drawing.Ltype, out, "record");
+      Listed(drawing.VPort, out, "record");
+      Listed(drawing.LType, out, "record");
       Listed(drawing.Layer, out, "record");
       Listed(drawing.Style, out, "record");
       Listed(drawing.View, out, "record");
       Listed(drawing.Ucs, out, "record");
-      Listed(drawing.Appid, out, "record");
-      Listed(drawing.Dimstyle, out, "record");
+      Listed(drawing.AppId, out, "record");
+      Listed(drawing.DimStyle, out, "record");
       Listed(drawing.BlockRecord, out, Recorded);
       for (auto &one : drawing.Blocks)
       {
@@ -140,7 +140,7 @@ namespace DxfIO::Audit
         }
       };
       const std::string_view name = record.Record.Name;
-      for (Blocks::Block &one : drawing.Blocks)
+      for (Blocks::Definition &one : drawing.Blocks)
       {
         if (!Ascii::Same(one.Begin.Name, name))
         {

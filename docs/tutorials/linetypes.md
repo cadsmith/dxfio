@@ -10,7 +10,7 @@ A new drawing's LTYPE table holds ByBlock, ByLayer and Continuous, none with a p
 
 ```cpp
 DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
-for (const DxfIO::Tables::Ltype &ltype : drawing.Ltype.Records)
+for (const DxfIO::Tables::LType &ltype : drawing.LType.Records)
 {
   std::println("{}: {} elements", ltype.Record.Name, ltype.Dashes.size());
 }
@@ -27,7 +27,7 @@ Continuous: 0 elements
 `Dashes` is the pattern, repeated along the line: a positive `Length` is a dash, 0 a dot, a negative length a space; a `Flags` of 0 keeps an element plain, 2 draws `Text` on it and 4 a shape. The linetype's own `Length` is the whole pattern's, the lengths added without their sign: 10 + 3 + 0 + 3. `Edit::Add` fails when the table holds a linetype of that name.
 
 ```cpp
-DxfIO::Tables::Ltype dashdot{};
+DxfIO::Tables::LType dashdot{};
 dashdot.Record.Name = "DashDot";
 dashdot.Description = "__ . __ . __ . __";
 dashdot.Length = 16;

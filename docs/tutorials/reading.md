@@ -36,9 +36,9 @@ for (const DxfIO::Header::Variable &variable : drawing.Header)
     continue;
   }
   const std::string &code = std::get<std::string>(variable.Values.front().Value);
-  if (const auto release = DxfIO::Release(code))
+  if (const auto release = DxfIO::ReleaseOf(code))
   {
-    std::println("{}, {}", code, DxfIO::Name(*release));
+    std::println("{}, {}", code, DxfIO::NameOf(*release));
   }
 }
 ```

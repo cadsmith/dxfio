@@ -6,8 +6,28 @@
 - Parameters and locals are camelCase words; a single letter only for math.
 - Private members start with `m_`.
 - Template type parameters end in `T`.
-- Public types take the name DXF gives what they hold: `MText`, `LwPolyline`,
-  `Vport`, `BlockRecord`. Functions are named for what they do.
+- A type that holds a kind of record takes the name DXF gives the kind, split
+  into the words and abbreviations it is made of, each capitalised, without
+  underscores or an `ACDB` prefix; a leading digit moves to the end: `MText`,
+  `XLine`, `AttDef`, `Attrib`, `SeqEnd`, `Block` and `EndBlk`, `LType`,
+  `VPort`, `DimStyle`, `AppId`, `LwPolyline`, `AcadTable`, `ImageDefReactor`,
+  `Placeholder`, `Face3d`. An abbreviation stays one word: `Attrib`, not
+  `AttRib`. It stays abbreviated when AutoCAD uses it on its own, as a command,
+  a system variable or a table, so a reader takes it as a word: `LType`,
+  `VPort`, `DimStyle`, `AttDef`, `MText`, `SeqEnd`, `EndBlk`. One that packs
+  several words into a few letters found nowhere else is spelled out:
+  `ACDBDICTIONARYWDFLT` is `DictionaryWithDefault`. The names are the ones a
+  DXF file and AutoCAD's reference use, and no spelled-out form holds without
+  an exception: `Viewport` is the VIEWPORT entity, not a VPORT.
+- Any other public type is named in whole words for what it holds, never with
+  a name a kind takes: `Definition`, `Section`, `Tag`, `SaveOptions`.
+- A namespace that holds the parts of one type takes that type's name in the
+  plural: `Objects::MLeaderStyles` for `MLeaderStyle`, `Objects::TableStyles`
+  for `TableStyle`, `Entities::Edges` for the alternatives of `Edge`.
+- A function that gives one property of its argument is named for the
+  property followed by `Of`: `TypeOf`, `NameOf`, `ReleaseOf`. One that reads
+  text into a value is named `Parse` and the value's type: `ParseHandle`.
+  Other functions are named for what they do.
 
 ```cpp
 namespace Foo

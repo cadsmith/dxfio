@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace DxfIO::Objects::Mleader
+namespace DxfIO::Objects::MLeaderStyles
 {
   /**
    *  ByBlock as a packed color, AutoCAD's color in one integer: the color method 0xC1 in the top
@@ -104,7 +104,7 @@ namespace DxfIO::Objects::Mleader
     /**
      *  The size of the arrowhead. Group 44.
      */
-    double Size{Mleader::Size};
+    double Size{MLeaderStyles::Size};
 
     auto operator==(const Leader &) const -> bool = default;
   };
@@ -213,7 +213,7 @@ namespace DxfIO::Objects::Mleader
 
     auto operator==(const Block &) const -> bool = default;
   };
-} // namespace DxfIO::Objects::Mleader
+} // namespace DxfIO::Objects::MLeaderStyles
 
 namespace DxfIO::Objects
 {
@@ -247,15 +247,15 @@ namespace DxfIO::Objects
      *  How the leader lines are drawn, kept on the heap as the text and block are, so every object
      *  stays small.
      */
-    Boxed<Mleader::Leader> Leader{};
+    Boxed<MLeaderStyles::Leader> Leader{};
     /**
      *  How the text is drawn.
      */
-    Boxed<Mleader::Text> Text{};
+    Boxed<MLeaderStyles::Text> Text{};
     /**
      *  How the block is drawn.
      */
-    Boxed<Mleader::Block> Block{};
+    Boxed<MLeaderStyles::Block> Block{};
     /**
      *  The factor the whole multileader is scaled by. Group 142.
      */
@@ -271,7 +271,7 @@ namespace DxfIO::Objects
     /**
      *  The gap left where a leader is broken. Group 143.
      */
-    double Breaks{Mleader::Breaking};
+    double Breaks{MLeaderStyles::Breaking};
     /**
      *  A value AutoCAD writes with no published meaning, usually 0. Group 298, from R2013.
      */

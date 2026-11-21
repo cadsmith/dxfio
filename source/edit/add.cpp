@@ -40,7 +40,7 @@ namespace DxfIO::Edit
       }
       Entities::Record record = parent;
       record.Base             = {};
-      chain.Closing           = Boxed{Entities::Seqend{.Record = std::move(record)}};
+      chain.Closing           = Boxed{Entities::SeqEnd{.Record = std::move(record)}};
     }
 
     /**
@@ -80,7 +80,7 @@ namespace DxfIO::Edit
      *  Flags a block that takes an ATTDEF as holding attribute definitions, as AutoCAD does, else
      *  its inserts ignore them.
      */
-    void Tagged(Blocks::Block *block, const Entity &one)
+    void Tagged(Blocks::Definition *block, const Entity &one)
     {
       if (block != nullptr
           && Entities::Attributing(one)
@@ -111,7 +111,7 @@ namespace DxfIO::Edit
       {
         return std::unexpected{Failure{.Line = 0, .What = std::format("a {} needs a name", kind)}};
       }
-      if constexpr (!std::same_as<RecordT, Tables::Vport>)
+      if constexpr (!std::same_as<RecordT, Tables::VPort>)
       {
         if (Find(table, one.Record.Name) != nullptr)
         {
@@ -166,7 +166,7 @@ namespace DxfIO::Edit
     {
       return Add(drawing, std::move(one), Space::Paper);
     }
-    Blocks::Block *found = FindBlock(drawing, block);
+    Blocks::Definition *found = FindBlock(drawing, block);
     if (found == nullptr)
     {
       return std::unexpected{
@@ -215,7 +215,7 @@ namespace DxfIO::Edit
                 std::max(drawing.BlockRecord.Head.Count,
                          static_cast<int>(drawing.BlockRecord.Records.size()));
           }
-          Blocks::Block block{};
+          Blocks::Definition block{};
           block.Begin.Record.Base.Self  = handles.Take();
           block.Begin.Record.Base.Owner = owner;
           block.Begin.Name              = std::string{name};
@@ -228,14 +228,14 @@ namespace DxfIO::Edit
         });
   }
 
-  auto Add(Document &drawing, Tables::Vport one) -> std::expected<Handle, Failure>
+  auto Add(Document &drawing, Tables::VPort one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Vport>(drawing, std::move(one), "viewport");
+    return Listed<&Document::VPort>(drawing, std::move(one), "viewport");
   }
 
-  auto Add(Document &drawing, Tables::Ltype one) -> std::expected<Handle, Failure>
+  auto Add(Document &drawing, Tables::LType one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Ltype>(drawing, std::move(one), "linetype");
+    return Listed<&Document::LType>(drawing, std::move(one), "linetype");
   }
 
   auto Add(Document &drawing, Tables::Layer one) -> std::expected<Handle, Failure>
@@ -263,13 +263,13 @@ namespace DxfIO::Edit
     return Listed<&Document::Ucs>(drawing, std::move(one), "ucs");
   }
 
-  auto Add(Document &drawing, Tables::Appid one) -> std::expected<Handle, Failure>
+  auto Add(Document &drawing, Tables::AppId one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Appid>(drawing, std::move(one), "application");
+    return Listed<&Document::AppId>(drawing, std::move(one), "application");
   }
 
-  auto Add(Document &drawing, Tables::Dimstyle one) -> std::expected<Handle, Failure>
+  auto Add(Document &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Dimstyle>(drawing, std::move(one), "dimension style");
+    return Listed<&Document::DimStyle>(drawing, std::move(one), "dimension style");
   }
 } // namespace DxfIO::Edit

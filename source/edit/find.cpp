@@ -50,7 +50,7 @@ namespace DxfIO::Edit
     auto Block(DocumentT &drawing, std::string_view name) -> auto *
     {
       const auto found =
-          std::ranges::find_if(drawing.Blocks, [name](const Blocks::Block &one) -> bool
+          std::ranges::find_if(drawing.Blocks, [name](const Blocks::Definition &one) -> bool
                                { return Same(one.Begin.Name, name); });
       return found == drawing.Blocks.end() ? nullptr : &*found;
     }
@@ -81,12 +81,12 @@ namespace DxfIO::Edit
     return Object(drawing, self);
   }
 
-  auto FindBlock(Document &drawing, std::string_view name) -> Blocks::Block *
+  auto FindBlock(Document &drawing, std::string_view name) -> Blocks::Definition *
   {
     return Block(drawing, name);
   }
 
-  auto FindBlock(const Document &drawing, std::string_view name) -> const Blocks::Block *
+  auto FindBlock(const Document &drawing, std::string_view name) -> const Blocks::Definition *
   {
     return Block(drawing, name);
   }

@@ -20,7 +20,7 @@
 
 namespace DxfIO
 {
-  namespace Objects::Mleader
+  namespace Objects::MLeaderStyles
   {
     inline constexpr auto Lines = std::tuple{
         Fields::Field{.Code = 172, .Member = &Leader::Order},
@@ -82,7 +82,7 @@ namespace DxfIO
         Fields::Field{.Code = 294, .Member = &Block::Rotated},
         Fields::Field{.Code = 177, .Member = &Block::Connection},
     };
-  } // namespace Objects::Mleader
+  } // namespace Objects::MLeaderStyles
 
   template <>
   inline constexpr auto Shapes<Objects::MLeaderStyle> = std::tuple{
@@ -98,20 +98,20 @@ namespace DxfIO
       Fields::Field{.Code = 171, .Member = &Objects::MLeaderStyle::Order},
       Fields::Part{
           .Member = &Objects::MLeaderStyle::Leader,
-          .Fields = Objects::Mleader::Lines,
+          .Fields = Objects::MLeaderStyles::Lines,
       },
       Fields::Field{.Code = 3, .Member = &Objects::MLeaderStyle::Description},
       Fields::Part{
           .Member = &Objects::MLeaderStyle::Leader,
-          .Fields = Objects::Mleader::Heads,
+          .Fields = Objects::MLeaderStyles::Heads,
       },
       Fields::Part{
           .Member = &Objects::MLeaderStyle::Text,
-          .Fields = Objects::Mleader::Words,
+          .Fields = Objects::MLeaderStyles::Words,
       },
       Fields::Part{
           .Member = &Objects::MLeaderStyle::Block,
-          .Fields = Objects::Mleader::Shown,
+          .Fields = Objects::MLeaderStyles::Shown,
       },
       Fields::Field{.Code = 142, .Member = &Objects::MLeaderStyle::Scale},
       Fields::Field{.Code = 295, .Member = &Objects::MLeaderStyle::Overwrite},
@@ -121,7 +121,7 @@ namespace DxfIO
           .Release = Version::R2010,
           .Fields  = std::tuple{Fields::Part{
               .Member = &Objects::MLeaderStyle::Text,
-              .Fields = Objects::Mleader::Attachments,
+              .Fields = Objects::MLeaderStyles::Attachments,
           }},
       },
       Fields::Since{

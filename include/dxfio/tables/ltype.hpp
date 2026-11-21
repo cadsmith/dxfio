@@ -66,7 +66,7 @@ namespace DxfIO::Tables
   /**
    *  An LTYPE table record: the pattern of dashes, dots and spaces a line is drawn with.
    */
-  struct DXFIO_API Ltype
+  struct DXFIO_API LType
   {
     /**
      *  The name, flags and handles every table record carries.
@@ -89,7 +89,7 @@ namespace DxfIO::Tables
      */
     std::vector<Tables::Dash> Dashes{};
 
-    auto operator==(const Ltype &) const -> bool = default;
+    auto operator==(const LType &) const -> bool = default;
   };
 } // namespace DxfIO::Tables
 

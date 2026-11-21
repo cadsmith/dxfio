@@ -23,7 +23,7 @@ namespace DxfIO
     one.Owner  = Handle{0x1};
     Base other = one;
     CHECK(one == other);
-    other.Extra.push_back(Group{.Code = 999, .Value = std::string{"x"}});
+    other.Extra.push_back(Tag{.Code = 999, .Value = std::string{"x"}});
     CHECK_FALSE(one == other);
   }
 } // namespace DxfIO

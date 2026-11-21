@@ -103,7 +103,7 @@ namespace DxfIO::Entities
   {
     const ExtrudedSurface one = Alikened<ExtrudedSurface>("332");
     REQUIRE_FALSE(one.Tail.empty());
-    CHECK(one.Tail.front()     == Group{.Code = 100, .Value = std::string{"AcDbExtrudedSurface"}});
+    CHECK(one.Tail.front()     == Tag{.Code = 100, .Value = std::string{"AcDbExtrudedSurface"}});
     CHECK(one.Tail.back().Code == 11 + 20);
   }
 

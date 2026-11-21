@@ -46,7 +46,7 @@ namespace DxfIO
           seeding = one.Code == 9 && Tags::Text(one) == "$HANDSEED";
           continue;
         }
-        const std::optional<Handle> found = Parsed(Tags::Text(one));
+        const std::optional<Handle> found = ParseHandle(Tags::Text(one));
         REQUIRE(found);
         if (seeding)
         {
@@ -67,7 +67,7 @@ namespace DxfIO
     void Pointing(Version release)
     {
       CAPTURE(release);
-      const auto text = Tests::Written(Create(release), Options{.Release = release});
+      const auto text = Tests::Written(Create(release), SaveOptions{.Release = release});
       REQUIRE(text);
       const Pointers all = Gathered(*text);
       for (const Handle one : all.Named)
@@ -87,12 +87,12 @@ namespace DxfIO
       CAPTURE(release);
       const Document drawing = Create(release);
       CHECK(Header::Declared(drawing.Header) == release);
-      const auto once = Tests::Written(drawing, Options{.Release = release});
+      const auto once = Tests::Written(drawing, SaveOptions{.Release = release});
       REQUIRE(once);
       const auto read = Load(*once);
       REQUIRE(read);
       CHECK(read->Issues.empty());
-      const auto twice = Tests::Written(read->Document, Options{.Release = release});
+      const auto twice = Tests::Written(read->Document, SaveOptions{.Release = release});
       REQUIRE(twice);
       CHECK(*twice == *once);
     }
@@ -116,12 +116,12 @@ namespace DxfIO
       CAPTURE(release);
       const Document drawing = Create(release);
       CHECK(Header::Declared(drawing.Header) == release);
-      const auto once = Tests::Written(drawing, Options{.Release = release});
+      const auto once = Tests::Written(drawing, SaveOptions{.Release = release});
       REQUIRE(once);
       const auto read = Load(*once);
       REQUIRE(read);
       CHECK(read->Issues.empty());
-      const auto twice = Tests::Written(read->Document, Options{.Release = release});
+      const auto twice = Tests::Written(read->Document, SaveOptions{.Release = release});
       REQUIRE(twice);
       CHECK(*twice == *once);
     }
@@ -134,7 +134,7 @@ namespace DxfIO
       const Document drawing = Create(release);
       CHECK(drawing.Objects.size() == 4);
       CHECK(drawing.Classes.empty());
-      CHECK(drawing.Dimstyle.Head.Base.Extra.empty());
+      CHECK(drawing.DimStyle.Head.Base.Extra.empty());
       for (const Tables::BlockRecord &one : drawing.BlockRecord.Records)
       {
         CHECK_FALSE(one.Layout);
@@ -143,7 +143,7 @@ namespace DxfIO
       CHECK_FALSE(drawing.Layer.Records.front().Material);
     }
     const Document modern = Create(Version::R2000);
-    CHECK_FALSE(modern.Dimstyle.Head.Base.Extra.empty());
+    CHECK_FALSE(modern.DimStyle.Head.Base.Extra.empty());
     CHECK(modern.BlockRecord.Records.front().Layout);
     CHECK(modern.Layer.Records.front().Style);
   }

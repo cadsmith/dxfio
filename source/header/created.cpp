@@ -13,32 +13,32 @@ namespace DxfIO::Header
 {
   namespace
   {
-    auto Point(const Row &one, const Vector &held) -> std::vector<Group>
+    auto Point(const Row &one, const Vector &held) -> std::vector<Tag>
     {
-      std::vector<Group> out{
-          Group{.Code = one.Code               , .Value = held.X},
-          Group{.Code = one.Code + Fields::Axis, .Value = held.Y},
+      std::vector<Tag> out{
+          Tag{.Code = one.Code               , .Value = held.X},
+          Tag{.Code = one.Code + Fields::Axis, .Value = held.Y},
       };
       if (!one.Flat)
       {
-        out.push_back(Group{.Code = one.Code + (2 * Fields::Axis), .Value = held.Z});
+        out.push_back(Tag{.Code = one.Code + (2 * Fields::Axis), .Value = held.Z});
       }
       return out;
     }
 
-    auto Groups(const Row &one) -> std::vector<Group>
+    auto Groups(const Row &one) -> std::vector<Tag>
     {
       return std::visit(
           DxfIO::Match{
-              [&one](const Vector &held) -> std::vector<Group> { return Point(one, held); },
-              [&one](std::string_view held) -> std::vector<DxfIO::Group>
+              [&one](const Vector &held) -> std::vector<Tag> { return Point(one, held); },
+              [&one](std::string_view held) -> std::vector<DxfIO::Tag>
               {
                 return std::vector{
-                    Group{.Code = one.Code, .Value = std::string{held}},
+                    Tag{.Code = one.Code, .Value = std::string{held}},
                 };
               },
               [&one](const auto &held) -> auto
-              { return std::vector{Group{.Code = one.Code, .Value = held}}; },
+              { return std::vector{Tag{.Code = one.Code, .Value = held}}; },
           },
           one.Value);
     }

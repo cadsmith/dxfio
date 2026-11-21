@@ -9,14 +9,14 @@ namespace DxfIO::Entities
   /**
    *  A SEQEND: the entity that closes the vertices of a POLYLINE or the attributes of an INSERT.
    */
-  struct DXFIO_API Seqend
+  struct DXFIO_API SeqEnd
   {
     /**
      *  The layer, linetype, color and the rest every entity carries.
      */
     Entities::Record Record{};
 
-    auto operator==(const Seqend &) const -> bool = default;
+    auto operator==(const SeqEnd &) const -> bool = default;
   };
 } // namespace DxfIO::Entities
 

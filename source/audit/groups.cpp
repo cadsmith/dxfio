@@ -2,7 +2,7 @@
 #include "tags/codes.hpp"
 #include "walk.hpp"
 
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/unknown.hpp"
 
 #include <algorithm>
@@ -14,7 +14,7 @@ namespace DxfIO::Audit
 {
   namespace
   {
-    auto Undefined(const Group &one) -> bool
+    auto Undefined(const Tag &one) -> bool
     {
       return !Tags::Codes::Defined(one.Code);
     }
@@ -25,7 +25,7 @@ namespace DxfIO::Audit
     template <class DocumentT, class GroupsT>
     void Checked(Auditor<DocumentT> &with, GroupsT &all, Handle self)
     {
-      for (const Group &one : all)
+      for (const Tag &one : all)
       {
         if (Undefined(one))
         {

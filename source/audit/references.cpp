@@ -239,9 +239,9 @@ namespace DxfIO::Audit
     Known<DocumentT> known{
         .With      = &with,
         .Layers    = Named(drawing.Layer),
-        .Linetypes = Named(drawing.Ltype),
+        .Linetypes = Named(drawing.LType),
         .Styles    = Named(drawing.Style),
-        .Dimstyles = Named(drawing.Dimstyle),
+        .Dimstyles = Named(drawing.DimStyle),
         .Blocks    = Defined(drawing.Blocks),
     };
     Lists(*with.Drawing,

@@ -72,7 +72,7 @@ namespace DxfIO::Empty
         CAPTURE(release);
         CAPTURE(name);
         Raw uncounted = one;
-        std::erase_if(uncounted.Groups, [](const Group &held) -> bool { return held.Code == 91; });
+        std::erase_if(uncounted.Groups, [](const Tag &held) -> bool { return held.Code == 91; });
         std::string       theirs = DxfIO::Declared(source, name);
         const std::size_t at     = theirs.find(" 91\r\n");
         if (at != std::string::npos)

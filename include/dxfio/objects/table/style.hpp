@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace DxfIO::Objects::Table
+namespace DxfIO::Objects::TableStyles
 {
   /**
    *  A cell data type: general, any value.
@@ -52,7 +52,7 @@ namespace DxfIO::Objects::Table
   /**
    *  How the cells of one kind of row are drawn: their text, fill and borders.
    */
-  struct DXFIO_API Cell
+  struct DXFIO_API RowStyle
   {
     /**
      *  The name of the text style. Group 7.
@@ -61,7 +61,7 @@ namespace DxfIO::Objects::Table
     /**
      *  The height of the text. Group 140.
      */
-    double Height{Table::Height};
+    double Height{TableStyles::Height};
     /**
      *  Where text stands in the cell: 1 to 3 top left to top right, 4 to 6 middle, 7 to 9 bottom.
      *  Group 170.
@@ -116,9 +116,9 @@ namespace DxfIO::Objects::Table
      */
     Border Right{};
 
-    auto operator==(const Cell &) const -> bool = default;
+    auto operator==(const RowStyle &) const -> bool = default;
   };
-} // namespace DxfIO::Objects::Table
+} // namespace DxfIO::Objects::TableStyles
 
 namespace DxfIO::Objects
 {
@@ -151,11 +151,11 @@ namespace DxfIO::Objects
     /**
      *  The margin left and right of text in a cell. Group 40.
      */
-    double Horizontal{Table::Margin};
+    double Horizontal{TableStyles::Margin};
     /**
      *  The margin above and below text in a cell. Group 41.
      */
-    double Vertical{Table::Margin};
+    double Vertical{TableStyles::Margin};
     /**
      *  Whether the title row is left out. Group 280.
      */
@@ -167,7 +167,7 @@ namespace DxfIO::Objects
     /**
      *  The cell styles of the data, title and header rows, in that order.
      */
-    std::vector<Table::Cell> Cells{};
+    std::vector<TableStyles::RowStyle> Cells{};
 
     auto operator==(const TableStyle &) const -> bool = default;
   };

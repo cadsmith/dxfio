@@ -101,14 +101,14 @@ namespace DxfIO::Lift
     void Tabled(const Lifting &with, Document &from)
     {
       Document &into = *with.Into;
-      Merged(with, into.Vport, std::move(from.Vport.Records));
-      Merged(with, into.Ltype, std::move(from.Ltype.Records));
+      Merged(with, into.VPort, std::move(from.VPort.Records));
+      Merged(with, into.LType, std::move(from.LType.Records));
       Merged(with, into.Layer, std::move(from.Layer.Records));
       Merged(with, into.Style, std::move(from.Style.Records));
       Merged(with, into.View, std::move(from.View.Records));
       Merged(with, into.Ucs, std::move(from.Ucs.Records));
-      Merged(with, into.Appid, std::move(from.Appid.Records));
-      Merged(with, into.Dimstyle, std::move(from.Dimstyle.Records));
+      Merged(with, into.AppId, std::move(from.AppId.Records));
+      Merged(with, into.DimStyle, std::move(from.DimStyle.Records));
       into.Loose = std::move(from.Loose);
     }
 
@@ -131,14 +131,14 @@ namespace DxfIO::Lift
      *  A block of the lifted drawing: a space block gives its entities to the release's own, any
      *  other is given its record, and its BLOCK, ENDBLK and entities their handles and owner.
      */
-    void Blocked(const Lifting &with, Blocks::Block block)
+    void Blocked(const Lifting &with, Blocks::Definition block)
     {
       Document              &into  = *with.Into;
       const std::string_view space = Spaced(block.Begin.Name);
       if (!space.empty())
       {
-        Blocks::Block &own   = *Edit::FindBlock(into, space);
-        const Handle   owner = own.Begin.Record.Base.Owner;
+        Blocks::Definition &own   = *Edit::FindBlock(into, space);
+        const Handle        owner = own.Begin.Record.Base.Owner;
         for (Entity &one : block.Entities)
         {
           Entities::Own(one, *with.Handles, owner);
@@ -206,7 +206,7 @@ namespace DxfIO::Lift
     const Lifting with{.Into = &into, .Handles = &handles};
     Headed(into, std::move(from.Header));
     Tabled(with, from);
-    for (Blocks::Block &one : from.Blocks)
+    for (Blocks::Definition &one : from.Blocks)
     {
       Blocked(with, std::move(one));
     }

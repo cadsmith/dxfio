@@ -3,7 +3,7 @@
 #include "checks.hpp"
 #include "entities/io.hpp"
 
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 #include "dxfio/entity.hpp"
 
 #include <algorithm>
@@ -24,7 +24,7 @@ namespace DxfIO::Audit
      *  Whether a block holds an ATTDEF that is not constant: in its own entities, or, for a space's
      *  block, in those of the ENTITIES section drawn in that space.
      */
-    auto Defining(const Document &drawing, const Blocks::Block &block) -> bool
+    auto Defining(const Document &drawing, const Blocks::Definition &block) -> bool
     {
       if (std::ranges::any_of(block.Entities, Entities::Attributing))
       {

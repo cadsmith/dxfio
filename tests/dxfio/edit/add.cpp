@@ -117,20 +117,20 @@ namespace DxfIO::Edit
     Document drawing = Create();
     REQUIRE(AddBlock(drawing, "TAGGED"));
     REQUIRE(AddBlock(drawing, "FIXED"));
-    Entities::Attdef constant{};
+    Entities::AttDef constant{};
     constant.Flags = 2;
     REQUIRE(Add(drawing, constant, "FIXED"));
     CHECK(FindBlock(drawing, "FIXED")->Begin.Flags == 0);
-    REQUIRE(Add(drawing, Entities::Attdef{}, "TAGGED"));
+    REQUIRE(Add(drawing, Entities::AttDef{}, "TAGGED"));
     CHECK(FindBlock(drawing, "TAGGED")->Begin.Flags == 2);
-    REQUIRE(Add(drawing, Entities::Attdef{}, "*Model_Space"));
+    REQUIRE(Add(drawing, Entities::AttDef{}, "*Model_Space"));
     CHECK(FindBlock(drawing, "*Model_Space")->Begin.Flags == 2);
-    REQUIRE(Add(drawing, Entities::Attdef{}, Space::Paper));
+    REQUIRE(Add(drawing, Entities::AttDef{}, Space::Paper));
     CHECK(FindBlock(drawing, "*Paper_Space")->Begin.Flags == 2);
-    REQUIRE(Add(drawing, Entities::Attdef{}, "TAGGED"));
+    REQUIRE(Add(drawing, Entities::AttDef{}, "TAGGED"));
     CHECK(FindBlock(drawing, "TAGGED")->Begin.Flags == 2);
     Document old = Create(Version::R12);
-    REQUIRE(Add(old, Entities::Attdef{}, Space::Model));
+    REQUIRE(Add(old, Entities::AttDef{}, Space::Model));
     CHECK(FindBlock(old, "*Model_Space") == nullptr);
   }
 
@@ -138,9 +138,9 @@ namespace DxfIO::Edit
   {
     Document drawing = Create();
     CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-    CHECK(Add(drawing, Tables::Ltype{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
+    CHECK(Add(drawing, Tables::LType{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
     CHECK(AddBlock(drawing, "")         == std::unexpected{Failure{0, "a block needs a name"}});
-    CHECK(Add(drawing, Tables::Vport{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
+    CHECK(Add(drawing, Tables::VPort{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
   }
 
   TEST_CASE("edit: an entity added to model space takes the seed and the space's record")
@@ -199,7 +199,7 @@ namespace DxfIO::Edit
     REQUIRE(self);
     const auto &added = std::get<Entities::Polyline>(drawing.Entities.front());
     REQUIRE(added.Vertices.Closing);
-    const Entities::Seqend &end = **added.Vertices.Closing;
+    const Entities::SeqEnd &end = **added.Vertices.Closing;
     CHECK(end.Record.Base.Self);
     CHECK(end.Record.Base.Owner == *self);
     CHECK(end.Record.Layer      == "Walls");
@@ -248,7 +248,7 @@ namespace DxfIO::Edit
     Entities::Polyline closed{};
     closed.Vertices.Children.resize(1);
     closed.Vertices.Closing =
-        Boxed{Entities::Seqend{.Record = {.Base = {.Self = Handle{.Value = 0x7000}}}}};
+        Boxed{Entities::SeqEnd{.Record = {.Base = {.Self = Handle{.Value = 0x7000}}}}};
     REQUIRE(Add(drawing, closed));
     CHECK(std::get<Entities::Polyline>(drawing.Entities.at(0)).Vertices.Closing);
     const auto &bare = std::get<Entities::Insert>(drawing.Entities.at(1));
@@ -273,7 +273,7 @@ namespace DxfIO::Edit
     Document   drawing = Create();
     const auto begin   = AddBlock(drawing, "Door");
     REQUIRE(begin);
-    const Blocks::Block *door = FindBlock(drawing, "door");
+    const Blocks::Definition *door = FindBlock(drawing, "door");
     REQUIRE(door != nullptr);
     CHECK(door->Begin.Record.Base.Self == *begin);
     const Handle record = Recorded(drawing, "Door");
@@ -310,7 +310,7 @@ namespace DxfIO::Edit
   {
     Document drawing = Create();
     REQUIRE(AddBlock(drawing, "*Paper_Space0"));
-    Blocks::Block *sheet      = FindBlock(drawing, "*Paper_Space0");
+    Blocks::Definition *sheet = FindBlock(drawing, "*Paper_Space0");
     sheet->Begin.Record.Paper = true;
     REQUIRE(Add(drawing, Entities::Line{}, "*Paper_Space0"));
     CHECK(std::get<Entities::Line>(sheet->Entities.front()).Record.Paper);
@@ -338,7 +338,7 @@ namespace DxfIO::Edit
     CHECK_FALSE(FindBlock(drawing, "Door")->Begin.Record.Base.Owner);
     REQUIRE(Add(drawing, Entities::Line{}));
     CHECK_FALSE(BaseOf(drawing.Entities.back()).Owner);
-    const auto saved = Save(drawing, Options{.Release = Version::R12});
+    const auto saved = Save(drawing, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     CHECK(Load(saved->Bytes));
   }
@@ -346,14 +346,14 @@ namespace DxfIO::Edit
   TEST_CASE("edit: every table takes a record, owned by the table, its count kept")
   {
     Document drawing = Create();
-    Listed(drawing, drawing.Vport, "*Active");
-    Listed(drawing, drawing.Ltype, "Dashed");
+    Listed(drawing, drawing.VPort, "*Active");
+    Listed(drawing, drawing.LType, "Dashed");
     Listed(drawing, drawing.Layer, "Walls");
     Listed(drawing, drawing.Style, "Bold");
     Listed(drawing, drawing.View, "Front");
     Listed(drawing, drawing.Ucs, "Tilted");
-    Listed(drawing, drawing.Appid, "DXFIO");
-    Listed(drawing, drawing.Dimstyle, "Metric2");
+    Listed(drawing, drawing.AppId, "DXFIO");
+    Listed(drawing, drawing.DimStyle, "Metric2");
     CHECK(Audit::Check(drawing).Clean());
   }
 
@@ -384,8 +384,8 @@ namespace DxfIO::Edit
     const auto twice   = Add(drawing, Named("0"));
     REQUIRE_FALSE(twice);
     CHECK(twice.error().What == "a record named 0 is there already");
-    CHECK_FALSE(Add(drawing, Called<Tables::Ltype>("continuous")));
-    CHECK(Add(drawing, Called<Tables::Vport>("*ACTIVE")));
+    CHECK_FALSE(Add(drawing, Called<Tables::LType>("continuous")));
+    CHECK(Add(drawing, Called<Tables::VPort>("*ACTIVE")));
   }
 
   TEST_CASE(

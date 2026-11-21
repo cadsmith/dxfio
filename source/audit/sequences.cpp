@@ -82,7 +82,7 @@ namespace DxfIO::Audit
           record.Base.Self = with.Take();
         }
         record.Base.Owner = kind.Record.Base.Self;
-        chain.Closing     = Boxed{Entities::Seqend{.Record = std::move(record)}};
+        chain.Closing     = Boxed{Entities::SeqEnd{.Record = std::move(record)}};
       }
     }
 

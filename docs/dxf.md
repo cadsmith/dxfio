@@ -25,13 +25,13 @@ const auto saved = DxfIO::SaveFile(loaded->Document, "plan-r2010.dxf",
   twice, a record out of its order, a value that does not parse. A file is
   refused only when it cannot be read at all, and the failure says where.
 - `Save` writes the document to bytes or a stream and `SaveFile` to a file,
-  for `Options::Release`, in ASCII or, with `Options::Binary`, in binary.
-  `Options::Codepage` chooses the code page of releases before R2007, which
-  store text in one: ANSI 874 and 1250 to 1258, and the East Asian 932, 936,
-  949, 950 and 1361, two bytes a character. A character the page lacks is
-  written as a `\U+` escape; `\M+` escapes are read as the character they
-  name. A page not carried keeps its text byte for byte. The issues that come
-  back say what the save had to change or leave out.
+  for `SaveOptions::Release`, in ASCII or, with `SaveOptions::Binary`, in
+  binary. `SaveOptions::Codepage` chooses the code page of releases before
+  R2007, which store text in one: ANSI 874 and 1250 to 1258, and the East
+  Asian 932, 936, 949, 950 and 1361, two bytes a character. A character the
+  page lacks is written as a `\U+` escape; `\M+` escapes are read as the
+  character they name. A page not carried keeps its text byte for byte. The
+  issues that come back say what the save had to change or leave out.
 - `Create(release)` gives an empty drawing AutoCAD opens without a finding:
   the tables, blocks, layouts and objects a drawing of that release needs.
 - `Edit::Add` puts an entity in model space, paper space or a block, or a

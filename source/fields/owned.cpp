@@ -58,7 +58,7 @@ namespace DxfIO::Fields
       const Tags::Codes::Type is = Tags::Codes::Of(code);
       if (is == Tags::Codes::Type::Handle)
       {
-        if (const std::optional<Handle> found = Parsed(raw))
+        if (const std::optional<Handle> found = ParseHandle(raw))
         {
           return *found;
         }
@@ -81,9 +81,9 @@ namespace DxfIO::Fields
     }
   } // namespace
 
-  auto Owned(const Tags::Tag &one, const Encoding::Scheme &with) -> Group
+  auto Owned(const Tags::Tag &one, const Encoding::Scheme &with) -> Tag
   {
-    return Group{
+    return Tag{
         .Code  = one.Code,
         .Value = std::visit(
             DxfIO::Match{
@@ -107,7 +107,7 @@ namespace DxfIO::Fields
     return Unhexed(out, Tags::Text(one));
   }
 
-  auto Put(Writing &to, const Group &one) -> std::expected<void, Failure>
+  auto Put(Writing &to, const Tag &one) -> std::expected<void, Failure>
   {
     return std::visit(
         DxfIO::Match{
@@ -132,9 +132,9 @@ namespace DxfIO::Fields
         one.Value);
   }
 
-  auto Put(Writing &to, std::span<const Group> all) -> std::expected<void, Failure>
+  auto Put(Writing &to, std::span<const Tag> all) -> std::expected<void, Failure>
   {
     return Chained(all,
-                   [&](const Group &one) -> std::expected<void, Failure> { return Put(to, one); });
+                   [&](const Tag &one) -> std::expected<void, Failure> { return Put(to, one); });
   }
 } // namespace DxfIO::Fields

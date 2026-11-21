@@ -27,11 +27,11 @@ namespace DxfIO::Audit
     return Ascii::Same(one, other);
   }
 
-  auto Defined(std::span<const Blocks::Block> blocks) -> Names
+  auto Defined(std::span<const Blocks::Definition> blocks) -> Names
   {
     Names out;
     out.reserve(blocks.size());
-    for (const Blocks::Block &one : blocks)
+    for (const Blocks::Definition &one : blocks)
     {
       if (!one.Begin.Name.empty())
       {

@@ -9,14 +9,14 @@ namespace DxfIO::Fields
   {
     auto Hexed(const Tags::Tag &one) -> bool
     {
-      return Parsed(Tags::Text(one)).has_value();
+      return ParseHandle(Tags::Text(one)).has_value();
     }
   } // namespace
 
   auto Value<Handle>::Read(Walk &in, int code) -> std::optional<Handle>
   {
     const Tags::Tag *one = in.Take(code, Hexed);
-    return one == nullptr ? std::nullopt : Parsed(Tags::Text(*one));
+    return one == nullptr ? std::nullopt : ParseHandle(Tags::Text(*one));
   }
 
   auto Value<Handle>::Write(Writing &to, int code, Handle held) -> std::expected<void, Failure>

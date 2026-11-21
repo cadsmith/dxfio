@@ -8,7 +8,7 @@ target_sources(dxfio_tests
     create.cpp
     entity.cpp
     family.cpp
-    group.cpp
+    tag.cpp
     handle.cpp
     handseed.cpp
     head.cpp

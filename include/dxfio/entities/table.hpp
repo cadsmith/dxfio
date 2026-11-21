@@ -3,8 +3,8 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/symbol.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/vector.hpp"
 
 #include <string>
@@ -49,7 +49,7 @@ namespace DxfIO::Entities
     /**
      *  The groups that follow, the table's style, rows, columns and cells, kept as they came.
      */
-    std::vector<Group> Body{};
+    std::vector<Tag> Body{};
 
     auto operator==(const AcadTable &) const -> bool = default;
   };

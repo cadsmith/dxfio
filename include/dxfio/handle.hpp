@@ -42,7 +42,7 @@ namespace DxfIO
    *  null handle. Empty when the text holds no digits, anything but hex digits, or more than 16 of
    *  them.
    */
-  [[nodiscard]] DXFIO_API auto Parsed(std::string_view text) -> std::optional<Handle>;
+  [[nodiscard]] DXFIO_API auto ParseHandle(std::string_view text) -> std::optional<Handle>;
 } // namespace DxfIO
 
 /**

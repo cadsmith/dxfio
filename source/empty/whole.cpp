@@ -27,7 +27,7 @@ namespace DxfIO::Empty
 
     void Pruned(Document &drawing)
     {
-      drawing.Dimstyle.Head.Base.Extra.clear();
+      drawing.DimStyle.Head.Base.Extra.clear();
       for (Tables::BlockRecord &one : drawing.BlockRecord.Records)
       {
         one.Layout = {};
@@ -46,7 +46,7 @@ namespace DxfIO::Empty
     out.Order = {"HEADER", "CLASSES", "TABLES", "BLOCKS", "ENTITIES", "OBJECTS"};
     Empty::Tables(out, ids, handles);
     out.Blocks          = Empty::Blocks(ids, handles);
-    const Handle active = out.Vport.Records.front().Record.Base.Self;
+    const Handle active = out.VPort.Records.front().Record.Base.Self;
     out.Objects         = release >= Version::R2000 ? Empty::Objects(ids, active, handles)
                                                     : Empty::Early(ids, handles);
     out.Classes         = Empty::Classes(release, out.Objects);

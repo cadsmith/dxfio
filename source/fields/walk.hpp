@@ -9,8 +9,8 @@
 #include "unknown/io.hpp"
 
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/issue.hpp"
+#include "dxfio/tag.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -77,11 +77,11 @@ namespace DxfIO::Fields
 
     auto Claim(std::int64_t wanted) -> std::size_t;
 
-    [[nodiscard]] auto Rest() const -> std::vector<Group>;
+    [[nodiscard]] auto Rest() const -> std::vector<Tag>;
 
     void Spend();
 
-    [[nodiscard]] auto Kept() -> std::vector<Group>;
+    [[nodiscard]] auto Kept() -> std::vector<Tag>;
 
   private:
     struct Standing

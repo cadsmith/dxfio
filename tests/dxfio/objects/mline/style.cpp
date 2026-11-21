@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-namespace DxfIO::Objects::Mline
+namespace DxfIO::Objects::MLineStyles
 {
   TEST_CASE("style: AutoCAD's Standard read whole, its two lines")
   {
@@ -74,4 +74,4 @@ namespace DxfIO::Objects::Mline
     REQUIRE(taken.Elements.size()       == 1);
     CHECK(taken.Elements.front().Offset == 0.5);
   }
-} // namespace DxfIO::Objects::Mline
+} // namespace DxfIO::Objects::MLineStyles
