@@ -102,11 +102,11 @@ namespace DxfIO::Objects
                                        "1070\r\n     0\r\n";
     const Material             taken = Read<Material>(text);
     CHECK(taken.Name == "Global");
-    CHECK(taken.Maps->Diffuse.Transform.Cells.front() == 0.0007999999797903);
-    CHECK(taken.Maps->Specular.Transform == Identity);
-    CHECK(taken.Illumination             == 0.125);
-    CHECK(taken.Reflectivity             == 0.375);
-    CHECK(taken.Channels == 17);
+    CHECK(taken.Maps->Diffuse.Transform.front() == 0.0007999999797903);
+    CHECK(taken.Maps->Specular.Transform        == Identity);
+    CHECK(taken.Illumination == 0.125);
+    CHECK(taken.Reflectivity == 0.375);
+    CHECK(taken.Channels     == 17);
     CHECK(taken.Base.Extra.empty());
     CHECK(Written(taken) == text);
   }

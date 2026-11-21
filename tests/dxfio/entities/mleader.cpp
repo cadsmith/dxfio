@@ -44,7 +44,7 @@ namespace DxfIO::Entities
       note.ColumnHeights              = {1.5, 2.5};
       note.HasBlock                   = true;
       note.BlockContent               = Handle{.Value = 0x36};
-      note.BlockTransform.Cells.fill(1.0);
+      note.BlockTransform.fill(1.0);
       MultiLeaders::LeaderLine stem{};
       stem.Vertices      = {Vector{.X = 1}, Vector{.X = 2}};
       stem.Breaks        = {MultiLeaders::LineBreak{.Index = 1, .Start = Vector{.Y = 1}},

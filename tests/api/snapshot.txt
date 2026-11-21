@@ -1348,7 +1348,7 @@ namespace DxfIO::Entities::MultiLeaders
     Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
     double BlockRotation{};
     int BlockColor{Colors::PackedByLayer};
-    Matrix BlockTransform{};
+    Matrix BlockTransform{DxfIO::Identity};
     Vector PlaneOrigin{};
     Vector PlaneXAxis{.X = 1};
     Vector PlaneYAxis{.Y = 1};
@@ -2223,20 +2223,11 @@ namespace DxfIO
       -> std::expected<Loaded, Failure>;
 }
 == dxfio/matrix.hpp
-#include "dxfio/api.hpp"
 #include <array>
-#include <cstddef>
 namespace DxfIO
 {
-  inline constexpr std::size_t Side = 4;
-  struct DXFIO_API Matrix
-  {
-    std::array<double, Side * Side> Cells{
-        1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
-    };
-    auto operator==(const Matrix &) const -> bool = default;
-  };
-  inline constexpr Matrix Identity{};
+  using Matrix = std::array<double, 16>;
+  inline constexpr Matrix Identity{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 }
 == dxfio/object.hpp
 #include "dxfio/api.hpp"
@@ -2469,7 +2460,7 @@ namespace DxfIO::Objects
     int Projection{2};
     int Tiling{1};
     int Automatic{1};
-    DxfIO::Matrix Transform{};
+    DxfIO::Matrix Transform{DxfIO::Identity};
     auto operator==(const Map &) const -> bool = default;
   };
   struct DXFIO_API Maps

@@ -10,9 +10,14 @@ namespace DxfIO::Geometry
 {
   namespace
   {
+    /**
+     *  The number of rows, and of columns, of a Matrix.
+     */
+    constexpr std::size_t Side = 4;
+
     auto Cell(const Matrix &matrix, std::size_t row, std::size_t column) -> double
     {
-      return matrix.Cells.at((row * Side) + column);
+      return matrix.at((row * Side) + column);
     }
   } // namespace
 
@@ -26,13 +31,31 @@ namespace DxfIO::Geometry
     /**
      *  In the insert's object coordinates: scale, then turn about Z, then move to the position.
      */
-    const Matrix placed{.Cells = {insert.Scale.X * cos, -insert.Scale.Y * sin, 0, insert.Position.X,
-                                  insert.Scale.X * sin, insert.Scale.Y * cos, 0, insert.Position.Y,
-                                  0, 0, insert.Scale.Z, insert.Position.Z, 0, 0, 0, 1}};
-    const Matrix world{.Cells = {axes.X.X, axes.Y.X, axes.Z.X, 0, axes.X.Y, axes.Y.Y, axes.Z.Y, 0,
-                                 axes.X.Z, axes.Y.Z, axes.Z.Z, 0, 0, 0, 0, 1}};
-    const Matrix based{
-        .Cells = {1, 0, 0, -origin.X, 0, 1, 0, -origin.Y, 0, 0, 1, -origin.Z, 0, 0, 0, 1}};
+    const Matrix placed = {
+        insert.Scale.X * cos,
+        -insert.Scale.Y * sin,
+        0,
+        insert.Position.X,
+        insert.Scale.X * sin,
+        insert.Scale.Y * cos,
+        0,
+        insert.Position.Y,
+        0,
+        0,
+        insert.Scale.Z,
+        insert.Position.Z,
+        0,
+        0,
+        0,
+        1,
+    };
+    const Matrix world = {
+        axes.X.X, axes.Y.X, axes.Z.X, 0, axes.X.Y, axes.Y.Y, axes.Z.Y, 0,
+        axes.X.Z, axes.Y.Z, axes.Z.Z, 0, 0,        0,        0,        1,
+    };
+    const Matrix based = {
+        1, 0, 0, -origin.X, 0, 1, 0, -origin.Y, 0, 0, 1, -origin.Z, 0, 0, 0, 1,
+    };
     return Compose(world, Compose(placed, based));
   }
 
@@ -50,7 +73,7 @@ namespace DxfIO::Geometry
 
   auto Compose(const Matrix &outer, const Matrix &inner) -> Matrix
   {
-    Matrix composed{.Cells = {}};
+    Matrix composed{};
     for (std::size_t row = 0; row < Side; ++row)
     {
       for (std::size_t column = 0; column < Side; ++column)
@@ -60,7 +83,7 @@ namespace DxfIO::Geometry
         {
           sum += Cell(outer, row, at) * Cell(inner, at, column);
         }
-        composed.Cells.at((row * Side) + column) = sum;
+        composed.at((row * Side) + column) = sum;
       }
     }
     return composed;

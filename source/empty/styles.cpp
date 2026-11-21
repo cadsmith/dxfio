@@ -27,10 +27,10 @@ namespace DxfIO::Empty
 
     auto Global(Handle self) -> Objects::Material
     {
-      Objects::Material out = Named("Global", self);
-      DxfIO::Matrix     placed{};
-      placed.Cells.front()           = Texture;
-      placed.Cells.at(Across)        = Texture;
+      Objects::Material out          = Named("Global", self);
+      DxfIO::Matrix     placed       = Identity;
+      placed.front()                 = Texture;
+      placed.at(Across)              = Texture;
       out.Maps->Diffuse.Transform    = placed;
       out.Maps->Reflection.Transform = placed;
       out.Maps->Opacity.Transform    = placed;

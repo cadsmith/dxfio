@@ -30,9 +30,9 @@ namespace DxfIO::Fields
     Walk       in{*all, Reading{}};
     const auto taken = Value<Matrix>::Read(in, 43);
     REQUIRE(taken);
-    CHECK(taken->Cells.front() == 0.5);
-    CHECK(taken->Cells.at(5)   == 1);
-    CHECK(taken->Cells.back()  == 1);
+    CHECK(taken->front() == 0.5);
+    CHECK(taken->at(5)   == 1);
+    CHECK(taken->back()  == 1);
     CHECK_FALSE(Value<Matrix>::Read(in, 47));
   }
 
@@ -41,8 +41,8 @@ namespace DxfIO::Fields
     const auto all = Tags::All(" 43\n2.0\n 43\n0.0\n");
     REQUIRE(all);
     Walk   in{*all, Reading{}};
-    Matrix wanted;
-    wanted.Cells.front() = 2;
+    Matrix wanted  = Identity;
+    wanted.front() = 2;
     CHECK(Value<Matrix>::Read(in, 43) == wanted);
   }
 
@@ -67,6 +67,6 @@ namespace DxfIO::Fields
     REQUIRE(in.Take(72) != nullptr);
     const auto taken = Value<Matrix>::Read(in, 43);
     REQUIRE(taken);
-    CHECK(taken->Cells.front() == 0.5);
+    CHECK(taken->front() == 0.5);
   }
 } // namespace DxfIO::Fields

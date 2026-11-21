@@ -328,7 +328,7 @@ namespace DxfIO::Entities::MultiLeaders
     /**
      *  The block's transformation matrix, its 16 cells each a group 47.
      */
-    Matrix BlockTransform{};
+    Matrix BlockTransform{DxfIO::Identity};
     /**
      *  The origin of the MULTILEADER's plane, in world coordinates. Groups 110, 120, 130.
      */

@@ -70,7 +70,7 @@ namespace DxfIO::Objects
      *  The transform of the map's projection, 16 values row by row. Group 43, 47, 49, 142, 144 or
      *  147.
      */
-    DxfIO::Matrix Transform{};
+    DxfIO::Matrix Transform{DxfIO::Identity};
 
     auto operator==(const Map &) const -> bool = default;
   };
