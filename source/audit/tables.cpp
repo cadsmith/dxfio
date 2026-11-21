@@ -143,9 +143,9 @@ namespace DxfIO::Audit
 
   void Localized(Tables::VPort &one, const Document & /*drawing*/)
   {
-    one.Style      = {};
-    one.Background = {};
-    one.Shadow     = {};
+    one.VisualStyle     = {};
+    one.Background      = {};
+    one.ShadePlotObject = {};
   }
 
   template <class DocumentT>

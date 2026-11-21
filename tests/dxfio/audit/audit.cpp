@@ -662,7 +662,7 @@ namespace DxfIO::Audit
     CHECK(style.Dimtxsty    == drawing.Style.Records.front().Record.Base.Self);
     CHECK_FALSE(style.Dimblk);
     CHECK(drawing.VPort.Records.front().Record.Name == "*Active");
-    CHECK_FALSE(drawing.VPort.Records.front().Style);
+    CHECK_FALSE(drawing.VPort.Records.front().VisualStyle);
     CHECK(drawing.LType.Records.front().Record.Name == "ByBlock");
   }
 

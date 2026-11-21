@@ -1004,7 +1004,7 @@ namespace DxfIO::Down
     CHECK(std::ranges::none_of(lifted.Objects, Looking));
     REQUIRE_FALSE(told.empty());
     CHECK(told.front().What == "visual styles left out, R2018 holds them otherwise");
-    CHECK(std::ranges::none_of(lifted.VPort.Records, Pointing, &Tables::VPort::Style));
+    CHECK(std::ranges::none_of(lifted.VPort.Records, Pointing, &Tables::VPort::VisualStyle));
     const Document same = Narrowed(drawn->Document, Version::R2007, nullptr);
     CHECK(std::ranges::any_of(same.Objects, Looking));
   }
@@ -1026,20 +1026,21 @@ namespace DxfIO::Down
     look.Base.Self = Handle{.Value = 0x900};
     drawing.Objects.emplace_back(look);
     Entities::Viewport port{};
-    port.Port->Style = Handle{.Value = 0x900};
+    port.Port->VisualStyle = Handle{.Value = 0x900};
     drawing.Blocks.front().Entities.emplace_back(port);
     Entities::Viewport other{};
-    other.Port->Style = Handle{.Value = 0x901};
+    other.Port->VisualStyle = Handle{.Value = 0x901};
     drawing.Entities.emplace_back(other);
     drawing.Entities.emplace_back(Entities::Line{});
     Tables::View view{};
-    view.Style = Handle{.Value = 0x900};
+    view.VisualStyle = Handle{.Value = 0x900};
     drawing.View.Records.push_back(view);
     const Document down = Narrowed(drawing, Version::R2010, nullptr);
-    CHECK_FALSE(std::get<Entities::Viewport>(down.Blocks.front().Entities.back()).Port->Style);
-    CHECK(std::get<Entities::Viewport>(down.Entities.at(down.Entities.size() - 2)).Port->Style
+    CHECK_FALSE(
+        std::get<Entities::Viewport>(down.Blocks.front().Entities.back()).Port->VisualStyle);
+    CHECK(std::get<Entities::Viewport>(down.Entities.at(down.Entities.size() - 2)).Port->VisualStyle
           == Handle{.Value = 0x901});
-    CHECK_FALSE(down.View.Records.back().Style);
+    CHECK_FALSE(down.View.Records.back().VisualStyle);
   }
 
   TEST_CASE("down: no visual style to leave out, nothing told")

@@ -258,7 +258,7 @@ namespace DxfIO::Down
       {
         if (auto *port = std::get_if<Entities::Viewport>(&one))
         {
-          Unpointed(port->Port->Style, gone);
+          Unpointed(port->Port->VisualStyle, gone);
         }
       }
     }
@@ -310,11 +310,11 @@ namespace DxfIO::Down
       }
       for (Tables::VPort &one : from.VPort.Records)
       {
-        Unpointed(one.Style, gone);
+        Unpointed(one.VisualStyle, gone);
       }
       for (Tables::View &one : from.View.Records)
       {
-        Unpointed(one.Style, gone);
+        Unpointed(one.VisualStyle, gone);
       }
       Unstyled(from.Entities, gone);
       for (Blocks::Definition &one : from.Blocks)

@@ -58,11 +58,11 @@ namespace DxfIO::Tables
     /**
      *  The center of the view, in display coordinates. Groups 12, 22.
      */
-    Vector Center{};
+    Vector ViewCenter{};
     /**
      *  The snap base point, in display coordinates. Groups 13, 23.
      */
-    Vector Base{};
+    Vector SnapBase{};
     /**
      *  The snap spacing along X and Y. Groups 14, 24.
      */
@@ -83,7 +83,7 @@ namespace DxfIO::Tables
     /**
      *  How tall the view is, in display coordinates. Group 40.
      */
-    double Height{1};
+    double ViewHeight{1};
     /**
      *  The width of the viewport over its height. Group 41.
      */
@@ -91,7 +91,7 @@ namespace DxfIO::Tables
     /**
      *  The lens length, in millimeters, of a perspective view. Group 42.
      */
-    double Focal{Lens};
+    double LensLength{Lens};
     /**
      *  The front clipping plane, as an offset from the target. Group 43.
      */
@@ -103,7 +103,7 @@ namespace DxfIO::Tables
     /**
      *  The snap angle, in degrees. Group 50.
      */
-    double Rotation{};
+    double SnapAngle{};
     /**
      *  The rotation of the view about its direction, in degrees. Group 51.
      */
@@ -120,19 +120,19 @@ namespace DxfIO::Tables
     /**
      *  Whether fast zoom is on. Group 73.
      */
-    bool Fast{true};
+    bool FastZoom{true};
     /**
      *  The UCS icon, as $UCSICON: 1 shown, 2 at the origin. Group 74.
      */
-    int Icon{3};
+    int UcsIcon{3};
     /**
      *  Whether snap is on. Group 75.
      */
-    bool Snapped{};
+    bool SnapOn{};
     /**
      *  Whether the grid is shown. Group 76.
      */
-    bool Gridded{true};
+    bool GridOn{true};
     /**
      *  Whether snap is isometric rather than square. Group 77.
      */
@@ -150,7 +150,7 @@ namespace DxfIO::Tables
      *  Whether the viewport keeps a UCS of its own, made current when the viewport is. Group 65,
      *  from R2000.
      */
-    bool Ucsvp{true};
+    bool UcsPerViewport{true};
     /**
      *  The UCS of the viewport; from R2000.
      */
@@ -158,23 +158,23 @@ namespace DxfIO::Tables
     /**
      *  The visual style. Group 348, from R2007.
      */
-    Handle Style{};
+    Handle VisualStyle{};
     /**
      *  How the grid is shown, as $GRIDDISPLAY bits. Group 60, from R2007.
      */
-    int Display{3};
+    int GridDisplay{3};
     /**
      *  The grid lines between major ones, as $GRIDMAJOR. Group 61, from R2007.
      */
-    int Major{Gridmajor};
+    int GridMajor{Gridmajor};
     /**
      *  Whether the default lighting is on. Group 292, from R2007.
      */
-    bool Lit{true};
+    bool DefaultLighting{true};
     /**
      *  The default lighting: 0 one distant light, 1 two. Group 282, from R2007.
      */
-    int Lighting{1};
+    int DefaultLightingType{1};
     /**
      *  How bright the viewport's lighting is. Group 141, from R2007.
      */
@@ -198,7 +198,7 @@ namespace DxfIO::Tables
     /**
      *  The shade plot object. Group 333, from R2007.
      */
-    Handle Shadow{};
+    Handle ShadePlotObject{};
 
     auto operator==(const VPort &) const -> bool = default;
   };

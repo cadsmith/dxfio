@@ -45,21 +45,21 @@ namespace DxfIO::Entities
     CHECK(paper.Port->Id     == 1);
     CHECK(paper.Port->Status == 1);
     CHECK(paper.Port->Flags  == 819232);
-    CHECK(paper.Port->Style);
+    CHECK(paper.Port->VisualStyle);
     CHECK(paper.Port->Rgb);
   }
 
   TEST_CASE("viewport: a floating one, its window and what it shows")
   {
     const Viewport one = Alikened(Marked("2DE"));
-    CHECK(one.Port->Id        == 2);
-    CHECK(one.Port->Width     == 205.6);
-    CHECK(one.Port->Height    == 156);
-    CHECK(one.Port->View      == Vector{.X = 50, .Y = 25, .Z = 0});
-    CHECK(one.Port->Extent    == doctest::Approx(76.80079719085126));
-    CHECK(one.Port->Direction == Up);
-    CHECK(one.Port->Lens      == 50);
-    CHECK(one.Port->Zoom      == 1000);
+    CHECK(one.Port->Id         == 2);
+    CHECK(one.Port->Width      == 205.6);
+    CHECK(one.Port->Height     == 156);
+    CHECK(one.Port->ViewCenter == Vector{.X = 50, .Y = 25, .Z = 0});
+    CHECK(one.Port->ViewHeight == doctest::Approx(76.80079719085126));
+    CHECK(one.Port->Direction  == Up);
+    CHECK(one.Port->LensLength == 50);
+    CHECK(one.Port->Zoom       == 1000);
     CHECK(one.Port->Sheet.empty());
   }
 
@@ -129,20 +129,20 @@ namespace DxfIO::Entities
 
   TEST_CASE("viewport: shaded in plot, from R2004 and not at R2000")
   {
-    CHECK(Alikened(Marked("2FC")).Port->Shade == 2);
+    CHECK(Alikened(Marked("2FC")).Port->ShadePlotMode == 2);
     CHECK_FALSE(Marked("2FC", Version::R2000).contains("170\r\n"));
   }
 
   TEST_CASE("viewport: snap, grid and major lines, its UCS named")
   {
     const Viewport one = Alikened(Marked("300"));
-    CHECK(one.Port->Snap.X == 2.5);
-    CHECK(one.Port->Snap.Y == 5);
-    CHECK(one.Port->Grid.X == 5);
-    CHECK(one.Port->Grid.Y == 7.5);
-    CHECK(one.Port->Base   == Vector{.X = 1, .Y = 2, .Z = 0});
-    CHECK(one.Port->Angle  == doctest::Approx(28.64788975654116));
-    CHECK(one.Port->Major  == 3);
+    CHECK(one.Port->Snap.X    == 2.5);
+    CHECK(one.Port->Snap.Y    == 5);
+    CHECK(one.Port->Grid.X    == 5);
+    CHECK(one.Port->Grid.Y    == 7.5);
+    CHECK(one.Port->SnapBase  == Vector{.X = 1, .Y = 2, .Z = 0});
+    CHECK(one.Port->SnapAngle == doctest::Approx(28.64788975654116));
+    CHECK(one.Port->GridMajor == 3);
     CHECK(one.Port->Axes.Named);
     CHECK(one.Port->Axes.Origin.X == 7);
   }
@@ -151,8 +151,8 @@ namespace DxfIO::Entities
   {
     const Viewport one = Alikened(Marked("304"));
     CHECK(one.Port->Render == 6);
-    CHECK_FALSE(one.Port->Lit);
-    CHECK(Alikened(Marked("2DE")).Port->Style != one.Port->Style);
+    CHECK_FALSE(one.Port->DefaultLighting);
+    CHECK(Alikened(Marked("2DE")).Port->VisualStyle != one.Port->VisualStyle);
     CHECK_FALSE(Marked("304", Version::R2004).contains("348\r\n"));
   }
 
@@ -169,16 +169,16 @@ namespace DxfIO::Entities
   TEST_CASE("viewport: a bare record takes what AutoCAD gives what is left out")
   {
     const Viewport bare = DxfIO::Read<Viewport>(Sparse);
-    CHECK(bare.Port->Flags     == 32768);
-    CHECK(bare.Port->Extent    == -1);
-    CHECK(bare.Port->Zoom      == 100);
-    CHECK(bare.Port->Lens      == 0);
-    CHECK(bare.Port->Direction == Up);
-    CHECK(bare.Port->Major     == 5);
-    CHECK(bare.Port->Lit);
+    CHECK(bare.Port->Flags      == 32768);
+    CHECK(bare.Port->ViewHeight == -1);
+    CHECK(bare.Port->Zoom       == 100);
+    CHECK(bare.Port->LensLength == 0);
+    CHECK(bare.Port->Direction  == Up);
+    CHECK(bare.Port->GridMajor  == 5);
+    CHECK(bare.Port->DefaultLighting);
     CHECK(bare.Port->Ambient == 250);
     CHECK_FALSE(bare.Port->Rgb);
-    CHECK_FALSE(bare.Port->Style);
+    CHECK_FALSE(bare.Port->VisualStyle);
     CHECK(bare.Record.Paper);
     const std::string out = Written(bare);
     CHECK_FALSE(out.contains("421\r\n"));
@@ -205,14 +205,14 @@ namespace DxfIO::Entities
           "141\r\n0.5\r\n142\r\n0.25\r\n 63\r\n     1\r\n421\r\n   3355443\r\n"
           "431\r\nbook$color\r\n361\r\n2E\r\n";
     const Viewport taken = Alikened(record);
-    CHECK(taken.Port->Sheet      == "monochrome.ctb");
-    CHECK(taken.Port->Background == Handle{.Value = 0x2B});
-    CHECK(taken.Port->Plot       == Handle{.Value = 0x2C});
-    CHECK(taken.Port->Brightness == 0.5);
-    CHECK(taken.Port->Contrast   == 0.25);
-    CHECK(taken.Port->Ambient    == 1);
-    CHECK(taken.Port->Book       == "book$color");
-    CHECK(taken.Port->Sun        == Handle{.Value = 0x2E});
+    CHECK(taken.Port->Sheet           == "monochrome.ctb");
+    CHECK(taken.Port->Background      == Handle{.Value = 0x2B});
+    CHECK(taken.Port->ShadePlotObject == Handle{.Value = 0x2C});
+    CHECK(taken.Port->Brightness      == 0.5);
+    CHECK(taken.Port->Contrast        == 0.25);
+    CHECK(taken.Port->Ambient         == 1);
+    CHECK(taken.Port->Book            == "book$color");
+    CHECK(taken.Port->Sun             == Handle{.Value = 0x2E});
   }
 
   TEST_CASE("viewport: R12 holds the view in extended data, kept as it is")

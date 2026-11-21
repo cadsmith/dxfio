@@ -66,10 +66,10 @@ namespace DxfIO::Empty
 
     auto Active() -> DxfIO::Tables::VPort
     {
-      auto out   = Called<DxfIO::Tables::VPort>("*Active");
-      out.Center = Vector{.X = Sheet.X / 2, .Y = Sheet.Y / 2, .Z = 0};
-      out.Height = Sheet.Y;
-      out.Aspect = Sheet.X / Sheet.Y;
+      auto out       = Called<DxfIO::Tables::VPort>("*Active");
+      out.ViewCenter = Vector{.X = Sheet.X / 2, .Y = Sheet.Y / 2, .Z = 0};
+      out.ViewHeight = Sheet.Y;
+      out.Aspect     = Sheet.X / Sheet.Y;
       return out;
     }
 

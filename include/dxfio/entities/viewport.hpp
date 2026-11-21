@@ -66,11 +66,11 @@ namespace DxfIO::Entities
     /**
      *  The center of the view, in display coordinates. Groups 12, 22, from R2000.
      */
-    Vector View{};
+    Vector ViewCenter{};
     /**
      *  The base point of the snap. Groups 13, 23, from R2000.
      */
-    Vector Base{};
+    Vector SnapBase{};
     /**
      *  The spacing of the snap. Groups 14, 24, from R2000.
      */
@@ -91,7 +91,7 @@ namespace DxfIO::Entities
     /**
      *  The lens length of a perspective view. Group 42, from R2000.
      */
-    double Lens{};
+    double LensLength{};
     /**
      *  The offset of the front clipping plane from the target. Group 43, from R2000.
      */
@@ -103,11 +103,11 @@ namespace DxfIO::Entities
     /**
      *  The height of the view, in model space units. Group 45, from R2000.
      */
-    double Extent{-1};
+    double ViewHeight{-1};
     /**
      *  The snap angle. Group 50, from R2000.
      */
-    double Angle{};
+    double SnapAngle{};
     /**
      *  The twist of the view. Group 51, from R2000.
      */
@@ -142,11 +142,11 @@ namespace DxfIO::Entities
     /**
      *  1 when the viewport keeps its own UCS, made current when it is active. Group 71, from R2000.
      */
-    int Follows{1};
+    int UcsPerViewport{1};
     /**
      *  1 when the UCS icon is drawn at the UCS origin. Group 74, from R2000.
      */
-    int Icon{};
+    int UcsIconAtOrigin{};
     /**
      *  The viewport's own UCS. Groups 110, 111, 112, 345, 346, 79 and 146, from R2000.
      */
@@ -155,11 +155,11 @@ namespace DxfIO::Entities
      *  How the viewport is plotted: 0 as displayed, 1 wireframe, 2 hidden, 3 rendered. Group 170,
      *  from R2004.
      */
-    int Shade{};
+    int ShadePlotMode{};
     /**
      *  How often a major grid line is drawn, in grid lines. Group 61, from R2007.
      */
-    int Major{Gridmajor};
+    int GridMajor{Gridmajor};
     /**
      *  The background drawn behind the view. Group 332, from R2007.
      */
@@ -167,19 +167,19 @@ namespace DxfIO::Entities
     /**
      *  The visual style or render preset the viewport is shade plotted with. Group 333, from R2007.
      */
-    Handle Plot{};
+    Handle ShadePlotObject{};
     /**
      *  The visual style the view is drawn in. Group 348, from R2007.
      */
-    Handle Style{};
+    Handle VisualStyle{};
     /**
      *  Whether the default lighting is on. Group 292, from R2007.
      */
-    bool Lit{true};
+    bool DefaultLighting{true};
     /**
      *  The default lighting: 1 one distant light, 2 two distant lights. Group 282, from R2007.
      */
-    int Lighting{1};
+    int DefaultLightingType{1};
     /**
      *  The brightness of the view. Group 141, from R2007.
      */
