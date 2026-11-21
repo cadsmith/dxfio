@@ -55,14 +55,14 @@ namespace DxfIO::Entities
   {
     SectionObject one{};
     one.Record.Base.Self     = Handle{.Value = 0x2a};
-    one.Data->Name            = "A";
-    one.Data->Rgb             = 255;
-    one.Data->Vertices        = {Vector{.X = 1}, Vector{.X = 2}};
-    one.Data->Back            = {Vector{.Y = 3}};
+    one.Data->Name           = "A";
+    one.Data->Rgb            = 255;
+    one.Data->Vertices       = {Vector{.X = 1}, Vector{.X = 2}};
+    one.Data->Back           = {Vector{.Y = 3}};
     const SectionObject back = DxfIO::Read<SectionObject>(Written(one));
     CHECK(back.Data->Rgb  == 255);
     CHECK(back.Data->Back == one.Data->Back);
-    CHECK(back           == one);
+    CHECK(back            == one);
   }
 
   TEST_CASE("slice: named as DXF names it, not as a file's sections are")

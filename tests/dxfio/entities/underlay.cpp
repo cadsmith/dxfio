@@ -52,14 +52,14 @@ namespace DxfIO::Entities
   TEST_CASE("underlay: scaled, turned and clipped, each kept")
   {
     DwfUnderlay one{};
-    one.Record.Base.Self     = Handle{.Value = 0x2a};
-    one.Data->Definition = Handle{.Value = 0x2b};
-    one.Data->Scale      = Vector{.X = 2, .Y = 3, .Z = 4};
-    one.Data->Rotation   = 30;
-    one.Data->Extrusion  = Vector{.X = 1};
-    one.Data->Clip       = {Bound{.Position = Vector{.X = 1, .Y = 2}},
-                                Bound{.Position = Vector{.X = 3, .Y = 4}}};
-    const DwfUnderlay back   = DxfIO::Read<DwfUnderlay>(Written(one));
+    one.Record.Base.Self   = Handle{.Value = 0x2a};
+    one.Data->Definition   = Handle{.Value = 0x2b};
+    one.Data->Scale        = Vector{.X = 2, .Y = 3, .Z = 4};
+    one.Data->Rotation     = 30;
+    one.Data->Extrusion    = Vector{.X = 1};
+    one.Data->Clip         = {Bound{.Position = Vector{.X = 1, .Y = 2}},
+                              Bound{.Position = Vector{.X = 3, .Y = 4}}};
+    const DwfUnderlay back = DxfIO::Read<DwfUnderlay>(Written(one));
     CHECK(back == one);
     CHECK(Written(one).find(" 31\r\n") == std::string::npos);
   }

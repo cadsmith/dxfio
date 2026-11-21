@@ -233,8 +233,8 @@ namespace DxfIO::Objects::TableStyles
                                       "280\r\n     1\r\n"
                                       "281\r\n     0\r\n";
     const Objects::TableStyle taken = Read<Objects::TableStyle>(text);
-    CHECK(taken.Revision == 0);
+    CHECK(taken.Revision        == 0);
     CHECK(taken.TitleSuppressed == 1);
-    CHECK(Written(taken) == text);
+    CHECK(Written(taken)        == text);
   }
 } // namespace DxfIO::Objects::TableStyles

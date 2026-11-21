@@ -48,7 +48,8 @@ namespace DxfIO
       }
     }
 
-    inline auto Loading(const Ole2FrameData &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Loading(const Ole2FrameData &one, Fields::Writing &to)
+        -> std::expected<void, Failure>
     {
       const auto size = static_cast<std::int64_t>(one.Data.size());
       return Fields::Value<std::int64_t>::Write(to, Sized, size)

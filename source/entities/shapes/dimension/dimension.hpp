@@ -34,7 +34,8 @@ namespace DxfIO
       Become(one.Form, static_cast<std::size_t>(Masked(one.Measure.Flags, Formal)), in);
     }
 
-    inline auto Shaping(const DimensionData &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Shaping(const DimensionData &one, Fields::Writing &to)
+        -> std::expected<void, Failure>
     {
       Measure kind  = one.Measure;
       kind.Flags   += static_cast<int>(one.Form.index()) - Masked(kind.Flags, Formal);

@@ -124,7 +124,7 @@ namespace DxfIO::Entities
     Dimension one{};
     one.Data->Measure.Flags = 32 + 3;
     one.Data->Form          = Forms::Radial{.Chord = Vector{.X = 5}, .Leader = 2};
-    const auto back           = DxfIO::Read<Dimension>(Written(one));
+    const auto back         = DxfIO::Read<Dimension>(Written(one));
     CHECK(back.Data->Measure.Flags == 32 + 4);
     REQUIRE(std::holds_alternative<Forms::Radial>(back.Data->Form));
     CHECK(std::get<Forms::Radial>(back.Data->Form) == std::get<Forms::Radial>(one.Data->Form));
@@ -178,7 +178,7 @@ namespace DxfIO::Entities
       CAPTURE(release);
       Dimension one{};
       one.Data->Measure.Style = Symbol{"ISO-25"};
-      const std::string text    = Written(one, release);
+      const std::string text  = Written(one, release);
       CHECK(text.contains("  3\r\nISO-25\r\n"));
       CHECK(DxfIO::Read<Dimension>(text, release).Data->Measure.Style == "ISO-25");
     }
@@ -257,7 +257,7 @@ namespace DxfIO::Entities
   {
     Dimension one{};
     one.Data->Measure.Flags = 1;
-    Dimension two             = one;
+    Dimension two           = one;
     two.Data->Measure.Flags = 2;
     CHECK(one.Data->Measure.Flags == 1);
     CHECK(sizeof(ArcDimension) < 2 * sizeof(Record));

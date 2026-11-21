@@ -36,7 +36,8 @@ namespace DxfIO
       Fields::Take(Modern, one, in);
     }
 
-    inline auto Freezing(const ViewportData &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Freezing(const ViewportData &one, Fields::Writing &to)
+        -> std::expected<void, Failure>
     {
       return to.Release < Version::R2004 ? Fields::Put(Legacy, one, to)
                                          : Fields::Put(Modern, one, to);

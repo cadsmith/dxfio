@@ -190,7 +190,7 @@ namespace DxfIO::Entities
   {
     Mesh one{};
     one.Data->Level = 1;
-    Mesh two       = one;
+    Mesh two        = one;
     two.Data->Level = 2;
     CHECK(one.Data->Level == 1);
   }

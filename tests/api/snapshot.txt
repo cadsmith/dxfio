@@ -391,7 +391,7 @@ namespace DxfIO::Edit
     [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
     [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
   private:
-    const Document                                       *m_Drawing;
+    const Document                                   *m_Drawing;
     std::unordered_map<std::uint64_t, const Entity *> m_Entities;
     std::unordered_map<std::uint64_t, const Object *> m_Objects;
   };
@@ -1489,12 +1489,12 @@ namespace DxfIO::Entities
 {
   enum class PolylineFlags : std::uint8_t
   {
-    Closed = 1,
-    CurveFit = 2,
-    SplineFit = 4,
-    Polyline3d = 8,
+    Closed      =  1,
+    CurveFit    =  2,
+    SplineFit   =  4,
+    Polyline3d  =  8,
     PolygonMesh = 16,
-    ClosedN = 32,
+    ClosedN      = 32,
     PolyfaceMesh = 64,
     ContinuousLinetype = 128,
   };
@@ -1869,7 +1869,7 @@ namespace DxfIO::Entities
     Tangent = 2,
     SplineFit = 8,
     ControlPoint = 16,
-    Polyline3d = 32,
+    Polyline3d   = 32,
     PolygonMesh = 64,
     PolyfaceMesh = 128,
   };
@@ -2083,7 +2083,7 @@ namespace DxfIO::Geometry
 #include "dxfio/vector.hpp"
 namespace DxfIO::Geometry
 {
-  [[nodiscard]] DXFIO_API auto TransformOf(const Entities::Insert &insert,
+  [[nodiscard]] DXFIO_API auto TransformOf(const Entities::Insert   &insert,
                                            const Blocks::Definition &block) -> Matrix;
   [[nodiscard]] DXFIO_API auto Transform(const Matrix &transform, Vector point) -> Vector;
   [[nodiscard]] DXFIO_API auto Compose(const Matrix &outer, const Matrix &inner) -> Matrix;
@@ -2165,24 +2165,24 @@ namespace DxfIO
   {
     ByLayer = -1,
     ByBlock = -2,
-    Default = -3,
-    Mm000   = 0,
-    Mm005   = 5,
-    Mm009   = 9,
-    Mm013   = 13,
-    Mm015   = 15,
-    Mm018   = 18,
-    Mm020   = 20,
-    Mm025   = 25,
-    Mm030   = 30,
-    Mm035   = 35,
-    Mm040   = 40,
-    Mm050   = 50,
-    Mm053   = 53,
-    Mm060   = 60,
-    Mm070   = 70,
-    Mm080   = 80,
-    Mm090   = 90,
+    Default =  -3,
+    Mm000   =   0,
+    Mm005   =   5,
+    Mm009   =   9,
+    Mm013   =  13,
+    Mm015   =  15,
+    Mm018   =  18,
+    Mm020   =  20,
+    Mm025   =  25,
+    Mm030   =  30,
+    Mm035   =  35,
+    Mm040   =  40,
+    Mm050   =  50,
+    Mm053   =  53,
+    Mm060   =  60,
+    Mm070   =  70,
+    Mm080   =  80,
+    Mm090   =  90,
     Mm100   = 100,
     Mm106   = 106,
     Mm120   = 120,

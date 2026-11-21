@@ -84,7 +84,7 @@ namespace DxfIO::Entities
       CAPTURE(release);
       CHECK(Alikened<Solid3d>(Boxy, release).Geometry != Boxed<Geometry>{});
       CHECK(Alikened<Region>(Flat, release).Geometry != Boxed<Geometry>{});
-      CHECK(Alikened<PlaneSurface>(Sheeted, release).UIsolines == 6);
+      CHECK(Alikened<PlaneSurface>(Sheeted, release).UIsolines  == 6);
       CHECK(Alikened<ExtrudedSurface>("332", release).VIsolines == 6);
       CHECK_FALSE(Alikened<RevolvedSurface>("33E", release).Data.empty());
       CHECK_FALSE(Alikened<LoftedSurface>("348", release).Data.empty());

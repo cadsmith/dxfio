@@ -51,13 +51,13 @@ namespace DxfIO::Entities
     REQUIRE(one.Data->Paths.size() == 1);
     CHECK(one.Data->Paths.front().Flags        == 1);
     CHECK(one.Data->Paths.front().Edges.size() == 4);
-    CHECK(one.Data->Style            == 1);
-    CHECK(one.Data->Kind             == 1);
-    CHECK(one.Data->Angle            == 45);
-    CHECK(one.Data->Scale            == 2);
-    REQUIRE(one.Data->PatternLines.size() == 1);
+    CHECK(one.Data->Style == 1);
+    CHECK(one.Data->Kind  == 1);
+    CHECK(one.Data->Angle == 45);
+    CHECK(one.Data->Scale == 2);
+    REQUIRE(one.Data->PatternLines.size()      == 1);
     CHECK(one.Data->PatternLines.front().Angle == 90);
-    CHECK(one.Data->Seeds.size()          == 1);
+    CHECK(one.Data->Seeds.size() == 1);
     CHECK_FALSE(one.Data->Gradient);
   }
 
@@ -144,9 +144,9 @@ namespace DxfIO::Entities
   TEST_CASE("hatch: patterns of several lines, doubled, dashed")
   {
     const Hatch user = Alikened(Marked("318"));
-    CHECK(user.Data->Name           == "_U");
-    CHECK(user.Data->Kind           == 0);
-    CHECK(user.Data->Doubled        == 1);
+    CHECK(user.Data->Name    == "_U");
+    CHECK(user.Data->Kind    == 0);
+    CHECK(user.Data->Doubled == 1);
     CHECK(user.Data->PatternLines.size() == 2);
     const Hatch brick = Alikened(Marked("31C"));
     CHECK(brick.Data->PatternLines.at(1).Dashes.size() == 2);
@@ -156,10 +156,10 @@ namespace DxfIO::Entities
   {
     const Hatch one = Alikened(Marked("321"));
     REQUIRE(one.Data->Gradient);
-    CHECK(one.Data->Gradient->Shown          == 1);
-    CHECK(one.Data->Gradient->Name           == "LINEAR");
+    CHECK(one.Data->Gradient->Shown           == 1);
+    CHECK(one.Data->Gradient->Name            == "LINEAR");
     REQUIRE(one.Data->Gradient->Colors.size() == 2);
-    CHECK(one.Data->Gradient->Colors.at(1).Place          == 1);
+    CHECK(one.Data->Gradient->Colors.at(1).Place         == 1);
     CHECK(Alikened(Marked("325")).Data->Gradient->Single == 1);
     CHECK(Alikened(Marked("2D3")).Data->Gradient->Shown  == 0);
     CHECK_FALSE(Alikened(Marked("2D3", Version::R2000), Version::R2000).Data->Gradient);

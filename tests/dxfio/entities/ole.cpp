@@ -39,7 +39,7 @@ namespace DxfIO::Entities
   {
     Ole2Frame one{};
     one.Record.Base.Self   = Handle{.Value = 0x2a};
-    one.Data->Data        = std::string(300, '\x7f');
+    one.Data->Data         = std::string(300, '\x7f');
     const std::string text = Written(one);
     CHECK(text.find(" 90\r\n      300\r\n") != std::string::npos);
     const Ole2Frame back = DxfIO::Read<Ole2Frame>(text);
