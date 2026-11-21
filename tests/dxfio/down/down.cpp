@@ -1026,10 +1026,10 @@ namespace DxfIO::Down
     look.Base.Self = Handle{.Value = 0x900};
     drawing.Objects.emplace_back(look);
     Entities::Viewport port{};
-    port.Port->VisualStyle = Handle{.Value = 0x900};
+    port.Data->VisualStyle = Handle{.Value = 0x900};
     drawing.Blocks.front().Entities.emplace_back(port);
     Entities::Viewport other{};
-    other.Port->VisualStyle = Handle{.Value = 0x901};
+    other.Data->VisualStyle = Handle{.Value = 0x901};
     drawing.Entities.emplace_back(other);
     drawing.Entities.emplace_back(Entities::Line{});
     Tables::View view{};
@@ -1037,8 +1037,8 @@ namespace DxfIO::Down
     drawing.View.Records.push_back(view);
     const Document down = Narrowed(drawing, Version::R2010, nullptr);
     CHECK_FALSE(
-        std::get<Entities::Viewport>(down.Blocks.front().Entities.back()).Port->VisualStyle);
-    CHECK(std::get<Entities::Viewport>(down.Entities.at(down.Entities.size() - 2)).Port->VisualStyle
+        std::get<Entities::Viewport>(down.Blocks.front().Entities.back()).Data->VisualStyle);
+    CHECK(std::get<Entities::Viewport>(down.Entities.at(down.Entities.size() - 2)).Data->VisualStyle
           == Handle{.Value = 0x901});
     CHECK_FALSE(down.View.Records.back().VisualStyle);
   }

@@ -17,7 +17,7 @@ namespace DxfIO::Entities
    *  The AcDbSection subclass of a SECTIONOBJECT: the plane that cuts the model and the line it is
    *  drawn with.
    */
-  struct DXFIO_API Cut
+  struct DXFIO_API SectionObjectData
   {
     /**
      *  What the section cuts with: 1 a plane, 2 a boundary, 4 a volume. Group 90.
@@ -68,7 +68,7 @@ namespace DxfIO::Entities
      */
     Handle Settings{};
 
-    auto operator==(const Cut &) const -> bool = default;
+    auto operator==(const SectionObjectData &) const -> bool = default;
   };
 
   /**
@@ -88,7 +88,7 @@ namespace DxfIO::Entities
     /**
      *  The plane, its line and its indicator, from the AcDbSection subclass.
      */
-    Boxed<Entities::Cut> Cut{};
+    Boxed<Entities::SectionObjectData> Data{};
 
     auto operator==(const SectionObject &) const -> bool = default;
   };

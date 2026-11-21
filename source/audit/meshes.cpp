@@ -18,23 +18,23 @@ namespace DxfIO::Audit
      */
     auto Empty(const Entities::Mesh &mesh) -> bool
     {
-      return mesh.Net->Vertices.empty() || mesh.Net->Faces.empty();
+      return mesh.Data->Vertices.empty() || mesh.Data->Faces.empty();
     }
 
     template <class DocumentT>
     void Creased(Auditor<DocumentT> &with, Part<DocumentT, Entities::Mesh> &mesh)
     {
-      const std::size_t edges = mesh.Net->Edges.size() / 2;
-      if (mesh.Net->Creases.size() == edges)
+      const std::size_t edges = mesh.Data->Edges.size() / 2;
+      if (mesh.Data->Creases.size() == edges)
       {
         return;
       }
       with.Note(Severity::Warning,
-                std::format("mesh with {} creases for {} edges", mesh.Net->Creases.size(), edges),
+                std::format("mesh with {} creases for {} edges", mesh.Data->Creases.size(), edges),
                 mesh.Record.Base.Self);
       if constexpr (Auditor<DocumentT>::Fix)
       {
-        mesh.Net->Creases.resize(edges);
+        mesh.Data->Creases.resize(edges);
       }
     }
 
@@ -48,7 +48,7 @@ namespace DxfIO::Audit
       }
       with.Note(Severity::Error,
                 std::format("mesh with no {}, left out",
-                            mesh.Net->Vertices.empty() ? "vertices" : "faces"),
+                            mesh.Data->Vertices.empty() ? "vertices" : "faces"),
                 mesh.Record.Base.Self);
     }
 

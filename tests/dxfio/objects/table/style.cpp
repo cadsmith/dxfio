@@ -111,7 +111,7 @@ namespace DxfIO::Objects::TableStyles
     CHECK(taken.Description == "Standard");
     CHECK(taken.Revision    == 0);
     CHECK(taken.Horizontal  == 1.5);
-    CHECK_FALSE(taken.Untitled);
+    CHECK_FALSE(taken.TitleSuppressed);
     REQUIRE(taken.Cells.size()        == 3);
     CHECK(taken.Cells.at(0).Height    == 4.5);
     CHECK(taken.Cells.at(0).Alignment == 2);
@@ -234,7 +234,7 @@ namespace DxfIO::Objects::TableStyles
                                       "281\r\n     0\r\n";
     const Objects::TableStyle taken = Read<Objects::TableStyle>(text);
     CHECK(taken.Revision == 0);
-    CHECK(taken.Untitled == 1);
+    CHECK(taken.TitleSuppressed == 1);
     CHECK(Written(taken) == text);
   }
 } // namespace DxfIO::Objects::TableStyles

@@ -14,7 +14,7 @@ namespace DxfIO::Entities
    *  The AcDbLight subclass of a LIGHT: its kind, color and place, and how it falls off and casts
    *  shadows.
    */
-  struct DXFIO_API Lamp
+  struct DXFIO_API LightData
   {
     /**
      *  The version of the light's layout. Group 90.
@@ -99,7 +99,7 @@ namespace DxfIO::Entities
      */
     int Softness{1};
 
-    auto operator==(const Lamp &) const -> bool = default;
+    auto operator==(const LightData &) const -> bool = default;
   };
 
   /**
@@ -119,7 +119,7 @@ namespace DxfIO::Entities
     /**
      *  The kind, color and place of the light, from the AcDbLight subclass.
      */
-    Boxed<Entities::Lamp> Lamp{};
+    Boxed<Entities::LightData> Data{};
 
     auto operator==(const Light &) const -> bool = default;
   };

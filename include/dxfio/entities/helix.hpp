@@ -14,7 +14,7 @@ namespace DxfIO::Entities
   /**
    *  The AcDbHelix subclass of a HELIX: the axis, radius and turns the coil follows.
    */
-  struct DXFIO_API Coil
+  struct DXFIO_API HelixData
   {
     /**
      *  The major version of the helix's layout. Group 90.
@@ -58,7 +58,7 @@ namespace DxfIO::Entities
      */
     int Constraint{};
 
-    auto operator==(const Coil &) const -> bool = default;
+    auto operator==(const HelixData &) const -> bool = default;
   };
 
   /**
@@ -82,7 +82,7 @@ namespace DxfIO::Entities
     /**
      *  The axis, radius and turns, from the AcDbHelix subclass.
      */
-    Entities::Coil Coil{};
+    Entities::HelixData Data{};
 
     auto operator==(const Helix &) const -> bool = default;
   };

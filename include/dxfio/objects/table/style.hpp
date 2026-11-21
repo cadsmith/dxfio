@@ -144,11 +144,11 @@ namespace DxfIO::Objects
     /**
      *  Whether the title row is left out. Group 280.
      */
-    bool Untitled{};
+    bool TitleSuppressed{};
     /**
      *  Whether the header row is left out. Group 281.
      */
-    bool Headless{};
+    bool HeaderSuppressed{};
     /**
      *  The cell styles of the data, title and header rows, in that order.
      */

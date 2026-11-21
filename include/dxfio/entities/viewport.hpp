@@ -18,7 +18,7 @@ namespace DxfIO::Entities
    *  The AcDbViewport subclass of a VIEWPORT: the window on the paper and the view of model space
    *  it shows.
    */
-  struct DXFIO_API Port
+  struct DXFIO_API ViewportData
   {
     /**
      *  The center of the window, in paper space coordinates. Groups 10, 20, 30.
@@ -184,7 +184,7 @@ namespace DxfIO::Entities
      */
     Handle Sun{};
 
-    auto operator==(const Port &) const -> bool = default;
+    auto operator==(const ViewportData &) const -> bool = default;
   };
 
   /**
@@ -199,7 +199,7 @@ namespace DxfIO::Entities
     /**
      *  The window and the view, from the AcDbViewport subclass.
      */
-    Boxed<Entities::Port> Port{};
+    Boxed<Entities::ViewportData> Data{};
 
     auto operator==(const Viewport &) const -> bool = default;
   };

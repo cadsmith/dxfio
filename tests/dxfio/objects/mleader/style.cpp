@@ -61,10 +61,10 @@ namespace DxfIO::Objects::MLeaderStyles
                                        "298\r\n     0\r\n";
     const MLeaderStyle         taken = Read<MLeaderStyle>(text);
     CHECK(taken.Description == "Standard");
-    CHECK(*taken.Leader     == Leader{.Linetype = Handle{.Value = 0x14}});
+    CHECK(*taken.Leader     == LeaderFormat{.Linetype = Handle{.Value = 0x14}});
     CHECK(taken.Text->Style == Handle{.Value = 0x11});
     CHECK(taken.Text->BottomAttachment == 9);
-    CHECK(*taken.Block == Block{});
+    CHECK(*taken.Block == BlockFormat{});
     CHECK_FALSE(taken.Annotative);
     CHECK(Written(taken) == text);
   }

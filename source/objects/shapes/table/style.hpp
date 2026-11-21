@@ -100,8 +100,8 @@ namespace DxfIO
       Fields::Field{.Code = 71, .Member = &Objects::TableStyle::Flags},
       Fields::Field{.Code = 40, .Member = &Objects::TableStyle::Horizontal},
       Fields::Field{.Code = 41, .Member = &Objects::TableStyle::Vertical},
-      Fields::Field{.Code = 280, .Member = &Objects::TableStyle::Untitled},
-      Fields::Field{.Code = 281, .Member = &Objects::TableStyle::Headless},
+      Fields::Field{.Code = 280, .Member = &Objects::TableStyle::TitleSuppressed},
+      Fields::Field{.Code = 281, .Member = &Objects::TableStyle::HeaderSuppressed},
       Fields::Every{
           .Opener = 7,
           .Member = &Objects::TableStyle::Cells,

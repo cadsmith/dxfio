@@ -98,17 +98,17 @@ namespace DxfIO
   template <>
   inline constexpr std::string_view Type<Entities::Solid3d> = "3DSOLID";
 
-  template <Entities::Sheet KindV>
+  template <Entities::SurfaceKind KindV>
   inline constexpr auto Shapes<Entities::SurfaceOf<KindV>> = std::tuple_cat(
       Entities::Modeled<Entities::SurfaceOf<KindV>>,
       std::tuple{
           Fields::Subclass{.Marker = "AcDbSurface"},
           Fields::Field{
               .Code   = 71,
-              .Member = &Entities::SurfaceOf<KindV>::Across,
+              .Member = &Entities::SurfaceOf<KindV>::UIsolines,
           },
-          Fields::Field{.Code = 72, .Member = &Entities::SurfaceOf<KindV>::Along},
-          Entities::Trailed<Entities::SurfaceOf<KindV>, &Entities::SurfaceOf<KindV>::Tail>,
+          Fields::Field{.Code = 72, .Member = &Entities::SurfaceOf<KindV>::VIsolines},
+          Entities::Trailed<Entities::SurfaceOf<KindV>, &Entities::SurfaceOf<KindV>::Data>,
       });
 
   template <>

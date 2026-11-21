@@ -26,18 +26,18 @@ namespace DxfIO::Entities
   TEST_CASE("slice: AutoCAD's section plane, its line and its settings")
   {
     const SectionObject one = Alikened();
-    CHECK(one.Cut->State    == 1);
-    CHECK(one.Cut->Flags    == 5);
-    CHECK(one.Cut->Name     == "Section Plane (1)");
-    CHECK(one.Cut->Vertical == Up);
-    CHECK(one.Cut->Top > one.Cut->Bottom);
-    CHECK(one.Cut->Transparency == 70);
-    CHECK(one.Cut->Color        == 9);
-    CHECK_FALSE(one.Cut->Rgb);
-    REQUIRE(one.Cut->Vertices.size() == 2);
-    CHECK(one.Cut->Vertices.back()   == Vector{.X = 250});
-    CHECK(one.Cut->Back.empty());
-    CHECK(one.Cut->Settings == Handle{.Value = 0x316});
+    CHECK(one.Data->State    == 1);
+    CHECK(one.Data->Flags    == 5);
+    CHECK(one.Data->Name     == "Section Plane (1)");
+    CHECK(one.Data->Vertical == Up);
+    CHECK(one.Data->Top > one.Data->Bottom);
+    CHECK(one.Data->Transparency == 70);
+    CHECK(one.Data->Color        == 9);
+    CHECK_FALSE(one.Data->Rgb);
+    REQUIRE(one.Data->Vertices.size() == 2);
+    CHECK(one.Data->Vertices.back()   == Vector{.X = 250});
+    CHECK(one.Data->Back.empty());
+    CHECK(one.Data->Settings == Handle{.Value = 0x316});
     CHECK_FALSE(one.Picture.empty());
     CHECK_FALSE(one.Record.Base.Extended.empty());
   }
@@ -47,7 +47,7 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened(release).Cut->Vertices.size() == 2);
+      CHECK(Alikened(release).Data->Vertices.size() == 2);
     }
   }
 
@@ -55,13 +55,13 @@ namespace DxfIO::Entities
   {
     SectionObject one{};
     one.Record.Base.Self     = Handle{.Value = 0x2a};
-    one.Cut->Name            = "A";
-    one.Cut->Rgb             = 255;
-    one.Cut->Vertices        = {Vector{.X = 1}, Vector{.X = 2}};
-    one.Cut->Back            = {Vector{.Y = 3}};
+    one.Data->Name            = "A";
+    one.Data->Rgb             = 255;
+    one.Data->Vertices        = {Vector{.X = 1}, Vector{.X = 2}};
+    one.Data->Back            = {Vector{.Y = 3}};
     const SectionObject back = DxfIO::Read<SectionObject>(Written(one));
-    CHECK(back.Cut->Rgb  == 255);
-    CHECK(back.Cut->Back == one.Cut->Back);
+    CHECK(back.Data->Rgb  == 255);
+    CHECK(back.Data->Back == one.Data->Back);
     CHECK(back           == one);
   }
 

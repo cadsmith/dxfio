@@ -12,7 +12,7 @@ namespace DxfIO::Entities
   /**
    *  A color of a gradient, and where along the gradient it lies.
    */
-  struct DXFIO_API Stop
+  struct DXFIO_API GradientColor
   {
     /**
      *  Where the color lies along the gradient, 0 to 1. Group 463.
@@ -27,7 +27,7 @@ namespace DxfIO::Entities
      */
     std::optional<int> Rgb{};
 
-    auto operator==(const Stop &) const -> bool = default;
+    auto operator==(const GradientColor &) const -> bool = default;
   };
 
   /**
@@ -62,7 +62,7 @@ namespace DxfIO::Entities
     /**
      *  The colors; group 453 counts them.
      */
-    std::vector<Stop> Stops{};
+    std::vector<GradientColor> Colors{};
     /**
      *  The name of the gradient, such as LINEAR or SPHERICAL. Group 470.
      */

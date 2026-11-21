@@ -29,22 +29,22 @@ namespace DxfIO::Entities
   TEST_CASE("light: a point, a spot and a distant one, each its own kind")
   {
     const Light point = Alikened("31D");
-    CHECK(point.Lamp->Name     == "Pointlight1");
-    CHECK(point.Lamp->Kind     == 2);
-    CHECK(point.Lamp->Position == Vector{.X = 260, .Y = 0, .Z = 5});
-    CHECK(point.Lamp->Target   == Vector{.X = 260, .Y = 0, .Z = -5});
-    CHECK(point.Lamp->Lit);
-    CHECK(point.Lamp->Color == 7);
-    CHECK(point.Lamp->Rgb   == 0xFFFFFF);
-    CHECK_FALSE(point.Lamp->Glyph);
-    CHECK(point.Lamp->Intensity == 1);
-    CHECK_FALSE(point.Lamp->Limited);
-    CHECK(point.Lamp->Hotspot == 45);
-    CHECK(point.Lamp->Falloff == 50);
-    CHECK(point.Lamp->CastShadows);
-    CHECK(point.Lamp->Size           == 256);
-    CHECK(Alikened("320").Lamp->Kind == 3);
-    CHECK(Alikened("323").Lamp->Kind == 1);
+    CHECK(point.Data->Name     == "Pointlight1");
+    CHECK(point.Data->Kind     == 2);
+    CHECK(point.Data->Position == Vector{.X = 260, .Y = 0, .Z = 5});
+    CHECK(point.Data->Target   == Vector{.X = 260, .Y = 0, .Z = -5});
+    CHECK(point.Data->Lit);
+    CHECK(point.Data->Color == 7);
+    CHECK(point.Data->Rgb   == 0xFFFFFF);
+    CHECK_FALSE(point.Data->Glyph);
+    CHECK(point.Data->Intensity == 1);
+    CHECK_FALSE(point.Data->Limited);
+    CHECK(point.Data->Hotspot == 45);
+    CHECK(point.Data->Falloff == 50);
+    CHECK(point.Data->CastShadows);
+    CHECK(point.Data->Size           == 256);
+    CHECK(Alikened("320").Data->Kind == 3);
+    CHECK(Alikened("323").Data->Kind == 1);
   }
 
   TEST_CASE("light: every release alike")
@@ -52,9 +52,9 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened("31D", release).Lamp->Name == "Pointlight1");
-      CHECK(Alikened("320", release).Lamp->Kind == 3);
-      CHECK(Alikened("323", release).Lamp->Kind == 1);
+      CHECK(Alikened("31D", release).Data->Name == "Pointlight1");
+      CHECK(Alikened("320", release).Data->Kind == 3);
+      CHECK(Alikened("323", release).Data->Kind == 1);
     }
   }
 
@@ -67,11 +67,11 @@ namespace DxfIO::Entities
   TEST_CASE("light: r2000 packs its color in one group, written back the same")
   {
     const Light old = Alikened("31D", Version::R2000);
-    CHECK(old.Lamp->Rgb == 0xFFFFFF);
+    CHECK(old.Data->Rgb == 0xFFFFFF);
     CHECK(Written(old, Version::R2000).find("-1023410177") != std::string::npos);
     Light red{};
-    red.Lamp->Rgb = 0xFF0000;
-    CHECK(DxfIO::Read<Light>(Written(red, Version::R2000), Version::R2000).Lamp->Rgb == 0xFF0000);
+    red.Data->Rgb = 0xFF0000;
+    CHECK(DxfIO::Read<Light>(Written(red, Version::R2000), Version::R2000).Data->Rgb == 0xFF0000);
   }
 
   TEST_CASE("light: a packed color not given leaves the fresh one")
@@ -80,14 +80,14 @@ namespace DxfIO::Entities
     const std::size_t from = text.find(" 90\r\n", text.find("  1\r\n"));
     REQUIRE(from != std::string::npos);
     text.erase(from, text.find("291\r\n", from) - from);
-    CHECK(DxfIO::Read<Light>(text, Version::R2000).Lamp->Rgb == 0xFFFFFF);
+    CHECK(DxfIO::Read<Light>(text, Version::R2000).Data->Rgb == 0xFFFFFF);
   }
 
   TEST_CASE("light: alike only with what it holds alike")
   {
     Light one{};
     CHECK(one == Light{});
-    one.Lamp->Size = 512;
+    one.Data->Size = 512;
     CHECK(one != Light{});
   }
 

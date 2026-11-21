@@ -14,7 +14,7 @@ namespace DxfIO::Objects
   /**
    *  One color of a material: its ambient, diffuse or specular color.
    */
-  struct DXFIO_API Shade
+  struct DXFIO_API MaterialColor
   {
     /**
      *  0 to take the color of the object, 1 to override it with Color. Group 70, 71 or 76 by shade.
@@ -29,7 +29,7 @@ namespace DxfIO::Objects
      */
     int Color{-1040187392};
 
-    auto operator==(const Shade &) const -> bool = default;
+    auto operator==(const MaterialColor &) const -> bool = default;
   };
 
   /**
@@ -136,11 +136,11 @@ namespace DxfIO::Objects
     /**
      *  The color in ambient light. Groups 70, 40, 90.
      */
-    Shade Ambient{};
+    MaterialColor Ambient{};
     /**
      *  The color under direct light. Groups 71, 41, 91.
      */
-    Shade Diffuse{};
+    MaterialColor Diffuse{};
     /**
      *  How glossy the surface is, from 0 to 1. Group 44.
      */
@@ -148,7 +148,7 @@ namespace DxfIO::Objects
     /**
      *  The color of highlights. Groups 76, 45, 92.
      */
-    Shade Specular{};
+    MaterialColor Specular{};
     /**
      *  How opaque the material is, from 0 to 1. Group 140.
      */

@@ -82,14 +82,14 @@ DxfIO::Edit::Add(drawing, styled);
 
 ## Multiline text [#mtext]
 
-An MTEXT wraps its text in a frame `Width` wide, its `Attachment` point, top left by default, at `Position`. Its fields are in `Paragraph`, kept on the heap and reached with `->`. A value of any length goes in `Value` whole: dxfio writes it in pieces of 250 characters.
+An MTEXT wraps its text in a frame `Width` wide, its `Attachment` point, top left by default, at `Position`. Its fields are in `Data`, an `MTextData` kept on the heap and reached with `->`. A value of any length goes in `Value` whole: dxfio writes it in pieces of 250 characters.
 
 ```cpp
 DxfIO::Entities::MText note{};
-note.Paragraph->Position = {.X = 0, .Y = 50, .Z = 0};
-note.Paragraph->Height = 2.5;
-note.Paragraph->Width = 40;
-note.Paragraph->Value = R"(Pump P-1 feeds {\C1;tank 3} through valve V-12, open in service\PDrain before winter)";
+note.Data->Position = {.X = 0, .Y = 50, .Z = 0};
+note.Data->Height = 2.5;
+note.Data->Width = 40;
+note.Data->Value = R"(Pump P-1 feeds {\C1;tank 3} through valve V-12, open in service\PDrain before winter)";
 DxfIO::Edit::Add(drawing, note);
 ```
 

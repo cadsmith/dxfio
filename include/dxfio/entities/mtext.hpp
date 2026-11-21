@@ -82,7 +82,7 @@ namespace DxfIO::Entities
    *  The AcDbMText subclass of an MTEXT: its text with its formatting codes, its frame and its
    *  background.
    */
-  struct DXFIO_API Paragraph
+  struct DXFIO_API MTextData
   {
     /**
      *  The insertion point, in world coordinates. Groups 10, 20, 30.
@@ -172,7 +172,7 @@ namespace DxfIO::Entities
      */
     std::optional<Entities::Columns> Columns{};
 
-    auto operator==(const Paragraph &) const -> bool = default;
+    auto operator==(const MTextData &) const -> bool = default;
   };
 
   /**
@@ -187,7 +187,7 @@ namespace DxfIO::Entities
     /**
      *  The text, its frame and its background, from the AcDbMText subclass.
      */
-    Boxed<Entities::Paragraph> Paragraph{};
+    Boxed<Entities::MTextData> Data{};
 
     auto operator==(const MText &) const -> bool = default;
   };

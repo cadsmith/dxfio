@@ -33,7 +33,7 @@ namespace DxfIO
 
     inline constexpr std::uint32_t Colors = 0x00FFFFFFU;
 
-    inline void Unpacked(Lamp &one, Fields::Walk &in)
+    inline void Unpacked(LightData &one, Fields::Walk &in)
     {
       if (const std::optional<int> held = Fields::Value<int>::Read(in, Packed))
       {
@@ -41,7 +41,7 @@ namespace DxfIO
       }
     }
 
-    inline auto Packing(const Lamp &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Packing(const LightData &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
       const std::uint32_t held = Method | (static_cast<std::uint32_t>(one.Rgb) & Colors);
       return Fields::Value<int>::Write(to, Packed, static_cast<int>(held));
@@ -49,17 +49,17 @@ namespace DxfIO
   } // namespace Entities
 
   template <>
-  inline constexpr auto Shapes<Entities::Lamp> = std::tuple{
+  inline constexpr auto Shapes<Entities::LightData> = std::tuple{
       Fields::Sequence{.Marker = "AcDbLight"},
-      Fields::Field{.Code = 90, .Member = &Entities::Lamp::Version},
-      Fields::Field{.Code = 1, .Member = &Entities::Lamp::Name},
-      Fields::Field{.Code = 70, .Member = &Entities::Lamp::Kind},
-      Fields::Field{.Code = 290, .Member = &Entities::Lamp::Lit},
+      Fields::Field{.Code = 90, .Member = &Entities::LightData::Version},
+      Fields::Field{.Code = 1, .Member = &Entities::LightData::Name},
+      Fields::Field{.Code = 70, .Member = &Entities::LightData::Kind},
+      Fields::Field{.Code = 290, .Member = &Entities::LightData::Lit},
       Fields::Until{
           .Release = Version::R2000,
           .Fields =
               std::tuple{
-                  Fields::Custom<Entities::Lamp>{
+                  Fields::Custom<Entities::LightData>{
                       .Read  = Entities::Unpacked,
                       .Write = Entities::Packing,
                   },
@@ -69,24 +69,24 @@ namespace DxfIO
           .Release = Version::R2004,
           .Fields =
               std::tuple{
-                  Fields::Field{.Code = 63, .Member = &Entities::Lamp::Color},
-                  Fields::Field{.Code = 421, .Member = &Entities::Lamp::Rgb},
+                  Fields::Field{.Code = 63, .Member = &Entities::LightData::Color},
+                  Fields::Field{.Code = 421, .Member = &Entities::LightData::Rgb},
               },
       },
-      Fields::Field{.Code = 291, .Member = &Entities::Lamp::Glyph},
-      Fields::Field{.Code = 40, .Member = &Entities::Lamp::Intensity},
-      Fields::Field{.Code = 10, .Member = &Entities::Lamp::Position},
-      Fields::Field{.Code = 11, .Member = &Entities::Lamp::Target},
-      Fields::Field{.Code = 72, .Member = &Entities::Lamp::Fading},
-      Fields::Field{.Code = 292, .Member = &Entities::Lamp::Limited},
-      Fields::Field{.Code = 41, .Member = &Entities::Lamp::AttenuationStart},
-      Fields::Field{.Code = 42, .Member = &Entities::Lamp::AttenuationEnd},
-      Fields::Field{.Code = 50, .Member = &Entities::Lamp::Hotspot},
-      Fields::Field{.Code = 51, .Member = &Entities::Lamp::Falloff},
-      Fields::Field{.Code = 293, .Member = &Entities::Lamp::CastShadows},
-      Fields::Field{.Code = 73, .Member = &Entities::Lamp::Shading},
-      Fields::Field{.Code = 91, .Member = &Entities::Lamp::Size},
-      Fields::Field{.Code = 280, .Member = &Entities::Lamp::Softness},
+      Fields::Field{.Code = 291, .Member = &Entities::LightData::Glyph},
+      Fields::Field{.Code = 40, .Member = &Entities::LightData::Intensity},
+      Fields::Field{.Code = 10, .Member = &Entities::LightData::Position},
+      Fields::Field{.Code = 11, .Member = &Entities::LightData::Target},
+      Fields::Field{.Code = 72, .Member = &Entities::LightData::Fading},
+      Fields::Field{.Code = 292, .Member = &Entities::LightData::Limited},
+      Fields::Field{.Code = 41, .Member = &Entities::LightData::AttenuationStart},
+      Fields::Field{.Code = 42, .Member = &Entities::LightData::AttenuationEnd},
+      Fields::Field{.Code = 50, .Member = &Entities::LightData::Hotspot},
+      Fields::Field{.Code = 51, .Member = &Entities::LightData::Falloff},
+      Fields::Field{.Code = 293, .Member = &Entities::LightData::CastShadows},
+      Fields::Field{.Code = 73, .Member = &Entities::LightData::Shading},
+      Fields::Field{.Code = 91, .Member = &Entities::LightData::Size},
+      Fields::Field{.Code = 280, .Member = &Entities::LightData::Softness},
   };
 
   template <>
@@ -94,8 +94,8 @@ namespace DxfIO
       Entities::Part<Entities::Light>,
       Fields::Picture{.Member = &Entities::Light::Picture},
       Fields::Part{
-          .Member = &Entities::Light::Lamp,
-          .Fields = Shapes<Entities::Lamp>,
+          .Member = &Entities::Light::Data,
+          .Fields = Shapes<Entities::LightData>,
       },
   };
 

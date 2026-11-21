@@ -30,14 +30,14 @@ namespace DxfIO
 
     inline constexpr int Tailed = 90;
 
-    inline constexpr Fields::Many<Net, int> Rungs{.Code = Tailed, .Member = &Net::Edges};
+    inline constexpr Fields::Many<MeshData, int> Rungs{.Code = Tailed, .Member = &MeshData::Edges};
 
-    inline auto Odd(const Net &one) -> bool
+    inline auto Odd(const MeshData &one) -> bool
     {
       return one.Edges.size() % 2 != 0;
     }
 
-    inline void Pairs(Net &one, Fields::Walk &in)
+    inline void Pairs(MeshData &one, Fields::Walk &in)
     {
       static_cast<void>(Fields::Value<std::int64_t>::Read(in, Paired));
       Fields::Take(Rungs, one, in);
@@ -47,7 +47,7 @@ namespace DxfIO
       }
     }
 
-    inline auto Pairing(const Net &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Pairing(const MeshData &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
       if (Odd(one))
       {
@@ -59,7 +59,7 @@ namespace DxfIO
           .and_then([&] -> auto { return Fields::Put(Rungs, one, to); });
     }
 
-    inline void Overriding(Net &one, Fields::Walk &in)
+    inline void Overriding(MeshData &one, Fields::Walk &in)
     {
       if (!in.Holds(Tailed))
       {
@@ -70,7 +70,7 @@ namespace DxfIO
       in.Spend();
     }
 
-    inline auto Overrode(const Net &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Overrode(const MeshData &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
       return Fields::Value<int>::Write(to, Tailed, one.Overridden)
           .and_then([&] -> auto { return Fields::Put(to, one.Overrides); });
@@ -78,22 +78,22 @@ namespace DxfIO
   } // namespace Entities
 
   template <>
-  inline constexpr auto Shapes<Entities::Net> = std::tuple{
+  inline constexpr auto Shapes<Entities::MeshData> = std::tuple{
       Fields::Sequence{.Marker = "AcDbSubDMesh"},
-      Fields::Field{.Code = 71, .Member = &Entities::Net::Version},
-      Fields::Field{.Code = 72, .Member = &Entities::Net::Blend},
-      Fields::Field{.Code = 91, .Member = &Entities::Net::Level},
-      Fields::Tally{.Code = 92, .Member = &Entities::Net::Vertices},
-      Fields::Many{.Code = 10, .Member = &Entities::Net::Vertices},
-      Fields::Tally{.Code = 93, .Member = &Entities::Net::Faces},
-      Fields::Many{.Code = 90, .Member = &Entities::Net::Faces},
-      Fields::Custom<Entities::Net>{
+      Fields::Field{.Code = 71, .Member = &Entities::MeshData::Version},
+      Fields::Field{.Code = 72, .Member = &Entities::MeshData::Blend},
+      Fields::Field{.Code = 91, .Member = &Entities::MeshData::Level},
+      Fields::Tally{.Code = 92, .Member = &Entities::MeshData::Vertices},
+      Fields::Many{.Code = 10, .Member = &Entities::MeshData::Vertices},
+      Fields::Tally{.Code = 93, .Member = &Entities::MeshData::Faces},
+      Fields::Many{.Code = 90, .Member = &Entities::MeshData::Faces},
+      Fields::Custom<Entities::MeshData>{
           .Read  = Entities::Pairs,
           .Write = Entities::Pairing,
       },
-      Fields::Tally{.Code = 95, .Member = &Entities::Net::Creases},
-      Fields::Many{.Code = 140, .Member = &Entities::Net::Creases},
-      Fields::Custom<Entities::Net>{
+      Fields::Tally{.Code = 95, .Member = &Entities::MeshData::Creases},
+      Fields::Many{.Code = 140, .Member = &Entities::MeshData::Creases},
+      Fields::Custom<Entities::MeshData>{
           .Read  = Entities::Overriding,
           .Write = Entities::Overrode,
       },
@@ -104,8 +104,8 @@ namespace DxfIO
       Entities::Part<Entities::Mesh>,
       Fields::Picture{.Member = &Entities::Mesh::Picture},
       Fields::Part{
-          .Member = &Entities::Mesh::Net,
-          .Fields = Shapes<Entities::Net>,
+          .Member = &Entities::Mesh::Data,
+          .Fields = Shapes<Entities::MeshData>,
       },
   };
 

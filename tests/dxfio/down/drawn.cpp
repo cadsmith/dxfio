@@ -85,7 +85,7 @@ namespace DxfIO::Down
       out.Entities.emplace_back(Entities::Ray{});
       out.Entities.emplace_back(Entities::XLine{});
       Entities::MText note{};
-      note.Paragraph->Value = "x\\Py";
+      note.Data->Value = "x\\Py";
       out.Blocks.front().Entities.emplace_back(note);
       return out;
     }
@@ -302,7 +302,7 @@ namespace DxfIO::Down
     one.Record.Base.Self      = Handle{.Value = 0x60};
     one.Record.Base.Owner     = Handle{.Value = 0x1f};
     one.Record.Layer          = Symbol{"Notes"};
-    Entities::Paragraph &body = *one.Paragraph;
+    Entities::MTextData &body = *one.Data;
     body.Position             = Vector{.X = 10, .Y = 10};
     body.Height               = 3;
     body.Value                = "a\\Pb\\Pc";
@@ -337,26 +337,26 @@ namespace DxfIO::Down
   TEST_CASE("drawn: MTEXT turned by its direction, else by its rotation")
   {
     Entities::MText one{};
-    one.Paragraph->Height    = 3;
-    one.Paragraph->Value     = "a\\Pb";
-    one.Paragraph->Direction = Vector{.Y = 1};
+    one.Data->Height    = 3;
+    one.Data->Value     = "a\\Pb";
+    one.Data->Direction = Vector{.Y = 1};
     Seed                              handles;
     const std::vector<Entities::Text> turned = Lettered(one, handles);
     CHECK(std::abs(turned.front().Lettering.Rotation - 90) < 1e-9);
     CHECK(Near(turned.at(1).Lettering.Position, Vector{.X = 5}));
-    one.Paragraph->Direction.reset();
-    one.Paragraph->Rotation = HalfTurn;
+    one.Data->Direction.reset();
+    one.Data->Rotation = HalfTurn;
     CHECK(std::abs(Lettered(one, handles).front().Lettering.Rotation - 180) < 1e-9);
   }
 
   TEST_CASE("drawn: MTEXT placed in the TEXT's own coordinate system")
   {
     Entities::MText one{};
-    one.Paragraph->Height    = 3;
-    one.Paragraph->Value     = "a\\Pb";
-    one.Paragraph->Position  = Vector{.X = 10};
-    one.Paragraph->Direction = Vector{.X = 1};
-    one.Paragraph->Extrusion = Vector{.Z = -1};
+    one.Data->Height    = 3;
+    one.Data->Value     = "a\\Pb";
+    one.Data->Position  = Vector{.X = 10};
+    one.Data->Direction = Vector{.X = 1};
+    one.Data->Extrusion = Vector{.Z = -1};
     Seed                              handles;
     const std::vector<Entities::Text> under = Lettered(one, handles);
     REQUIRE(under.size() == 2);
@@ -364,7 +364,7 @@ namespace DxfIO::Down
     CHECK(std::abs(under.front().Lettering.Rotation - 180) < 1e-9);
     CHECK(Near(under.at(1).Lettering.Position, Vector{.X = -10, .Y = 5}));
     CHECK(under.front().Lettering.Extrusion == Vector{.Z = -1});
-    one.Paragraph->Direction.reset();
+    one.Data->Direction.reset();
     CHECK(std::abs(Lettered(one, handles).front().Lettering.Rotation) < 1e-9);
   }
 

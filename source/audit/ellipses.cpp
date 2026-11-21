@@ -41,8 +41,8 @@ namespace DxfIO::Audit
 
     auto Wrapped(double angle) -> double
     {
-      const double turned = std::fmod(angle, Entities::Turn);
-      return turned < 0 ? turned + Entities::Turn : turned;
+      const double turned = std::fmod(angle, Turn);
+      return turned < 0 ? turned + Turn : turned;
     }
 
     /**
@@ -63,7 +63,7 @@ namespace DxfIO::Audit
       const double length = Length(across);
       one.Axis            = Scaled(across, length == 0 ? 0 : Length(one.Axis) * one.Ratio / length);
       one.Ratio           = 1 / one.Ratio;
-      if (one.End - one.Start >= Entities::Turn)
+      if (one.End - one.Start >= Turn)
       {
         return;
       }
@@ -71,7 +71,7 @@ namespace DxfIO::Audit
       one.End   = Wrapped(one.End - Quarter);
       if (one.End <= one.Start)
       {
-        one.End += Entities::Turn;
+        one.End += Turn;
       }
     }
 

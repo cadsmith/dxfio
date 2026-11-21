@@ -4,6 +4,8 @@
 #include "names.hpp"
 #include "walk.hpp"
 
+#include "dxfio/entities/leader.hpp"
+#include "dxfio/entities/mtext.hpp"
 #include "dxfio/entities/tolerance.hpp"
 
 #include <algorithm>
@@ -187,29 +189,21 @@ namespace DxfIO::Audit
       {
         Styled(known, kind.Lettering.Style, kind.Record.Base.Self);
       }
-      if constexpr (requires { kind.Paragraph->Style; })
+      if constexpr (std::is_same_v<std::remove_cvref_t<KindT>, Entities::MText>)
       {
-        Styled(known, kind.Paragraph->Style, kind.Record.Base.Self);
+        Styled(known, kind.Data->Style, kind.Record.Base.Self);
       }
       if constexpr (requires { kind.Lettering->Style; })
       {
         Styled(known, kind.Lettering->Style, kind.Record.Base.Self);
       }
-      if constexpr (requires { kind.Figure->Measure.Style; })
+      if constexpr (requires { kind.Data->Measure.Style; })
       {
-        Dimstyled(known, kind.Figure->Measure.Style, kind.Record.Base.Self);
+        Dimstyled(known, kind.Data->Measure.Style, kind.Record.Base.Self);
       }
-      if constexpr (requires { kind.Bend->Measure.Style; })
+      if constexpr (std::is_same_v<std::remove_cvref_t<KindT>, Entities::Leader>)
       {
-        Dimstyled(known, kind.Bend->Measure.Style, kind.Record.Base.Self);
-      }
-      if constexpr (requires { kind.Jog->Measure.Style; })
-      {
-        Dimstyled(known, kind.Jog->Measure.Style, kind.Record.Base.Self);
-      }
-      if constexpr (requires { kind.Lead->Style; })
-      {
-        Dimstyled(known, kind.Lead->Style, kind.Record.Base.Self);
+        Dimstyled(known, kind.Data->Style, kind.Record.Base.Self);
       }
       if constexpr (std::is_same_v<std::remove_cvref_t<KindT>, Entities::Tolerance>)
       {

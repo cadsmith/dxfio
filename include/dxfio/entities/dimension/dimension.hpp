@@ -167,7 +167,7 @@ namespace DxfIO::Entities
   /**
    *  What a DIMENSION draws: what every dimension shares, and the points of its kind.
    */
-  struct DXFIO_API Figure
+  struct DXFIO_API DimensionData
   {
     /**
      *  The block, the text and the plane, from the AcDbDimension subclass.
@@ -178,7 +178,7 @@ namespace DxfIO::Entities
      */
     Forms::Form Form{};
 
-    auto operator==(const Figure &) const -> bool = default;
+    auto operator==(const DimensionData &) const -> bool = default;
   };
 
   /**
@@ -193,7 +193,7 @@ namespace DxfIO::Entities
     /**
      *  What the dimension measures and how it is drawn.
      */
-    Boxed<Entities::Figure> Figure{};
+    Boxed<Entities::DimensionData> Data{};
 
     auto operator==(const Dimension &) const -> bool = default;
   };
@@ -201,7 +201,7 @@ namespace DxfIO::Entities
   /**
    *  What an ARC_DIMENSION draws: what every dimension shares, and the arc it measures.
    */
-  struct DXFIO_API Bend
+  struct DXFIO_API ArcDimensionData
   {
     /**
      *  The block, the text and the plane, from the AcDbDimension subclass.
@@ -244,7 +244,7 @@ namespace DxfIO::Entities
      */
     Vector SecondLeaderPoint{};
 
-    auto operator==(const Bend &) const -> bool = default;
+    auto operator==(const ArcDimensionData &) const -> bool = default;
   };
 
   /**
@@ -264,7 +264,7 @@ namespace DxfIO::Entities
     /**
      *  The arc measured and how the dimension is drawn, from the AcDbArcDimension subclass.
      */
-    Boxed<Entities::Bend> Bend{};
+    Boxed<Entities::ArcDimensionData> Data{};
 
     auto operator==(const ArcDimension &) const -> bool = default;
   };
@@ -273,7 +273,7 @@ namespace DxfIO::Entities
    *  What a LARGE_RADIAL_DIMENSION draws: what every dimension shares, and the jog it is drawn
    *  with.
    */
-  struct DXFIO_API Jog
+  struct DXFIO_API LargeRadialDimensionData
   {
     /**
      *  The block, the text and the plane, from the AcDbDimension subclass.
@@ -297,7 +297,7 @@ namespace DxfIO::Entities
      */
     double JogAngle{};
 
-    auto operator==(const Jog &) const -> bool = default;
+    auto operator==(const LargeRadialDimensionData &) const -> bool = default;
   };
 
   /**
@@ -317,7 +317,7 @@ namespace DxfIO::Entities
     /**
      *  The curve measured and the jog, from the AcDbRadialDimensionLarge subclass.
      */
-    Boxed<Entities::Jog> Jog{};
+    Boxed<Entities::LargeRadialDimensionData> Data{};
 
     auto operator==(const LargeRadialDimension &) const -> bool = default;
   };

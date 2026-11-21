@@ -84,27 +84,27 @@ namespace DxfIO::Entities
       CAPTURE(release);
       CHECK(Alikened<Solid3d>(Boxy, release).Geometry != Boxed<Geometry>{});
       CHECK(Alikened<Region>(Flat, release).Geometry != Boxed<Geometry>{});
-      CHECK(Alikened<PlaneSurface>(Sheeted, release).Across == 6);
-      CHECK(Alikened<ExtrudedSurface>("332", release).Along == 6);
-      CHECK_FALSE(Alikened<RevolvedSurface>("33E", release).Tail.empty());
-      CHECK_FALSE(Alikened<LoftedSurface>("348", release).Tail.empty());
-      CHECK_FALSE(Alikened<SweptSurface>("355", release).Tail.empty());
+      CHECK(Alikened<PlaneSurface>(Sheeted, release).UIsolines == 6);
+      CHECK(Alikened<ExtrudedSurface>("332", release).VIsolines == 6);
+      CHECK_FALSE(Alikened<RevolvedSurface>("33E", release).Data.empty());
+      CHECK_FALSE(Alikened<LoftedSurface>("348", release).Data.empty());
+      CHECK_FALSE(Alikened<SweptSurface>("355", release).Data.empty());
     }
   }
 
   TEST_CASE("modeler: r2013 names by nurbs what r2010 names by surface alone")
   {
-    CHECK(Alikened<Surface>(Patch, Version::R2010).Tail.empty());
-    CHECK(Alikened<NurbSurface>(Patch, Version::R2013).Tail.front().Code == 100);
-    CHECK(Alikened<NurbSurface>(Patch).Tail.front().Code == 100);
+    CHECK(Alikened<Surface>(Patch, Version::R2010).Data.empty());
+    CHECK(Alikened<NurbSurface>(Patch, Version::R2013).Data.front().Code == 100);
+    CHECK(Alikened<NurbSurface>(Patch).Data.front().Code == 100);
   }
 
   TEST_CASE("modeler: a surface's own subclass stays a run of groups, in order")
   {
     const ExtrudedSurface one = Alikened<ExtrudedSurface>("332");
-    REQUIRE_FALSE(one.Tail.empty());
-    CHECK(one.Tail.front()     == Tag{.Code = 100, .Value = std::string{"AcDbExtrudedSurface"}});
-    CHECK(one.Tail.back().Code == 11 + 20);
+    REQUIRE_FALSE(one.Data.empty());
+    CHECK(one.Data.front()     == Tag{.Code = 100, .Value = std::string{"AcDbExtrudedSurface"}});
+    CHECK(one.Data.back().Code == 11 + 20);
   }
 
   TEST_CASE("modeler: a body, kept like a region, its lines long and short")
@@ -129,7 +129,7 @@ namespace DxfIO::Entities
     body.Picture = "x";
     CHECK(body != Body{});
     LoftedSurface sheet{};
-    sheet.Across = 1;
+    sheet.UIsolines = 1;
     CHECK(sheet != LoftedSurface{});
   }
 

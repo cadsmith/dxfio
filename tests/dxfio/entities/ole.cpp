@@ -26,20 +26,20 @@ namespace DxfIO::Entities
   TEST_CASE("ole: an embedded object, its corners and its bytes")
   {
     const Ole2Frame one = Replayed<Ole2Frame>(Embedding);
-    CHECK(one.Frame->Version     == 2);
-    CHECK(one.Frame->Description == "Paintbrush Picture");
-    CHECK(one.Frame->Upper       == Vector{.X = 4, .Y = 5});
-    CHECK(one.Frame->Lower       == Vector{.X = 6, .Y = 1});
-    CHECK(one.Frame->Kind        == 2);
-    CHECK(one.Frame->Space       == 0);
-    CHECK(one.Frame->Data        == std::string{"\xDE\xAD\xBE\xEF"});
+    CHECK(one.Data->Version     == 2);
+    CHECK(one.Data->Description == "Paintbrush Picture");
+    CHECK(one.Data->Upper       == Vector{.X = 4, .Y = 5});
+    CHECK(one.Data->Lower       == Vector{.X = 6, .Y = 1});
+    CHECK(one.Data->Kind        == 2);
+    CHECK(one.Data->Space       == 0);
+    CHECK(one.Data->Data        == std::string{"\xDE\xAD\xBE\xEF"});
   }
 
   TEST_CASE("ole: bytes past one line split as AutoCAD splits them")
   {
     Ole2Frame one{};
     one.Record.Base.Self   = Handle{.Value = 0x2a};
-    one.Frame->Data        = std::string(300, '\x7f');
+    one.Data->Data        = std::string(300, '\x7f');
     const std::string text = Written(one);
     CHECK(text.find(" 90\r\n      300\r\n") != std::string::npos);
     const Ole2Frame back = DxfIO::Read<Ole2Frame>(text);
@@ -51,7 +51,7 @@ namespace DxfIO::Entities
     const std::string text = Written(Ole2Frame{});
     CHECK(text.find("310\r\n") == std::string::npos);
     CHECK(text.ends_with("  1\r\nOLE\r\n"));
-    CHECK(DxfIO::Read<Ole2Frame>(text).Frame->Data.empty());
+    CHECK(DxfIO::Read<Ole2Frame>(text).Data->Data.empty());
   }
 
   TEST_CASE("ole: without its end it stays as it came")

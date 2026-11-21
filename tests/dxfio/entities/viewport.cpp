@@ -42,40 +42,40 @@ namespace DxfIO::Entities
   {
     const Viewport paper = Alikened(Marked("2DA"));
     CHECK(paper.Record.Paper);
-    CHECK(paper.Port->Id     == 1);
-    CHECK(paper.Port->Status == 1);
-    CHECK(paper.Port->Flags  == 819232);
-    CHECK(paper.Port->VisualStyle);
-    CHECK(paper.Port->Rgb);
+    CHECK(paper.Data->Id     == 1);
+    CHECK(paper.Data->Status == 1);
+    CHECK(paper.Data->Flags  == 819232);
+    CHECK(paper.Data->VisualStyle);
+    CHECK(paper.Data->Rgb);
   }
 
   TEST_CASE("viewport: a floating one, its window and what it shows")
   {
     const Viewport one = Alikened(Marked("2DE"));
-    CHECK(one.Port->Id         == 2);
-    CHECK(one.Port->Width      == 205.6);
-    CHECK(one.Port->Height     == 156);
-    CHECK(one.Port->ViewCenter == Vector{.X = 50, .Y = 25, .Z = 0});
-    CHECK(one.Port->ViewHeight == doctest::Approx(76.80079719085126));
-    CHECK(one.Port->Direction  == Up);
-    CHECK(one.Port->LensLength == 50);
-    CHECK(one.Port->Zoom       == 1000);
-    CHECK(one.Port->Sheet.empty());
+    CHECK(one.Data->Id         == 2);
+    CHECK(one.Data->Width      == 205.6);
+    CHECK(one.Data->Height     == 156);
+    CHECK(one.Data->ViewCenter == Vector{.X = 50, .Y = 25, .Z = 0});
+    CHECK(one.Data->ViewHeight == doctest::Approx(76.80079719085126));
+    CHECK(one.Data->Direction  == Up);
+    CHECK(one.Data->LensLength == 50);
+    CHECK(one.Data->Zoom       == 1000);
+    CHECK(one.Data->Sheet.empty());
   }
 
   TEST_CASE("viewport: off, 0 in the stack and bit 131072; locked, bit 16384")
   {
     const Viewport dark = Alikened(Marked("2E6"));
-    CHECK(dark.Port->Status == 0);
-    CHECK((dark.Port->Flags & 131072) != 0);
-    CHECK((Alikened(Marked("2EA")).Port->Flags & 16384) != 0);
+    CHECK(dark.Data->Status == 0);
+    CHECK((dark.Data->Flags & 131072) != 0);
+    CHECK((Alikened(Marked("2EA")).Data->Flags & 16384) != 0);
   }
 
   TEST_CASE("viewport: the stack apart from the number, as AutoCAD left it")
   {
     const Viewport one = Alikened(Marked("2EE"));
-    CHECK(one.Port->Id     == 6);
-    CHECK(one.Port->Status == 9);
+    CHECK(one.Data->Id     == 6);
+    CHECK(one.Data->Status == 9);
   }
 
   TEST_CASE("viewport: its frozen layers on 341 at R2000, 331 from R2004")
@@ -83,13 +83,13 @@ namespace DxfIO::Entities
     const std::string old = Marked("2EE", Version::R2000);
     CHECK(old.contains("341\r\n"));
     CHECK_FALSE(old.contains("331\r\n"));
-    CHECK(Alikened(old, Version::R2000).Port->Frozen.size() == 2);
+    CHECK(Alikened(old, Version::R2000).Data->Frozen.size() == 2);
     const std::string late = Marked("2EE", Version::R2004);
     CHECK(late.contains("331\r\n"));
-    CHECK(Alikened(late, Version::R2004).Port->Frozen.size() == 2);
+    CHECK(Alikened(late, Version::R2004).Data->Frozen.size() == 2);
     const Viewport now = Alikened(Marked("2EE"));
-    CHECK(now.Port->Frozen.size() == 2);
-    CHECK(now.Port->Frozen.front() != now.Port->Frozen.back());
+    CHECK(now.Data->Frozen.size() == 2);
+    CHECK(now.Data->Frozen.front() != now.Data->Frozen.back());
   }
 
   TEST_CASE("viewport: 341 read at R2000 goes out as 331 at R2018")
@@ -107,7 +107,7 @@ namespace DxfIO::Entities
     {
       CAPTURE(release);
       const Viewport taken = DxfIO::Read<Viewport>(record, release);
-      CHECK(taken.Port->Frozen.size() == 2);
+      CHECK(taken.Data->Frozen.size() == 2);
       CHECK(taken.Record.Base.Extra.empty());
     }
     const Viewport both = DxfIO::Read<Viewport>(record);
@@ -122,63 +122,63 @@ namespace DxfIO::Entities
     for (const std::string_view self : {"2F3", "2F8"})
     {
       const Viewport one = Alikened(Marked(self));
-      CHECK(one.Port->Clip);
-      CHECK((one.Port->Flags & 65536) != 0);
+      CHECK(one.Data->Clip);
+      CHECK((one.Data->Flags & 65536) != 0);
     }
   }
 
   TEST_CASE("viewport: shaded in plot, from R2004 and not at R2000")
   {
-    CHECK(Alikened(Marked("2FC")).Port->ShadePlotMode == 2);
+    CHECK(Alikened(Marked("2FC")).Data->ShadePlotMode == 2);
     CHECK_FALSE(Marked("2FC", Version::R2000).contains("170\r\n"));
   }
 
   TEST_CASE("viewport: snap, grid and major lines, its UCS named")
   {
     const Viewport one = Alikened(Marked("300"));
-    CHECK(one.Port->Snap.X    == 2.5);
-    CHECK(one.Port->Snap.Y    == 5);
-    CHECK(one.Port->Grid.X    == 5);
-    CHECK(one.Port->Grid.Y    == 7.5);
-    CHECK(one.Port->SnapBase  == Vector{.X = 1, .Y = 2, .Z = 0});
-    CHECK(one.Port->SnapAngle == doctest::Approx(28.64788975654116));
-    CHECK(one.Port->GridMajor == 3);
-    CHECK(one.Port->Axes.Named);
-    CHECK(one.Port->Axes.Origin.X == 7);
+    CHECK(one.Data->Snap.X    == 2.5);
+    CHECK(one.Data->Snap.Y    == 5);
+    CHECK(one.Data->Grid.X    == 5);
+    CHECK(one.Data->Grid.Y    == 7.5);
+    CHECK(one.Data->SnapBase  == Vector{.X = 1, .Y = 2, .Z = 0});
+    CHECK(one.Data->SnapAngle == doctest::Approx(28.64788975654116));
+    CHECK(one.Data->GridMajor == 3);
+    CHECK(one.Data->Axes.Named);
+    CHECK(one.Data->Axes.Origin.X == 7);
   }
 
   TEST_CASE("viewport: its visual style and lighting from R2007")
   {
     const Viewport one = Alikened(Marked("304"));
-    CHECK(one.Port->Render == 6);
-    CHECK_FALSE(one.Port->DefaultLighting);
-    CHECK(Alikened(Marked("2DE")).Port->VisualStyle != one.Port->VisualStyle);
+    CHECK(one.Data->Render == 6);
+    CHECK_FALSE(one.Data->DefaultLighting);
+    CHECK(Alikened(Marked("2DE")).Data->VisualStyle != one.Data->VisualStyle);
     CHECK_FALSE(Marked("304", Version::R2004).contains("348\r\n"));
   }
 
   TEST_CASE("viewport: a view from a corner, and a perspective")
   {
     const Viewport corner = Alikened(Marked("308"));
-    CHECK(corner.Port->Direction == Vector{.X = 1, .Y = 1, .Z = 1});
-    CHECK(corner.Port->Target    == Vector{.X = 50, .Y = 25, .Z = 0});
+    CHECK(corner.Data->Direction == Vector{.X = 1, .Y = 1, .Z = 1});
+    CHECK(corner.Data->Target    == Vector{.X = 50, .Y = 25, .Z = 0});
     const Viewport deep = Alikened(Marked("30C"));
-    CHECK((deep.Port->Flags & 1) != 0);
-    CHECK(deep.Port->Direction.Z == 100);
+    CHECK((deep.Data->Flags & 1) != 0);
+    CHECK(deep.Data->Direction.Z == 100);
   }
 
   TEST_CASE("viewport: a bare record takes what AutoCAD gives what is left out")
   {
     const Viewport bare = DxfIO::Read<Viewport>(Sparse);
-    CHECK(bare.Port->Flags      == 32768);
-    CHECK(bare.Port->ViewHeight == -1);
-    CHECK(bare.Port->Zoom       == 100);
-    CHECK(bare.Port->LensLength == 0);
-    CHECK(bare.Port->Direction  == Up);
-    CHECK(bare.Port->GridMajor  == 5);
-    CHECK(bare.Port->DefaultLighting);
-    CHECK(bare.Port->Ambient == 250);
-    CHECK_FALSE(bare.Port->Rgb);
-    CHECK_FALSE(bare.Port->VisualStyle);
+    CHECK(bare.Data->Flags      == 32768);
+    CHECK(bare.Data->ViewHeight == -1);
+    CHECK(bare.Data->Zoom       == 100);
+    CHECK(bare.Data->LensLength == 0);
+    CHECK(bare.Data->Direction  == Up);
+    CHECK(bare.Data->GridMajor  == 5);
+    CHECK(bare.Data->DefaultLighting);
+    CHECK(bare.Data->Ambient == 250);
+    CHECK_FALSE(bare.Data->Rgb);
+    CHECK_FALSE(bare.Data->VisualStyle);
     CHECK(bare.Record.Paper);
     const std::string out = Written(bare);
     CHECK_FALSE(out.contains("421\r\n"));
@@ -205,21 +205,21 @@ namespace DxfIO::Entities
           "141\r\n0.5\r\n142\r\n0.25\r\n 63\r\n     1\r\n421\r\n   3355443\r\n"
           "431\r\nbook$color\r\n361\r\n2E\r\n";
     const Viewport taken = Alikened(record);
-    CHECK(taken.Port->Sheet           == "monochrome.ctb");
-    CHECK(taken.Port->Background      == Handle{.Value = 0x2B});
-    CHECK(taken.Port->ShadePlotObject == Handle{.Value = 0x2C});
-    CHECK(taken.Port->Brightness      == 0.5);
-    CHECK(taken.Port->Contrast        == 0.25);
-    CHECK(taken.Port->Ambient         == 1);
-    CHECK(taken.Port->Book            == "book$color");
-    CHECK(taken.Port->Sun             == Handle{.Value = 0x2E});
+    CHECK(taken.Data->Sheet           == "monochrome.ctb");
+    CHECK(taken.Data->Background      == Handle{.Value = 0x2B});
+    CHECK(taken.Data->ShadePlotObject == Handle{.Value = 0x2C});
+    CHECK(taken.Data->Brightness      == 0.5);
+    CHECK(taken.Data->Contrast        == 0.25);
+    CHECK(taken.Data->Ambient         == 1);
+    CHECK(taken.Data->Book            == "book$color");
+    CHECK(taken.Data->Sun             == Handle{.Value = 0x2E});
   }
 
   TEST_CASE("viewport: R12 holds the view in extended data, kept as it is")
   {
     const Viewport old = DxfIO::Read<Viewport>(Marked("2DE", Version::R12), Version::R12);
-    CHECK(old.Port->Width == 205.6);
-    CHECK(old.Port->Id    == 2);
+    CHECK(old.Data->Width == 205.6);
+    CHECK(old.Data->Id    == 2);
     CHECK(old.Record.Base.Extended.size() == 1);
     CHECK(Written(old, Version::R12).contains("MVIEW"));
   }
@@ -227,10 +227,10 @@ namespace DxfIO::Entities
   TEST_CASE("viewport: a copy is its own, its box deep")
   {
     Viewport one{};
-    one.Port->Id   = 1;
+    one.Data->Id   = 1;
     Viewport other = one;
-    other.Port->Id = 2;
-    CHECK(one.Port->Id == 1);
+    other.Data->Id = 2;
+    CHECK(one.Data->Id == 1);
     CHECK_FALSE(one    == other);
   }
 
@@ -244,7 +244,7 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened(Marked("2DE", release), release).Port->Id == 2);
+      CHECK(Alikened(Marked("2DE", release), release).Data->Id == 2);
     }
   }
 

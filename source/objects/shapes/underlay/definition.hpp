@@ -13,7 +13,7 @@
 
 namespace DxfIO
 {
-  template <Entities::Overlay KindV>
+  template <Entities::UnderlayKind KindV>
   inline constexpr auto Shapes<Objects::UnderlayDefinition<KindV>> = std::tuple{
       Fields::Subclass{.Marker = "AcDbUnderlayDefinition"},
       Fields::Field{

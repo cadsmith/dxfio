@@ -15,7 +15,7 @@ namespace DxfIO::Entities
   /**
    *  The AcDbSubDMesh subclass of a MESH: its vertices, faces, edges and creases.
    */
-  struct DXFIO_API Net
+  struct DXFIO_API MeshData
   {
     /**
      *  The version of the mesh's layout. Group 71.
@@ -56,7 +56,7 @@ namespace DxfIO::Entities
      */
     std::vector<Tag> Overrides{};
 
-    auto operator==(const Net &) const -> bool = default;
+    auto operator==(const MeshData &) const -> bool = default;
   };
 
   /**
@@ -76,7 +76,7 @@ namespace DxfIO::Entities
     /**
      *  The vertices, faces, edges and creases, from the AcDbSubDMesh subclass.
      */
-    Boxed<Entities::Net> Net{};
+    Boxed<Entities::MeshData> Data{};
 
     auto operator==(const Mesh &) const -> bool = default;
   };

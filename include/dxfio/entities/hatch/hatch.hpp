@@ -18,7 +18,7 @@ namespace DxfIO::Entities
   /**
    *  A line family of a hatch pattern: a line repeated across the hatch, dashed or not.
    */
-  struct DXFIO_API Stripe
+  struct DXFIO_API PatternLine
   {
     /**
      *  The angle of the lines, in degrees. Group 53.
@@ -46,14 +46,14 @@ namespace DxfIO::Entities
      */
     std::vector<double> Dashes{};
 
-    auto operator==(const Stripe &) const -> bool = default;
+    auto operator==(const PatternLine &) const -> bool = default;
   };
 
   /**
    *  The AcDbHatch subclass of a HATCH: its boundary paths, its pattern or gradient, and its seed
    *  points.
    */
-  struct DXFIO_API Fill
+  struct DXFIO_API HatchData
   {
     /**
      *  A point whose Z is the hatch's elevation; its X and Y are 0. Groups 10, 20, 30.
@@ -102,7 +102,7 @@ namespace DxfIO::Entities
     /**
      *  The line families of the pattern, for a pattern fill; group 78 counts them.
      */
-    std::vector<Stripe> Stripes{};
+    std::vector<PatternLine> PatternLines{};
     /**
      *  The pixel size AutoCAD computed the hatch with. Group 47.
      */
@@ -116,7 +116,7 @@ namespace DxfIO::Entities
      */
     std::optional<Entities::Gradient> Gradient{};
 
-    auto operator==(const Fill &) const -> bool = default;
+    auto operator==(const HatchData &) const -> bool = default;
   };
 
   /**
@@ -131,7 +131,7 @@ namespace DxfIO::Entities
     /**
      *  The boundaries and how they are filled, from the AcDbHatch subclass.
      */
-    Boxed<Entities::Fill> Fill{};
+    Boxed<Entities::HatchData> Data{};
 
     auto operator==(const Hatch &) const -> bool = default;
   };

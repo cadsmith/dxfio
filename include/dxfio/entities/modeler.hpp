@@ -113,12 +113,12 @@ namespace DxfIO::Entities
   /**
    *  The kinds of surface entity.
    */
-  enum class Sheet : std::uint8_t
+  enum class SurfaceKind : std::uint8_t
   {
     /**
      *  A SURFACE.
      */
-    Plain,
+    Generic,
     /**
      *  A PLANESURFACE.
      */
@@ -149,7 +149,7 @@ namespace DxfIO::Entities
    *  A surface entity of the kind given: its ACIS body, the isolines drawn on it, and the kind's
    *  own groups.
    */
-  template <Sheet KindV>
+  template <SurfaceKind KindV>
   struct SurfaceOf
   {
     /**
@@ -168,15 +168,15 @@ namespace DxfIO::Entities
     /**
      *  The number of isolines drawn across the surface along U. Group 71.
      */
-    int Across{6};
+    int UIsolines{6};
     /**
      *  The number of isolines drawn across the surface along V. Group 72.
      */
-    int Along{6};
+    int VIsolines{6};
     /**
      *  The groups that follow the isolines, the kind's own data, kept as they came.
      */
-    std::vector<Tag> Tail{};
+    std::vector<Tag> Data{};
 
     auto operator==(const SurfaceOf &) const -> bool = default;
   };
@@ -184,31 +184,31 @@ namespace DxfIO::Entities
   /**
    *  A SURFACE: a surface of no more particular kind.
    */
-  using Surface = SurfaceOf<Sheet::Plain>;
+  using Surface = SurfaceOf<SurfaceKind::Generic>;
   /**
    *  A PLANESURFACE: a flat surface.
    */
-  using PlaneSurface = SurfaceOf<Sheet::Planar>;
+  using PlaneSurface = SurfaceOf<SurfaceKind::Planar>;
   /**
    *  A NURBSURFACE: a surface shaped by NURBS control vertices.
    */
-  using NurbSurface = SurfaceOf<Sheet::Nurbs>;
+  using NurbSurface = SurfaceOf<SurfaceKind::Nurbs>;
   /**
    *  An EXTRUDEDSURFACE: a profile extruded along a direction.
    */
-  using ExtrudedSurface = SurfaceOf<Sheet::Extruded>;
+  using ExtrudedSurface = SurfaceOf<SurfaceKind::Extruded>;
   /**
    *  A LOFTEDSURFACE: a surface through several cross sections.
    */
-  using LoftedSurface = SurfaceOf<Sheet::Lofted>;
+  using LoftedSurface = SurfaceOf<SurfaceKind::Lofted>;
   /**
    *  A REVOLVEDSURFACE: a profile turned about an axis.
    */
-  using RevolvedSurface = SurfaceOf<Sheet::Revolved>;
+  using RevolvedSurface = SurfaceOf<SurfaceKind::Revolved>;
   /**
    *  A SWEPTSURFACE: a profile swept along a path.
    */
-  using SweptSurface = SurfaceOf<Sheet::Swept>;
+  using SweptSurface = SurfaceOf<SurfaceKind::Swept>;
 } // namespace DxfIO::Entities
 
 #endif /* DXFIO_ENTITIES_MODELER_HPP */

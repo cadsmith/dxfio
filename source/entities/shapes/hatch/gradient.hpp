@@ -16,10 +16,10 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Entities::Stop> = std::tuple{
-      Fields::Field{.Code = 463, .Member = &Entities::Stop::Place},
-      Fields::Field{.Code = 63, .Member = &Entities::Stop::Color},
-      Fields::Field{.Code = 421, .Member = &Entities::Stop::Rgb},
+  inline constexpr auto Shapes<Entities::GradientColor> = std::tuple{
+      Fields::Field{.Code = 463, .Member = &Entities::GradientColor::Place},
+      Fields::Field{.Code = 63, .Member = &Entities::GradientColor::Color},
+      Fields::Field{.Code = 421, .Member = &Entities::GradientColor::Rgb},
   };
 
   template <>
@@ -30,11 +30,11 @@ namespace DxfIO
       Fields::Field{.Code = 461, .Member = &Entities::Gradient::Shift},
       Fields::Field{.Code = 452, .Member = &Entities::Gradient::Single},
       Fields::Field{.Code = 462, .Member = &Entities::Gradient::Tint},
-      Fields::Count{.Code = 453, .Member = &Entities::Gradient::Stops},
+      Fields::Count{.Code = 453, .Member = &Entities::Gradient::Colors},
       Fields::Each{
           .Opener = 463,
-          .Member = &Entities::Gradient::Stops,
-          .Fields = Shapes<Entities::Stop>,
+          .Member = &Entities::Gradient::Colors,
+          .Fields = Shapes<Entities::GradientColor>,
       },
       Fields::Field{.Code = 470, .Member = &Entities::Gradient::Name},
   };

@@ -258,7 +258,7 @@ namespace DxfIO::Down
       {
         if (auto *port = std::get_if<Entities::Viewport>(&one))
         {
-          Unpointed(port->Port->VisualStyle, gone);
+          Unpointed(port->Data->VisualStyle, gone);
         }
       }
     }

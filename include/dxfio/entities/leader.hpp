@@ -18,7 +18,7 @@ namespace DxfIO::Entities
    *  The AcDbLeader subclass of a LEADER: its vertices, its arrowhead and the annotation it points
    *  from.
    */
-  struct DXFIO_API Lead
+  struct DXFIO_API LeaderData
   {
     /**
      *  The name of the dimension style. Group 3.
@@ -84,7 +84,7 @@ namespace DxfIO::Entities
      */
     Vector Offset{};
 
-    auto operator==(const Lead &) const -> bool = default;
+    auto operator==(const LeaderData &) const -> bool = default;
   };
 
   /**
@@ -99,7 +99,7 @@ namespace DxfIO::Entities
     /**
      *  The vertices, arrowhead and annotation, from the AcDbLeader subclass.
      */
-    Boxed<Entities::Lead> Lead{};
+    Boxed<Entities::LeaderData> Data{};
 
     auto operator==(const Leader &) const -> bool = default;
   };

@@ -16,7 +16,7 @@ namespace DxfIO::Objects::MLeaderStyles
   /**
    *  How the leader lines of a multileader style are drawn.
    */
-  struct DXFIO_API Leader
+  struct DXFIO_API LeaderFormat
   {
     /**
      *  Which end of a leader is drawn first: 0 the head, 1 the tail. Group 172.
@@ -76,13 +76,13 @@ namespace DxfIO::Objects::MLeaderStyles
      */
     double ArrowheadSize{4};
 
-    auto operator==(const Leader &) const -> bool = default;
+    auto operator==(const LeaderFormat &) const -> bool = default;
   };
 
   /**
    *  How the text of a multileader style is drawn.
    */
-  struct DXFIO_API Text
+  struct DXFIO_API TextFormat
   {
     /**
      *  The text a new multileader starts with. Group 300.
@@ -144,13 +144,13 @@ namespace DxfIO::Objects::MLeaderStyles
      */
     int TopAttachment{9};
 
-    auto operator==(const Text &) const -> bool = default;
+    auto operator==(const TextFormat &) const -> bool = default;
   };
 
   /**
    *  How the block of a multileader style is drawn, when its content is a block.
    */
-  struct DXFIO_API Block
+  struct DXFIO_API BlockFormat
   {
     /**
      *  The block record of the content. Group 343.
@@ -181,7 +181,7 @@ namespace DxfIO::Objects::MLeaderStyles
      */
     int Connection{};
 
-    auto operator==(const Block &) const -> bool = default;
+    auto operator==(const BlockFormat &) const -> bool = default;
   };
 } // namespace DxfIO::Objects::MLeaderStyles
 
@@ -217,15 +217,15 @@ namespace DxfIO::Objects
      *  How the leader lines are drawn, kept on the heap as the text and block are, so every object
      *  stays small.
      */
-    Boxed<MLeaderStyles::Leader> Leader{};
+    Boxed<MLeaderStyles::LeaderFormat> Leader{};
     /**
      *  How the text is drawn.
      */
-    Boxed<MLeaderStyles::Text> Text{};
+    Boxed<MLeaderStyles::TextFormat> Text{};
     /**
      *  How the block is drawn.
      */
-    Boxed<MLeaderStyles::Block> Block{};
+    Boxed<MLeaderStyles::BlockFormat> Block{};
     /**
      *  The factor the whole multileader is scaled by. Group 142.
      */

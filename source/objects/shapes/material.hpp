@@ -39,19 +39,19 @@ namespace DxfIO
 
     template <int Method, int Factor, int Color>
     inline constexpr auto Shaded = std::tuple{
-        Fields::Field<Shade, int, int>{
+        Fields::Field<MaterialColor, int, int>{
             .Code     = Method,
-            .Member   = &Shade::Method,
+            .Member   = &MaterialColor::Method,
             .Fallback = 0,
         },
-        Fields::Field<Shade, double, double>{
+        Fields::Field<MaterialColor, double, double>{
             .Code     = Factor,
-            .Member   = &Shade::Factor,
+            .Member   = &MaterialColor::Factor,
             .Fallback = 1.0,
         },
-        Fields::Field<Shade, int, int>{
+        Fields::Field<MaterialColor, int, int>{
             .Code     = Color,
-            .Member   = &Shade::Color,
+            .Member   = &MaterialColor::Color,
             .Fallback = -1040187392,
         },
     };

@@ -83,7 +83,7 @@ namespace DxfIO::Down
       return Vector{.X = Dot(one, from.X), .Y = Dot(one, from.Y), .Z = Dot(one, from.Z)};
     }
 
-    auto Turned(const Entities::Paragraph &one, const Axes &from) -> double
+    auto Turned(const Entities::MTextData &one, const Axes &from) -> double
     {
       if (one.Direction)
       {
@@ -125,7 +125,7 @@ namespace DxfIO::Down
 
   auto Lettered(const Entities::MText &one, Seed &handles) -> std::vector<Entities::Text>
   {
-    const Entities::Paragraph     &body  = *one.Paragraph;
+    const Entities::MTextData     &body  = *one.Data;
     const std::vector<std::string> lines = Plain(body.Value);
     const int attachment = body.Attachment >= 1 && body.Attachment <= 9 ? body.Attachment - 1 : 0;
     const int row        = attachment / Columns;

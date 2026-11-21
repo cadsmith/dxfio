@@ -30,7 +30,7 @@ namespace DxfIO::Entities
    *  The AcDbUnderlayReference subclass: where an underlay lies, how it is shown and how it is
    *  clipped.
    */
-  struct DXFIO_API Overlaid
+  struct DXFIO_API UnderlayData
   {
     /**
      *  The definition object that names the file. Group 340.
@@ -69,13 +69,13 @@ namespace DxfIO::Entities
      */
     std::vector<Bound> Clip{};
 
-    auto operator==(const Overlaid &) const -> bool = default;
+    auto operator==(const UnderlayData &) const -> bool = default;
   };
 
   /**
    *  An underlay of the kind given: a PDF, DWF or DGN file shown under the drawing.
    */
-  template <Overlay KindV>
+  template <UnderlayKind KindV>
   struct UnderlayOf
   {
     /**
@@ -90,7 +90,7 @@ namespace DxfIO::Entities
     /**
      *  Where the underlay lies and how it is shown, from the AcDbUnderlayReference subclass.
      */
-    Boxed<Entities::Overlaid> Overlaid{};
+    Boxed<Entities::UnderlayData> Data{};
 
     auto operator==(const UnderlayOf &) const -> bool = default;
   };
@@ -98,15 +98,15 @@ namespace DxfIO::Entities
   /**
    *  A PDFUNDERLAY: a page of a PDF file shown under the drawing.
    */
-  using PdfUnderlay = UnderlayOf<Overlay::Pdf>;
+  using PdfUnderlay = UnderlayOf<UnderlayKind::Pdf>;
   /**
    *  A DWFUNDERLAY: a sheet of a DWF file shown under the drawing.
    */
-  using DwfUnderlay = UnderlayOf<Overlay::Dwf>;
+  using DwfUnderlay = UnderlayOf<UnderlayKind::Dwf>;
   /**
    *  A DGNUNDERLAY: a model of a MicroStation DGN file shown under the drawing.
    */
-  using DgnUnderlay = UnderlayOf<Overlay::Dgn>;
+  using DgnUnderlay = UnderlayOf<UnderlayKind::Dgn>;
 } // namespace DxfIO::Entities
 
 #endif /* DXFIO_ENTITIES_UNDERLAY_HPP */

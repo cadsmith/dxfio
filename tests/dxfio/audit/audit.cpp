@@ -225,7 +225,7 @@ namespace DxfIO::Audit
     CHECK(swapped.Axis  == Vector{.X = 0, .Y = 6, .Z = 0});
     CHECK(swapped.Ratio == 0.5);
     CHECK(swapped.Start == 0);
-    CHECK(swapped.End   == Entities::Turn);
+    CHECK(swapped.End   == Turn);
     const auto &turned = std::get<Entities::Ellipse>(drawing.Entities.at(1));
     CHECK(turned.Start == doctest::Approx(7 * std::numbers::pi / 4));
     CHECK(turned.End   == doctest::Approx(9 * std::numbers::pi / 4));
@@ -267,8 +267,8 @@ namespace DxfIO::Audit
   {
     Document       drawing = Fresh();
     Entities::Mesh mesh{};
-    mesh.Net->Vertices = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
-    mesh.Net->Faces    = {3, 0, 1, 2};
+    mesh.Data->Vertices = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+    mesh.Data->Faces    = {3, 0, 1, 2};
     REQUIRE(Edit::Add(drawing, Entities::Wipeout{}));
     REQUIRE(Edit::Add(drawing, mesh));
     REQUIRE(Edit::Add(drawing, mesh));
@@ -346,18 +346,18 @@ namespace DxfIO::Audit
   {
     Document            drawing = Fresh();
     Entities::Dimension dimension{};
-    dimension.Figure->Measure.Style = Symbol{"NOPE"};
+    dimension.Data->Measure.Style = Symbol{"NOPE"};
     Entities::ArcDimension arc{};
-    arc.Bend->Measure.Style = Symbol{"NOPE"};
+    arc.Data->Measure.Style = Symbol{"NOPE"};
     Entities::LargeRadialDimension jogged{};
-    jogged.Jog->Measure.Style = Symbol{"NOPE"};
+    jogged.Data->Measure.Style = Symbol{"NOPE"};
     Entities::Leader leader{};
-    leader.Lead->Style  = Symbol{"NOPE"};
-    leader.Lead->Points = {Vector{}, Vector{.X = 1}};
+    leader.Data->Style  = Symbol{"NOPE"};
+    leader.Data->Points = {Vector{}, Vector{.X = 1}};
     Entities::Tolerance tolerance{};
     tolerance.Style = Symbol{"NOPE"};
     Entities::Dimension fine{};
-    fine.Figure->Measure.Style = Symbol{"standard"};
+    fine.Data->Measure.Style = Symbol{"standard"};
     REQUIRE(Edit::Add(drawing, dimension));
     REQUIRE(Edit::Add(drawing, arc));
     REQUIRE(Edit::Add(drawing, jogged));
@@ -369,15 +369,15 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.front().What == "dimension style NOPE missing");
     CHECK(seen.Findings.front().Subject == BaseOf(drawing.Entities.front()).Self);
     REQUIRE(Repair(drawing).Warnings()  == 5);
-    CHECK(std::get<Entities::Dimension>(drawing.Entities.at(0)).Figure->Measure.Style.View()
+    CHECK(std::get<Entities::Dimension>(drawing.Entities.at(0)).Data->Measure.Style.View()
           == "Standard");
-    CHECK(std::get<Entities::ArcDimension>(drawing.Entities.at(1)).Bend->Measure.Style.View()
+    CHECK(std::get<Entities::ArcDimension>(drawing.Entities.at(1)).Data->Measure.Style.View()
           == "Standard");
-    CHECK(std::get<Entities::LargeRadialDimension>(drawing.Entities.at(2)).Jog->Measure.Style.View()
+    CHECK(std::get<Entities::LargeRadialDimension>(drawing.Entities.at(2)).Data->Measure.Style.View()
           == "Standard");
-    CHECK(std::get<Entities::Leader>(drawing.Entities.at(3)).Lead->Style.View() == "Standard");
+    CHECK(std::get<Entities::Leader>(drawing.Entities.at(3)).Data->Style.View() == "Standard");
     CHECK(std::get<Entities::Tolerance>(drawing.Entities.at(4)).Style.View()    == "Standard");
-    CHECK(std::get<Entities::Dimension>(drawing.Entities.at(5)).Figure->Measure.Style.View()
+    CHECK(std::get<Entities::Dimension>(drawing.Entities.at(5)).Data->Measure.Style.View()
           == "standard");
     CHECK(Check(drawing).Findings.empty());
   }
@@ -411,7 +411,7 @@ namespace DxfIO::Audit
     text.Lettering.Style = Symbol{""};
     REQUIRE(Edit::Add(drawing, text));
     Entities::Leader leader{};
-    leader.Lead->Points = {Vector{}, Vector{.X = 1}};
+    leader.Data->Points = {Vector{}, Vector{.X = 1}};
     REQUIRE(Edit::Add(drawing, leader));
     Entities::Insert insert{};
     REQUIRE(Edit::Add(drawing, insert));
@@ -443,7 +443,7 @@ namespace DxfIO::Audit
     CHECK(lined.Record.Layer.View()    == "0");
     CHECK(lined.Record.Linetype.View() == "ByLayer");
     CHECK(std::get<Entities::Text>(drawing.Entities.at(1)).Lettering.Style.View() == "Standard");
-    CHECK(std::get<Entities::Leader>(drawing.Entities.at(2)).Lead->Style.View()   == "Standard");
+    CHECK(std::get<Entities::Leader>(drawing.Entities.at(2)).Data->Style.View()   == "Standard");
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -451,11 +451,11 @@ namespace DxfIO::Audit
   {
     Document         drawing = Fresh();
     Entities::Leader none{};
-    none.Lead->Style     = Symbol{"Standard"};
+    none.Data->Style     = Symbol{"Standard"};
     Entities::Leader one = none;
-    one.Lead->Points     = {Vector{}};
+    one.Data->Points     = {Vector{}};
     Entities::Leader two = none;
-    two.Lead->Points     = {Vector{}, Vector{.X = 1}};
+    two.Data->Points     = {Vector{}, Vector{.X = 1}};
     REQUIRE(Edit::Add(drawing, none));
     REQUIRE(Edit::Add(drawing, two));
     REQUIRE(Edit::Add(drawing, one));
@@ -468,7 +468,7 @@ namespace DxfIO::Audit
     CHECK(seen.Warnings() == 0);
     CHECK(Repair(drawing).Clean());
     REQUIRE(drawing.Entities.size() == 1);
-    CHECK(std::get<Entities::Leader>(drawing.Entities.front()).Lead->Points.size() == 2);
+    CHECK(std::get<Entities::Leader>(drawing.Entities.front()).Data->Points.size() == 2);
     CHECK(Edit::FindBlock(drawing, "PART")->Entities.empty());
     CHECK(Check(drawing).Findings.empty());
   }
@@ -799,7 +799,7 @@ namespace DxfIO::Audit
     drawing.Entities.emplace_back(text);
     Entities::MText para{};
     para.Record.Base.Self = Handle{.Value = Past(drawing).Value};
-    para.Paragraph->Style = Symbol{"Gone"};
+    para.Data->Style = Symbol{"Gone"};
     drawing.Entities.emplace_back(para);
     Entities::Text kept{};
     kept.Record.Base.Self = Handle{.Value = Past(drawing).Value};
@@ -810,7 +810,7 @@ namespace DxfIO::Audit
     CHECK(std::get<Entities::Text>(drawing.Entities.front()).Lettering.Style == "STANDARD");
     CHECK(std::get<Entities::Text>(drawing.Entities.at(drawing.Entities.size() - 2)).Lettering.Style
           == "Standard");
-    CHECK(std::get<Entities::MText>(drawing.Entities.back()).Paragraph->Style == "Standard");
+    CHECK(std::get<Entities::MText>(drawing.Entities.back()).Data->Style == "Standard");
   }
 
   TEST_CASE("audit: an attribute definition's text style named nowhere becomes the standard one")
@@ -850,9 +850,9 @@ namespace DxfIO::Audit
   {
     Document       drawing = Fresh();
     Entities::Mesh faceless{};
-    faceless.Net->Vertices = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+    faceless.Data->Vertices = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
     Entities::Mesh pointless{};
-    pointless.Net->Faces = {3, 0, 1, 2};
+    pointless.Data->Faces = {3, 0, 1, 2};
     REQUIRE(Edit::Add(drawing, faceless));
     REQUIRE(Edit::Add(drawing, Entities::Line{}));
     REQUIRE(Edit::AddBlock(drawing, "PART"));
@@ -876,13 +876,13 @@ namespace DxfIO::Audit
     Document       drawing = Fresh();
     Entities::Mesh mesh{};
     mesh.Record.Base.Self = Past(drawing);
-    mesh.Net->Vertices    = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
-    mesh.Net->Faces       = {3, 0, 1, 2};
-    mesh.Net->Edges       = {0, 1, 1, 2};
-    mesh.Net->Creases     = {0.5};
+    mesh.Data->Vertices    = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+    mesh.Data->Faces       = {3, 0, 1, 2};
+    mesh.Data->Edges       = {0, 1, 1, 2};
+    mesh.Data->Creases     = {0.5};
     drawing.Blocks.front().Entities.emplace_back(mesh);
     Entities::Mesh whole   = mesh;
-    whole.Net->Creases     = {0.5, 0.0};
+    whole.Data->Creases     = {0.5, 0.0};
     whole.Record.Base.Self = Handle{.Value = mesh.Record.Base.Self.Value + 1};
     drawing.Blocks.front().Entities.emplace_back(whole);
     drawing.Entities.emplace_back(Lined(Handle{.Value = mesh.Record.Base.Self.Value + 2}));
@@ -893,7 +893,7 @@ namespace DxfIO::Audit
     REQUIRE(Repair(drawing).Warnings() == 1);
     const auto &fixed = std::get<Entities::Mesh>(
         drawing.Blocks.front().Entities.at(drawing.Blocks.front().Entities.size() - 2));
-    CHECK(fixed.Net->Creases == std::vector{0.5, 0.0});
+    CHECK(fixed.Data->Creases == std::vector{0.5, 0.0});
   }
 
   TEST_CASE("audit: a drawing with no seed to set still repairs, and is given one")

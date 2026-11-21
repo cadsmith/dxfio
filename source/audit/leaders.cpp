@@ -20,7 +20,7 @@ namespace DxfIO::Audit
     auto Short(const Entity &one) -> bool
     {
       const auto *leader = std::get_if<Entities::Leader>(&one);
-      return leader != nullptr && leader->Lead->Points.size() < Fewest;
+      return leader != nullptr && leader->Data->Points.size() < Fewest;
     }
   } // namespace
 

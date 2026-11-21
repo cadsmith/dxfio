@@ -23,50 +23,50 @@ namespace DxfIO
   namespace Objects::MLeaderStyles
   {
     inline constexpr auto Lines = std::tuple{
-        Fields::Field{.Code = 172, .Member = &Leader::DrawOrder},
-        Fields::Field{.Code = 90, .Member = &Leader::MaxPoints},
-        Fields::Field{.Code = 40, .Member = &Leader::FirstSegmentAngle},
-        Fields::Field{.Code = 41, .Member = &Leader::SecondSegmentAngle},
-        Fields::Field{.Code = 173, .Member = &Leader::LeaderType},
-        Fields::Field{.Code = 91, .Member = &Leader::Color},
-        Fields::Field{.Code = 340, .Member = &Leader::Linetype},
-        Fields::Field{.Code = 92, .Member = &Leader::Lineweight},
-        Fields::Field{.Code = 290, .Member = &Leader::EnableLanding},
-        Fields::Field{.Code = 42, .Member = &Leader::LandingGap},
-        Fields::Field{.Code = 291, .Member = &Leader::EnableDogleg},
-        Fields::Field{.Code = 43, .Member = &Leader::DoglegLength},
+        Fields::Field{.Code = 172, .Member = &LeaderFormat::DrawOrder},
+        Fields::Field{.Code = 90, .Member = &LeaderFormat::MaxPoints},
+        Fields::Field{.Code = 40, .Member = &LeaderFormat::FirstSegmentAngle},
+        Fields::Field{.Code = 41, .Member = &LeaderFormat::SecondSegmentAngle},
+        Fields::Field{.Code = 173, .Member = &LeaderFormat::LeaderType},
+        Fields::Field{.Code = 91, .Member = &LeaderFormat::Color},
+        Fields::Field{.Code = 340, .Member = &LeaderFormat::Linetype},
+        Fields::Field{.Code = 92, .Member = &LeaderFormat::Lineweight},
+        Fields::Field{.Code = 290, .Member = &LeaderFormat::EnableLanding},
+        Fields::Field{.Code = 42, .Member = &LeaderFormat::LandingGap},
+        Fields::Field{.Code = 291, .Member = &LeaderFormat::EnableDogleg},
+        Fields::Field{.Code = 43, .Member = &LeaderFormat::DoglegLength},
     };
 
     inline constexpr auto Heads = std::tuple{
-        Fields::Field{.Code = 341, .Member = &Leader::Arrowhead, .Fallback = Handle{}},
-        Fields::Field{.Code = 44, .Member = &Leader::ArrowheadSize},
+        Fields::Field{.Code = 341, .Member = &LeaderFormat::Arrowhead, .Fallback = Handle{}},
+        Fields::Field{.Code = 44, .Member = &LeaderFormat::ArrowheadSize},
     };
 
     inline constexpr auto Words = std::tuple{
-        Fields::Field{.Code = 300, .Member = &Text::DefaultText},
-        Fields::Field{.Code = 342, .Member = &Text::Style},
-        Fields::Field{.Code = 174, .Member = &Text::LeftAttachment},
-        Fields::Field{.Code = 178, .Member = &Text::RightAttachment},
-        Fields::Field{.Code = 175, .Member = &Text::AngleType},
-        Fields::Field{.Code = 176, .Member = &Text::Alignment},
-        Fields::Field{.Code = 93, .Member = &Text::Color},
-        Fields::Field{.Code = 45, .Member = &Text::Height},
-        Fields::Field{.Code = 292, .Member = &Text::Frame},
-        Fields::Field{.Code = 297, .Member = &Text::AlwaysLeft},
-        Fields::Field{.Code = 46, .Member = &Text::AlignSpace},
+        Fields::Field{.Code = 300, .Member = &TextFormat::DefaultText},
+        Fields::Field{.Code = 342, .Member = &TextFormat::Style},
+        Fields::Field{.Code = 174, .Member = &TextFormat::LeftAttachment},
+        Fields::Field{.Code = 178, .Member = &TextFormat::RightAttachment},
+        Fields::Field{.Code = 175, .Member = &TextFormat::AngleType},
+        Fields::Field{.Code = 176, .Member = &TextFormat::Alignment},
+        Fields::Field{.Code = 93, .Member = &TextFormat::Color},
+        Fields::Field{.Code = 45, .Member = &TextFormat::Height},
+        Fields::Field{.Code = 292, .Member = &TextFormat::Frame},
+        Fields::Field{.Code = 297, .Member = &TextFormat::AlwaysLeft},
+        Fields::Field{.Code = 46, .Member = &TextFormat::AlignSpace},
     };
 
     inline constexpr auto Attachments = std::tuple{
-        Fields::Field{.Code = 271, .Member = &Text::AttachmentDirection},
-        Fields::Field{.Code = 272, .Member = &Text::BottomAttachment},
-        Fields::Field{.Code = 273, .Member = &Text::TopAttachment},
+        Fields::Field{.Code = 271, .Member = &TextFormat::AttachmentDirection},
+        Fields::Field{.Code = 272, .Member = &TextFormat::BottomAttachment},
+        Fields::Field{.Code = 273, .Member = &TextFormat::TopAttachment},
     };
 
     inline constexpr auto Shown = std::tuple{
-        Fields::Field{.Code = 343, .Member = &Block::Content, .Fallback = Handle{}},
-        Fields::Field{.Code = 94, .Member = &Block::Color},
+        Fields::Field{.Code = 343, .Member = &BlockFormat::Content, .Fallback = Handle{}},
+        Fields::Field{.Code = 94, .Member = &BlockFormat::Color},
         Fields::Part{
-            .Member = &Block::Scale,
+            .Member = &BlockFormat::Scale,
             .Fields =
                 std::tuple{
                     Fields::Field<Vector, double>{.Code = 47, .Member = &Vector::X},
@@ -77,10 +77,10 @@ namespace DxfIO
                     },
                 },
         },
-        Fields::Field{.Code = 293, .Member = &Block::EnableScale},
-        Fields::Field{.Code = 141, .Member = &Block::Rotation},
-        Fields::Field{.Code = 294, .Member = &Block::EnableRotation},
-        Fields::Field{.Code = 177, .Member = &Block::Connection},
+        Fields::Field{.Code = 293, .Member = &BlockFormat::EnableScale},
+        Fields::Field{.Code = 141, .Member = &BlockFormat::Rotation},
+        Fields::Field{.Code = 294, .Member = &BlockFormat::EnableRotation},
+        Fields::Field{.Code = 177, .Member = &BlockFormat::Connection},
     };
   } // namespace Objects::MLeaderStyles
 

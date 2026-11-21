@@ -33,7 +33,7 @@ namespace DxfIO
 
     inline constexpr int Rotated = 50;
 
-    inline void Turned(Paragraph &one, Fields::Walk &in)
+    inline void Turned(MTextData &one, Fields::Walk &in)
     {
       const bool last = in.Later(Rotated, Directed);
       one.Direction   = Fields::Value<Vector>::Read(in, Directed);
@@ -48,7 +48,7 @@ namespace DxfIO
       }
     }
 
-    inline auto Turning(const Paragraph &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Turning(const MTextData &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
       using Direction = Fields::Value<std::optional<Vector>>;
       using Rotation  = Fields::Value<std::optional<double>>;
@@ -76,19 +76,19 @@ namespace DxfIO
     inline constexpr int Bordered = 16;
 
     inline constexpr std::tuple Backing{
-        Fields::Field{.Code = 63, .Member = &Paragraph::Color},
-        Fields::Field{.Code = 421, .Member = &Paragraph::Rgb},
-        Fields::Field{.Code = 431, .Member = &Paragraph::Book},
-        Fields::Field{.Code = 45, .Member = &Paragraph::Margin},
-        Fields::Field{.Code = 441, .Member = &Paragraph::Transparency},
+        Fields::Field{.Code = 63, .Member = &MTextData::Color},
+        Fields::Field{.Code = 421, .Member = &MTextData::Rgb},
+        Fields::Field{.Code = 431, .Member = &MTextData::Book},
+        Fields::Field{.Code = 45, .Member = &MTextData::Margin},
+        Fields::Field{.Code = 441, .Member = &MTextData::Transparency},
     };
 
-    inline void Backed(Paragraph &one, Fields::Walk &in)
+    inline void Backed(MTextData &one, Fields::Walk &in)
     {
       Fields::Read(one, in, Backing);
     }
 
-    inline auto Backs(const Paragraph &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Backs(const MTextData &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
       const int wanted = to.Release >= Version::R2018 ? Painted + Bordered : Painted;
       return Masked(one.Fill, wanted) != 0 ? Fields::Write(one, to, Backing)
@@ -96,8 +96,8 @@ namespace DxfIO
     }
 
     inline constexpr std::tuple Background{
-        Fields::Field{.Code = 90, .Member = &Paragraph::Fill, .Fallback = 0},
-        Fields::Custom<Paragraph>{.Read = Backed, .Write = Backs},
+        Fields::Field{.Code = 90, .Member = &MTextData::Fill, .Fallback = 0},
+        Fields::Custom<MTextData>{.Read = Backed, .Write = Backs},
     };
   } // namespace Entities
 
@@ -124,40 +124,40 @@ namespace DxfIO
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Paragraph> = std::tuple{
+  inline constexpr auto Shapes<Entities::MTextData> = std::tuple{
       Fields::Subclass{.Marker = "AcDbMText"},
-      Fields::Field{.Code = 10, .Member = &Entities::Paragraph::Position},
-      Fields::Field{.Code = 40, .Member = &Entities::Paragraph::Height},
-      Fields::Field{.Code = 41, .Member = &Entities::Paragraph::Width},
+      Fields::Field{.Code = 10, .Member = &Entities::MTextData::Position},
+      Fields::Field{.Code = 40, .Member = &Entities::MTextData::Height},
+      Fields::Field{.Code = 41, .Member = &Entities::MTextData::Width},
       Fields::Field{
           .Code   = 46,
-          .Member = &Entities::Paragraph::Defined,
+          .Member = &Entities::MTextData::Defined,
           .Since  = Version::R2007,
       },
-      Fields::Field{.Code = 71, .Member = &Entities::Paragraph::Attachment},
-      Fields::Field{.Code = 72, .Member = &Entities::Paragraph::Flow},
-      Fields::Pieces{.Member = &Entities::Paragraph::Value},
+      Fields::Field{.Code = 71, .Member = &Entities::MTextData::Attachment},
+      Fields::Field{.Code = 72, .Member = &Entities::MTextData::Flow},
+      Fields::Pieces{.Member = &Entities::MTextData::Value},
       Fields::Field{
           .Code     = 7,
-          .Member   = &Entities::Paragraph::Style,
+          .Member   = &Entities::MTextData::Style,
           .Fallback = std::string_view{"Standard"},
       },
       Fields::Field{
           .Code     = 210,
-          .Member   = &Entities::Paragraph::Extrusion,
+          .Member   = &Entities::MTextData::Extrusion,
           .Fallback = Up,
       },
-      Fields::Custom<Entities::Paragraph>{
+      Fields::Custom<Entities::MTextData>{
           .Read  = Entities::Turned,
           .Write = Entities::Turning,
       },
-      Fields::Field{.Code = 73, .Member = &Entities::Paragraph::LineSpacingStyle},
-      Fields::Field{.Code = 44, .Member = &Entities::Paragraph::LineSpacingFactor},
+      Fields::Field{.Code = 73, .Member = &Entities::MTextData::LineSpacingStyle},
+      Fields::Field{.Code = 44, .Member = &Entities::MTextData::LineSpacingFactor},
       Fields::Since{.Release = Version::R2004, .Fields = Entities::Background},
       Fields::Since{
           .Release = Version::R2018,
           .Fields  = std::tuple{Fields::Embedded{
-              .Member = &Entities::Paragraph::Columns,
+              .Member = &Entities::MTextData::Columns,
               .Fields = Shapes<Entities::Columns>,
           }},
       },
@@ -167,8 +167,8 @@ namespace DxfIO
   inline constexpr auto Shapes<Entities::MText> = std::tuple{
       Entities::Part<Entities::MText>,
       Fields::Part{
-          .Member = &Entities::MText::Paragraph,
-          .Fields = Shapes<Entities::Paragraph>,
+          .Member = &Entities::MText::Data,
+          .Fields = Shapes<Entities::MTextData>,
       },
   };
 
