@@ -38,11 +38,11 @@ namespace DxfIO::Entities
     /**
      *  The width segments start with when their vertex gives none. Group 40.
      */
-    double Start{};
+    double StartWidth{};
     /**
      *  The width segments end with when their vertex gives none. Group 41.
      */
-    double End{};
+    double EndWidth{};
     /**
      *  1 closed, 2 curve-fit, 4 spline-fit, 8 3D polyline, 16 polygon mesh, 32 mesh closed along N,
      *  64 polyface mesh, 128 linetype drawn continuously around the vertices. Group 70.

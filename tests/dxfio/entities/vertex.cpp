@@ -51,11 +51,11 @@ namespace DxfIO::Entities
     const Polyline       &taken = Traced(file.Entities, 0x48a);
     REQUIRE(taken.Vertices.Children.size() == 2);
     const Vertex &first = taken.Vertices.Children.front();
-    CHECK(first.Start == 1.0);
-    CHECK(first.End   == 2.0);
-    CHECK(first.Bulge == 0.5);
-    CHECK(first.Id    == 7);
-    CHECK(first.Flags == 2);
+    CHECK(first.StartWidth == 1.0);
+    CHECK(first.EndWidth   == 2.0);
+    CHECK(first.Bulge      == 0.5);
+    CHECK(first.Id         == 7);
+    CHECK(first.Flags      == 2);
     CHECK(first.Tangent > 28);
     const std::string text = Written(first);
     CHECK(text.find(" 42\r\n") < text.find(" 91\r\n"));
@@ -143,7 +143,7 @@ namespace DxfIO::Entities
   TEST_CASE("vertex: a width written at 0, unlike a width not given")
   {
     Vertex held            = Flagged(0);
-    held.Start             = 0.0;
+    held.StartWidth        = 0.0;
     const std::string text = Written(held);
     CHECK(text.contains(" 40\r\n0.0\r\n"));
     CHECK_FALSE(text.contains(" 41\r\n"));

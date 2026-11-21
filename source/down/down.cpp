@@ -145,8 +145,8 @@ namespace DxfIO::Down
       out.Position.Z = one.Elevation;
       out.Thickness  = one.Thickness;
       out.Flags      = Masked(one.Flags, Closed + Generated);
-      out.Start      = one.Width.value_or(0.0);
-      out.End        = one.Width.value_or(0.0);
+      out.StartWidth = one.Width.value_or(0.0);
+      out.EndWidth   = one.Width.value_or(0.0);
       out.Extrusion  = one.Extrusion;
       for (const Entities::LwPolyline::Vertex &vertex : one.Vertices)
       {
@@ -156,8 +156,8 @@ namespace DxfIO::Down
         child.Bulge    = vertex.Bulge;
         if (vertex.Widths)
         {
-          child.Start = vertex.Widths->Start;
-          child.End   = vertex.Widths->End;
+          child.StartWidth = vertex.Widths->Start;
+          child.EndWidth   = vertex.Widths->End;
         }
         out.Vertices.Children.push_back(std::move(child));
       }

@@ -67,8 +67,8 @@ namespace DxfIO::Entities
   {
     const DxfIO::Document file = Heavy();
     CHECK(Traced(file.Entities, 0x2d3).Flags       == 1);
-    CHECK(Traced(file.Entities, 0x2d8).Start       == 2);
-    CHECK(Traced(file.Entities, 0x2d8).End         == 2);
+    CHECK(Traced(file.Entities, 0x2d8).StartWidth  == 2);
+    CHECK(Traced(file.Entities, 0x2d8).EndWidth    == 2);
     CHECK(Traced(file.Entities, 0x2e6).Position.Z  == 5);
     CHECK(Traced(file.Entities, 0x2eb).Thickness   == 3);
     CHECK(Traced(file.Entities, 0x2f0).Extrusion.Y == -1);
@@ -80,11 +80,11 @@ namespace DxfIO::Entities
     const DxfIO::Document file  = Heavy();
     const Polyline       &taken = Traced(file.Entities, 0x2dd);
     REQUIRE(taken.Vertices.Children.size() == 3);
-    CHECK(taken.Start == 1);
-    CHECK(taken.End   == 3);
-    CHECK_FALSE(taken.Vertices.Children.at(0).Start);
-    CHECK(taken.Vertices.Children.at(1).Start == 3.0);
-    CHECK(taken.Vertices.Children.at(1).End   == 0.0);
+    CHECK(taken.StartWidth == 1);
+    CHECK(taken.EndWidth   == 3);
+    CHECK_FALSE(taken.Vertices.Children.at(0).StartWidth);
+    CHECK(taken.Vertices.Children.at(1).StartWidth == 3.0);
+    CHECK(taken.Vertices.Children.at(1).EndWidth   == 0.0);
   }
 
   TEST_CASE("polyline: fitted and splined, and 3D, marked by their flags")
@@ -106,9 +106,9 @@ namespace DxfIO::Entities
   {
     const DxfIO::Document file  = Heavy();
     const Polyline       &taken = Traced(file.Entities, 0x4b2);
-    CHECK(taken.Thickness == 2);
-    CHECK(taken.Flags     == 1);
-    CHECK(taken.Start     == 1);
+    CHECK(taken.Thickness  == 2);
+    CHECK(taken.Flags      == 1);
+    CHECK(taken.StartWidth == 1);
     const std::string text = Written(taken);
     CHECK(text.find(" 39\r\n") < text.find(" 70\r\n"));
     CHECK(text.find(" 70\r\n") < text.find(" 40\r\n"));

@@ -68,12 +68,12 @@ namespace DxfIO
       },
       Fields::Field{
           .Code     = 40,
-          .Member   = &Entities::Polyline::Start,
+          .Member   = &Entities::Polyline::StartWidth,
           .Fallback = 0.0,
       },
       Fields::Field{
           .Code     = 41,
-          .Member   = &Entities::Polyline::End,
+          .Member   = &Entities::Polyline::EndWidth,
           .Fallback = 0.0,
       },
       Fields::Field{

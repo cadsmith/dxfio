@@ -1441,8 +1441,8 @@ namespace DxfIO::Entities
     Vector Extrusion{Up};
     Sequence<Vertex> Vertices{};
     double Thickness{};
-    double Start{};
-    double End{};
+    double StartWidth{};
+    double EndWidth{};
     int Flags{};
     int Rows{};
     int Columns{};
@@ -1801,8 +1801,8 @@ namespace DxfIO::Entities
   {
     Entities::Record Record{};
     Vector Position{};
-    std::optional<double> Start{};
-    std::optional<double> End{};
+    std::optional<double> StartWidth{};
+    std::optional<double> EndWidth{};
     double Bulge{};
     int Id{};
     int Flags{};

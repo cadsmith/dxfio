@@ -370,8 +370,8 @@ namespace DxfIO::Down
     CHECK(heavy.Flags            == 1 + 128);
     CHECK(heavy.Position.Z       == 2.0);
     CHECK(heavy.Thickness        == 3.0);
-    CHECK(heavy.Start            == 0.5);
-    CHECK(heavy.End == 0.5);
+    CHECK(heavy.StartWidth       == 0.5);
+    CHECK(heavy.EndWidth         == 0.5);
   }
 
   TEST_CASE("down: the POLYLINE made of a lightweight one has its vertices, then a SEQEND")
@@ -383,12 +383,12 @@ namespace DxfIO::Down
     const auto    &heavy = std::get<Entities::Polyline>(out.Entities.front());
     REQUIRE(heavy.Vertices.Children.size() == 2);
     const Entities::Vertex &bulged = heavy.Vertices.Children[0];
-    CHECK(bulged.Position == Vector{.X = 1, .Y = 2});
-    CHECK(bulged.Bulge    == 0.25);
-    CHECK(bulged.Start    == 0.1);
-    CHECK(bulged.End      == 0.2);
+    CHECK(bulged.Position         == Vector{.X = 1, .Y = 2});
+    CHECK(bulged.Bulge            == 0.25);
+    CHECK(bulged.StartWidth       == 0.1);
+    CHECK(bulged.EndWidth         == 0.2);
     CHECK(bulged.Record.Base.Self == first);
-    CHECK_FALSE(heavy.Vertices.Children[1].Start);
+    CHECK_FALSE(heavy.Vertices.Children[1].StartWidth);
     REQUIRE(heavy.Vertices.Closing);
     CHECK(heavy.Vertices.Closing.value_or(Boxed<Entities::SeqEnd>{})->Record.Base.Self);
   }
@@ -408,7 +408,7 @@ namespace DxfIO::Down
     one.Width                 = std::nullopt;
     from.Entities.emplace_back(one);
     const Document out = Narrowed(from, Version::R12, nullptr);
-    CHECK(std::get<Entities::Polyline>(out.Entities.front()).Start == 0.0);
+    CHECK(std::get<Entities::Polyline>(out.Entities.front()).StartWidth == 0.0);
   }
 
   TEST_CASE("down: the seed passes the handles a conversion took")
