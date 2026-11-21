@@ -36,8 +36,10 @@ const auto saved = DxfIO::SaveFile(loaded->Drawing, "plan-r2010.dxf",
   the tables, blocks, layouts and objects a drawing of that release needs.
 - `Edit::Add` puts an entity in model space, paper space or a block, or a
   record in its table, with a new handle, its owner and `$HANDSEED` moved on;
-  `Edit::AddBlock` makes a block. `Edit::Find`, `FindEntity`, `FindObject`
-  and `FindBlock` look things up, names without case.
+  `Edit::AddBlock` makes a block.
+- `FindEntity` and `FindObject` find a record by its handle, and an `Index`
+  finds many in constant time. `View` finds table records, blocks, layouts and
+  dictionaries by name, without case.
 - `TypeOf` and `BaseOf` give any entity's or object's DXF name and its
   handle, owner and extended data.
 - `Audit::Check` lists what AutoCAD would complain about, and

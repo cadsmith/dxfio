@@ -51,6 +51,7 @@ const squeeze = (text: string) => text.replace(/\s+/g, ' ').trim()
 const groups: [string, (path: string) => boolean][] = [
   ['Start', (p) => ['dxfio.hpp', 'load.hpp', 'save.hpp', 'create.hpp', 'version.hpp'].includes(p)],
   ['Edit', (p) => p.startsWith('edit/')],
+  ['View', (p) => ['view.hpp', 'index.hpp'].includes(p)],
   ['Drawing', (p) => ['drawing.hpp', 'section.hpp', 'issue.hpp', 'failure.hpp', 'unknown.hpp', 'raw.hpp'].includes(p) || p.startsWith('header/')],
   ['Entities', (p) => p.startsWith('entities/') || p === 'entity.hpp'],
   ['Objects', (p) => p.startsWith('objects/') || p === 'object.hpp'],

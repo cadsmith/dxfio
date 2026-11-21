@@ -8,8 +8,8 @@
 #include "dxfio/audit/audit.hpp"
 #include "dxfio/create.hpp"
 #include "dxfio/edit/add.hpp"
-#include "dxfio/edit/find.hpp"
 #include "dxfio/load.hpp"
+#include "dxfio/view.hpp"
 
 #include <doctest/doctest.h>
 
@@ -36,7 +36,7 @@ namespace DxfIO::Lift
 
     auto Owner(const Drawing &drawing, std::string_view block) -> Handle
     {
-      const Tables::BlockRecord *found = Edit::Find(drawing.BlockRecord, block);
+      const Tables::BlockRecord *found = View::Record(drawing.BlockRecord, block);
       REQUIRE(found != nullptr);
       return found->Record.Base.Self;
     }
@@ -61,10 +61,10 @@ namespace DxfIO::Lift
       CHECK(back.Drawing.Order
             == std::vector<std::string>{"HEADER", "CLASSES", "TABLES", "BLOCKS", "ENTITIES",
                                         "OBJECTS"});
-      CHECK(Edit::Find(back.Drawing.BlockRecord, "*Model_Space") != nullptr);
-      CHECK(Edit::Find(back.Drawing.BlockRecord, "*Paper_Space") != nullptr);
-      CHECK(Edit::Find(back.Drawing.LType, "ByLayer") != nullptr);
-      CHECK(Edit::Find(back.Drawing.LType, "ByBlock") != nullptr);
+      CHECK(View::Record(back.Drawing.BlockRecord, "*Model_Space") != nullptr);
+      CHECK(View::Record(back.Drawing.BlockRecord, "*Paper_Space") != nullptr);
+      CHECK(View::Record(back.Drawing.LType, "ByLayer") != nullptr);
+      CHECK(View::Record(back.Drawing.LType, "ByBlock") != nullptr);
       CHECK_FALSE(back.Drawing.Objects.empty());
       CHECK_FALSE(back.Drawing.Classes.empty());
       CHECK(back.Drawing.Layer.Head.Base.Self);
@@ -98,7 +98,7 @@ namespace DxfIO::Lift
             "its links given")
   {
     Drawing        drawing = Create(Version::R12);
-    Tables::Layer *zero    = Edit::Find(drawing.Layer, "0");
+    Tables::Layer *zero    = View::Record(drawing.Layer, "0");
     REQUIRE(zero != nullptr);
     zero->Color = 3;
     Tables::Layer walls{};
@@ -106,13 +106,13 @@ namespace DxfIO::Lift
     walls.Color       = 5;
     REQUIRE(Edit::Add(drawing, walls));
     const Loaded         back  = Raised(drawing, Version::R2000);
-    const Tables::Layer *first = Edit::Find(back.Drawing.Layer, "0");
+    const Tables::Layer *first = View::Record(back.Drawing.Layer, "0");
     REQUIRE(first != nullptr);
     CHECK(first->Color == 3);
     CHECK(first->Style);
     CHECK(first->Record.Base.Self);
     CHECK(first->Record.Base.Owner == back.Drawing.Layer.Head.Base.Self);
-    const Tables::Layer *made = Edit::Find(back.Drawing.Layer, "WALLS");
+    const Tables::Layer *made = View::Record(back.Drawing.Layer, "WALLS");
     REQUIRE(made != nullptr);
     CHECK(made->Color             == 5);
     CHECK(made->Style             == first->Style);
@@ -131,7 +131,7 @@ namespace DxfIO::Lift
     REQUIRE(Edit::Add(drawing, Entities::Circle{}, "PART"));
     const Loaded              back   = Raised(drawing, Version::R2000);
     const Handle              record = Owner(back.Drawing, "PART");
-    const Blocks::Definition *block  = Edit::FindBlock(back.Drawing, "PART");
+    const Blocks::Definition *block  = View::Block(back.Drawing, "PART");
     REQUIRE(block != nullptr);
     CHECK(block->Block.Record.Base.Owner  == record);
     CHECK(block->EndBlk.Record.Base.Owner == record);
@@ -144,21 +144,21 @@ namespace DxfIO::Lift
   TEST_CASE("lift: the R12 space blocks become the spaces, what they hold inside them")
   {
     Drawing drawing = Create(Version::R12);
-    REQUIRE(Edit::FindBlock(drawing, "$PAPER_SPACE") != nullptr);
+    REQUIRE(View::Block(drawing, "$PAPER_SPACE") != nullptr);
     REQUIRE(Edit::Add(drawing, Entities::Circle{}, "$PAPER_SPACE"));
     REQUIRE(Edit::Add(drawing, Entities::Arc{}, "$MODEL_SPACE"));
     REQUIRE(Edit::Add(drawing, Entities::Line{}, Edit::Space::Paper));
     const Loaded back = Raised(drawing, Version::R2000);
-    CHECK(Edit::FindBlock(back.Drawing, "$PAPER_SPACE")        == nullptr);
-    CHECK(Edit::Find(back.Drawing.BlockRecord, "$PAPER_SPACE") == nullptr);
-    CHECK(Edit::FindBlock(back.Drawing, "$MODEL_SPACE")        == nullptr);
-    const Blocks::Definition *model = Edit::FindBlock(back.Drawing, "*Model_Space");
+    CHECK(View::Block(back.Drawing, "$PAPER_SPACE") == nullptr);
+    CHECK(View::Record(back.Drawing.BlockRecord, "$PAPER_SPACE") == nullptr);
+    CHECK(View::Block(back.Drawing, "$MODEL_SPACE") == nullptr);
+    const Blocks::Definition *model = View::Block(back.Drawing, "*Model_Space");
     REQUIRE(model != nullptr);
     REQUIRE(model->Entities.size() == 1);
     CHECK(BaseOf(model->Entities.front()).Owner == Owner(back.Drawing, "*Model_Space"));
     CHECK_FALSE(Entities::Paper(model->Entities.front()));
     const Handle              paper = Owner(back.Drawing, "*Paper_Space");
-    const Blocks::Definition *sheet = Edit::FindBlock(back.Drawing, "*Paper_Space");
+    const Blocks::Definition *sheet = View::Block(back.Drawing, "*Paper_Space");
     REQUIRE(sheet != nullptr);
     REQUIRE(sheet->Entities.size() == 1);
     CHECK(BaseOf(sheet->Entities.front()).Owner == paper);

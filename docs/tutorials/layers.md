@@ -94,10 +94,10 @@ DxfIO::Edit::Add(drawing, survey);
 
 ## Find and change [#find]
 
-`Edit::Find` gives a pointer to the layer of that name, found without case, or null.
+`View::Record` gives a pointer to the layer of that name, found without case, or null.
 
 ```cpp
-if (DxfIO::Tables::Layer *found = DxfIO::Edit::Find(drawing.Layer, "grid"))
+if (DxfIO::Tables::Layer *found = DxfIO::View::Record(drawing.Layer, "grid"))
 {
   found->Color = -found->Color;
   std::println("{} is on, color {}", found->Record.Name, found->Color);

@@ -13,9 +13,7 @@ set(DXFIO_HEADERS
   dxfio/drawing.hpp
   dxfio/dxfio.hpp
   dxfio/edit/add.hpp
-  dxfio/edit/find.hpp
   dxfio/edit/handles.hpp
-  dxfio/edit/index.hpp
   dxfio/edit/space.hpp
   dxfio/entities/arc.hpp
   dxfio/entities/attdef.hpp
@@ -69,6 +67,7 @@ set(DXFIO_HEADERS
   dxfio/geometry/transform.hpp
   dxfio/handle.hpp
   dxfio/header/header.hpp
+  dxfio/index.hpp
   dxfio/issue.hpp
   dxfio/lineweight.hpp
   dxfio/load.hpp
@@ -116,6 +115,7 @@ set(DXFIO_HEADERS
   dxfio/unknown.hpp
   dxfio/vector.hpp
   dxfio/version.hpp
+  dxfio/view.hpp
   dxfio/widths.hpp
   dxfio/xdata.hpp
 )

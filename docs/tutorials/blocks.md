@@ -51,7 +51,7 @@ DxfIO::Edit::Add(drawing, size, "Valve");
 Bit 2 of `Begin.Flags` says the block has attribute definitions that are not constant. `AddBlock` leaves the flags at 0, so set it once the block has its ATTDEFs.
 
 ```cpp
-if (DxfIO::Blocks::Definition *valve = DxfIO::Edit::FindBlock(drawing, "Valve"))
+if (DxfIO::Blocks::Definition *valve = DxfIO::View::Block(drawing, "Valve"))
 {
   valve->Block.Flags = 2;
 }

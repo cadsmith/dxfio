@@ -1,5 +1,5 @@
-#ifndef DXFIO_EDIT_INDEX_HPP
-#define DXFIO_EDIT_INDEX_HPP
+#ifndef DXFIO_INDEX_HPP
+#define DXFIO_INDEX_HPP
 
 #include "dxfio/api.hpp"
 #include "dxfio/drawing.hpp"
@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <unordered_map>
 
-namespace DxfIO::Edit
+namespace DxfIO
 {
   /**
    *  A drawing's entities and objects by handle, read once so that each lookup takes constant time:
@@ -42,6 +42,6 @@ namespace DxfIO::Edit
     std::unordered_map<std::uint64_t, const Entity *> m_Entities;
     std::unordered_map<std::uint64_t, const Object *> m_Objects;
   };
-} // namespace DxfIO::Edit
+} // namespace DxfIO
 
-#endif /* DXFIO_EDIT_INDEX_HPP */
+#endif /* DXFIO_INDEX_HPP */

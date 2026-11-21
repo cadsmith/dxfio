@@ -1,29 +1,20 @@
-#include "dxfio/edit/find.hpp"
+#include "dxfio/drawing.hpp"
 
 #include "dxfio/create.hpp"
 #include "dxfio/edit/add.hpp"
 
 #include <doctest/doctest.h>
 
-#include <string>
 #include <variant>
 
-namespace DxfIO::Edit
+namespace DxfIO
 {
-  TEST_CASE("edit: names compare without case")
-  {
-    CHECK(Same("Walls", "WALLS"));
-    CHECK(Same("", ""));
-    CHECK_FALSE(Same("Walls", "Wall"));
-    CHECK_FALSE(Same("Walls", "Halls"));
-  }
-
-  TEST_CASE("edit: an entity is found by its handle, in the entities or in a block")
+  TEST_CASE("drawing: an entity is found by its handle, in the entities or in a block")
   {
     Drawing drawing = Create();
-    REQUIRE(AddBlock(drawing, "Door"));
-    const auto drawn = Add(drawing, Entities::Line{});
-    const auto held  = Add(drawing, Entities::Circle{}, "Door");
+    REQUIRE(Edit::AddBlock(drawing, "Door"));
+    const auto drawn = Edit::Add(drawing, Entities::Line{});
+    const auto held  = Edit::Add(drawing, Entities::Circle{}, "Door");
     REQUIRE(drawn);
     REQUIRE(held);
     Entity *line = FindEntity(drawing, *drawn);
@@ -39,7 +30,7 @@ namespace DxfIO::Edit
     CHECK(FindEntity(fixed, Handle{}) == nullptr);
   }
 
-  TEST_CASE("edit: the null handle finds nothing, though records with no handle are there")
+  TEST_CASE("drawing: the null handle finds nothing, though records with no handle are there")
   {
     Drawing drawing = Create(Version::R12);
     drawing.Entities.emplace_back(Entities::Line{});
@@ -52,7 +43,7 @@ namespace DxfIO::Edit
     CHECK(FindObject(fixed, Handle{})   == nullptr);
   }
 
-  TEST_CASE("edit: an object is found by its handle")
+  TEST_CASE("drawing: an object is found by its handle")
   {
     Drawing      drawing = Create();
     const Handle root    = BaseOf(drawing.Objects.front()).Self;
@@ -64,23 +55,4 @@ namespace DxfIO::Edit
     CHECK(FindObject(drawing, Handle{.Value = 0xfffff}) == nullptr);
     CHECK(FindObject(fixed, Handle{.Value = 0xfffff})   == nullptr);
   }
-
-  TEST_CASE("edit: a block and a table record are found by name, without case")
-  {
-    Drawing             drawing = Create();
-    Blocks::Definition *model   = FindBlock(drawing, "*MODEL_SPACE");
-    REQUIRE(model != nullptr);
-    CHECK(model->Block.Name == "*Model_Space");
-    const Drawing &fixed = drawing;
-    CHECK(FindBlock(fixed, "*paper_space") != nullptr);
-    CHECK(FindBlock(drawing, "Door") == nullptr);
-    CHECK(FindBlock(fixed, "Door")   == nullptr);
-
-    Tables::LType *continuous = Find(drawing.LType, "CONTINUOUS");
-    REQUIRE(continuous != nullptr);
-    CHECK(continuous->Record.Name      == "Continuous");
-    CHECK(Find(fixed.Layer, "0")       == &drawing.Layer.Records.front());
-    CHECK(Find(drawing.Layer, "Walls") == nullptr);
-    CHECK(Find(fixed.Style, "Bold")    == nullptr);
-  }
-} // namespace DxfIO::Edit
+} // namespace DxfIO

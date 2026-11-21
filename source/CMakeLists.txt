@@ -2,10 +2,12 @@ add_library(dxfio
   braced.cpp
   braces.cpp
   create.cpp
+  drawing.cpp
   entity.cpp
   handle.cpp
   handseed.cpp
   head.cpp
+  index.cpp
   lineweight.cpp
   load.cpp
   object.cpp
@@ -18,6 +20,7 @@ add_library(dxfio
   tail.cpp
   unknown.cpp
   version.cpp
+  view.cpp
 )
 
 add_subdirectory(audit)

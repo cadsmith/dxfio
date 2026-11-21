@@ -4,7 +4,7 @@
 #include "masked.hpp"
 #include "seeding.hpp"
 
-#include "dxfio/edit/find.hpp"
+#include "dxfio/view.hpp"
 
 #include <algorithm>
 #include <concepts>
@@ -22,7 +22,7 @@ namespace DxfIO::Edit
 
     auto Owner(const Drawing &drawing, std::string_view space) -> Handle
     {
-      const auto *found = Find(drawing.BlockRecord, space);
+      const auto *found = View::Record(drawing.BlockRecord, space);
       return found == nullptr ? Handle{} : found->Record.Base.Self;
     }
 
@@ -114,7 +114,7 @@ namespace DxfIO::Edit
       }
       if constexpr (!std::same_as<RecordT, Tables::VPort>)
       {
-        if (Find(table, one.Record.Name) != nullptr)
+        if (View::Record(table, one.Record.Name) != nullptr)
         {
           return std::unexpected{
               Failure{.Code = FailureCode::Exists,
@@ -151,7 +151,7 @@ namespace DxfIO::Edit
               {
                 Entities::Claim(one, owner);
               }
-              Tagged(FindBlock(drawing, paper ? Paper : Model), one);
+              Tagged(View::Block(drawing, paper ? Paper : Model), one);
               drawing.Entities.push_back(std::move(one));
               return self;
             });
@@ -159,15 +159,15 @@ namespace DxfIO::Edit
 
   auto Add(Drawing &drawing, Entity one, std::string_view block) -> std::expected<Handle, Failure>
   {
-    if (Same(block, Model))
+    if (View::Same(block, Model))
     {
       return Add(drawing, std::move(one), Space::Model);
     }
-    if (Same(block, Paper))
+    if (View::Same(block, Paper))
     {
       return Add(drawing, std::move(one), Space::Paper);
     }
-    Blocks::Definition *found = FindBlock(drawing, block);
+    Blocks::Definition *found = View::Block(drawing, block);
     if (found == nullptr)
     {
       return std::unexpected{
@@ -195,12 +195,12 @@ namespace DxfIO::Edit
       return std::unexpected{
           Failure{.Code = FailureCode::Refused, .What = "block with no name refused"}};
     }
-    if (FindBlock(drawing, name) != nullptr)
+    if (View::Block(drawing, name) != nullptr)
     {
       return std::unexpected{
           Failure{.Code = FailureCode::Exists, .What = std::format("block {} exists", name)}};
     }
-    const bool recorded = Find(drawing.BlockRecord, Model) != nullptr;
+    const bool recorded = View::Record(drawing.BlockRecord, Model) != nullptr;
     return Seeded(drawing).transform(
         [&drawing, name, recorded](Seed handles) -> Handle
         {
@@ -242,7 +242,7 @@ namespace DxfIO::Edit
 
   auto Add(Drawing &drawing, Tables::Layer one) -> std::expected<Handle, Failure>
   {
-    if (const Tables::Layer *zero = Find(drawing.Layer, "0"))
+    if (const Tables::Layer *zero = View::Record(drawing.Layer, "0"))
     {
       one.Style    = one.Style ? one.Style : zero->Style;
       one.Material = one.Material ? one.Material : zero->Material;

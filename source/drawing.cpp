@@ -1,15 +1,13 @@
-#include "dxfio/edit/find.hpp"
-
-#include "ascii.hpp"
+#include "dxfio/drawing.hpp"
 
 #include <algorithm>
 
-namespace DxfIO::Edit
+namespace DxfIO
 {
   namespace
   {
     template <class DrawingT>
-    auto Entity(DrawingT &drawing, Handle self) -> auto *
+    auto EntityIn(DrawingT &drawing, Handle self) -> auto *
     {
       using Found = decltype(&drawing.Entities.front());
       if (!self)
@@ -37,7 +35,7 @@ namespace DxfIO::Edit
     }
 
     template <class DrawingT>
-    auto Object(DrawingT &drawing, Handle self) -> auto *
+    auto ObjectIn(DrawingT &drawing, Handle self) -> auto *
     {
       const auto found =
           !self ? drawing.Objects.end()
@@ -45,49 +43,25 @@ namespace DxfIO::Edit
                                        { return BaseOf(one).Self == self; });
       return found == drawing.Objects.end() ? nullptr : &*found;
     }
-
-    template <class DrawingT>
-    auto Block(DrawingT &drawing, std::string_view name) -> auto *
-    {
-      const auto found =
-          std::ranges::find_if(drawing.Blocks, [name](const Blocks::Definition &one) -> bool
-                               { return Same(one.Block.Name, name); });
-      return found == drawing.Blocks.end() ? nullptr : &*found;
-    }
   } // namespace
-
-  auto Same(std::string_view one, std::string_view other) -> bool
-  {
-    return Ascii::Same(one, other);
-  }
 
   auto FindEntity(Drawing &drawing, Handle self) -> DxfIO::Entity *
   {
-    return Entity(drawing, self);
+    return EntityIn(drawing, self);
   }
 
   auto FindEntity(const Drawing &drawing, Handle self) -> const DxfIO::Entity *
   {
-    return Entity(drawing, self);
+    return EntityIn(drawing, self);
   }
 
   auto FindObject(Drawing &drawing, Handle self) -> DxfIO::Object *
   {
-    return Object(drawing, self);
+    return ObjectIn(drawing, self);
   }
 
   auto FindObject(const Drawing &drawing, Handle self) -> const DxfIO::Object *
   {
-    return Object(drawing, self);
+    return ObjectIn(drawing, self);
   }
-
-  auto FindBlock(Drawing &drawing, std::string_view name) -> Blocks::Definition *
-  {
-    return Block(drawing, name);
-  }
-
-  auto FindBlock(const Drawing &drawing, std::string_view name) -> const Blocks::Definition *
-  {
-    return Block(drawing, name);
-  }
-} // namespace DxfIO::Edit
+} // namespace DxfIO

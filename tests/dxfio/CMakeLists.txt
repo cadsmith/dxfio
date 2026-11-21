@@ -6,6 +6,7 @@ target_sources(dxfio_tests
     brace.cpp
     chained.cpp
     create.cpp
+    drawing.cpp
     entity.cpp
     family.cpp
     tag.cpp
@@ -13,6 +14,7 @@ target_sources(dxfio_tests
     handseed.cpp
     lineweight.cpp
     head.cpp
+    index.cpp
     load.cpp
     match.cpp
     object.cpp
@@ -27,6 +29,7 @@ target_sources(dxfio_tests
     unknown.cpp
     vector.cpp
     version.cpp
+    view.cpp
     xdata.cpp
 )
 

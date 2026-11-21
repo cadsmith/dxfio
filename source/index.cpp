@@ -1,6 +1,6 @@
-#include "dxfio/edit/index.hpp"
+#include "dxfio/index.hpp"
 
-namespace DxfIO::Edit
+namespace DxfIO
 {
   Index::Index(const Drawing &drawing) : m_Drawing{&drawing}
   {
@@ -37,4 +37,4 @@ namespace DxfIO::Edit
     const auto found = self ? m_Objects.find(self.Value) : m_Objects.end();
     return found == m_Objects.end() ? nullptr : found->second;
   }
-} // namespace DxfIO::Edit
+} // namespace DxfIO

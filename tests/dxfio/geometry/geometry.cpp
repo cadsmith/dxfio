@@ -1,7 +1,5 @@
 #include "../disk.hpp"
 
-#include "dxfio/edit/find.hpp"
-#include "dxfio/edit/index.hpp"
 #include "dxfio/entities/circle.hpp"
 #include "dxfio/geometry/coordinates.hpp"
 #include "dxfio/geometry/transform.hpp"
@@ -75,35 +73,5 @@ namespace DxfIO::Geometry
     CHECK(Near(Transform(TransformOf(insert, block), block.Block.Origin),
                Vector{.X = -10, .Y = 20, .Z = 0}));
     CHECK(Compose(Identity, placed) == placed);
-  }
-
-  TEST_CASE("index: finds every entity and object as FindEntity and FindObject do")
-  {
-    for (const char *name : {"entities-r2000.dxf", "entities-r2018.dxf"})
-    {
-      CAPTURE(name);
-      const auto loaded = Load(Acad(name));
-      REQUIRE(loaded);
-      const Drawing    &drawing = loaded->Drawing;
-      const Edit::Index index{drawing};
-      CHECK(&index.Drawn() == &drawing);
-      for (const Entity &one : drawing.Entities)
-      {
-        CHECK(index.FindEntity(BaseOf(one).Self) == Edit::FindEntity(drawing, BaseOf(one).Self));
-      }
-      for (const auto &block : drawing.Blocks)
-      {
-        for (const Entity &one : block.Entities)
-        {
-          CHECK(index.FindEntity(BaseOf(one).Self) == Edit::FindEntity(drawing, BaseOf(one).Self));
-        }
-      }
-      for (const Object &one : drawing.Objects)
-      {
-        CHECK(index.FindObject(BaseOf(one).Self) == Edit::FindObject(drawing, BaseOf(one).Self));
-      }
-      CHECK(index.FindEntity(Handle{}) == nullptr);
-      CHECK(index.FindObject(Handle{.Value = 0xFFFFFF}) == nullptr);
-    }
   }
 } // namespace DxfIO::Geometry

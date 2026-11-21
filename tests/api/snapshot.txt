@@ -239,6 +239,7 @@ namespace DxfIO
 #include "dxfio/api.hpp"
 #include "dxfio/blocks/definition.hpp"
 #include "dxfio/entity.hpp"
+#include "dxfio/handle.hpp"
 #include "dxfio/header/header.hpp"
 #include "dxfio/object.hpp"
 #include "dxfio/raw.hpp"
@@ -279,25 +280,29 @@ namespace DxfIO
     std::vector<Section> Sections{};
     auto operator==(const Drawing &) const -> bool = default;
   };
+  [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
+  [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
+  [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
+  [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
 }
 == dxfio/dxfio.hpp
 #include "dxfio/audit/audit.hpp"
 #include "dxfio/create.hpp"
 #include "dxfio/drawing.hpp"
 #include "dxfio/edit/add.hpp"
-#include "dxfio/edit/find.hpp"
 #include "dxfio/edit/handles.hpp"
-#include "dxfio/edit/index.hpp"
 #include "dxfio/edit/space.hpp"
 #include "dxfio/flags.hpp"
 #include "dxfio/geometry/coordinates.hpp"
 #include "dxfio/geometry/transform.hpp"
+#include "dxfio/index.hpp"
 #include "dxfio/library.hpp"
 #include "dxfio/lineweight.hpp"
 #include "dxfio/load.hpp"
 #include "dxfio/save.hpp"
 #include "dxfio/tables/face.hpp"
 #include "dxfio/version.hpp"
+#include "dxfio/view.hpp"
 == dxfio/edit/add.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/drawing.hpp"
@@ -324,45 +329,6 @@ namespace DxfIO::Edit
   DXFIO_API auto Add(Drawing &drawing, Tables::AppId one) -> std::expected<Handle, Failure>;
   DXFIO_API auto Add(Drawing &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>;
 }
-== dxfio/edit/find.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/blocks/definition.hpp"
-#include "dxfio/drawing.hpp"
-#include "dxfio/entity.hpp"
-#include "dxfio/handle.hpp"
-#include "dxfio/object.hpp"
-#include "dxfio/tables/table.hpp"
-#include <algorithm>
-#include <string_view>
-namespace DxfIO::Edit
-{
-  [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
-  [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
-  [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
-  [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
-  [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
-  [[nodiscard]] DXFIO_API auto FindBlock(Drawing &drawing, std::string_view name)
-      -> Blocks::Definition *;
-  [[nodiscard]] DXFIO_API auto FindBlock(const Drawing &drawing, std::string_view name)
-      -> const Blocks::Definition *;
-  template <class RecordT>
-    requires requires(const RecordT &record) { record.Record.Name; }
-  [[nodiscard]] auto Find(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
-  {
-    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
-    return found == table.Records.end() ? nullptr : &*found;
-  }
-  template <class RecordT>
-    requires requires(const RecordT &record) { record.Record.Name; }
-  [[nodiscard]] auto Find(const Tables::Table<RecordT> &table, std::string_view name)
-      -> const RecordT *
-  {
-    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
-    return found == table.Records.end() ? nullptr : &*found;
-  }
-}
 == dxfio/edit/handles.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/drawing.hpp"
@@ -372,29 +338,6 @@ namespace DxfIO::Edit
 namespace DxfIO::Edit
 {
   [[nodiscard]] DXFIO_API auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
-}
-== dxfio/edit/index.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/drawing.hpp"
-#include "dxfio/entity.hpp"
-#include "dxfio/handle.hpp"
-#include "dxfio/object.hpp"
-#include <cstdint>
-#include <unordered_map>
-namespace DxfIO::Edit
-{
-  class DXFIO_API Index
-  {
-  public:
-    explicit Index(const Drawing &drawing);
-    [[nodiscard]] auto Drawn() const -> const Drawing &;
-    [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
-    [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
-  private:
-    const Drawing                                    *m_Drawing;
-    std::unordered_map<std::uint64_t, const Entity *> m_Entities;
-    std::unordered_map<std::uint64_t, const Object *> m_Objects;
-  };
 }
 == dxfio/edit/space.hpp
 #include <cstdint>
@@ -2139,6 +2082,29 @@ namespace DxfIO::Header
     auto operator==(const Variable &) const -> bool = default;
   };
 }
+== dxfio/index.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/drawing.hpp"
+#include "dxfio/entity.hpp"
+#include "dxfio/handle.hpp"
+#include "dxfio/object.hpp"
+#include <cstdint>
+#include <unordered_map>
+namespace DxfIO
+{
+  class DXFIO_API Index
+  {
+  public:
+    explicit Index(const Drawing &drawing);
+    [[nodiscard]] auto Drawn() const -> const Drawing &;
+    [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
+    [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
+  private:
+    const Drawing                                    *m_Drawing;
+    std::unordered_map<std::uint64_t, const Entity *> m_Entities;
+    std::unordered_map<std::uint64_t, const Object *> m_Objects;
+  };
+}
 == dxfio/issue.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/handle.hpp"
@@ -3402,6 +3368,108 @@ namespace DxfIO
   [[nodiscard]] DXFIO_API auto AcadverOf(Version release) -> std::string_view;
   [[nodiscard]] DXFIO_API auto NameOf(Version release) -> std::string_view;
   [[nodiscard]] DXFIO_API auto ReleaseOf(std::string_view code) -> std::optional<Version>;
+}
+== dxfio/view.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/blocks/definition.hpp"
+#include "dxfio/drawing.hpp"
+#include "dxfio/object.hpp"
+#include "dxfio/objects/dictionary.hpp"
+#include "dxfio/objects/layout.hpp"
+#include "dxfio/tables/block.hpp"
+#include "dxfio/tables/table.hpp"
+#include <algorithm>
+#include <concepts>
+#include <string_view>
+#include <type_traits>
+#include <vector>
+namespace DxfIO::View
+{
+  [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
+  [[nodiscard]] DXFIO_API auto Block(Drawing &drawing, std::string_view name)
+      -> Blocks::Definition *;
+  [[nodiscard]] DXFIO_API auto Block(const Drawing &drawing, std::string_view name)
+      -> const Blocks::Definition *;
+  template <class RecordT>
+    requires requires(const RecordT &record) { record.Record.Name; }
+  [[nodiscard]] auto Record(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
+  {
+    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
+                                            { return Same(record.Record.Name, name); });
+    return found == table.Records.end() ? nullptr : &*found;
+  }
+  template <class RecordT>
+    requires requires(const RecordT &record) { record.Record.Name; }
+  [[nodiscard]] auto Record(const Tables::Table<RecordT> &table, std::string_view name)
+      -> const RecordT *
+  {
+    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
+                                            { return Same(record.Record.Name, name); });
+    return found == table.Records.end() ? nullptr : &*found;
+  }
+  template <class RecordT, class DrawingT>
+    requires std::same_as<std::remove_const_t<DrawingT>, Drawing>
+  [[nodiscard]] auto TableOf(DrawingT &drawing) -> auto &
+  {
+    if constexpr (std::same_as<RecordT, Tables::VPort>)
+    {
+      return drawing.VPort;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::LType>)
+    {
+      return drawing.LType;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::Layer>)
+    {
+      return drawing.Layer;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::Style>)
+    {
+      return drawing.Style;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::View>)
+    {
+      return drawing.View;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::Ucs>)
+    {
+      return drawing.Ucs;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::AppId>)
+    {
+      return drawing.AppId;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::DimStyle>)
+    {
+      return drawing.DimStyle;
+    }
+    else
+    {
+      static_assert(std::same_as<RecordT, Tables::BlockRecord>, "a kind of table record");
+      return drawing.BlockRecord;
+    }
+  }
+  template <class RecordT>
+  [[nodiscard]] auto Record(Drawing &drawing, std::string_view name) -> RecordT *
+  {
+    return Record(TableOf<RecordT>(drawing), name);
+  }
+  template <class RecordT>
+  [[nodiscard]] auto Record(const Drawing &drawing, std::string_view name) -> const RecordT *
+  {
+    return Record(TableOf<RecordT>(drawing), name);
+  }
+  [[nodiscard]] DXFIO_API auto ModelSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
+  [[nodiscard]] DXFIO_API auto PaperSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
+  [[nodiscard]] DXFIO_API auto Layouts(const Drawing &drawing)
+      -> std::vector<const Objects::Layout *>;
+  [[nodiscard]] DXFIO_API auto Layout(const Drawing &drawing, std::string_view name)
+      -> const Objects::Layout *;
+  [[nodiscard]] DXFIO_API auto Root(const Drawing &drawing) -> const Objects::Dictionary *;
+  [[nodiscard]] DXFIO_API auto Entry(const Drawing &drawing, const Objects::Dictionary &dictionary,
+                                     std::string_view name) -> const Object *;
+  [[nodiscard]] DXFIO_API auto Dictionary(const Drawing &drawing, std::string_view name)
+      -> const Objects::Dictionary *;
 }
 == dxfio/widths.hpp
 #include "dxfio/api.hpp"

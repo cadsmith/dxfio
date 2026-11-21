@@ -9,7 +9,7 @@
 #include "past.hpp"
 #include "seed.hpp"
 
-#include "dxfio/edit/find.hpp"
+#include "dxfio/view.hpp"
 
 #include <algorithm>
 #include <string_view>
@@ -39,11 +39,11 @@ namespace DxfIO::Lift
      */
     auto Spaced(std::string_view name) -> std::string_view
     {
-      if (Edit::Same(name, "$MODEL_SPACE") || Edit::Same(name, Model))
+      if (View::Same(name, "$MODEL_SPACE") || View::Same(name, Model))
       {
         return Model;
       }
-      return Edit::Same(name, "$PAPER_SPACE") || Edit::Same(name, Paper) ? Paper
+      return View::Same(name, "$PAPER_SPACE") || View::Same(name, Paper) ? Paper
                                                                          : std::string_view{};
     }
 
@@ -68,7 +68,7 @@ namespace DxfIO::Lift
 
     auto Record(const Drawing &drawing, std::string_view block) -> Handle
     {
-      return Edit::Find(drawing.BlockRecord, block)->Record.Base.Self;
+      return View::Record(drawing.BlockRecord, block)->Record.Base.Self;
     }
 
     /**
@@ -81,7 +81,7 @@ namespace DxfIO::Lift
     {
       for (RecordT &one : records)
       {
-        RecordT *own = Edit::Find(into, one.Record.Name);
+        RecordT *own = View::Record(into, one.Record.Name);
         Base     base{};
         base.Self       = own == nullptr ? with.Handles->Take() : own->Record.Base.Self;
         base.Owner      = into.Head.Base.Self;
@@ -137,7 +137,7 @@ namespace DxfIO::Lift
       const std::string_view space = Spaced(block.Block.Name);
       if (!space.empty())
       {
-        Blocks::Definition &own   = *Edit::FindBlock(into, space);
+        Blocks::Definition &own   = *View::Block(into, space);
         const Handle        owner = own.Block.Record.Base.Owner;
         for (Entity &one : block.Entities)
         {

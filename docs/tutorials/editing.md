@@ -51,7 +51,7 @@ LINE 2DB moved to (10, 20) - (40, 40)
 
 ## By layer [#layer]
 
-Every kind dxfio types carries its layer and color in `Record`; an `Unknown` has none, and the `requires` test leaves it out. `Edit::Same` compares names as AutoCAD does, without case. `Colors::ByLayer` gives an entity its layer's color; the circle on walls also has a true color in `Rgb`, cleared with it.
+Every kind dxfio types carries its layer and color in `Record`; an `Unknown` has none, and the `requires` test leaves it out. `View::Same` compares names as AutoCAD does, without case. `Colors::ByLayer` gives an entity its layer's color; the circle on walls also has a true color in `Rgb`, cleared with it.
 
 ```cpp
 for (DxfIO::Entity &one : drawing.Entities)
@@ -62,7 +62,7 @@ for (DxfIO::Entity &one : drawing.Entities)
         if constexpr (requires { kind.Record.Layer; })
         {
           DxfIO::Entities::Record &record = kind.Record;
-          if (!DxfIO::Edit::Same(record.Layer.View(), "walls"))
+          if (!DxfIO::View::Same(record.Layer.View(), "walls"))
           {
             return;
           }
@@ -82,10 +82,10 @@ CIRCLE 2D0 on walls: color 30, true color 0xFF8000
 
 ## By handle [#handle]
 
-A handle's `Value` is the number DXF writes in hex. `Edit::FindEntity` looks for it in the ENTITIES section and in every block, and returns a pointer into the drawing, or null. `std::get_if` gives null for a null pointer too, so one test covers both.
+A handle's `Value` is the number DXF writes in hex. `FindEntity` looks for it in the ENTITIES section and in every block, and returns a pointer into the drawing, or null. `std::get_if` gives null for a null pointer too, so one test covers both.
 
 ```cpp
-DxfIO::Entity *found = DxfIO::Edit::FindEntity(drawing, DxfIO::Handle{.Value = 0x2D5});
+DxfIO::Entity *found = DxfIO::FindEntity(drawing, DxfIO::Handle{.Value = 0x2D5});
 if (auto *circle = std::get_if<DxfIO::Entities::Circle>(found))
 {
   circle->Radius *= 2;

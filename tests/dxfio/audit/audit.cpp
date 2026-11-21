@@ -8,9 +8,9 @@
 
 #include "dxfio/create.hpp"
 #include "dxfio/edit/add.hpp"
-#include "dxfio/edit/find.hpp"
 #include "dxfio/load.hpp"
 #include "dxfio/save.hpp"
+#include "dxfio/view.hpp"
 
 #include <doctest/doctest.h>
 
@@ -159,7 +159,7 @@ namespace DxfIO::Audit
     layer.Record.Base.Extended.push_back(named("NORTH"));
     REQUIRE(Edit::Add(drawing, layer));
     REQUIRE(Edit::AddBlock(drawing, "PART"));
-    Edit::FindBlock(drawing, "PART")->Block.Record.Base.Extended.push_back(named("WEST"));
+    View::Block(drawing, "PART")->Block.Record.Base.Extended.push_back(named("WEST"));
     std::get<Objects::Dictionary>(drawing.Objects.front()).Base.Extended.push_back(named("south"));
     Tables::Table<Unknown> loose{};
     loose.Head.Name = "VX_TABLE";
@@ -169,13 +169,13 @@ namespace DxfIO::Audit
     const Report seen = Check(drawing);
     CHECK(seen.Errors() == 5);
     CHECK(seen.Findings.front().What    == "application NORTH not registered");
-    CHECK(seen.Findings.front().Subject == Edit::Find(drawing.Layer, "WALLS")->Record.Base.Self);
+    CHECK(seen.Findings.front().Subject == View::Record(drawing.Layer, "WALLS")->Record.Base.Self);
     const Report fixed = Repair(drawing);
     CHECK(fixed.Clean());
     for (const std::string_view application : {"SOUTH", "EAST", "NORTH", "WEST", "LOOSE"})
     {
       CAPTURE(application);
-      const Tables::AppId *made = Edit::Find(drawing.AppId, application);
+      const Tables::AppId *made = View::Record(drawing.AppId, application);
       REQUIRE(made != nullptr);
       CHECK(made->Record.Base.Self);
       CHECK(made->Record.Base.Owner == drawing.AppId.Head.Base.Self);
@@ -191,7 +191,7 @@ namespace DxfIO::Audit
     line.Record.Base.Extended.push_back(Xdata{.Application = "SOUTH"});
     REQUIRE(Edit::Add(drawing, line));
     REQUIRE(Repair(drawing).Clean());
-    const Tables::AppId *made = Edit::Find(drawing.AppId, "SOUTH");
+    const Tables::AppId *made = View::Record(drawing.AppId, "SOUTH");
     REQUIRE(made != nullptr);
     CHECK_FALSE(made->Record.Base.Self);
   }
@@ -232,8 +232,7 @@ namespace DxfIO::Audit
     const auto &line = std::get<Entities::Ellipse>(drawing.Entities.at(2));
     CHECK(line.Axis  == Vector{});
     CHECK(line.Ratio == 0.5);
-    const auto &arc =
-        std::get<Entities::Ellipse>(Edit::FindBlock(drawing, "PART")->Entities.front());
+    const auto &arc = std::get<Entities::Ellipse>(View::Block(drawing, "PART")->Entities.front());
     CHECK(arc.Axis  == Vector{.X = 0, .Y = 6, .Z = 0});
     CHECK(arc.Start == doctest::Approx(0));
     CHECK(arc.End   == doctest::Approx(std::numbers::pi / 2));
@@ -402,8 +401,8 @@ namespace DxfIO::Audit
     drawing.Style.Records.push_back(unstyled);
     WriteSeed(drawing, Handle{.Value = Past(drawing).Value + 1});
     REQUIRE(Edit::AddBlock(drawing, "PART"));
-    Edit::FindBlock(drawing, "PART")->Block.Name.clear();
-    Edit::Find(drawing.BlockRecord, "PART")->Record.Name.clear();
+    View::Block(drawing, "PART")->Block.Name.clear();
+    View::Record(drawing.BlockRecord, "PART")->Record.Name.clear();
     Entities::Line line{};
     line.Record.Layer    = Symbol{""};
     line.Record.Linetype = Symbol{""};
@@ -470,7 +469,7 @@ namespace DxfIO::Audit
     CHECK(Repair(drawing).Clean());
     REQUIRE(drawing.Entities.size() == 1);
     CHECK(std::get<Entities::Leader>(drawing.Entities.front()).Data->Points.size() == 2);
-    CHECK(Edit::FindBlock(drawing, "PART")->Entities.empty());
+    CHECK(View::Block(drawing, "PART")->Entities.empty());
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -504,7 +503,7 @@ namespace DxfIO::Audit
     Entities::AttDef constant{};
     constant.Flags = 2;
     REQUIRE(Edit::Add(drawing, constant, "FIXED"));
-    Blocks::Definition *tagged = Edit::FindBlock(drawing, "TAGGED");
+    Blocks::Definition *tagged = View::Block(drawing, "TAGGED");
     tagged->Block.Flags        = 1;
     const Report seen          = Check(drawing);
     REQUIRE(seen.Warnings() == 1);
@@ -513,7 +512,7 @@ namespace DxfIO::Audit
     CHECK(seen.Errors() == 0);
     CHECK(Repair(drawing).Clean());
     CHECK(tagged->Block.Flags == 3);
-    CHECK(Edit::FindBlock(drawing, "FIXED")->Block.Flags == 0);
+    CHECK(View::Block(drawing, "FIXED")->Block.Flags == 0);
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -599,12 +598,12 @@ namespace DxfIO::Audit
     CHECK(seen.Errors()            == 0);
     REQUIRE(seen.Warnings()        == 4);
     CHECK(seen.Findings.at(0).What == "lineweight 1000 is none AutoCAD has, 211 taken");
-    CHECK(seen.Findings.at(0).Subject == Edit::Find(drawing.Layer, "WALLS")->Record.Base.Self);
+    CHECK(seen.Findings.at(0).Subject == View::Record(drawing.Layer, "WALLS")->Record.Base.Self);
     CHECK(seen.Findings.at(1).What    == "lineweight 284 is none AutoCAD has, 211 taken");
     CHECK(seen.Findings.at(2).What    == "lineweight -4 is none AutoCAD has, -3 taken");
     CHECK(seen.Findings.at(3).What    == "lineweight 7 is none AutoCAD has, 5 taken");
     CHECK(Repair(drawing).Clean());
-    CHECK(Edit::Find(drawing.Layer, "WALLS")->Lineweight == Lineweight::Mm211);
+    CHECK(View::Record(drawing.Layer, "WALLS")->Lineweight == Lineweight::Mm211);
     CHECK(std::get<Entities::Line>(drawing.Entities.at(0)).Record.Lineweight == Lineweight::Mm211);
     CHECK(std::get<Entities::Line>(drawing.Entities.at(1)).Record.Lineweight
           == Lineweight::Default);
@@ -826,7 +825,7 @@ namespace DxfIO::Audit
     CHECK(Check(drawing).Warnings()    == 2);
     REQUIRE(Repair(drawing).Warnings() == 2);
     CHECK(std::get<Entities::AttDef>(drawing.Entities.back()).Lettering->Style == "Standard");
-    CHECK(Edit::FindBlock(drawing, "*Model_Space")->Block.Flags == 2);
+    CHECK(View::Block(drawing, "*Model_Space")->Block.Flags == 2);
   }
 
   TEST_CASE("audit: an insert of no block is left out")
@@ -869,7 +868,7 @@ namespace DxfIO::Audit
     CHECK(Repair(drawing).Clean());
     REQUIRE(drawing.Entities.size() == 1);
     CHECK(std::holds_alternative<Entities::Line>(drawing.Entities.front()));
-    CHECK(Edit::FindBlock(drawing, "PART")->Entities.empty());
+    CHECK(View::Block(drawing, "PART")->Entities.empty());
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -1000,22 +999,22 @@ namespace DxfIO::Audit
     REQUIRE(Edit::AddBlock(drawing, "B"));
     REQUIRE(Edit::Add(drawing, Entities::Line{}, "A"));
     REQUIRE(Edit::Add(drawing, Entities::Line{}, "B"));
-    const Handle shared = Edit::Find(drawing.BlockRecord, "A")->Record.Base.Self;
-    Edit::Find(drawing.BlockRecord, "B")->Record.Base.Self = shared;
-    Blocks::Definition &moved                              = *Edit::FindBlock(drawing, "B");
-    moved.Block.Record.Base.Owner                          = shared;
-    moved.EndBlk.Record.Base.Owner                         = shared;
-    BaseOf(moved.Entities.front()).Owner                   = shared;
-    const Report fixed                                     = Repair(drawing);
+    const Handle shared = View::Record(drawing.BlockRecord, "A")->Record.Base.Self;
+    View::Record(drawing.BlockRecord, "B")->Record.Base.Self = shared;
+    Blocks::Definition &moved                                = *View::Block(drawing, "B");
+    moved.Block.Record.Base.Owner                            = shared;
+    moved.EndBlk.Record.Base.Owner                           = shared;
+    BaseOf(moved.Entities.front()).Owner                     = shared;
+    const Report fixed                                       = Repair(drawing);
     REQUIRE(fixed.Errors() == 1);
     CHECK(fixed.Findings.front().What
           == std::format("handle {:X} of a block record used twice", shared.Value));
-    const Handle now = Edit::Find(drawing.BlockRecord, "B")->Record.Base.Self;
+    const Handle now = View::Record(drawing.BlockRecord, "B")->Record.Base.Self;
     CHECK(now != shared);
     CHECK(moved.Block.Record.Base.Owner        == now);
     CHECK(moved.EndBlk.Record.Base.Owner       == now);
     CHECK(BaseOf(moved.Entities.front()).Owner == now);
-    const Blocks::Definition &kept = *Edit::FindBlock(drawing, "A");
+    const Blocks::Definition &kept = *View::Block(drawing, "A");
     CHECK(kept.Block.Record.Base.Owner        == shared);
     CHECK(BaseOf(kept.Entities.front()).Owner == shared);
   }
@@ -1026,15 +1025,15 @@ namespace DxfIO::Audit
     Drawing drawing = Create(Version::R2018);
     REQUIRE(Edit::Add(drawing, Entities::Line{}));
     REQUIRE(Edit::Add(drawing, Entities::Circle{}, Edit::Space::Paper));
-    const Tables::BlockRecord &model      = *Edit::Find(drawing.BlockRecord, "*Model_Space");
+    const Tables::BlockRecord &model      = *View::Record(drawing.BlockRecord, "*Model_Space");
     const Handle               shared     = model.Record.Base.Self;
-    Tables::BlockRecord       &paper      = *Edit::Find(drawing.BlockRecord, "*Paper_Space");
+    Tables::BlockRecord       &paper      = *View::Record(drawing.BlockRecord, "*Paper_Space");
     paper.Record.Base.Self                = shared;
-    Blocks::Definition &sheet             = *Edit::FindBlock(drawing, "*Paper_Space");
+    Blocks::Definition &sheet             = *View::Block(drawing, "*Paper_Space");
     sheet.Block.Record.Base.Owner         = shared;
     sheet.EndBlk.Record.Base.Owner        = shared;
     BaseOf(drawing.Entities.back()).Owner = shared;
-    auto &laid = std::get<Objects::Layout>(*Edit::FindObject(drawing, paper.Layout));
+    auto &laid = std::get<Objects::Layout>(*FindObject(drawing, paper.Layout));
     laid.Block = shared;
     REQUIRE(Repair(drawing).Errors() == 1);
     const Handle now = paper.Record.Base.Self;
@@ -1044,8 +1043,8 @@ namespace DxfIO::Audit
     CHECK(BaseOf(drawing.Entities.back()).Owner == now);
     CHECK(laid.Block == now);
     CHECK(BaseOf(drawing.Entities.front()).Owner == shared);
-    CHECK(Edit::FindBlock(drawing, "*Model_Space")->Block.Record.Base.Owner         == shared);
-    CHECK(std::get<Objects::Layout>(*Edit::FindObject(drawing, model.Layout)).Block == shared);
+    CHECK(View::Block(drawing, "*Model_Space")->Block.Record.Base.Owner       == shared);
+    CHECK(std::get<Objects::Layout>(*FindObject(drawing, model.Layout)).Block == shared);
   }
 
   TEST_CASE("audit: the model space record given a new handle leaves paper space's entities")
@@ -1053,7 +1052,7 @@ namespace DxfIO::Audit
     Drawing drawing = Create(Version::R2018);
     REQUIRE(Edit::Add(drawing, Entities::Line{}));
     REQUIRE(Edit::Add(drawing, Entities::Circle{}, Edit::Space::Paper));
-    Tables::BlockRecord &model             = *Edit::Find(drawing.BlockRecord, "*Model_Space");
+    Tables::BlockRecord &model             = *View::Record(drawing.BlockRecord, "*Model_Space");
     const Handle         shared            = drawing.Layer.Head.Base.Self;
     model.Record.Base.Self                 = shared;
     BaseOf(drawing.Entities.front()).Owner = shared;
@@ -1117,8 +1116,8 @@ namespace DxfIO::Audit
     CHECK(attributes.Children.front().Lettering.Style == "Standard");
     const auto &vertices = std::get<Entities::Polyline>(drawing.Entities.back()).Vertices;
     CHECK(vertices.Children.front().Record.Linetype == "ByLayer");
-    CHECK(Edit::Find(drawing.Layer, "NoSuchLayer") != nullptr);
-    CHECK(Edit::Find(drawing.Layer, "Ends") != nullptr);
+    CHECK(View::Record(drawing.Layer, "NoSuchLayer") != nullptr);
+    CHECK(View::Record(drawing.Layer, "Ends") != nullptr);
     CHECK(Check(drawing).Findings.empty());
   }
 

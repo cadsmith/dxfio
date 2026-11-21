@@ -2,9 +2,9 @@
 
 #include "dxfio/audit/audit.hpp"
 #include "dxfio/create.hpp"
-#include "dxfio/edit/find.hpp"
 #include "dxfio/load.hpp"
 #include "dxfio/save.hpp"
+#include "dxfio/view.hpp"
 
 #include <doctest/doctest.h>
 
@@ -35,7 +35,7 @@ namespace DxfIO::Edit
 
     auto Recorded(const Drawing &drawing, std::string_view name) -> Handle
     {
-      return Find(drawing.BlockRecord, name)->Record.Base.Self;
+      return View::Record(drawing.BlockRecord, name)->Record.Base.Self;
     }
 
     auto Named(std::string_view name) -> Tables::Layer
@@ -120,18 +120,18 @@ namespace DxfIO::Edit
     Entities::AttDef constant{};
     constant.Flags = 2;
     REQUIRE(Add(drawing, constant, "FIXED"));
-    CHECK(FindBlock(drawing, "FIXED")->Block.Flags == 0);
+    CHECK(View::Block(drawing, "FIXED")->Block.Flags == 0);
     REQUIRE(Add(drawing, Entities::AttDef{}, "TAGGED"));
-    CHECK(FindBlock(drawing, "TAGGED")->Block.Flags == 2);
+    CHECK(View::Block(drawing, "TAGGED")->Block.Flags == 2);
     REQUIRE(Add(drawing, Entities::AttDef{}, "*Model_Space"));
-    CHECK(FindBlock(drawing, "*Model_Space")->Block.Flags == 2);
+    CHECK(View::Block(drawing, "*Model_Space")->Block.Flags == 2);
     REQUIRE(Add(drawing, Entities::AttDef{}, Space::Paper));
-    CHECK(FindBlock(drawing, "*Paper_Space")->Block.Flags == 2);
+    CHECK(View::Block(drawing, "*Paper_Space")->Block.Flags == 2);
     REQUIRE(Add(drawing, Entities::AttDef{}, "TAGGED"));
-    CHECK(FindBlock(drawing, "TAGGED")->Block.Flags == 2);
+    CHECK(View::Block(drawing, "TAGGED")->Block.Flags == 2);
     Drawing old = Create(Version::R12);
     REQUIRE(Add(old, Entities::AttDef{}, Space::Model));
-    CHECK(FindBlock(old, "*Model_Space") == nullptr);
+    CHECK(View::Block(old, "*Model_Space") == nullptr);
   }
 
   TEST_CASE("add: a record or a block with no name is refused")
@@ -281,13 +281,13 @@ namespace DxfIO::Edit
     Drawing    drawing = Create();
     const auto begin   = AddBlock(drawing, "Door");
     REQUIRE(begin);
-    const Blocks::Definition *door = FindBlock(drawing, "door");
+    const Blocks::Definition *door = View::Block(drawing, "door");
     REQUIRE(door != nullptr);
     CHECK(door->Block.Record.Base.Self == *begin);
     const Handle record = Recorded(drawing, "Door");
     CHECK(door->Block.Record.Base.Owner  == record);
     CHECK(door->EndBlk.Record.Base.Owner == record);
-    CHECK(Find(drawing.BlockRecord, "Door")->Record.Base.Owner
+    CHECK(View::Record(drawing.BlockRecord, "Door")->Record.Base.Owner
           == drawing.BlockRecord.Head.Base.Self);
 
     const auto self = Add(drawing, Entities::Arc{}, "DOOR");
@@ -311,14 +311,14 @@ namespace DxfIO::Edit
     REQUIRE(drawing.Entities.size() == 2);
     CHECK_FALSE(std::get<Entities::Line>(drawing.Entities[0]).Record.Paper);
     CHECK(std::get<Entities::Line>(drawing.Entities[1]).Record.Paper);
-    CHECK(FindBlock(drawing, "*Model_Space")->Entities.empty());
+    CHECK(View::Block(drawing, "*Model_Space")->Entities.empty());
   }
 
   TEST_CASE("edit: a block of a layout's paper space flags what it takes")
   {
     Drawing drawing = Create();
     REQUIRE(AddBlock(drawing, "*Paper_Space0"));
-    Blocks::Definition *sheet = FindBlock(drawing, "*Paper_Space0");
+    Blocks::Definition *sheet = View::Block(drawing, "*Paper_Space0");
     sheet->Block.Record.Paper = true;
     REQUIRE(Add(drawing, Entities::Line{}, "*Paper_Space0"));
     CHECK(std::get<Entities::Line>(sheet->Entities.front()).Record.Paper);
@@ -343,7 +343,7 @@ namespace DxfIO::Edit
     const auto records = drawing.BlockRecord.Records.size();
     REQUIRE(AddBlock(drawing, "Door"));
     CHECK(drawing.BlockRecord.Records.size() == records);
-    CHECK_FALSE(FindBlock(drawing, "Door")->Block.Record.Base.Owner);
+    CHECK_FALSE(View::Block(drawing, "Door")->Block.Record.Base.Owner);
     REQUIRE(Add(drawing, Entities::Line{}));
     CHECK_FALSE(BaseOf(drawing.Entities.back()).Owner);
     const auto saved = Save(drawing, SaveOptions{.Release = Version::R12});
@@ -368,7 +368,7 @@ namespace DxfIO::Edit
   TEST_CASE("edit: a layer takes layer 0's plot style and material, unless it names its own")
   {
     Drawing             drawing = Create();
-    const Tables::Layer zero    = *Find(drawing.Layer, "0");
+    const Tables::Layer zero    = *View::Record(drawing.Layer, "0");
     REQUIRE(zero.Style);
     REQUIRE(Add(drawing, Named("Walls")));
     CHECK(drawing.Layer.Records.back().Style    == zero.Style);
@@ -417,6 +417,6 @@ namespace DxfIO::Edit
     CHECK_FALSE(AddBlock(drawing, "Door"));
     CHECK_FALSE(Add(drawing, Named("Walls")));
     CHECK(drawing.Entities.empty());
-    CHECK_FALSE(Find(drawing.Layer, "Walls"));
+    CHECK_FALSE(View::Record(drawing.Layer, "Walls"));
   }
 } // namespace DxfIO::Edit
