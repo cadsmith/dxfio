@@ -94,6 +94,17 @@ namespace DxfIO::View
     CHECK(Entry(drawing, *root, "NOPE") == nullptr);
     CHECK(Dictionary(drawing, "NOPE")   == nullptr);
     CHECK(Root(Drawing{}) == nullptr);
+    CHECK(Dictionary(Drawing{}, "ACAD_LAYOUT") == nullptr);
+  }
+
+  TEST_CASE("view: the root is the dictionary no one owns, wherever it stands")
+  {
+    Drawing drawing = Create();
+    std::ranges::reverse(drawing.Objects);
+    const Objects::Dictionary *root = Root(drawing);
+    REQUIRE(root != nullptr);
+    CHECK_FALSE(root->Base.Owner);
+    CHECK(root == std::get_if<Objects::Dictionary>(&drawing.Objects.back()));
   }
 
   TEST_CASE("view: an entry leads to its object whether the dictionary owns it hard or soft")

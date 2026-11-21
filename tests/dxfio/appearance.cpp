@@ -74,6 +74,9 @@ namespace DxfIO
     CHECK(look.Linetype == Symbol{"Dashed"});
     record.Layer = Symbol{"0"};
     CHECK(AppearanceOf(drawing, record, nullptr).Layer == Symbol{"0"});
+    const Appearance other{.Layer = Symbol{"Elsewhere"}};
+    record.Layer = Symbol{"Walls"};
+    CHECK(AppearanceOf(drawing, record, &other).Layer == Symbol{"Walls"});
   }
 
   TEST_CASE("appearance: its own values stay, and a layer not in the table gives the defaults")
@@ -83,11 +86,12 @@ namespace DxfIO
     record.Layer          = Symbol{"Nowhere"};
     record.Color          = 2;
     record.Linetype       = Symbol{"Hidden"};
+    record.Lineweight     = Lineweight::Mm025;
     const Appearance look = AppearanceOf(drawing, record, nullptr);
     CHECK(look.Color == 2);
     CHECK_FALSE(look.Rgb);
     CHECK(look.Linetype   == Symbol{"Hidden"});
-    CHECK(look.Lineweight == Lineweight::Default);
+    CHECK(look.Lineweight == Lineweight::Mm025);
     record.Linetype          = Symbol{"ByLayer"};
     record.Color             = Colors::ByLayer;
     const Appearance missing = AppearanceOf(drawing, record, nullptr);

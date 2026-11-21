@@ -2,6 +2,8 @@
 
 #include "disk.hpp"
 
+#include "dxfio/create.hpp"
+#include "dxfio/edit/add.hpp"
 #include "dxfio/load.hpp"
 
 #include <doctest/doctest.h>
@@ -36,5 +38,20 @@ namespace DxfIO
       CHECK(index.FindEntity(Handle{}) == nullptr);
       CHECK(index.FindObject(Handle{.Value = 0xFFFFFF}) == nullptr);
     }
+  }
+
+  TEST_CASE("index: finds an entity of a block, and the drawing it indexed")
+  {
+    Drawing drawing = Create();
+    REQUIRE(Edit::AddBlock(drawing, "Door"));
+    const auto held = Edit::Add(drawing, Entities::Circle{}, "Door");
+    REQUIRE(held);
+    const Index index{drawing};
+    CHECK(&index.Drawn() == &drawing);
+    const Entity *circle = index.FindEntity(*held);
+    REQUIRE(circle != nullptr);
+    CHECK(circle == FindEntity(drawing, *held));
+    CHECK(index.FindObject(Handle{}) == nullptr);
+    CHECK(index.FindEntity(Handle{.Value = 0xFFFFFF}) == nullptr);
   }
 } // namespace DxfIO
