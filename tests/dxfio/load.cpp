@@ -111,8 +111,8 @@ namespace DxfIO
                            "  5\n2A\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
     CHECK(read->Document.Entities.empty());
-    REQUIRE(read->Document.Sections.size() == 1);
-    CHECK(read->Document.Sections.front().Groups.size() == 2);
+    REQUIRE(read->Document.Sections.size()            == 1);
+    CHECK(read->Document.Sections.front().Tags.size() == 2);
     const auto saved = Tests::Written(read->Document, SaveOptions{});
     REQUIRE(saved);
     CHECK(saved->contains("\\U+0045NTITIES"));
@@ -178,7 +178,7 @@ namespace DxfIO
         "  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n1001\nACAD\n1004\nzz\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
     REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(BaseOf(read->Document.Entities.front()).Extended.front().Groups.empty());
+    CHECK(BaseOf(read->Document.Entities.front()).Extended.front().Tags.empty());
     CHECK(read->Issues
           == std::vector{
               Issue{.Line = 10, .What = "hex expected for group 1004, found \"zz\", left out"}});

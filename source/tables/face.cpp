@@ -24,8 +24,8 @@ namespace DxfIO::Tables
     template <class ValueT>
     auto Held(const Xdata &all, int code) -> const ValueT *
     {
-      const auto found = std::ranges::find(all.Groups, code, &Tag::Code);
-      return found == all.Groups.end() ? nullptr : std::get_if<ValueT>(&found->Value);
+      const auto found = std::ranges::find(all.Tags, code, &Tag::Code);
+      return found == all.Tags.end() ? nullptr : std::get_if<ValueT>(&found->Value);
     }
   } // namespace
 

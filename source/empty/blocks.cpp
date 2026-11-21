@@ -22,9 +22,9 @@ namespace DxfIO::Empty
   auto Block(std::string name, Space space, Seed &handles) -> Blocks::Definition
   {
     Blocks::Definition out{};
-    out.Begin.Record = Owned(space, handles);
-    out.Begin.Name   = std::move(name);
-    out.End.Record   = Owned(space, handles);
+    out.Block.Record  = Owned(space, handles);
+    out.Block.Name    = std::move(name);
+    out.EndBlk.Record = Owned(space, handles);
     return out;
   }
 

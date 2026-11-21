@@ -97,9 +97,9 @@ namespace DxfIO::Blocks
 {
   struct DXFIO_API Definition
   {
-    Blocks::Block Begin{};
+    Blocks::Block Block{};
     DxfIO::Entities::List Entities{};
-    Blocks::EndBlk End{};
+    Blocks::EndBlk EndBlk{};
     auto operator==(const Definition &) const -> bool = default;
   };
 }
@@ -207,7 +207,7 @@ namespace DxfIO
   struct DXFIO_API Brace
   {
     std::string Name{};
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Brace &) const -> bool = default;
   };
 }
@@ -215,8 +215,8 @@ namespace DxfIO
 namespace DxfIO::Colors
 {
   inline constexpr int White = 7;
-  inline constexpr int Byblock = 0;
-  inline constexpr int Bylayer = 256;
+  inline constexpr int ByBlock = 0;
+  inline constexpr int ByLayer = 256;
 }
 == dxfio/corners.hpp
 #include "dxfio/vector.hpp"
@@ -1540,8 +1540,8 @@ namespace DxfIO::Entities
     std::optional<std::string> Book{};
     std::optional<int> Rgb{};
     std::optional<int> Transparency{};
-    int Color{Colors::Bylayer};
-    int Lineweight{Lineweights::Bylayer};
+    int Color{Colors::ByLayer};
+    int Lineweight{Lineweights::ByLayer};
     int Shadow{};
     bool Paper{};
     bool Hidden{};
@@ -2037,8 +2037,8 @@ namespace DxfIO
 == dxfio/lineweights.hpp
 namespace DxfIO::Lineweights
 {
-  inline constexpr int Bylayer = -1;
-  inline constexpr int Byblock = -2;
+  inline constexpr int ByLayer = -1;
+  inline constexpr int ByBlock = -2;
   inline constexpr int Standard = -3;
 }
 == dxfio/load.hpp
@@ -2377,7 +2377,7 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects::MLeaderStyles
 {
-  inline constexpr int PackedByblock = -1056964608;
+  inline constexpr int PackedByBlock = -1056964608;
   inline constexpr double Margin = 2;
   inline constexpr double Reach = 8;
   inline constexpr double Size = 4;
@@ -2390,9 +2390,9 @@ namespace DxfIO::Objects::MLeaderStyles
     double First{};
     double Second{};
     int Type{1};
-    int Color{PackedByblock};
+    int Color{PackedByBlock};
     Handle Linetype{};
-    int Lineweight{Lineweights::Byblock};
+    int Lineweight{Lineweights::ByBlock};
     bool Landing{true};
     double Gap{Margin};
     bool Dogleg{true};
@@ -2409,7 +2409,7 @@ namespace DxfIO::Objects::MLeaderStyles
     int Right{1};
     int Angle{1};
     int Alignment{};
-    int Color{PackedByblock};
+    int Color{PackedByBlock};
     double Height{Size};
     bool Frame{};
     bool Flush{};
@@ -2422,7 +2422,7 @@ namespace DxfIO::Objects::MLeaderStyles
   struct DXFIO_API Block
   {
     Handle Record{};
-    int Color{PackedByblock};
+    int Color{PackedByBlock};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
     bool Scaled{true};
     double Rotation{};
@@ -2463,7 +2463,7 @@ namespace DxfIO::Objects::MLineStyles
   struct DXFIO_API Element
   {
     double Offset{};
-    int Color{Colors::Bylayer};
+    int Color{Colors::ByLayer};
     std::string Linetype{"BYLAYER"};
     auto operator==(const Element &) const -> bool = default;
   };
@@ -2476,7 +2476,7 @@ namespace DxfIO::Objects
     std::string Name{};
     int Flags{};
     std::string Description{};
-    int Fill{Colors::Bylayer};
+    int Fill{Colors::ByLayer};
     double Start{MLineStyles::Square};
     double End{MLineStyles::Square};
     std::vector<MLineStyles::Element> Elements{};
@@ -2606,7 +2606,7 @@ namespace DxfIO::Objects::TableStyles
   inline constexpr double Margin = 1.5;
   struct DXFIO_API Border
   {
-    int Lineweight{Lineweights::Byblock};
+    int Lineweight{Lineweights::ByBlock};
     bool Visible{true};
     int Color{};
     auto operator==(const Border &) const -> bool = default;
@@ -2723,7 +2723,7 @@ namespace DxfIO
   struct DXFIO_API Raw
   {
     std::string Type{};
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Raw &) const -> bool = default;
   };
 }
@@ -2771,7 +2771,7 @@ namespace DxfIO
   struct DXFIO_API Section
   {
     std::string Name{};
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Section &) const -> bool = default;
   };
 }
@@ -3242,7 +3242,7 @@ namespace DxfIO
   {
     Symbol Type{};
     DxfIO::Base Base{};
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Unknown &) const -> bool = default;
   };
 }
@@ -3305,7 +3305,7 @@ namespace DxfIO
   struct DXFIO_API Xdata
   {
     std::string Application{};
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Xdata &) const -> bool = default;
   };
 }

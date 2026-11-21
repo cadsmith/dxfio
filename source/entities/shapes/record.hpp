@@ -45,7 +45,7 @@ namespace DxfIO
       Fields::Field{
           .Code     = 62,
           .Member   = &Entities::Record::Color,
-          .Fallback = Colors::Bylayer,
+          .Fallback = Colors::ByLayer,
       },
       Fields::Field{
           .Code   = 420,
@@ -77,7 +77,7 @@ namespace DxfIO
       Fields::Field{
           .Code     = 370,
           .Member   = &Entities::Record::Lineweight,
-          .Fallback = Lineweights::Bylayer,
+          .Fallback = Lineweights::ByLayer,
           .Since    = Version::R2000,
       },
       Fields::Field{

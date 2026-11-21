@@ -28,9 +28,9 @@ namespace DxfIO::Blocks
     std::vector<Issue>            issues;
     const std::vector<Definition> taken = Read(*nests, Fields::Reading{.Issues = &issues});
     REQUIRE(taken.size()           == 1);
-    CHECK(taken.front().Begin.Name == "bolt");
+    CHECK(taken.front().Block.Name == "bolt");
     CHECK(std::holds_alternative<Entities::Circle>(taken.front().Entities.front()));
-    CHECK(taken.front().End.Record.Base.Self == Handle{0x22});
+    CHECK(taken.front().EndBlk.Record.Base.Self == Handle{0x22});
     Fields::Sheet page;
     REQUIRE(Write(page.To, taken));
     CHECK(page.Out == text);

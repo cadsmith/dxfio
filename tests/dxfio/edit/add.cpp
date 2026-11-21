@@ -120,15 +120,15 @@ namespace DxfIO::Edit
     Entities::AttDef constant{};
     constant.Flags = 2;
     REQUIRE(Add(drawing, constant, "FIXED"));
-    CHECK(FindBlock(drawing, "FIXED")->Begin.Flags == 0);
+    CHECK(FindBlock(drawing, "FIXED")->Block.Flags == 0);
     REQUIRE(Add(drawing, Entities::AttDef{}, "TAGGED"));
-    CHECK(FindBlock(drawing, "TAGGED")->Begin.Flags == 2);
+    CHECK(FindBlock(drawing, "TAGGED")->Block.Flags == 2);
     REQUIRE(Add(drawing, Entities::AttDef{}, "*Model_Space"));
-    CHECK(FindBlock(drawing, "*Model_Space")->Begin.Flags == 2);
+    CHECK(FindBlock(drawing, "*Model_Space")->Block.Flags == 2);
     REQUIRE(Add(drawing, Entities::AttDef{}, Space::Paper));
-    CHECK(FindBlock(drawing, "*Paper_Space")->Begin.Flags == 2);
+    CHECK(FindBlock(drawing, "*Paper_Space")->Block.Flags == 2);
     REQUIRE(Add(drawing, Entities::AttDef{}, "TAGGED"));
-    CHECK(FindBlock(drawing, "TAGGED")->Begin.Flags == 2);
+    CHECK(FindBlock(drawing, "TAGGED")->Block.Flags == 2);
     Document old = Create(Version::R12);
     REQUIRE(Add(old, Entities::AttDef{}, Space::Model));
     CHECK(FindBlock(old, "*Model_Space") == nullptr);
@@ -275,10 +275,10 @@ namespace DxfIO::Edit
     REQUIRE(begin);
     const Blocks::Definition *door = FindBlock(drawing, "door");
     REQUIRE(door != nullptr);
-    CHECK(door->Begin.Record.Base.Self == *begin);
+    CHECK(door->Block.Record.Base.Self == *begin);
     const Handle record = Recorded(drawing, "Door");
-    CHECK(door->Begin.Record.Base.Owner == record);
-    CHECK(door->End.Record.Base.Owner   == record);
+    CHECK(door->Block.Record.Base.Owner  == record);
+    CHECK(door->EndBlk.Record.Base.Owner == record);
     CHECK(Find(drawing.BlockRecord, "Door")->Record.Base.Owner
           == drawing.BlockRecord.Head.Base.Self);
 
@@ -311,7 +311,7 @@ namespace DxfIO::Edit
     Document drawing = Create();
     REQUIRE(AddBlock(drawing, "*Paper_Space0"));
     Blocks::Definition *sheet = FindBlock(drawing, "*Paper_Space0");
-    sheet->Begin.Record.Paper = true;
+    sheet->Block.Record.Paper = true;
     REQUIRE(Add(drawing, Entities::Line{}, "*Paper_Space0"));
     CHECK(std::get<Entities::Line>(sheet->Entities.front()).Record.Paper);
   }
@@ -335,7 +335,7 @@ namespace DxfIO::Edit
     const auto records = drawing.BlockRecord.Records.size();
     REQUIRE(AddBlock(drawing, "Door"));
     CHECK(drawing.BlockRecord.Records.size() == records);
-    CHECK_FALSE(FindBlock(drawing, "Door")->Begin.Record.Base.Owner);
+    CHECK_FALSE(FindBlock(drawing, "Door")->Block.Record.Base.Owner);
     REQUIRE(Add(drawing, Entities::Line{}));
     CHECK_FALSE(BaseOf(drawing.Entities.back()).Owner);
     const auto saved = Save(drawing, SaveOptions{.Release = Version::R12});

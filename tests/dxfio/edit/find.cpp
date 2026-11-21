@@ -70,7 +70,7 @@ namespace DxfIO::Edit
     Document            drawing = Create();
     Blocks::Definition *model   = FindBlock(drawing, "*MODEL_SPACE");
     REQUIRE(model != nullptr);
-    CHECK(model->Begin.Name == "*Model_Space");
+    CHECK(model->Block.Name == "*Model_Space");
     const Document &fixed = drawing;
     CHECK(FindBlock(fixed, "*paper_space") != nullptr);
     CHECK(FindBlock(drawing, "Door") == nullptr);

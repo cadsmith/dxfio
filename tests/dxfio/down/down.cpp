@@ -169,7 +169,7 @@ namespace DxfIO::Down
       line.Record.Layer     = Symbol{"Walls"};
       out.Entities.emplace_back(line);
       out.Blocks.push_back(Blocks::Definition{});
-      out.Blocks.back().Begin.Name = "Door";
+      out.Blocks.back().Block.Name = "Door";
       Entities::Insert held{};
       held.Block = Symbol{"Door"};
       Entities::Attrib tag{};
@@ -269,7 +269,7 @@ namespace DxfIO::Down
   TEST_CASE("down: a drawing for R12 holds no section R12 has not")
   {
     Document from = Fresh();
-    from.Sections.push_back(Section{.Name = "ACDSDATA", .Groups = {}});
+    from.Sections.push_back(Section{.Name = "ACDSDATA", .Tags = {}});
     from.Order.emplace_back("ACDSDATA");
     const Document out = Narrowed(from, Version::R12, nullptr);
     CHECK(out.Order == std::vector<std::string>{"HEADER", "TABLES", "BLOCKS", "ENTITIES"});
@@ -300,15 +300,15 @@ namespace DxfIO::Down
   {
     Document from = Fresh();
     from.Blocks.push_back(Blocks::Definition{});
-    from.Blocks.back().Begin.Name = "*Paper_Space7";
+    from.Blocks.back().Block.Name = "*Paper_Space7";
     from.Blocks.push_back(Blocks::Definition{});
-    from.Blocks.back().Begin.Name = "Door";
+    from.Blocks.back().Block.Name = "Door";
     const Document out            = Narrowed(from, Version::R12, nullptr);
     REQUIRE(out.Blocks.size()      == 3);
-    CHECK(out.Blocks[0].Begin.Name == "$MODEL_SPACE");
-    CHECK(out.Blocks[1].Begin.Name == "$PAPER_SPACE");
-    CHECK(out.Blocks[2].Begin.Name == "Door");
-    CHECK_FALSE(out.Blocks[0].Begin.Record.Base.Self);
+    CHECK(out.Blocks[0].Block.Name == "$MODEL_SPACE");
+    CHECK(out.Blocks[1].Block.Name == "$PAPER_SPACE");
+    CHECK(out.Blocks[2].Block.Name == "Door");
+    CHECK_FALSE(out.Blocks[0].Block.Record.Base.Self);
   }
 
   TEST_CASE("down: R10 has neither applications nor dimension styles")
@@ -327,7 +327,7 @@ namespace DxfIO::Down
     Entities::Line line{};
     line.Record.Base.Self  = Handle{0xB0};
     line.Record.Base.Owner = Handle{0x1F};
-    line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Groups = {}});
+    line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Tags = {}});
     line.Record.Base.Reactors.push_back(Handle{0x20});
     from.Entities.emplace_back(line);
     const Document out = Narrowed(from, Version::R12, nullptr);
@@ -467,8 +467,8 @@ namespace DxfIO::Down
       return std::ranges::any_of(narrowed.Classes,
                                  [name](const Raw &one) -> bool
                                  {
-                                   return !one.Groups.empty()
-                                       && one.Groups.front()
+                                   return !one.Tags.empty()
+                                       && one.Tags.front()
                                               == Tag{.Code = 1, .Value = std::string{name}};
                                  });
     };
@@ -508,8 +508,8 @@ namespace DxfIO::Down
     CHECK(out.Order == from.Order);
     CHECK(out.Layer.Records.front().Record.Base.Self
           == from.Layer.Records.front().Record.Base.Self);
-    CHECK(out.Blocks.front().Begin.Name == "*Model_Space");
-    CHECK(out.Blocks.front().Begin.Record.Base.Self);
+    CHECK(out.Blocks.front().Block.Name == "*Model_Space");
+    CHECK(out.Blocks.front().Block.Record.Base.Self);
     CHECK(out.Classes.empty());
     CHECK(out.DimStyle.Head.Base.Extra.empty());
   }
@@ -519,7 +519,7 @@ namespace DxfIO::Down
     Document                       from  = Fresh();
     const std::vector<std::string> order = from.Order;
     from.Sections.push_back(
-        Section{.Name = "THUMBNAILIMAGE", .Groups = {Tag{.Code = 90, .Value = std::int64_t{0}}}});
+        Section{.Name = "THUMBNAILIMAGE", .Tags = {Tag{.Code = 90, .Value = std::int64_t{0}}}});
     from.Order.emplace_back("THUMBNAILIMAGE");
     const Document out = Narrowed(from, Version::R14, nullptr);
     CHECK(out.Sections.empty());
@@ -667,7 +667,7 @@ namespace DxfIO::Down
     sheet.Record.Name = "*Paper_Space3";
     from.BlockRecord.Records.push_back(sheet);
     from.Blocks.push_back(Blocks::Definition{});
-    from.Blocks.back().Begin.Name = "*Paper_Space3";
+    from.Blocks.back().Block.Name = "*Paper_Space3";
     const Document out            = Narrowed(from, Version::R14, nullptr);
     for (const Tables::BlockRecord &one : out.BlockRecord.Records)
     {
@@ -737,7 +737,7 @@ namespace DxfIO::Down
   {
     Document       from = Fresh();
     Entities::Line line{};
-    line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Groups = {}});
+    line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Tags = {}});
     from.Entities.emplace_back(line);
     CHECK(Entities::Based(Narrowed(from, Version::R10, nullptr).Entities.front()).Extended.empty());
   }
@@ -771,21 +771,21 @@ namespace DxfIO::Down
     Document from = Fresh();
     from.Classes.clear();
     from.Classes.push_back(Raw{
-        .Type   = "CLASS",
-        .Groups = {Tag{.Code = 1, .Value = std::string{"IMAGE"}}},
+        .Type = "CLASS",
+        .Tags = {Tag{.Code = 1, .Value = std::string{"IMAGE"}}},
     });
     from.Classes.push_back(Raw{
-        .Type   = "CLASS",
-        .Groups = {Tag{.Code = 1, .Value = std::string{"SCALE"}}},
+        .Type = "CLASS",
+        .Tags = {Tag{.Code = 1, .Value = std::string{"SCALE"}}},
     });
     from.Classes.push_back(Raw{
-        .Type   = "CLASS",
-        .Groups = {Tag{.Code = 1, .Value = std::int64_t{1}}},
+        .Type = "CLASS",
+        .Tags = {Tag{.Code = 1, .Value = std::int64_t{1}}},
     });
-    from.Classes.push_back(Raw{.Type = "CLASS", .Groups = {}});
+    from.Classes.push_back(Raw{.Type = "CLASS", .Tags = {}});
     const Document out = Narrowed(from, Version::R14, nullptr);
     REQUIRE(out.Classes.size() == 1);
-    CHECK(std::get<std::string>(out.Classes.front().Groups.front().Value) == "IMAGE");
+    CHECK(std::get<std::string>(out.Classes.front().Tags.front().Value) == "IMAGE");
   }
 
   TEST_CASE("down: objects newer than R2007 go below it, their entries too")

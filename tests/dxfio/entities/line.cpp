@@ -16,7 +16,7 @@ namespace DxfIO::Entities
   {
     const Line taken = Replayed<Line>(Drawn("2CE"));
     CHECK(taken.End          == Vector{.X = 100, .Y = 50, .Z = 0});
-    CHECK(taken.Record.Color == Colors::Bylayer);
+    CHECK(taken.Record.Color == Colors::ByLayer);
     CHECK(taken.Extrusion    == Up);
   }
 

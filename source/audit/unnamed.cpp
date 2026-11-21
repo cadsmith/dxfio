@@ -51,7 +51,7 @@ namespace DxfIO::Audit
 
     auto Blank(const Blocks::Definition &one) -> bool
     {
-      return one.Begin.Name.empty();
+      return one.Block.Name.empty();
     }
   } // namespace
 
@@ -72,7 +72,7 @@ namespace DxfIO::Audit
     {
       if (Blank(one))
       {
-        with.Note(Severity::Error, "block with no name, left out", one.Begin.Record.Base.Self);
+        with.Note(Severity::Error, "block with no name, left out", one.Block.Record.Base.Self);
       }
     }
     if constexpr (Auditor<DocumentT>::Fix)

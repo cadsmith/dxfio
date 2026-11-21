@@ -27,7 +27,7 @@ namespace DxfIO::Objects::MLineStyles
     /**
      *  The AutoCAD Color Index of the line: 1 to 255, 0 for ByBlock, 256 for ByLayer. Group 62.
      */
-    int Color{Colors::Bylayer};
+    int Color{Colors::ByLayer};
     /**
      *  The name of the line's linetype. Group 6.
      */
@@ -64,7 +64,7 @@ namespace DxfIO::Objects
     /**
      *  The AutoCAD Color Index of the fill. Group 62.
      */
-    int Fill{Colors::Bylayer};
+    int Fill{Colors::ByLayer};
     /**
      *  The angle of the start cap, in degrees. Group 51.
      */

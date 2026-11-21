@@ -14,9 +14,9 @@ namespace DxfIO::Objects::MLeaderStyles
 {
   /**
    *  ByBlock as a packed color, AutoCAD's color in one integer: the color method 0xC1 in the top
-   *  byte and nothing below it. Not Colors::Byblock, the index 0 of group 62.
+   *  byte and nothing below it. Not Colors::ByBlock, the index 0 of group 62.
    */
-  inline constexpr int PackedByblock = -1056964608;
+  inline constexpr int PackedByBlock = -1056964608;
 
   /**
    *  The landing gap of a new multileader style.
@@ -71,7 +71,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The color of the lines, packed into one integer as AutoCAD does. Group 91.
      */
-    int Color{PackedByblock};
+    int Color{PackedByBlock};
     /**
      *  The linetype of the lines. Group 340.
      */
@@ -80,7 +80,7 @@ namespace DxfIO::Objects::MLeaderStyles
      *  The lineweight in hundredths of a millimeter, or -1 ByLayer, -2 ByBlock, -3 the default.
      *  Group 92.
      */
-    int Lineweight{Lineweights::Byblock};
+    int Lineweight{Lineweights::ByBlock};
     /**
      *  Whether the leader lands on the content. Group 290.
      */
@@ -143,7 +143,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The color of the text, packed into one integer as AutoCAD does. Group 93.
      */
-    int Color{PackedByblock};
+    int Color{PackedByBlock};
     /**
      *  The height of the text. Group 45.
      */
@@ -189,7 +189,7 @@ namespace DxfIO::Objects::MLeaderStyles
     /**
      *  The color of the block, packed into one integer as AutoCAD does. Group 94.
      */
-    int Color{PackedByblock};
+    int Color{PackedByBlock};
     /**
      *  The scale of the block along X, Y and Z. Groups 47, 49, 140.
      */

@@ -23,7 +23,7 @@ layer 0, color 256, lineweight -1
 
 ## Color [#color]
 
-`Color` is an AutoCAD Color Index from 1 to 255, or `Colors::Bylayer` (256) to take the layer's color, or `Colors::Byblock` (0) to take the color of the block insert the entity is drawn in. `Colors::White`, 7, is drawn white on a dark background and black on a light one.
+`Color` is an AutoCAD Color Index from 1 to 255, or `Colors::ByLayer` (256) to take the layer's color, or `Colors::ByBlock` (0) to take the color of the block insert the entity is drawn in. `Colors::White`, 7, is drawn white on a dark background and black on a light one.
 
 ```cpp
 DxfIO::Entities::Line indexed{};
@@ -48,7 +48,7 @@ DxfIO::Edit::Add(drawing, orange);
 
 ## Lineweight [#lineweight]
 
-`Lineweight` is in hundredths of a millimeter, so 50 is 0.50 mm, and is written from R2000 on. `Lineweights::Bylayer` (-1) takes the layer's, `Lineweights::Byblock` (-2) the block insert's, and `Lineweights::Standard` (-3) the drawing's default, which `$LWDEFAULT` gives.
+`Lineweight` is in hundredths of a millimeter, so 50 is 0.50 mm, and is written from R2000 on. `Lineweights::ByLayer` (-1) takes the layer's, `Lineweights::ByBlock` (-2) the block insert's, and `Lineweights::Standard` (-3) the drawing's default, which `$LWDEFAULT` gives.
 
 ```cpp
 DxfIO::Entities::Line heavy{};

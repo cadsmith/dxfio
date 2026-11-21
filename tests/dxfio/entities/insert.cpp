@@ -145,7 +145,7 @@ namespace DxfIO::Entities
       const DxfIO::Document file = Opened("inserts", release);
       const auto            nest =
           std::ranges::find(file.Blocks, "nest", [](const Blocks::Definition &one) -> std::string
-                            { return one.Begin.Name; });
+                            { return one.Block.Name; });
       REQUIRE(nest != file.Blocks.end());
       REQUIRE(nest->Entities.size() == 1);
       CHECK(std::get<Insert>(nest->Entities.front()).Attributes.Children.size() == 1);

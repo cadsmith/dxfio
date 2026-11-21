@@ -22,7 +22,7 @@ namespace DxfIO
     /**
      *  The groups after the 1001, in their order.
      */
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Xdata &) const -> bool = default;
   };

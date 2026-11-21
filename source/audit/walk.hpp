@@ -93,8 +93,8 @@ namespace DxfIO::Audit
     }
     for (auto &one : drawing.Blocks)
     {
-      visit(one.Begin.Record.Base);
-      visit(one.End.Record.Base);
+      visit(one.Block.Record.Base);
+      visit(one.EndBlk.Record.Base);
       for (auto &held : one.Entities)
       {
         Carried(held, visit);

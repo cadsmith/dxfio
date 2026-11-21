@@ -19,7 +19,7 @@ namespace DxfIO::Tables
     {
       Style one{};
       one.Record.Base.Extended.push_back(
-          Xdata{.Application = std::move(application), .Groups = std::move(groups)});
+          Xdata{.Application = std::move(application), .Tags = std::move(groups)});
       return one;
     }
   } // namespace

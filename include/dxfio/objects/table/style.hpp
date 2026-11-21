@@ -36,7 +36,7 @@ namespace DxfIO::Objects::TableStyles
      *  The lineweight in hundredths of a millimeter, or -1 ByLayer, -2 ByBlock, -3 the default.
      *  Group 274 to 279 by border.
      */
-    int Lineweight{Lineweights::Byblock};
+    int Lineweight{Lineweights::ByBlock};
     /**
      *  Whether the border is drawn. Group 284 to 289 by border.
      */

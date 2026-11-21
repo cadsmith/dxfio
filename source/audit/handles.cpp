@@ -106,8 +106,8 @@ namespace DxfIO::Audit
       Listed(drawing.BlockRecord, out, Recorded);
       for (auto &one : drawing.Blocks)
       {
-        out.push_back(Holder<DocumentT>{.Base = &one.Begin.Record.Base, .Kind = "block"});
-        out.push_back(Holder<DocumentT>{.Base = &one.End.Record.Base, .Kind = "block end"});
+        out.push_back(Holder<DocumentT>{.Base = &one.Block.Record.Base, .Kind = "block"});
+        out.push_back(Holder<DocumentT>{.Base = &one.EndBlk.Record.Base, .Kind = "block end"});
       }
       Lists(drawing,
             [&out](auto &all) -> void
@@ -142,12 +142,12 @@ namespace DxfIO::Audit
       const std::string_view name = record.Record.Name;
       for (Blocks::Definition &one : drawing.Blocks)
       {
-        if (!Ascii::Same(one.Begin.Name, name))
+        if (!Ascii::Same(one.Block.Name, name))
         {
           continue;
         }
-        follow(one.Begin.Record.Base.Owner);
-        follow(one.End.Record.Base.Owner);
+        follow(one.Block.Record.Base.Owner);
+        follow(one.EndBlk.Record.Base.Owner);
         for (Entity &held : one.Entities)
         {
           follow(BaseOf(held).Owner);

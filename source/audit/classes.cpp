@@ -28,8 +28,7 @@ namespace DxfIO::Audit
     for (Raw &one : Empty::Undeclared(*with.Drawing, release))
     {
       with.Note(Severity::Error,
-                std::format("no CLASS for {}", std::get<std::string>(one.Groups.front().Value)),
-                {});
+                std::format("no CLASS for {}", std::get<std::string>(one.Tags.front().Value)), {});
       if constexpr (Auditor<DocumentT>::Fix)
       {
         with.Drawing->Classes.push_back(std::move(one));

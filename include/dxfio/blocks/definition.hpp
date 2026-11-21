@@ -16,7 +16,7 @@ namespace DxfIO::Blocks
     /**
      *  The BLOCK that opens the block, with its name, flags and base point.
      */
-    Blocks::Block Begin{};
+    Blocks::Block Block{};
     /**
      *  The entities of the block, in the order they are drawn.
      */
@@ -24,7 +24,7 @@ namespace DxfIO::Blocks
     /**
      *  The ENDBLK that closes the block.
      */
-    Blocks::EndBlk End{};
+    Blocks::EndBlk EndBlk{};
 
     auto operator==(const Definition &) const -> bool = default;
   };

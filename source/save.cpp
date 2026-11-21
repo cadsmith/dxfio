@@ -90,7 +90,7 @@ namespace DxfIO
       {
         return {};
       }
-      return Chained(found->Groups, [&](const Tag &one) -> std::expected<void, Failure>
+      return Chained(found->Tags, [&](const Tag &one) -> std::expected<void, Failure>
                      { return Fields::Put(to, one); });
     }
 

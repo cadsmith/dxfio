@@ -133,9 +133,9 @@ namespace DxfIO::Lift
     const Handle              record = Owner(back.Document, "PART");
     const Blocks::Definition *block  = Edit::FindBlock(back.Document, "PART");
     REQUIRE(block != nullptr);
-    CHECK(block->Begin.Record.Base.Owner == record);
-    CHECK(block->End.Record.Base.Owner   == record);
-    CHECK(block->Begin.Record.Base.Self);
+    CHECK(block->Block.Record.Base.Owner  == record);
+    CHECK(block->EndBlk.Record.Base.Owner == record);
+    CHECK(block->Block.Record.Base.Self);
     REQUIRE(block->Entities.size() == 1);
     CHECK(BaseOf(block->Entities.front()).Owner == record);
     CHECK(Audit::Check(back.Document).Findings.empty());

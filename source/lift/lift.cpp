@@ -134,15 +134,15 @@ namespace DxfIO::Lift
     void Blocked(const Lifting &with, Blocks::Definition block)
     {
       Document              &into  = *with.Into;
-      const std::string_view space = Spaced(block.Begin.Name);
+      const std::string_view space = Spaced(block.Block.Name);
       if (!space.empty())
       {
         Blocks::Definition &own   = *Edit::FindBlock(into, space);
-        const Handle        owner = own.Begin.Record.Base.Owner;
+        const Handle        owner = own.Block.Record.Base.Owner;
         for (Entity &one : block.Entities)
         {
           Entities::Own(one, *with.Handles, owner);
-          if (own.Begin.Record.Paper)
+          if (own.Block.Record.Paper)
           {
             Entities::Claim(one, owner);
           }
@@ -150,9 +150,9 @@ namespace DxfIO::Lift
         }
         return;
       }
-      const Handle owner = Recorded(with, block.Begin.Name);
-      Owned(block.Begin.Record.Base, with, owner);
-      Owned(block.End.Record.Base, with, owner);
+      const Handle owner = Recorded(with, block.Block.Name);
+      Owned(block.Block.Record.Base, with, owner);
+      Owned(block.EndBlk.Record.Base, with, owner);
       for (Entity &one : block.Entities)
       {
         Entities::Own(one, *with.Handles, owner);

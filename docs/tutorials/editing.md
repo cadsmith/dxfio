@@ -51,7 +51,7 @@ LINE 2DB moved to (10, 20) - (40, 40)
 
 ## By layer [#layer]
 
-Every kind dxfio types carries its layer and color in `Record`; an `Unknown` has none, and the `requires` test leaves it out. `Edit::Same` compares names as AutoCAD does, without case. `Colors::Bylayer` gives an entity its layer's color; the circle on walls also has a true color in `Rgb`, cleared with it.
+Every kind dxfio types carries its layer and color in `Record`; an `Unknown` has none, and the `requires` test leaves it out. `Edit::Same` compares names as AutoCAD does, without case. `Colors::ByLayer` gives an entity its layer's color; the circle on walls also has a true color in `Rgb`, cleared with it.
 
 ```cpp
 for (DxfIO::Entity &one : drawing.Entities)
@@ -68,7 +68,7 @@ for (DxfIO::Entity &one : drawing.Entities)
           }
           std::println("{} {} on walls: color {}, true color 0x{:06X}", DxfIO::TypeOf(one),
                        DxfIO::Hex(record.Base.Self), record.Color, record.Rgb.value_or(0));
-          record.Color = DxfIO::Colors::Bylayer;
+          record.Color = DxfIO::Colors::ByLayer;
           record.Rgb.reset();
         }
       },

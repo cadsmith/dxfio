@@ -11,12 +11,12 @@ namespace DxfIO::Colors
   /**
    *  Color 0 in group 62: the entity takes the color of the block insert it is drawn in.
    */
-  inline constexpr int Byblock = 0;
+  inline constexpr int ByBlock = 0;
 
   /**
    *  Color 256 in group 62: the entity takes the color of its layer.
    */
-  inline constexpr int Bylayer = 256;
+  inline constexpr int ByLayer = 256;
 } // namespace DxfIO::Colors
 
 #endif /* DXFIO_COLORS_HPP */

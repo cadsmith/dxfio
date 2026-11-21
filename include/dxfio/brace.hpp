@@ -23,7 +23,7 @@ namespace DxfIO
     /**
      *  The groups between the opening and the closing 102, in their order.
      */
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Brace &) const -> bool = default;
   };

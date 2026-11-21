@@ -107,7 +107,7 @@ namespace DxfIO
   TEST_CASE("save: up, an unknown object with no handle leaves every dictionary whole")
   {
     Document drawing = Create(Version::R2000);
-    drawing.Objects.emplace_back(Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Groups = {}});
+    drawing.Objects.emplace_back(Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Tags = {}});
     const auto older = Tests::Written(drawing, SaveOptions{.Release = Version::R2000});
     REQUIRE(older);
     const auto read = Load(*older);
@@ -362,7 +362,7 @@ namespace DxfIO
     Tables::Layer layer{};
     layer.Record.Name = "WALLS";
     drawing.Layer.Records.push_back(layer);
-    drawing.Sections.push_back(Section{.Name = "THUMBNAILIMAGE", .Groups = {}});
+    drawing.Sections.push_back(Section{.Name = "THUMBNAILIMAGE", .Tags = {}});
     const auto saved = Tests::Written(drawing, {.Release = Version::R12});
     REQUIRE(saved);
     CHECK(*saved
@@ -419,7 +419,7 @@ namespace DxfIO
   {
     Document drawing = Create(Version::R2018);
     drawing.Objects.emplace_back(
-        Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Groups = {Tag{.Code = 70, .Value = 1e30}}});
+        Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Tags = {Tag{.Code = 70, .Value = 1e30}}});
     CHECK_FALSE(Save(drawing));
     CHECK_FALSE(Save(drawing, SaveOptions{.Binary = true}));
   }

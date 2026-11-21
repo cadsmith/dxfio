@@ -33,9 +33,9 @@ namespace DxfIO::Audit
     out.reserve(blocks.size());
     for (const Blocks::Definition &one : blocks)
     {
-      if (!one.Begin.Name.empty())
+      if (!one.Block.Name.empty())
       {
-        out.emplace(one.Begin.Name);
+        out.emplace(one.Block.Name);
       }
     }
     return out;

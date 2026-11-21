@@ -159,7 +159,7 @@ namespace DxfIO::Audit
     layer.Record.Base.Extended.push_back(named("NORTH"));
     REQUIRE(Edit::Add(drawing, layer));
     REQUIRE(Edit::AddBlock(drawing, "PART"));
-    Edit::FindBlock(drawing, "PART")->Begin.Record.Base.Extended.push_back(named("WEST"));
+    Edit::FindBlock(drawing, "PART")->Block.Record.Base.Extended.push_back(named("WEST"));
     std::get<Objects::Dictionary>(drawing.Objects.front()).Base.Extended.push_back(named("south"));
     Tables::Table<Unknown> loose{};
     loose.Head.Name = "VX_TABLE";
@@ -280,9 +280,9 @@ namespace DxfIO::Audit
     drawing.Objects.push_back(variable);
     WriteSeed(drawing, Handle{.Value = Past(drawing).Value + 1});
     drawing.Classes.push_back(
-        Raw{.Type = "CLASS", .Groups = {Tag{.Code = 2, .Value = std::string{"AcDbThing"}}}});
+        Raw{.Type = "CLASS", .Tags = {Tag{.Code = 2, .Value = std::string{"AcDbThing"}}}});
     drawing.Classes.push_back(
-        Raw{.Type = "CLASS", .Groups = {Tag{.Code = 1, .Value = std::int64_t{5}}}});
+        Raw{.Type = "CLASS", .Tags = {Tag{.Code = 1, .Value = std::int64_t{5}}}});
     const Report seen = Check(drawing);
     REQUIRE(seen.Errors()          == 4);
     CHECK(seen.Findings.at(0).What == "no CLASS for WIPEOUT");
@@ -294,8 +294,8 @@ namespace DxfIO::Audit
     REQUIRE(drawing.Classes.size() == before + 4);
     CHECK(
         drawing.Classes.at(before)
-        == Raw{.Type   = "CLASS",
-               .Groups = {
+        == Raw{.Type = "CLASS",
+               .Tags = {
                    Tag{.Code = 1, .Value = std::string{"WIPEOUT"}},
                    Tag{.Code = 2, .Value = std::string{"AcDbWipeout"}},
                    Tag{.Code = 3,
@@ -308,9 +308,8 @@ namespace DxfIO::Audit
                    Tag{.Code = 280, .Value = std::int64_t{0}},
                    Tag{.Code = 281, .Value = std::int64_t{1}},
                }});
-    CHECK(drawing.Classes.at(before + 1).Groups.at(4) == Tag{.Code = 91, .Value = std::int64_t{2}});
-    CHECK(drawing.Classes.at(before + 3).Groups.at(6)
-          == Tag{.Code = 281, .Value = std::int64_t{0}});
+    CHECK(drawing.Classes.at(before + 1).Tags.at(4) == Tag{.Code = 91, .Value = std::int64_t{2}});
+    CHECK(drawing.Classes.at(before + 3).Tags.at(6) == Tag{.Code = 281, .Value = std::int64_t{0}});
     CHECK(Check(drawing).Findings.empty());
     const auto saved = Tests::Written(drawing);
     REQUIRE(saved);
@@ -325,12 +324,12 @@ namespace DxfIO::Audit
   {
     Document early = Fresh(Version::R2000);
     std::erase_if(early.Classes, [](const Raw &one) -> bool
-                  { return one.Groups.front() == Tag{.Code = 1, .Value = std::string{"LAYOUT"}}; });
+                  { return one.Tags.front() == Tag{.Code = 1, .Value = std::string{"LAYOUT"}}; });
     const Report seen = Check(early);
     REQUIRE(seen.Errors()            == 1);
     CHECK(seen.Findings.front().What == "no CLASS for LAYOUT");
     CHECK(Repair(early).Clean());
-    CHECK(early.Classes.back().Groups.size() == 6);
+    CHECK(early.Classes.back().Tags.size() == 6);
     Objects::DataTable later{};
     later.Base.Self = Handle{.Value = Past(early).Value + 1};
     early.Objects.push_back(later);
@@ -402,7 +401,7 @@ namespace DxfIO::Audit
     drawing.Style.Records.push_back(unstyled);
     WriteSeed(drawing, Handle{.Value = Past(drawing).Value + 1});
     REQUIRE(Edit::AddBlock(drawing, "PART"));
-    Edit::FindBlock(drawing, "PART")->Begin.Name.clear();
+    Edit::FindBlock(drawing, "PART")->Block.Name.clear();
     Edit::Find(drawing.BlockRecord, "PART")->Record.Name.clear();
     Entities::Line line{};
     line.Record.Layer    = Symbol{""};
@@ -505,15 +504,15 @@ namespace DxfIO::Audit
     constant.Flags = 2;
     REQUIRE(Edit::Add(drawing, constant, "FIXED"));
     Blocks::Definition *tagged = Edit::FindBlock(drawing, "TAGGED");
-    tagged->Begin.Flags        = 1;
+    tagged->Block.Flags        = 1;
     const Report seen          = Check(drawing);
     REQUIRE(seen.Warnings() == 1);
     CHECK(seen.Findings.front().What == "block TAGGED holds attribute definitions, not flagged so");
-    CHECK(seen.Findings.front().Subject == tagged->Begin.Record.Base.Self);
+    CHECK(seen.Findings.front().Subject == tagged->Block.Record.Base.Self);
     CHECK(seen.Errors() == 0);
     CHECK(Repair(drawing).Clean());
-    CHECK(tagged->Begin.Flags == 3);
-    CHECK(Edit::FindBlock(drawing, "FIXED")->Begin.Flags == 0);
+    CHECK(tagged->Block.Flags == 3);
+    CHECK(Edit::FindBlock(drawing, "FIXED")->Block.Flags == 0);
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -525,13 +524,13 @@ namespace DxfIO::Audit
     line.Record.Base.Extra.push_back(Tag{.Code = 300, .Value = std::string{"kept"}});
     line.Record.Base.Extended.push_back(
         Xdata{.Application = "ACAD",
-              .Groups      = {Tag{.Code = 1080, .Value = std::string{"x"}},
+              .Tags        = {Tag{.Code = 1080, .Value = std::string{"x"}},
                               Tag{.Code = 1000, .Value = std::string{"kept"}}}});
     REQUIRE(Edit::Add(drawing, line));
     Unknown loose{};
-    loose.Type   = Symbol{"CAMERA"};
-    loose.Groups = {Tag{.Code = 83, .Value = std::string{"5"}},
-                    Tag{.Code = 100, .Value = std::string{"AcDbCamera"}}};
+    loose.Type = Symbol{"CAMERA"};
+    loose.Tags = {Tag{.Code = 83, .Value = std::string{"5"}},
+                  Tag{.Code = 100, .Value = std::string{"AcDbCamera"}}};
     REQUIRE(Edit::Add(drawing, loose));
     const Report seen = Check(drawing);
     REQUIRE(seen.Errors()             == 3);
@@ -542,9 +541,9 @@ namespace DxfIO::Audit
     CHECK(Repair(drawing).Clean());
     const Base &base = BaseOf(drawing.Entities.front());
     CHECK(base.Extra == std::vector{Tag{.Code = 300, .Value = std::string{"kept"}}});
-    CHECK(base.Extended.front().Groups
+    CHECK(base.Extended.front().Tags
           == std::vector{Tag{.Code = 1000, .Value = std::string{"kept"}}});
-    CHECK(std::get<Unknown>(drawing.Entities.back()).Groups.size() == 1);
+    CHECK(std::get<Unknown>(drawing.Entities.back()).Tags.size() == 1);
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -825,7 +824,7 @@ namespace DxfIO::Audit
     CHECK(Check(drawing).Warnings()    == 2);
     REQUIRE(Repair(drawing).Warnings() == 2);
     CHECK(std::get<Entities::AttDef>(drawing.Entities.back()).Lettering->Style == "Standard");
-    CHECK(Edit::FindBlock(drawing, "*Model_Space")->Begin.Flags == 2);
+    CHECK(Edit::FindBlock(drawing, "*Model_Space")->Block.Flags == 2);
   }
 
   TEST_CASE("audit: an insert of no block is left out")
@@ -1002,8 +1001,8 @@ namespace DxfIO::Audit
     const Handle shared = Edit::Find(drawing.BlockRecord, "A")->Record.Base.Self;
     Edit::Find(drawing.BlockRecord, "B")->Record.Base.Self = shared;
     Blocks::Definition &moved                              = *Edit::FindBlock(drawing, "B");
-    moved.Begin.Record.Base.Owner                          = shared;
-    moved.End.Record.Base.Owner                            = shared;
+    moved.Block.Record.Base.Owner                          = shared;
+    moved.EndBlk.Record.Base.Owner                         = shared;
     BaseOf(moved.Entities.front()).Owner                   = shared;
     const Report fixed                                     = Repair(drawing);
     REQUIRE(fixed.Errors() == 1);
@@ -1011,11 +1010,11 @@ namespace DxfIO::Audit
           == std::format("handle {:X} of a block record used twice", shared.Value));
     const Handle now = Edit::Find(drawing.BlockRecord, "B")->Record.Base.Self;
     CHECK(now != shared);
-    CHECK(moved.Begin.Record.Base.Owner        == now);
-    CHECK(moved.End.Record.Base.Owner          == now);
+    CHECK(moved.Block.Record.Base.Owner        == now);
+    CHECK(moved.EndBlk.Record.Base.Owner       == now);
     CHECK(BaseOf(moved.Entities.front()).Owner == now);
     const Blocks::Definition &kept = *Edit::FindBlock(drawing, "A");
-    CHECK(kept.Begin.Record.Base.Owner        == shared);
+    CHECK(kept.Block.Record.Base.Owner        == shared);
     CHECK(BaseOf(kept.Entities.front()).Owner == shared);
   }
 
@@ -1030,20 +1029,20 @@ namespace DxfIO::Audit
     Tables::BlockRecord       &paper      = *Edit::Find(drawing.BlockRecord, "*Paper_Space");
     paper.Record.Base.Self                = shared;
     Blocks::Definition &sheet             = *Edit::FindBlock(drawing, "*Paper_Space");
-    sheet.Begin.Record.Base.Owner         = shared;
-    sheet.End.Record.Base.Owner           = shared;
+    sheet.Block.Record.Base.Owner         = shared;
+    sheet.EndBlk.Record.Base.Owner        = shared;
     BaseOf(drawing.Entities.back()).Owner = shared;
     auto &laid = std::get<Objects::Layout>(*Edit::FindObject(drawing, paper.Layout));
     laid.Block = shared;
     REQUIRE(Repair(drawing).Errors() == 1);
     const Handle now = paper.Record.Base.Self;
     CHECK(now != shared);
-    CHECK(sheet.Begin.Record.Base.Owner         == now);
-    CHECK(sheet.End.Record.Base.Owner           == now);
+    CHECK(sheet.Block.Record.Base.Owner         == now);
+    CHECK(sheet.EndBlk.Record.Base.Owner        == now);
     CHECK(BaseOf(drawing.Entities.back()).Owner == now);
     CHECK(laid.Block == now);
     CHECK(BaseOf(drawing.Entities.front()).Owner == shared);
-    CHECK(Edit::FindBlock(drawing, "*Model_Space")->Begin.Record.Base.Owner         == shared);
+    CHECK(Edit::FindBlock(drawing, "*Model_Space")->Block.Record.Base.Owner         == shared);
     CHECK(std::get<Objects::Layout>(*Edit::FindObject(drawing, model.Layout)).Block == shared);
   }
 

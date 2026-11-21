@@ -121,9 +121,9 @@ namespace DxfIO
   TEST_CASE("past: above a block's two ends and what it holds")
   {
     Blocks::Definition begin{};
-    begin.Begin.Record.Base.Self = High;
+    begin.Block.Record.Base.Self = High;
     Blocks::Definition end{};
-    end.End.Record.Base.Self = High;
+    end.EndBlk.Record.Base.Self = High;
     Blocks::Definition held{};
     held.Entities.emplace_back(Chain(High));
     for (const Blocks::Definition &one : {begin, end, held})

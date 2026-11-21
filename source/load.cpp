@@ -117,11 +117,11 @@ namespace DxfIO
 
     auto Foreign(const File::Section &from, Loaded &into, const Fields::Reading &with) -> Filled
     {
-      Section held{.Name = std::string{from.Name}, .Groups = {}};
-      held.Groups.reserve(from.Body.size());
+      Section held{.Name = std::string{from.Name}, .Tags = {}};
+      held.Tags.reserve(from.Body.size());
       for (const Tags::Tag &one : from.Body)
       {
-        held.Groups.push_back(Fields::Owned(one, with.Text));
+        held.Tags.push_back(Fields::Owned(one, with.Text));
       }
       into.Document.Sections.push_back(std::move(held));
       return {};

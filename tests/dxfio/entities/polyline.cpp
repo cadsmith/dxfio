@@ -165,7 +165,7 @@ namespace DxfIO::Entities
     CHECK(Traced(file.Entities, 0x4a6).Record.Paper);
     const auto found =
         std::ranges::find(file.Blocks, "held", [](const Blocks::Definition &one) -> std::string
-                          { return one.Begin.Name; });
+                          { return one.Block.Name; });
     REQUIRE(found != file.Blocks.end());
     REQUIRE(found->Entities.size() == 1);
     CHECK(std::get<Polyline>(found->Entities.front()).Vertices.Children.size() == 3);

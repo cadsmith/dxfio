@@ -198,7 +198,7 @@ namespace DxfIO::Entities
     return std::visit(
         DxfIO::Match{
             [](const Unknown &kept) -> bool
-            { return std::ranges::any_of(Fence(kept.Groups), Flagged); },
+            { return std::ranges::any_of(Fence(kept.Tags), Flagged); },
             [](const auto &kind) -> auto { return kind.Record.Paper; },
         },
         one);
@@ -250,7 +250,7 @@ namespace DxfIO::Entities
             [owner](Unknown &kept) -> void
             {
               kept.Base.Owner = owner;
-              Flag(kept.Groups);
+              Flag(kept.Tags);
             },
             [owner](auto &kind) -> auto
             {

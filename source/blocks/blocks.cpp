@@ -16,9 +16,9 @@ namespace DxfIO::Blocks
     for (const File::Nest &one : all)
     {
       out.push_back(Definition{
-          .Begin    = Taken<Block>(one.Head, with),
+          .Block    = Taken<Block>(one.Head, with),
           .Entities = Entities::Read(one.Records, with),
-          .End      = Taken<EndBlk>(one.End, with),
+          .EndBlk   = Taken<EndBlk>(one.End, with),
       });
     }
     return out;
@@ -29,11 +29,11 @@ namespace DxfIO::Blocks
     return Chained(all,
                    [&](const Definition &one) -> auto
                    {
-                     return Given(to, one.Begin)
+                     return Given(to, one.Block)
                          .and_then([&to, &one] -> std::expected<void, Failure>
                                    { return Entities::Write(to, one.Entities); })
                          .and_then([&to, &one] -> std::expected<void, Failure>
-                                   { return Given(to, one.End); });
+                                   { return Given(to, one.EndBlk); });
                    });
   }
 } // namespace DxfIO::Blocks

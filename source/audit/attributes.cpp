@@ -30,8 +30,8 @@ namespace DxfIO::Audit
       {
         return true;
       }
-      const bool paper = Ascii::Same(block.Begin.Name, Paper);
-      if (!paper && !Ascii::Same(block.Begin.Name, Model))
+      const bool paper = Ascii::Same(block.Block.Name, Paper);
+      if (!paper && !Ascii::Same(block.Block.Name, Model))
       {
         return false;
       }
@@ -51,17 +51,17 @@ namespace DxfIO::Audit
   {
     for (auto &block : with.Drawing->Blocks)
     {
-      if (Masked(block.Begin.Flags, Holding) != 0 || !Defining(*with.Drawing, block))
+      if (Masked(block.Block.Flags, Holding) != 0 || !Defining(*with.Drawing, block))
       {
         continue;
       }
       with.Note(
           Severity::Warning,
-          std::format("block {} holds attribute definitions, not flagged so", block.Begin.Name),
-          block.Begin.Record.Base.Self);
+          std::format("block {} holds attribute definitions, not flagged so", block.Block.Name),
+          block.Block.Record.Base.Self);
       if constexpr (Auditor<DocumentT>::Fix)
       {
-        block.Begin.Flags += Holding;
+        block.Block.Flags += Holding;
       }
     }
   }

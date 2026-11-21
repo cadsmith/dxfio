@@ -21,7 +21,7 @@ namespace DxfIO
     /**
      *  The groups after the 0, in their order.
      */
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Raw &) const -> bool = default;
   };

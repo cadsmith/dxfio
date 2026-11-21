@@ -98,7 +98,7 @@ namespace DxfIO::Empty
       out.Font = "arial.ttf";
       out.Record.Base.Extended.push_back(Xdata{
           .Application = "ACAD",
-          .Groups =
+          .Tags =
               {
                   Tag{.Code = Typeface, .Value = std::string{"Arial"}},
                   Tag{.Code = Family, .Value = Pitch},

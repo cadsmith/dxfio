@@ -27,7 +27,7 @@ namespace DxfIO
     /**
      *  Every other group, subclass markers included, in the order the file gave them.
      */
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Unknown &) const -> bool = default;
   };

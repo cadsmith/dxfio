@@ -51,7 +51,7 @@ namespace DxfIO::Edit
     {
       const auto found =
           std::ranges::find_if(drawing.Blocks, [name](const Blocks::Definition &one) -> bool
-                               { return Same(one.Begin.Name, name); });
+                               { return Same(one.Block.Name, name); });
       return found == drawing.Blocks.end() ? nullptr : &*found;
     }
   } // namespace

@@ -21,7 +21,7 @@ namespace DxfIO
     /**
      *  The groups between its name and its ENDSEC, in their order.
      */
-    std::vector<Tag> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Section &) const -> bool = default;
   };

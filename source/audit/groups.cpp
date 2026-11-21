@@ -44,7 +44,7 @@ namespace DxfIO::Audit
     {
       if (auto *kept = std::get_if<Unknown>(&one))
       {
-        Checked(with, kept->Groups, kept->Base.Self);
+        Checked(with, kept->Tags, kept->Base.Self);
       }
     }
   } // namespace
@@ -63,14 +63,14 @@ namespace DxfIO::Audit
             Checked(with, base.Extra, base.Self);
             for (auto &data : base.Extended)
             {
-              Checked(with, data.Groups, base.Self);
+              Checked(with, data.Tags, base.Self);
             }
           });
     for (auto &table : with.Drawing->Loose)
     {
       for (auto &one : table.Records)
       {
-        Checked(with, one.Groups, one.Base.Self);
+        Checked(with, one.Tags, one.Base.Self);
       }
     }
     Lists(*with.Drawing,

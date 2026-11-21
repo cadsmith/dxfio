@@ -153,6 +153,6 @@ namespace DxfIO
     const Document drawing = Create(Version::R12);
     CHECK(drawing.Order.size() == 4);
     CHECK(drawing.Objects.empty());
-    CHECK(drawing.Blocks.front().Begin.Name == "$MODEL_SPACE");
+    CHECK(drawing.Blocks.front().Block.Name == "$MODEL_SPACE");
   }
 } // namespace DxfIO

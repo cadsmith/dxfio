@@ -84,9 +84,9 @@ namespace DxfIO::Edit
     {
       if (block != nullptr
           && Entities::Attributing(one)
-          && Masked(block->Begin.Flags, Attributed) == 0)
+          && Masked(block->Block.Flags, Attributed) == 0)
       {
-        block->Begin.Flags += Attributed;
+        block->Block.Flags += Attributed;
       }
     }
 
@@ -172,12 +172,12 @@ namespace DxfIO::Edit
       return std::unexpected{
           Failure{.Line = 0, .What = std::format("there is no block named {}", block)}};
     }
-    const Handle owner = found->Begin.Record.Base.Owner;
+    const Handle owner = found->Block.Record.Base.Owner;
     return Owned(drawing, one, owner)
         .transform(
             [found, &one, owner](Handle self) -> Handle
             {
-              if (found->Begin.Record.Paper)
+              if (found->Block.Record.Paper)
               {
                 Entities::Claim(one, owner);
               }
@@ -216,12 +216,12 @@ namespace DxfIO::Edit
                          static_cast<int>(drawing.BlockRecord.Records.size()));
           }
           Blocks::Definition block{};
-          block.Begin.Record.Base.Self  = handles.Take();
-          block.Begin.Record.Base.Owner = owner;
-          block.Begin.Name              = std::string{name};
-          block.End.Record.Base.Self    = handles.Take();
-          block.End.Record.Base.Owner   = owner;
-          const Handle out              = block.Begin.Record.Base.Self;
+          block.Block.Record.Base.Self   = handles.Take();
+          block.Block.Record.Base.Owner  = owner;
+          block.Block.Name               = std::string{name};
+          block.EndBlk.Record.Base.Self  = handles.Take();
+          block.EndBlk.Record.Base.Owner = owner;
+          const Handle out               = block.Block.Record.Base.Self;
           drawing.Blocks.push_back(std::move(block));
           Moved(drawing, handles.Next());
           return out;

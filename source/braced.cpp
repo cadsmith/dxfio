@@ -59,7 +59,7 @@ namespace DxfIO
         into.Dictionary        = *handle;
         return lost;
       }
-      into.Braces.push_back(Brace{.Name = std::string{name}, .Groups = std::move(groups)});
+      into.Braces.push_back(Brace{.Name = std::string{name}, .Tags = std::move(groups)});
       return 0;
     }
 

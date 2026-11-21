@@ -53,7 +53,7 @@ Bit 2 of `Begin.Flags` says the block has attribute definitions that are not con
 ```cpp
 if (DxfIO::Blocks::Definition *valve = DxfIO::Edit::FindBlock(drawing, "Valve"))
 {
-  valve->Begin.Flags = 2;
+  valve->Block.Flags = 2;
 }
 ```
 

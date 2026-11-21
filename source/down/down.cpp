@@ -337,7 +337,7 @@ namespace DxfIO::Down
     {
       for (Raw &one : all)
       {
-        for (Tag &group : one.Groups)
+        for (Tag &group : one.Tags)
         {
           if (group.Code == 1 && group.Value == Content{std::string{from}})
           {
@@ -555,17 +555,17 @@ namespace DxfIO::Down
     void Blocked(Document &from, Seed &handles, const Narrowing &with)
     {
       std::erase_if(from.Blocks,
-                    [](const Blocks::Definition &one) -> bool { return Sheet(one.Begin.Name); });
+                    [](const Blocks::Definition &one) -> bool { return Sheet(one.Block.Name); });
       for (Blocks::Definition &one : from.Blocks)
       {
         if (with.Release < Version::R13)
         {
-          if (const std::string_view space = Space(one.Begin.Name); !space.empty())
+          if (const std::string_view space = Space(one.Block.Name); !space.empty())
           {
-            one.Begin.Name = space;
+            one.Block.Name = space;
           }
-          one.Begin.Record.Base = {};
-          one.End.Record.Base   = {};
+          one.Block.Record.Base  = {};
+          one.EndBlk.Record.Base = {};
         }
         Narrow(one.Entities, handles, with);
       }
@@ -573,9 +573,8 @@ namespace DxfIO::Down
 
     auto Listed(const Raw &one) -> bool
     {
-      const auto  name = std::ranges::find(one.Groups, 1, &Tag::Code);
-      const auto *text =
-          name == one.Groups.end() ? nullptr : std::get_if<std::string>(&name->Value);
+      const auto  name = std::ranges::find(one.Tags, 1, &Tag::Code);
+      const auto *text = name == one.Tags.end() ? nullptr : std::get_if<std::string>(&name->Value);
       return text != nullptr && std::ranges::contains(Declared, *text);
     }
 

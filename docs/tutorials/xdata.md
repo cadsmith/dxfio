@@ -25,7 +25,7 @@ DxfIO::Entities::Line wall{};
 wall.End = {.X = 400, .Y = 0, .Z = 0};
 wall.Record.Base.Extended.push_back(DxfIO::Xdata{
     .Application = "WALLPLAN",
-    .Groups =
+    .Tags =
         {
             {.Code = 1000, .Value = std::string{"W-12"}},
             {.Code = 1040, .Value = 0.2},
@@ -65,8 +65,8 @@ for (const DxfIO::Xdata &data : DxfIO::BaseOf(*found).Extended)
     continue;
   }
   std::println("{} {}: {} thick, rated {} minutes", DxfIO::TypeOf(*found),
-               std::get<std::string>(data.Groups.at(0).Value), std::get<double>(data.Groups.at(1).Value),
-               std::get<std::int64_t>(data.Groups.at(2).Value));
+               std::get<std::string>(data.Tags.at(0).Value), std::get<double>(data.Tags.at(1).Value),
+               std::get<std::int64_t>(data.Tags.at(2).Value));
 }
 ```
 

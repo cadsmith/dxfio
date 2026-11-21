@@ -103,8 +103,8 @@ namespace DxfIO
     }
     for (const Blocks::Definition &one : from.Blocks)
     {
-      visit(one.Begin.Record.Base.Self);
-      visit(one.End.Record.Base.Self);
+      visit(one.Block.Record.Base.Self);
+      visit(one.EndBlk.Record.Base.Self);
       for (const Entity &held : one.Entities)
       {
         Held(held, visit);

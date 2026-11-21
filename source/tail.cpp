@@ -42,7 +42,7 @@ namespace DxfIO
         }
         if (!dropped)
         {
-          into.Extended.back().Groups.push_back(Fields::Owned(one, with.Text));
+          into.Extended.back().Tags.push_back(Fields::Owned(one, with.Text));
         }
         continue;
       }
@@ -56,7 +56,7 @@ namespace DxfIO
         });
         continue;
       }
-      into.Extended.push_back(Xdata{.Application = std::move(name), .Groups = {}});
+      into.Extended.push_back(Xdata{.Application = std::move(name), .Tags = {}});
     }
   }
 
@@ -67,7 +67,7 @@ namespace DxfIO
                    {
                      return Fields::Value<std::string>::Write(to, Application, one.Application)
                          .and_then([&to, &one] -> std::expected<void, Failure>
-                                   { return Fields::Put(to, one.Groups); });
+                                   { return Fields::Put(to, one.Tags); });
                    });
   }
 } // namespace DxfIO

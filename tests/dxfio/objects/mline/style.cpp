@@ -57,7 +57,7 @@ namespace DxfIO::Objects::MLineStyles
     const MLineStyle           taken = Read<MLineStyle>(text);
     CHECK(taken.Fill == 8);
     REQUIRE(taken.Elements.size()      == 2);
-    CHECK(taken.Elements.front().Color == Colors::Bylayer);
+    CHECK(taken.Elements.front().Color == Colors::ByLayer);
     CHECK(taken.Elements.back().Color  == 1);
   }
 
