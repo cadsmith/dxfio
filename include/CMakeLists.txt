@@ -1,5 +1,6 @@
 set(DXFIO_HEADERS
   dxfio/api.hpp
+  dxfio/appearance.hpp
   dxfio/audit/audit.hpp
   dxfio/base.hpp
   dxfio/blocks/block.hpp
@@ -7,6 +8,7 @@ set(DXFIO_HEADERS
   dxfio/blocks/endblk.hpp
   dxfio/boxed.hpp
   dxfio/brace.hpp
+  dxfio/color.hpp
   dxfio/colors.hpp
   dxfio/corners.hpp
   dxfio/create.hpp

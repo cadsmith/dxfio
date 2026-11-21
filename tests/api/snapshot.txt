@@ -16,6 +16,28 @@
 #    endif
 #  endif
 #endif
+== dxfio/appearance.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/colors.hpp"
+#include "dxfio/drawing.hpp"
+#include "dxfio/entities/record.hpp"
+#include "dxfio/lineweight.hpp"
+#include "dxfio/symbol.hpp"
+#include <optional>
+namespace DxfIO
+{
+  struct DXFIO_API Appearance
+  {
+    Symbol Layer{"0"};
+    int Color{Colors::White};
+    std::optional<int> Rgb{};
+    Symbol             Linetype{"Continuous"};
+    DxfIO::Lineweight  Lineweight{DxfIO::Lineweight::Default};
+    auto operator==(const Appearance &) const -> bool = default;
+  };
+  [[nodiscard]] DXFIO_API auto AppearanceOf(const Drawing &drawing, const Entities::Record &record,
+                                            const Appearance *outer) -> Appearance;
+}
 == dxfio/audit/audit.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/drawing.hpp"
@@ -211,6 +233,34 @@ namespace DxfIO
     auto operator==(const Brace &) const -> bool = default;
   };
 }
+== dxfio/color.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/entities/record.hpp"
+#include <cstdint>
+#include <optional>
+namespace DxfIO
+{
+  enum class ColorMethod : std::uint8_t
+  {
+    ByLayer = 0xC0,
+    ByBlock = 0xC1,
+    Rgb     = 0xC2,
+    Index   = 0xC3,
+  };
+  enum class TransparencyMethod : std::uint8_t
+  {
+    ByLayer = 0,
+    ByBlock = 1,
+    Alpha   = 2,
+  };
+  [[nodiscard]] DXFIO_API auto MethodOf(const Entities::Record &record) -> ColorMethod;
+  [[nodiscard]] DXFIO_API auto RgbOf(const Entities::Record &record)
+      -> std::optional<std::uint32_t>;
+  [[nodiscard]] DXFIO_API auto TransparencyMethodOf(const Entities::Record &record)
+      -> std::optional<TransparencyMethod>;
+  [[nodiscard]] DXFIO_API auto AlphaOf(const Entities::Record &record)
+      -> std::optional<std::uint8_t>;
+}
 == dxfio/colors.hpp
 namespace DxfIO::Colors
 {
@@ -286,7 +336,9 @@ namespace DxfIO
   [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
 }
 == dxfio/dxfio.hpp
+#include "dxfio/appearance.hpp"
 #include "dxfio/audit/audit.hpp"
+#include "dxfio/color.hpp"
 #include "dxfio/create.hpp"
 #include "dxfio/drawing.hpp"
 #include "dxfio/edit/add.hpp"

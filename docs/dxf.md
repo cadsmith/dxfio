@@ -42,6 +42,9 @@ const auto saved = DxfIO::SaveFile(loaded->Drawing, "plan-r2010.dxf",
   dictionaries by name, without case.
 - `TypeOf` and `BaseOf` give any entity's or object's DXF name and its
   handle, owner and extended data.
+- `AppearanceOf` gives the layer, color, linetype and lineweight an entity is
+  drawn with, its ByLayer and ByBlock resolved; `MethodOf`, `RgbOf`,
+  `TransparencyMethodOf` and `AlphaOf` read its color and transparency.
 - `Audit::Check` lists what AutoCAD would complain about, and
   `Audit::Repair` fixes it in place; see below.
 

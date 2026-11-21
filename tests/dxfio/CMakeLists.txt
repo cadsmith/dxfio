@@ -1,10 +1,12 @@
 target_sources(dxfio_tests
   PRIVATE
+    appearance.cpp
     ascii.cpp
     base.cpp
     boxed.cpp
     brace.cpp
     chained.cpp
+    color.cpp
     create.cpp
     drawing.cpp
     entity.cpp

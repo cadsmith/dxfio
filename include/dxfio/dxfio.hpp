@@ -7,7 +7,9 @@
  *  helpers of DxfIO::Edit and the audit of DxfIO::Audit.
  */
 
+#include "dxfio/appearance.hpp"
 #include "dxfio/audit/audit.hpp"
+#include "dxfio/color.hpp"
 #include "dxfio/create.hpp"
 #include "dxfio/drawing.hpp"
 #include "dxfio/edit/add.hpp"

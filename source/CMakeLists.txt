@@ -1,6 +1,8 @@
 add_library(dxfio
+  appearance.cpp
   braced.cpp
   braces.cpp
+  color.cpp
   create.cpp
   drawing.cpp
   entity.cpp
