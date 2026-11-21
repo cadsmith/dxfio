@@ -268,10 +268,8 @@ namespace DxfIO::Family
       if (!done.at(at))
       {
         Failure failed = done.at(at).error();
-        if (failed.Line)
-        {
-          *failed.Line += to.To->Lines();
-        }
+        failed.Line    = failed.Line.transform([&to](std::size_t line) -> std::size_t
+                                               { return line + to.To->Lines(); });
         return std::unexpected{std::move(failed)};
       }
       to.To->Append(texts.at(at), lines.at(at));
