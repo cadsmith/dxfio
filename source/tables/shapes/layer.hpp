@@ -56,7 +56,7 @@ namespace DxfIO
       },
       Fields::Field{
           .Code   = 348,
-          .Member = &Tables::Layer::Spare,
+          .Member = &Tables::Layer::Unknown1,
           .Since  = Version::R2013,
       },
   };

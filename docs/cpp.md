@@ -21,6 +21,10 @@
   an exception: `Viewport` is the VIEWPORT entity, not a VPORT.
 - Any other public type is named in whole words for what it holds, never with
   a name a kind takes: `Definition`, `Section`, `Tag`, `SaveOptions`.
+- A member for a group the DXF reference leaves unnamed is `Unknown` and its
+  place among the record's unnamed groups, counted from 1 in the file's order:
+  `Unknown1`, `Unknown2`. Its note opens with "Unnamed in the DXF reference"
+  and says what AutoCAD writes.
 - A namespace that holds the parts of one type takes that type's name in the
   plural: `Objects::MLeaderStyles` for `MLeaderStyle`, `Objects::TableStyles`
   for `TableStyle`, `Entities::Edges` for the alternatives of `Edge`.

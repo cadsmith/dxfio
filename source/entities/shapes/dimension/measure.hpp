@@ -31,7 +31,7 @@ namespace DxfIO
     };
 
     inline constexpr std::tuple Bits{
-        Fields::Field{.Code = 73, .Member = &Measure::Above},
+        Fields::Field{.Code = 73, .Member = &Measure::Unknown1},
         Fields::Field{.Code = 74, .Member = &Measure::FlipFirst},
         Fields::Field{.Code = 75, .Member = &Measure::FlipSecond},
     };

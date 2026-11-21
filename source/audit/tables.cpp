@@ -123,7 +123,7 @@ namespace DxfIO::Audit
   {
     one.Material = Found<Objects::Material>(drawing, "Global");
     one.Style    = Plotted(drawing);
-    one.Spare    = {};
+    one.Unknown1 = {};
   }
 
   void Localized(Tables::DimStyle &one, const Document &drawing)

@@ -25,7 +25,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::Gradient> = std::tuple{
       Fields::Field{.Code = 450, .Member = &Entities::Gradient::Shown},
-      Fields::Field{.Code = 451, .Member = &Entities::Gradient::Reserved},
+      Fields::Field{.Code = 451, .Member = &Entities::Gradient::Unknown1},
       Fields::Field{.Code = 460, .Member = &Entities::Gradient::Angle},
       Fields::Field{.Code = 461, .Member = &Entities::Gradient::Shift},
       Fields::Field{.Code = 452, .Member = &Entities::Gradient::Single},

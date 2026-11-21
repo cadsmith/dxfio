@@ -27,7 +27,7 @@ namespace DxfIO::Tables
     CHECK(taken.Style      == Handle{0xf});
     CHECK(taken.Material   == Handle{0x2a});
     CHECK_FALSE(taken.Rgb);
-    CHECK_FALSE(taken.Spare);
+    CHECK_FALSE(taken.Unknown1);
     CHECK(taken.Record.Base.Extra.empty());
     CHECK(Written(taken) == Text);
   }

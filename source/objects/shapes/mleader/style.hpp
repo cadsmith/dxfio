@@ -128,7 +128,7 @@ namespace DxfIO
           .Release = Version::R2013,
           .Fields  = std::tuple{Fields::Field{
               .Code   = 298,
-              .Member = &Objects::MLeaderStyle::Spare,
+              .Member = &Objects::MLeaderStyle::Unknown1,
           }},
       },
   };

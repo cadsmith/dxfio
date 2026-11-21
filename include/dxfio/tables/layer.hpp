@@ -62,9 +62,9 @@ namespace DxfIO::Tables
      */
     std::optional<std::string> Book{};
     /**
-     *  A handle AutoCAD writes with no published meaning, usually none. Group 348, from R2013.
+     *  Unnamed in the DXF reference; null as AutoCAD writes it. Group 348, from R2013.
      */
-    Handle Spare{};
+    Handle Unknown1{};
 
     auto operator==(const Layer &) const -> bool = default;
   };

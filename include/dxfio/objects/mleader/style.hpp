@@ -273,9 +273,9 @@ namespace DxfIO::Objects
      */
     double BreakGapSize{MLeaderStyles::Breaking};
     /**
-     *  A value AutoCAD writes with no published meaning, usually 0. Group 298, from R2013.
+     *  Unnamed in the DXF reference; 0 as AutoCAD writes it. Group 298, from R2013.
      */
-    int Spare{};
+    int Unknown1{};
 
     auto operator==(const MLeaderStyle &) const -> bool = default;
   };

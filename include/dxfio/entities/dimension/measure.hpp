@@ -78,9 +78,9 @@ namespace DxfIO::Entities
      */
     double Measured{Unmeasured};
     /**
-     *  A flag DXF does not document. Group 73, from R2007.
+     *  Unnamed in the DXF reference. Group 73, from R2007.
      */
-    int Above{};
+    int Unknown1{};
     /**
      *  Whether the first arrowhead is flipped. Group 74, from R2007.
      */

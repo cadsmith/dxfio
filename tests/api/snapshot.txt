@@ -587,7 +587,7 @@ namespace DxfIO::Entities
     std::optional<int> LineSpacingStyle{};
     std::optional<double> LineSpacingFactor{};
     double Measured{Unmeasured};
-    int Above{};
+    int Unknown1{};
     int FlipFirst{};
     int FlipSecond{};
     std::optional<double> Oblique{};
@@ -709,7 +709,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Gradient
   {
     int Shown{};
-    int Reserved{};
+    int Unknown1{};
     double Angle{};
     double Shift{};
     int Single{};
@@ -2454,7 +2454,7 @@ namespace DxfIO::Objects
     bool OverwriteProperty{};
     bool Annotative{};
     double BreakGapSize{MLeaderStyles::Breaking};
-    int Spare{};
+    int Unknown1{};
     auto operator==(const MLeaderStyle &) const -> bool = default;
   };
 }
@@ -3024,7 +3024,7 @@ namespace DxfIO::Tables
     Handle Material{};
     std::optional<int> Rgb{};
     std::optional<std::string> Book{};
-    Handle Spare{};
+    Handle Unknown1{};
     auto operator==(const Layer &) const -> bool = default;
   };
 }

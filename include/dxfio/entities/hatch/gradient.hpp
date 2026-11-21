@@ -40,9 +40,9 @@ namespace DxfIO::Entities
      */
     int Shown{};
     /**
-     *  Reserved by AutoCAD. Group 451.
+     *  Unnamed in the DXF reference, which reserves it. Group 451.
      */
-    int Reserved{};
+    int Unknown1{};
     /**
      *  The rotation of the gradient, in radians. Group 460.
      */

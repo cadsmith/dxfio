@@ -29,7 +29,7 @@ namespace DxfIO::Entities
      */
     std::vector<Tag> Lines{};
     /**
-     *  A flag of the R2013 layout, which DXF does not document. Group 290.
+     *  Unnamed in the DXF reference; a flag of the R2013 layout. Group 290.
      */
     std::optional<bool> Stored{};
     /**
