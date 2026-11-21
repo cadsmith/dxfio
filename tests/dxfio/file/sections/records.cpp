@@ -21,6 +21,8 @@ namespace DxfIO::File::Sections
   {
     const auto all = Tags::All("  8\n0\n");
     REQUIRE(all);
-    CHECK(Records(*all) == std::unexpected{Failure{1, "group 0 expected, found group 8"}});
+    CHECK(Records(*all)
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 1, .What = "group 0 expected, found group 8"}});
   }
 } // namespace DxfIO::File::Sections

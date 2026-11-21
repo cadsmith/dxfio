@@ -14,12 +14,12 @@ Load a DXF file, tell which release wrote it, and see what its tables and entiti
 const auto loaded = DxfIO::LoadFile("plan.dxf");
 if (!loaded)
 {
-  std::println("line {}: {}", loaded.error().Line, loaded.error().What);
+  std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
   return 1;
 }
 for (const DxfIO::Issue &issue : loaded->Issues)
 {
-  std::println("line {}: {}", issue.Line, issue.What);
+  std::println("line {}: {}", issue.Line.value_or(0), issue.What);
 }
 const DxfIO::Document &drawing = loaded->Document;
 ```

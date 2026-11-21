@@ -21,7 +21,7 @@ namespace DxfIO::Edit
     if (!first || first.Value == Last)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = "the drawing holds the last handle there is"}};
+          Failure{.Code = FailureCode::Refused, .What = "no handle left past the last one"}};
     }
     return Seed{first};
   }

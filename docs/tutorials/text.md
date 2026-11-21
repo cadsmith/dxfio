@@ -33,21 +33,23 @@ DxfIO::Edit::Add(drawing, title);
 
 ## Justification [#justification]
 
-`Lettering.Horizontal` takes 0 left, 1 center, 2 right or 4 middle, and the text's own `Vertical` 0 baseline, 1 bottom, 2 middle or 3 top. Each of these but left on the baseline holds the text to `Lettering.Alignment`. `Position` is then where the drawn text starts, which depends on the font and which dxfio does not work out, so these texts give it the alignment point too.
+`Lettering.Horizontal` takes `Left`, `Center`, `Right` or `Middle`, and the text's own `Vertical` `Baseline`, `Bottom`, `Middle` or `Top`. Each of these but left on the baseline holds the text to `Lettering.Alignment`. `Position` is then where the drawn text starts, which depends on the font and which dxfio does not work out, so these texts give it the alignment point too.
 
 ```cpp
+using Across = DxfIO::Entities::HorizontalAlignment;
+using Down = DxfIO::Entities::VerticalAlignment;
 struct Justification
 {
-  int Horizontal;
-  int Vertical;
+  Across Horizontal;
+  Down Vertical;
   std::string Value;
 };
 const std::vector<Justification> justifications{
-    {.Horizontal = 1, .Vertical = 0, .Value = "center"},
-    {.Horizontal = 2, .Vertical = 0, .Value = "right"},
-    {.Horizontal = 4, .Vertical = 0, .Value = "middle"},
-    {.Horizontal = 1, .Vertical = 3, .Value = "top center"},
-    {.Horizontal = 0, .Vertical = 1, .Value = "bottom left"},
+    {.Horizontal = Across::Center, .Vertical = Down::Baseline, .Value = "center"},
+    {.Horizontal = Across::Right, .Vertical = Down::Baseline, .Value = "right"},
+    {.Horizontal = Across::Middle, .Vertical = Down::Baseline, .Value = "middle"},
+    {.Horizontal = Across::Center, .Vertical = Down::Top, .Value = "top center"},
+    {.Horizontal = Across::Left, .Vertical = Down::Bottom, .Value = "bottom left"},
 };
 
 double y = 0;

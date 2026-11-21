@@ -8,6 +8,7 @@
 #include "fields/since.hpp"
 #include "fields/text.hpp"
 
+#include "dxfio/entities/lettering.hpp"
 #include "dxfio/version.hpp"
 
 #include <expected>
@@ -55,7 +56,9 @@ namespace DxfIO::Entities
       Fields::Field{.Code = 2, .Member = &KindT::Tag},
       Fields::Field{.Code = 70, .Member = &KindT::Flags},
       Fields::Field{.Code = 73, .Member = &KindT::Length, .Fallback = 0},
-      Fields::Field{.Code = 74, .Member = &KindT::Vertical, .Fallback = 0},
+      Fields::Field{.Code     = 74,
+                    .Member   = &KindT::Vertical,
+                    .Fallback = Entities::VerticalAlignment::Baseline},
       Fields::Since{
           .Release = Version::R2007,
           .Fields =

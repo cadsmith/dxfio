@@ -21,9 +21,9 @@ namespace DxfIO::Entities
      */
     Entities::Lettering Lettering{};
     /**
-     *  The vertical justification: 0 baseline, 1 bottom, 2 middle, 3 top. Group 73.
+     *  Group 73.
      */
-    int Vertical{};
+    VerticalAlignment Vertical{};
 
     auto operator==(const Text &) const -> bool = default;
   };

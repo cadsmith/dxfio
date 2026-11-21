@@ -8,6 +8,7 @@
 #include <array>
 #include <cstdlib>
 #include <format>
+#include <utility>
 #include <variant>
 
 namespace DxfIO::Audit
@@ -39,18 +40,19 @@ namespace DxfIO::Audit
     }
 
     template <class DocumentT>
-    void Weighed(Auditor<DocumentT> &with, Part<DocumentT, int> &weight, Handle self)
+    void Weighed(Auditor<DocumentT> &with, Part<DocumentT, Lineweight> &weight, Handle self)
     {
-      const int nearest = Nearest(weight);
-      if (nearest == weight)
+      const int held    = std::to_underlying(weight);
+      const int nearest = Nearest(held);
+      if (nearest == held)
       {
         return;
       }
       with.Note(Severity::Warning,
-                std::format("lineweight {} is none AutoCAD has, {} taken", weight, nearest), self);
+                std::format("lineweight {} is none AutoCAD has, {} taken", held, nearest), self);
       if constexpr (Auditor<DocumentT>::Fix)
       {
-        weight = nearest;
+        weight = static_cast<Lineweight>(nearest);
       }
     }
 

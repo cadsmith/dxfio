@@ -150,7 +150,7 @@ namespace DxfIO
       if (std::ranges::contains(into.Document.Order, name))
       {
         into.Issues.push_back(Issue{
-            .Line = 0,
+            .Code = IssueCode::Damaged,
             .What = std::format("section {} given again, the first kept", name),
         });
         return {};
@@ -197,7 +197,7 @@ namespace DxfIO
     void Dated(Loaded &into)
     {
       into.Issues.push_back(Issue{
-          .Line = 0,
+          .Code = IssueCode::Damaged,
           .What = "no $ACADVER, read as R2000 for the subclass markers its records carry",
       });
       into.Document.Header.insert(
@@ -221,7 +221,7 @@ namespace DxfIO
         return;
       }
       into.Issues.push_back(Issue{
-          .Line = 0,
+          .Code = IssueCode::Damaged,
           .What = std::format("$HANDSEED {} is not past the handles in use, raised to {}",
                               Hex(*seed), Hex(past)),
       });
@@ -259,7 +259,7 @@ namespace DxfIO
     if (opaque)
     {
       out.Issues.push_back(Issue{
-          .Line = 0,
+          .Code = IssueCode::NotKept,
           .What = "the code page is not carried, text kept as bytes",
       });
     }
@@ -281,7 +281,7 @@ namespace DxfIO
   {
     if (from.fail())
     {
-      return std::unexpected{Failure{.Line = 0, .What = "the stream could not be read"}};
+      return std::unexpected{Failure{.Code = FailureCode::Io, .What = "stream not readable"}};
     }
     const std::string bytes{std::istreambuf_iterator<char>{from}, std::istreambuf_iterator<char>{}};
     return Load(bytes, with);
@@ -294,7 +294,7 @@ namespace DxfIO
     if (!from)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = std::format("{} cannot be read", file.string())}};
+          Failure{.Code = FailureCode::Io, .What = std::format("cannot open {}", file.string())}};
     }
     std::error_code      unsized;
     const std::uintmax_t size = std::filesystem::file_size(file, unsized);

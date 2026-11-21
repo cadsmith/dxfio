@@ -46,7 +46,7 @@ auto main() -> int
   const auto loaded = DxfIO::LoadFile("first.dxf");
   if (!loaded)
   {
-    std::println("line {}: {}", loaded.error().Line, loaded.error().What);
+    std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
     return 1;
   }
   std::println("{} entity, {} issues", loaded->Document.Entities.size(),

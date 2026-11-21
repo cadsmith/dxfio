@@ -1,5 +1,6 @@
 #include "tags/writer.hpp"
 
+#include "located.hpp"
 #include "match.hpp"
 #include "tags/codes.hpp"
 #include "tags/real.hpp"
@@ -111,7 +112,8 @@ namespace DxfIO::Tags
     const std::expected<Content, Failure> value = Typed(one.Code, one.Value);
     if (!value)
     {
-      return std::unexpected{Failure{.Line = line, .What = value.error().What}};
+      return std::unexpected{
+          Failure{.Code = value.error().Code, .Line = Located(line), .What = value.error().What}};
     }
     if (m_Form != Form::Ascii)
     {
@@ -159,7 +161,8 @@ namespace DxfIO::Tags
             [this, code](std::string_view) -> std::expected<void, Failure>
             {
               return std::unexpected{Failure{
-                  .Line = m_Line,
+                  .Code = FailureCode::Refused,
+                  .Line = Located(m_Line),
                   .What = std::format("group {} holds bytes kept as text", code),
               }};
             },

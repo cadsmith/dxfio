@@ -24,7 +24,7 @@ DxfIO::Edit::Add(drawing, stem, "Valve");
 
 ## Attribute definitions [#attdef]
 
-An ATTDEF names an attribute by its `Tag`, with the `Prompt` shown when the block is inserted and a default value in `Lettering->Value`: an ATTDEF keeps its `Lettering` on the heap, reached with `->`. `Horizontal` 1 and `Vertical` 2 center the number on `Alignment`, the base point here, and `Flags` 1 makes the size invisible.
+An ATTDEF names an attribute by its `Tag`, with the `Prompt` shown when the block is inserted and a default value in `Lettering->Value`: an ATTDEF keeps its `Lettering` on the heap, reached with `->`. `Center` and `Middle` center the number on `Alignment`, the base point here, and `Flags` 1 makes the size invisible.
 
 ```cpp
 DxfIO::Entities::AttDef number{};
@@ -32,8 +32,8 @@ number.Tag = DxfIO::Symbol{"NUMBER"};
 number.Prompt = "Valve number";
 number.Lettering->Value = "V-0";
 number.Lettering->Height = 2.5;
-number.Lettering->Horizontal = 1;
-number.Vertical = 2;
+number.Lettering->Horizontal = DxfIO::Entities::HorizontalAlignment::Center;
+number.Vertical = DxfIO::Entities::VerticalAlignment::Middle;
 number.Lettering->Alignment = DxfIO::Vector{.X = 0, .Y = 0, .Z = 0};
 DxfIO::Edit::Add(drawing, number, "Valve");
 

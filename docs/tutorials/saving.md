@@ -12,7 +12,7 @@ The drawing here, `plan.dxf`, is one AutoCAD saved as R2018. Among its entities 
 const auto plan = DxfIO::LoadFile("plan.dxf");
 if (!plan)
 {
-  std::println("line {}: {}", plan.error().Line, plan.error().What);
+  std::println("line {}: {}", plan.error().Line.value_or(0), plan.error().What);
   return 1;
 }
 const DxfIO::Document &drawing = plan->Document;

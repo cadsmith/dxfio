@@ -556,12 +556,12 @@ namespace DxfIO
     broken.setstate(std::ios::badbit);
     const auto refused = Save(fresh, broken);
     REQUIRE_FALSE(refused);
-    CHECK(refused.error().What == "the stream would not take the drawing");
+    CHECK(refused.error().What == "stream not writable");
     const std::filesystem::path nowhere =
         std::filesystem::temp_directory_path() / "dxfio-missing" / "out.dxf";
     const auto unwritten = SaveFile(fresh, nowhere);
     REQUIRE_FALSE(unwritten);
-    CHECK(unwritten.error().What == nowhere.string() + " cannot be written");
+    CHECK(unwritten.error().What == "cannot write " + nowhere.string());
   }
 
   namespace
@@ -579,6 +579,6 @@ namespace DxfIO
     std::ostream to{&full};
     const auto   refused = Save(Create(Version::R2018), to);
     REQUIRE_FALSE(refused);
-    CHECK(refused.error().What == "the stream would not take the drawing");
+    CHECK(refused.error().What == "stream not writable");
   }
 } // namespace DxfIO

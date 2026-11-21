@@ -11,6 +11,7 @@ target_sources(dxfio_tests
     tag.cpp
     handle.cpp
     handseed.cpp
+    lineweight.cpp
     head.cpp
     load.cpp
     match.cpp

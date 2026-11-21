@@ -93,7 +93,9 @@ namespace DxfIO
     Entities::Gather(one.Attributes, rest, with);
     if (!one.Attributes.Closing)
     {
-      with.Tell(Issue{.Subject = one.Record.Base.Self, .What = "INSERT has no SEQEND"});
+      with.Tell(Issue{.Code    = IssueCode::Damaged,
+                      .Subject = one.Record.Base.Self,
+                      .What    = "INSERT has no SEQEND"});
     }
   }
 

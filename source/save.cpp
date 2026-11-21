@@ -270,8 +270,8 @@ namespace DxfIO
   {
     if (!with.Codepage.empty() && Encoding::Find(with.Codepage) == nullptr)
     {
-      return std::unexpected{
-          Failure{.Line = 0, .What = std::format("no code page named {}", with.Codepage)}};
+      return std::unexpected{Failure{.Code = FailureCode::Refused,
+                                     .What = std::format("no code page named {}", with.Codepage)}};
     }
     Saved      out;
     const bool same = with.Release == Header::Declared(drawing.Header);
@@ -297,7 +297,7 @@ namespace DxfIO
               if (!to)
               {
                 return std::unexpected{
-                    Failure{.Line = 0, .What = "the stream would not take the drawing"}};
+                    Failure{.Code = FailureCode::Io, .What = "stream not writable"}};
               }
               return std::move(saved.Issues);
             });
@@ -310,7 +310,7 @@ namespace DxfIO
     if (!to)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = std::format("{} cannot be written", file.string())}};
+          Failure{.Code = FailureCode::Io, .What = std::format("cannot write {}", file.string())}};
     }
     return Save(drawing, to, with);
   }

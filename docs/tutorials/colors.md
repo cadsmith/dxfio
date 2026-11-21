@@ -13,7 +13,8 @@ DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Entities::Line plain{};
 plain.End = {.X = 100, .Y = 0, .Z = 0};
-std::println("layer {}, color {}, lineweight {}", plain.Record.Layer, plain.Record.Color, plain.Record.Lineweight);
+std::println("layer {}, color {}, lineweight {}", plain.Record.Layer, plain.Record.Color,
+             std::to_underlying(plain.Record.Lineweight));
 DxfIO::Edit::Add(drawing, plain);
 ```
 
@@ -48,13 +49,13 @@ DxfIO::Edit::Add(drawing, orange);
 
 ## Lineweight [#lineweight]
 
-`Lineweight` is in hundredths of a millimeter, so 50 is 0.50 mm, and is written from R2000 on. `Lineweights::ByLayer` (-1) takes the layer's, `Lineweights::ByBlock` (-2) the block insert's, and `Lineweights::Standard` (-3) the drawing's default, which `$LWDEFAULT` gives.
+A `Lineweight` is one of AutoCAD's widths, named in hundredths of a millimeter, so `Mm050` is 0.50 mm, and is written from R2000 on; `MillimetersOf` gives the width. `Lineweight::ByLayer` (-1) takes the layer's, `ByBlock` (-2) the block insert's, and `Default` (-3) the drawing's default, which `$LWDEFAULT` gives.
 
 ```cpp
 DxfIO::Entities::Line heavy{};
 heavy.Start = {.X = 0, .Y = 30, .Z = 0};
 heavy.End = {.X = 100, .Y = 30, .Z = 0};
-heavy.Record.Lineweight = 50;
+heavy.Record.Lineweight = DxfIO::Lineweight::Mm050;
 DxfIO::Edit::Add(drawing, heavy);
 ```
 

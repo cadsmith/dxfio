@@ -4,7 +4,7 @@
 #include "dxfio/api.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/symbol.hpp"
 #include "dxfio/tables/record.hpp"
 
@@ -36,9 +36,9 @@ namespace DxfIO::Tables
      */
     bool Plot{true};
     /**
-     *  The lineweight in hundredths of a millimeter, or -3 for the default. Group 370, from R2000.
+     *  Group 370, from R2000.
      */
-    int Lineweight{Lineweights::Standard};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::Default};
     /**
      *  The plot style, a placeholder in the plot style name dictionary. Group 390, from R2000.
      */

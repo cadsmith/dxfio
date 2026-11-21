@@ -1,5 +1,6 @@
 #include "tags/tags.hpp"
 
+#include "located.hpp"
 #include "tags/ascii/reader.hpp"
 #include "tags/binary/reader.hpp"
 #include "tags/sentinel.hpp"
@@ -53,8 +54,9 @@ namespace DxfIO::Tags
       }
       if (!in.Done() && issues != nullptr)
       {
-        issues->push_back(
-            Issue{.Line = Following(out.back()), .What = "what follows EOF, left out"});
+        issues->push_back(Issue{.Code = IssueCode::Damaged,
+                                .Line = Located(Following(out.back())),
+                                .What = "what follows EOF, left out"});
       }
       return out;
     }

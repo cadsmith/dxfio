@@ -63,10 +63,11 @@ set(DXFIO_HEADERS
   dxfio/entities/xline.hpp
   dxfio/entity.hpp
   dxfio/failure.hpp
+  dxfio/flags.hpp
   dxfio/handle.hpp
   dxfio/header/header.hpp
   dxfio/issue.hpp
-  dxfio/lineweights.hpp
+  dxfio/lineweight.hpp
   dxfio/load.hpp
   dxfio/matrix.hpp
   dxfio/object.hpp

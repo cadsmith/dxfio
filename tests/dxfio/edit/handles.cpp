@@ -90,7 +90,7 @@ namespace DxfIO::Edit
     Seeding(seeded).Values.front().Value = Handle{.Value = Last};
     const auto none                      = NewHandle(seeded);
     REQUIRE_FALSE(none);
-    CHECK(none.error().What == "the drawing holds the last handle there is");
+    CHECK(none.error().What == "no handle left past the last one");
 
     Document full{};
     full.Entities.emplace_back(Lined(Handle{.Value = Last}));

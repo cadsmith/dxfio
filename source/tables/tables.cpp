@@ -1,6 +1,7 @@
 #include "../filing.hpp"
 #include "chained.hpp"
 #include "heading.hpp"
+#include "located.hpp"
 #include "seek.hpp"
 #include "shapes/appid.hpp"
 #include "shapes/block.hpp"
@@ -67,7 +68,8 @@ namespace DxfIO::Tables
           return true;
         }
         into.With->Tell(Issue{
-            .Line = record.Tags.front().Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(record.Tags.front().Line),
             .What = std::format("record {} in table {}, left out", record.Name, head.Name),
         });
         return false;
@@ -172,7 +174,8 @@ namespace DxfIO::Tables
       if (std::ranges::contains(seen, head.Name))
       {
         with.Tell(Issue{
-            .Line = one.Head.Tags.front().Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(one.Head.Tags.front().Line),
             .What = std::format("table {} given again, the first kept", head.Name),
         });
         continue;

@@ -6,6 +6,7 @@ add_library(dxfio
   handle.cpp
   handseed.cpp
   head.cpp
+  lineweight.cpp
   load.cpp
   object.cpp
   parallel.cpp

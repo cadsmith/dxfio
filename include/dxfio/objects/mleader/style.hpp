@@ -6,7 +6,7 @@
 #include "dxfio/boxed.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/vector.hpp"
 
 #include <string>
@@ -50,7 +50,7 @@ namespace DxfIO::Objects::MLeaderStyles
      *  The lineweight in hundredths of a millimeter, or -1 ByLayer, -2 ByBlock, -3 the default.
      *  Group 92.
      */
-    int Lineweight{Lineweights::ByBlock};
+    int Lineweight{-2};
     /**
      *  Whether the leader lands on the content. Group 290.
      */

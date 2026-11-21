@@ -119,6 +119,7 @@ namespace DxfIO
     if (!one.Vertices.Closing)
     {
       with.Tell(Issue{
+          .Code    = IssueCode::Damaged,
           .Subject = one.Record.Base.Self,
           .What    = "POLYLINE has no SEQEND",
       });

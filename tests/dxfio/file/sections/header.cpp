@@ -24,6 +24,9 @@ namespace DxfIO::File::Sections
   {
     const auto all = Tags::All("  1\nAC1032\n");
     REQUIRE(all);
-    CHECK(Header(*all) == std::unexpected{Failure{1, "header variable expected, found group 1"}});
+    CHECK(Header(*all)
+          == std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                     .Line = 1,
+                                     .What = "header variable expected, found group 1"}});
   }
 } // namespace DxfIO::File::Sections

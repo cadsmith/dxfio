@@ -166,8 +166,8 @@ namespace DxfIO::Down
       text.Lettering.Rotation   = angle * Degrees;
       text.Lettering.Style      = body.Style;
       text.Lettering.Extrusion  = body.Extrusion;
-      text.Lettering.Horizontal = column;
-      text.Vertical             = Top - row;
+      text.Lettering.Horizontal = static_cast<Entities::HorizontalAlignment>(column);
+      text.Vertical             = static_cast<Entities::VerticalAlignment>(Top - row);
       out.push_back(std::move(text));
     }
     return out;

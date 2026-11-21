@@ -23,7 +23,7 @@ namespace DxfIO::Tables
     CHECK(taken.Color        == -1);
     CHECK(taken.Linetype     == "DASHED");
     CHECK_FALSE(taken.Plot);
-    CHECK(taken.Lineweight == 35);
+    CHECK(taken.Lineweight == Lineweight::Mm035);
     CHECK(taken.Style      == Handle{0xf});
     CHECK(taken.Material   == Handle{0x2a});
     CHECK_FALSE(taken.Rgb);

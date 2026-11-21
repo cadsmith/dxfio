@@ -23,7 +23,7 @@ auto loaded = DxfIO::LoadFile("plan.dxf");
 auto loaded = DxfIO::LoadFile("plan.dxf");
 if (!loaded)
 {
-  std::println("line {}: {}", loaded.error().Line, loaded.error().What);
+  std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
   return 1;
 }
 DxfIO::Document &drawing = loaded->Document;

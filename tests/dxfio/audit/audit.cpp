@@ -373,8 +373,9 @@ namespace DxfIO::Audit
           == "Standard");
     CHECK(std::get<Entities::ArcDimension>(drawing.Entities.at(1)).Data->Measure.Style.View()
           == "Standard");
-    CHECK(std::get<Entities::LargeRadialDimension>(drawing.Entities.at(2)).Data->Measure.Style.View()
-          == "Standard");
+    CHECK(
+        std::get<Entities::LargeRadialDimension>(drawing.Entities.at(2)).Data->Measure.Style.View()
+        == "Standard");
     CHECK(std::get<Entities::Leader>(drawing.Entities.at(3)).Data->Style.View() == "Standard");
     CHECK(std::get<Entities::Tolerance>(drawing.Entities.at(4)).Style.View()    == "Standard");
     CHECK(std::get<Entities::Dimension>(drawing.Entities.at(5)).Data->Measure.Style.View()
@@ -578,21 +579,21 @@ namespace DxfIO::Audit
   {
     Document       drawing = Fresh();
     Entities::Line heavy{};
-    heavy.Record.Lineweight = 284;
+    heavy.Record.Lineweight = static_cast<Lineweight>(284);
     Entities::Line odd{};
-    odd.Record.Lineweight = -4;
+    odd.Record.Lineweight = static_cast<Lineweight>(-4);
     Entities::Polyline chain{};
     chain.Vertices.Children.push_back(Entities::Vertex{});
-    chain.Vertices.Children.front().Record.Lineweight = 7;
+    chain.Vertices.Children.front().Record.Lineweight = static_cast<Lineweight>(7);
     Entities::Line fine{};
-    fine.Record.Lineweight = 211;
+    fine.Record.Lineweight = Lineweight::Mm211;
     REQUIRE(Edit::Add(drawing, heavy));
     REQUIRE(Edit::Add(drawing, odd));
     REQUIRE(Edit::Add(drawing, chain));
     REQUIRE(Edit::Add(drawing, fine));
     Tables::Layer walls{};
     walls.Record.Name = "WALLS";
-    walls.Lineweight  = 1000;
+    walls.Lineweight  = static_cast<Lineweight>(1000);
     REQUIRE(Edit::Add(drawing, walls));
     const Report seen = Check(drawing);
     CHECK(seen.Errors()            == 0);
@@ -603,14 +604,15 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.at(2).What    == "lineweight -4 is none AutoCAD has, -3 taken");
     CHECK(seen.Findings.at(3).What    == "lineweight 7 is none AutoCAD has, 5 taken");
     CHECK(Repair(drawing).Clean());
-    CHECK(Edit::Find(drawing.Layer, "WALLS")->Lineweight == 211);
-    CHECK(std::get<Entities::Line>(drawing.Entities.at(0)).Record.Lineweight == 211);
-    CHECK(std::get<Entities::Line>(drawing.Entities.at(1)).Record.Lineweight == -3);
+    CHECK(Edit::Find(drawing.Layer, "WALLS")->Lineweight == Lineweight::Mm211);
+    CHECK(std::get<Entities::Line>(drawing.Entities.at(0)).Record.Lineweight == Lineweight::Mm211);
+    CHECK(std::get<Entities::Line>(drawing.Entities.at(1)).Record.Lineweight
+          == Lineweight::Default);
     CHECK(std::get<Entities::Polyline>(drawing.Entities.at(2))
               .Vertices.Children.front()
               .Record.Lineweight
-          == 5);
-    CHECK(std::get<Entities::Line>(drawing.Entities.at(3)).Record.Lineweight == 211);
+          == Lineweight::Mm005);
+    CHECK(std::get<Entities::Line>(drawing.Entities.at(3)).Record.Lineweight == Lineweight::Mm211);
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -799,7 +801,7 @@ namespace DxfIO::Audit
     drawing.Entities.emplace_back(text);
     Entities::MText para{};
     para.Record.Base.Self = Handle{.Value = Past(drawing).Value};
-    para.Data->Style = Symbol{"Gone"};
+    para.Data->Style      = Symbol{"Gone"};
     drawing.Entities.emplace_back(para);
     Entities::Text kept{};
     kept.Record.Base.Self = Handle{.Value = Past(drawing).Value};
@@ -876,13 +878,13 @@ namespace DxfIO::Audit
     Document       drawing = Fresh();
     Entities::Mesh mesh{};
     mesh.Record.Base.Self = Past(drawing);
-    mesh.Data->Vertices    = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
-    mesh.Data->Faces       = {3, 0, 1, 2};
-    mesh.Data->Edges       = {0, 1, 1, 2};
-    mesh.Data->Creases     = {0.5};
+    mesh.Data->Vertices   = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+    mesh.Data->Faces      = {3, 0, 1, 2};
+    mesh.Data->Edges      = {0, 1, 1, 2};
+    mesh.Data->Creases    = {0.5};
     drawing.Blocks.front().Entities.emplace_back(mesh);
     Entities::Mesh whole   = mesh;
-    whole.Data->Creases     = {0.5, 0.0};
+    whole.Data->Creases    = {0.5, 0.0};
     whole.Record.Base.Self = Handle{.Value = mesh.Record.Base.Self.Value + 1};
     drawing.Blocks.front().Entities.emplace_back(whole);
     drawing.Entities.emplace_back(Lined(Handle{.Value = mesh.Record.Base.Self.Value + 2}));

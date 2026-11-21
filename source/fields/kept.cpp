@@ -1,5 +1,6 @@
 #include "fields/owned.hpp"
 #include "fields/walk.hpp"
+#include "located.hpp"
 #include "tags/codes.hpp"
 #include "unknown/io.hpp"
 
@@ -31,7 +32,8 @@ namespace DxfIO::Fields
       }
       if (index < uncovered && !m_Unfit.at(index) && m_Repeats.Trails(one.Code))
       {
-        m_With.Tell(Issue{.Line = one.Line,
+        m_With.Tell(Issue{.Code = IssueCode::Damaged,
+                          .Line = Located(one.Line),
                           .What = std::format("group {} given again, one kept", one.Code)});
         continue;
       }
@@ -60,7 +62,8 @@ namespace DxfIO::Fields
       if (std::optional<std::string> why =
               Dropped(index, one.Code, Standing{.Beyond = beyond, .Early = index < first}))
       {
-        m_With.Tell(Issue{.Line = one.Line, .What = std::move(*why)});
+        m_With.Tell(
+            Issue{.Code = IssueCode::Damaged, .Line = Located(one.Line), .What = std::move(*why)});
         continue;
       }
       beyond = beyond

@@ -86,14 +86,14 @@ namespace DxfIO::Entities
   TEST_CASE("attdef: aligned, 74 past its flags, its 11 given")
   {
     const AttDef right = Alikened(Marked("2D8"));
-    CHECK(right.Lettering->Horizontal == 2);
-    CHECK(right.Vertical             == 3);
+    CHECK(right.Lettering->Horizontal == Entities::HorizontalAlignment::Right);
+    CHECK(right.Vertical             == Entities::VerticalAlignment::Top);
     CHECK(right.Lettering->Alignment == Vector{.X = 60, .Y = 5, .Z = 0});
     const AttDef left = Alikened(Marked("2D9"));
-    CHECK(left.Lettering->Horizontal == 0);
-    CHECK(left.Vertical == 2);
-    CHECK(Alikened(Marked("2DA")).Lettering->Horizontal == 3);
-    CHECK(Alikened(Marked("2DB")).Lettering->Horizontal == 5);
+    CHECK(left.Lettering->Horizontal == Entities::HorizontalAlignment::Left);
+    CHECK(left.Vertical == Entities::VerticalAlignment::Middle);
+    CHECK(Alikened(Marked("2DA")).Lettering->Horizontal == Entities::HorizontalAlignment::Aligned);
+    CHECK(Alikened(Marked("2DB")).Lettering->Horizontal == Entities::HorizontalAlignment::Fit);
   }
 
   TEST_CASE("attdef: what an entity and a text hold, on another plane too")
@@ -105,7 +105,7 @@ namespace DxfIO::Entities
     CHECK(made.Record.Color         == 1);
     const AttDef behind = Alikened(Marked("2DD"));
     CHECK(behind.Lettering->Extrusion.Z == -1);
-    CHECK(behind.Vertical == 1);
+    CHECK(behind.Vertical == Entities::VerticalAlignment::Bottom);
   }
 
   TEST_CASE("attdef: locked, on the last 280 from R2010 and the one at R2007")
@@ -135,7 +135,7 @@ namespace DxfIO::Entities
     const std::string record = Marked("2E1");
     const AttDef      many   = DxfIO::Read<AttDef>(record);
     CHECK(many.Tag      == "MULTI");
-    CHECK(many.Vertical == 3);
+    CHECK(many.Vertical == Entities::VerticalAlignment::Top);
     CHECK_FALSE(many.Locked);
     CHECK_FALSE(many.Record.Base.Extra.empty());
     CHECK(Alike(Written(many), record));
@@ -146,10 +146,10 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened(Marked("2D8", release), release).Vertical == 3);
+      CHECK(Alikened(Marked("2D8", release), release).Vertical == Entities::VerticalAlignment::Top);
     }
     const AttDef old = Alikened(Marked("2D8", Version::R12), Version::R12);
-    CHECK(old.Vertical == 3);
+    CHECK(old.Vertical == Entities::VerticalAlignment::Top);
     CHECK(old.Prompt   == "Prompt");
   }
 

@@ -109,15 +109,16 @@ namespace DxfIO::Edit
       auto &table = drawing.*Member;
       if (one.Record.Name.empty())
       {
-        return std::unexpected{Failure{.Line = 0, .What = std::format("a {} needs a name", kind)}};
+        return std::unexpected{Failure{.Code = FailureCode::Refused,
+                                       .What = std::format("{} with no name refused", kind)}};
       }
       if constexpr (!std::same_as<RecordT, Tables::VPort>)
       {
         if (Find(table, one.Record.Name) != nullptr)
         {
           return std::unexpected{
-              Failure{.Line = 0,
-                      .What = std::format("a record named {} is there already", one.Record.Name)}};
+              Failure{.Code = FailureCode::Exists,
+                      .What = std::format("{} {} exists", kind, one.Record.Name)}};
         }
       }
       return Seeded(drawing).transform(
@@ -170,7 +171,7 @@ namespace DxfIO::Edit
     if (found == nullptr)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = std::format("there is no block named {}", block)}};
+          Failure{.Code = FailureCode::Missing, .What = std::format("block {} missing", block)}};
     }
     const Handle owner = found->Block.Record.Base.Owner;
     return Owned(drawing, one, owner)
@@ -191,12 +192,13 @@ namespace DxfIO::Edit
   {
     if (name.empty())
     {
-      return std::unexpected{Failure{.Line = 0, .What = "a block needs a name"}};
+      return std::unexpected{
+          Failure{.Code = FailureCode::Refused, .What = "block with no name refused"}};
     }
     if (FindBlock(drawing, name) != nullptr)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = std::format("a block named {} is there already", name)}};
+          Failure{.Code = FailureCode::Exists, .What = std::format("block {} exists", name)}};
     }
     const bool recorded = Find(drawing.BlockRecord, Model) != nullptr;
     return Seeded(drawing).transform(

@@ -76,7 +76,8 @@ namespace DxfIO::Tags
 
     auto Refused(int code) -> Failure
     {
-      return Failure{.Line = 0, .What = std::format("group {} holds no value of its type", code)};
+      return Failure{.Code = FailureCode::Refused,
+                     .What = std::format("group {} holds no value of its type", code)};
     }
 
     auto Whole(int code, Codes::Type is, const Content &value) -> Converted
@@ -100,7 +101,8 @@ namespace DxfIO::Tags
       if (!std::isfinite(*number))
       {
         return std::unexpected{
-            Failure{.Line = 0, .What = std::format("group {} holds no finite number", code)}};
+            Failure{.Code = FailureCode::Refused,
+                    .What = std::format("group {} holds no finite number", code)}};
       }
       return Content{*number};
     }

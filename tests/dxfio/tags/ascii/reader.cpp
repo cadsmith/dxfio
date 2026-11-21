@@ -91,22 +91,30 @@ namespace DxfIO::Tags::Ascii
     CHECK(tags.at(1)    == Tag{.Code = 62, .Line = 7, .Value = std::int64_t{1}});
     CHECK(issues
           == std::vector{
-              Issue{.Line = 4, .What = "number expected for group 40, found \"nope\", left out"},
-              Issue{.Line = 6, .What = "integer expected for group 70, found \"1e300\", left out"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 4,
+                    .What = "number expected for group 40, found \"nope\", left out"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 6,
+                    .What = "integer expected for group 70, found \"1e300\", left out"},
           });
     CHECK(Read(" 40\nnope\n").empty());
     CHECK(Told("  0\nSECTION\n  2")
-          == std::vector{
-              Issue{.Line = 3, .What = "group 2 at the end of the file has no value, left out"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .Line = 3,
+                               .What = "group 2 at the end of the file has no value, left out"}});
     CHECK(Read("  0\nSECTION\n  2").size() == 1);
     CHECK(Told("310\nxyz\n")
-          == std::vector{
-              Issue{.Line = 2, .What = "hex expected for group 310, found \"xyz\", left out"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .Line = 2,
+                               .What = "hex expected for group 310, found \"xyz\", left out"}});
     CHECK(Told(" 70\n100000\n 90\n3000000000\n")
           == std::vector{
-              Issue{.Line = 2,
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 2,
                     .What = "integer of 16 bits expected for group 70, found \"100000\", left out"},
-              Issue{.Line = 4,
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 4,
                     .What =
                         "integer of 32 bits expected for group 90, found \"3000000000\", left out"},
           });
@@ -122,8 +130,12 @@ namespace DxfIO::Tags::Ascii
     CHECK(tags.at(2)    == Tag{.Code = 0, .Line = 5, .Value = std::string_view{"EOF"}});
     CHECK(issues
           == std::vector{
-              Issue{.Line = 2, .What = "group 0 holds \"SECTION \" with blanks, trimmed"},
-              Issue{.Line = 6, .What = "group 0 holds \"\tEOF\" with blanks, trimmed"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 2,
+                    .What = "group 0 holds \"SECTION \" with blanks, trimmed"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 6,
+                    .What = "group 0 holds \"\tEOF\" with blanks, trimmed"},
           });
     CHECK(Told("  0\nSECTION\n").empty());
   }
@@ -143,9 +155,15 @@ namespace DxfIO::Tags::Ascii
     CHECK(tags.at(6).Value == Content{std::string_view{"D^"}});
     CHECK(issues
           == std::vector{
-              Issue{.Line = 6, .What = "group 0 holds \"B^  \" with blanks, trimmed"},
-              Issue{.Line = 8, .What = "group 0 holds \"^^ \" with blanks, trimmed"},
-              Issue{.Line = 14, .What = "group 0 holds \"D^\t\" with blanks, trimmed"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 6,
+                    .What = "group 0 holds \"B^  \" with blanks, trimmed"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 8,
+                    .What = "group 0 holds \"^^ \" with blanks, trimmed"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 14,
+                    .What = "group 0 holds \"D^\t\" with blanks, trimmed"},
           });
   }
 
@@ -153,13 +171,25 @@ namespace DxfIO::Tags::Ascii
             "is no code")
   {
     const std::vector<Tag> tags = Read("70 \n1\n\t 0\t\nEOF\n");
-    REQUIRE(tags.size()        == 2);
-    CHECK(tags.at(0).Code      == 70);
-    CHECK(tags.at(1).Code      == 0);
-    CHECK(Refused("1072\nx\n") == Failure{1, "group code expected, found \"1072\""});
-    CHECK(Refused("+70\n1\n")  == Failure{1, "group code expected, found \"+70\""});
-    CHECK(Refused("-1\n1\n")   == Failure{1, "group code expected, found \"-1\""});
-    CHECK(Refused("7 0\n1\n")  == Failure{1, "group code expected, found \"7 0\""});
+    REQUIRE(tags.size()   == 2);
+    CHECK(tags.at(0).Code == 70);
+    CHECK(tags.at(1).Code == 0);
+    CHECK(Refused("1072\nx\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 1,
+                     .What = "group code expected, found \"1072\""});
+    CHECK(Refused("+70\n1\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 1,
+                     .What = "group code expected, found \"+70\""});
+    CHECK(Refused("-1\n1\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 1,
+                     .What = "group code expected, found \"-1\""});
+    CHECK(Refused("7 0\n1\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 1,
+                     .What = "group code expected, found \"7 0\""});
   }
 
   TEST_CASE("ascii: a group of a code DXF does not define is kept and told")
@@ -167,30 +197,49 @@ namespace DxfIO::Tags::Ascii
     std::vector<Issue>     issues;
     const std::vector<Tag> tags = Read("  0\nLINE\n250\n2\n", &issues);
     REQUIRE(tags.size() == 2);
-    CHECK(tags.at(1) == Tag{.Code = 250, .Line = 3, .Value = std::string_view{"2"}});
-    CHECK(issues == std::vector{Issue{.Line = 3, .What = "group 250 is no DXF group, kept"}});
+    CHECK(tags.at(1)    == Tag{.Code = 250, .Line = 3, .Value = std::string_view{"2"}});
+    CHECK(issues
+          == std::vector{Issue{
+              .Code = IssueCode::Unknown, .Line = 3, .What = "group 250 is no DXF group, kept"}});
   }
 
   TEST_CASE("ascii: a failure names its line and what was found")
   {
     CHECK(Refused("  0\r\nSECTION\r\nabc\r\nx\r\n")
-          == Failure{3, "group code expected, found \"abc\""});
-    CHECK(Refused("  0\nSECTION\n1072\nx\n") == Failure{3, "group code expected, found \"1072\""});
-    CHECK(Refused("  0\nSECTION\n -1\nx\n")  == Failure{3, "group code expected, found \"-1\""});
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 3,
+                     .What = "group code expected, found \"abc\""});
+    CHECK(Refused("  0\nSECTION\n1072\nx\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 3,
+                     .What = "group code expected, found \"1072\""});
+    CHECK(Refused("  0\nSECTION\n -1\nx\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 3,
+                     .What = "group code expected, found \"-1\""});
     CHECK(Refused("  0\nSECTION\n\n  2\nHEADER\n")
-          == Failure{3, "blank line where a group code is expected"});
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 3,
+                     .What = "blank line where a group code is expected"});
   }
 
   TEST_CASE("ascii: a failure shows no more than the start of a long line")
   {
     const std::string line(100000, 'x');
     const std::string shown = std::string(64, 'x') + "...";
-    CHECK(Refused(line + "\n  0\n") == Failure{1, "group code expected, found \"" + shown + "\""});
-    CHECK(
-        Told(" 40\n" + line + "\n")
-        == std::vector{Issue{
-            .Line = 2, .What = "number expected for group 40, found \"" + shown + "\", left out"}});
+    CHECK(Refused(line + "\n  0\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 1,
+                     .What = "group code expected, found \"" + shown + "\""});
+    CHECK(Told(" 40\n" + line + "\n")
+          == std::vector{
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 2,
+                    .What = "number expected for group 40, found \"" + shown + "\", left out"}});
     const std::string exact(64, 'y');
-    CHECK(Refused(exact + "\n") == Failure{1, "group code expected, found \"" + exact + "\""});
+    CHECK(Refused(exact + "\n")
+          == Failure{.Code = FailureCode::Damaged,
+                     .Line = 1,
+                     .What = "group code expected, found \"" + exact + "\""});
   }
 } // namespace DxfIO::Tags::Ascii

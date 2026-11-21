@@ -14,6 +14,8 @@
 #include "dxfio/edit/find.hpp"
 #include "dxfio/edit/handles.hpp"
 #include "dxfio/edit/space.hpp"
+#include "dxfio/flags.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/load.hpp"
 #include "dxfio/save.hpp"
 #include "dxfio/tables/face.hpp"

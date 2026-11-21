@@ -1,5 +1,7 @@
 #include "file/file.hpp"
 
+#include "located.hpp"
+
 #include <algorithm>
 #include <cstddef>
 #include <format>
@@ -34,7 +36,8 @@ namespace DxfIO::File
      */
     auto Tabled(std::span<const Tags::Tag> &rest, std::vector<Issue> *issues) -> Section
     {
-      Tell(issues, Issue{.Line = rest.front().Line,
+      Tell(issues, Issue{.Code = IssueCode::Damaged,
+                         .Line = Located(rest.front().Line),
                          .What = "TABLE outside a TABLES section, taken as one"});
       const std::span<const Tags::Tag> after = rest.subspan(1);
       const auto                       end   = std::ranges::find_if(after, Opens);
@@ -55,14 +58,17 @@ namespace DxfIO::File
       if (!Tags::Holds(start, 0, "SECTION"))
       {
         return std::unexpected{Failure{
-            .Line = start.Line,
+            .Code = FailureCode::Damaged,
+            .Line = Located(start.Line),
             .What = std::format("SECTION expected, found group {}", start.Code),
         }};
       }
       const std::span<const Tags::Tag> after = rest.subspan(1);
       if (after.empty() || after.front().Code != 2)
       {
-        return std::unexpected{Failure{.Line = start.Line, .What = "section without a name"}};
+        return std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                       .Line = Located(start.Line),
+                                       .What = "section without a name"}};
       }
       const std::string_view           name   = Tags::Text(after.front());
       const std::span<const Tags::Tag> inside = after.subspan(1);
@@ -71,7 +77,8 @@ namespace DxfIO::File
       {
         Tell(issues,
              Issue{
-                 .Line = start.Line,
+                 .Code = IssueCode::Damaged,
+                 .Line = Located(start.Line),
                  .What = std::format("ENDSEC of {} missing, closed at the end of the file", name),
              });
         rest = {};

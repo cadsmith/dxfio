@@ -287,7 +287,13 @@ namespace DxfIO
 #include "dxfio/edit/add.hpp"
 #include "dxfio/edit/find.hpp"
 #include "dxfio/edit/handles.hpp"
+#include "dxfio/edit/index.hpp"
 #include "dxfio/edit/space.hpp"
+#include "dxfio/flags.hpp"
+#include "dxfio/geometry/coordinates.hpp"
+#include "dxfio/geometry/transform.hpp"
+#include "dxfio/library.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/load.hpp"
 #include "dxfio/save.hpp"
 #include "dxfio/tables/face.hpp"
@@ -367,6 +373,29 @@ namespace DxfIO::Edit
 {
   [[nodiscard]] DXFIO_API auto NewHandle(Document &drawing) -> std::expected<Handle, Failure>;
 }
+== dxfio/edit/index.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/document.hpp"
+#include "dxfio/entity.hpp"
+#include "dxfio/handle.hpp"
+#include "dxfio/object.hpp"
+#include <cstdint>
+#include <unordered_map>
+namespace DxfIO::Edit
+{
+  class DXFIO_API Index
+  {
+  public:
+    explicit Index(const Document &drawing);
+    [[nodiscard]] auto Drawn() const -> const Document &;
+    [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
+    [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
+  private:
+    const Document                                       *m_Drawing;
+    std::unordered_map<std::uint64_t, const Entity *> m_Entities;
+    std::unordered_map<std::uint64_t, const Object *> m_Objects;
+  };
+}
 == dxfio/edit/space.hpp
 #include <cstdint>
 namespace DxfIO::Edit
@@ -413,7 +442,7 @@ namespace DxfIO::Entities
     Symbol Tag{};
     int Flags{};
     int Length{};
-    int Vertical{};
+    VerticalAlignment Vertical{};
     bool Locked{};
     auto operator==(const AttDef &) const -> bool = default;
   };
@@ -433,7 +462,7 @@ namespace DxfIO::Entities
     Symbol Tag{};
     int Flags{};
     int Length{};
-    int Vertical{};
+    VerticalAlignment Vertical{};
     bool Locked{};
     auto operator==(const Attrib &) const -> bool = default;
   };
@@ -885,10 +914,27 @@ namespace DxfIO::Entities
 #include "dxfio/api.hpp"
 #include "dxfio/symbol.hpp"
 #include "dxfio/vector.hpp"
+#include <cstdint>
 #include <optional>
 #include <string>
 namespace DxfIO::Entities
 {
+  enum class HorizontalAlignment : std::int16_t
+  {
+    Left,
+    Center,
+    Right,
+    Aligned,
+    Middle,
+    Fit,
+  };
+  enum class VerticalAlignment : std::int16_t
+  {
+    Baseline,
+    Bottom,
+    Middle,
+    Top,
+  };
   struct DXFIO_API Lettering
   {
     double Thickness{};
@@ -900,7 +946,7 @@ namespace DxfIO::Entities
     double Oblique{};
     Symbol Style{"Standard"};
     int Generation{};
-    int Horizontal{};
+    HorizontalAlignment Horizontal{};
     std::optional<Vector> Alignment{};
     Vector Extrusion{Up};
     auto operator==(const Lettering &) const -> bool = default;
@@ -965,12 +1011,19 @@ namespace DxfIO::Entities
 == dxfio/entities/lwpolyline.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
 #include "dxfio/widths.hpp"
+#include <cstdint>
 #include <optional>
 #include <vector>
 namespace DxfIO::Entities
 {
+  enum class LwPolylineFlags : std::uint8_t
+  {
+    Closed = 1,
+    ContinuousLinetype = 128,
+  };
   struct DXFIO_API LwPolyline
   {
     struct Vertex
@@ -1429,9 +1482,22 @@ namespace DxfIO::Entities
 #include "dxfio/entities/record.hpp"
 #include "dxfio/entities/sequence.hpp"
 #include "dxfio/entities/vertex.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
+#include <cstdint>
 namespace DxfIO::Entities
 {
+  enum class PolylineFlags : std::uint8_t
+  {
+    Closed = 1,
+    CurveFit = 2,
+    SplineFit = 4,
+    Polyline3d = 8,
+    PolygonMesh = 16,
+    ClosedN = 32,
+    PolyfaceMesh = 64,
+    ContinuousLinetype = 128,
+  };
   struct DXFIO_API Polyline
   {
     Entities::Record Record{};
@@ -1519,7 +1585,7 @@ namespace DxfIO::Entities
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/symbol.hpp"
 #include <optional>
 #include <string>
@@ -1537,7 +1603,7 @@ namespace DxfIO::Entities
     std::optional<int> Rgb{};
     std::optional<int> Transparency{};
     int Color{Colors::ByLayer};
-    int Lineweight{Lineweights::ByLayer};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::ByLayer};
     int Shadow{};
     bool Paper{};
     bool Hidden{};
@@ -1707,7 +1773,7 @@ namespace DxfIO::Entities
   {
     Entities::Record Record{};
     Entities::Lettering Lettering{};
-    int Vertical{};
+    VerticalAlignment Vertical{};
     auto operator==(const Text &) const -> bool = default;
   };
 }
@@ -1791,10 +1857,22 @@ namespace DxfIO::Entities
 == dxfio/entities/vertex.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
+#include <cstdint>
 #include <optional>
 namespace DxfIO::Entities
 {
+  enum class VertexFlags : std::uint8_t
+  {
+    CurveFitExtra = 1,
+    Tangent = 2,
+    SplineFit = 8,
+    ControlPoint = 16,
+    Polyline3d = 32,
+    PolygonMesh = 64,
+    PolyfaceMesh = 128,
+  };
   struct DXFIO_API Vertex
   {
     Entities::Record Record{};
@@ -1955,15 +2033,60 @@ namespace DxfIO
 == dxfio/failure.hpp
 #include "dxfio/api.hpp"
 #include <cstddef>
+#include <cstdint>
+#include <optional>
 #include <string>
 namespace DxfIO
 {
+  enum class FailureCode : std::uint8_t
+  {
+    Io,
+    Damaged,
+    Missing,
+    Exists,
+    Refused,
+  };
   struct DXFIO_API Failure
   {
-    std::size_t Line{};
+    FailureCode Code{};
+    std::optional<std::size_t> Line{};
     std::string What{};
     auto operator==(const Failure &) const -> bool = default;
   };
+}
+== dxfio/flags.hpp
+#include <type_traits>
+#include <utility>
+namespace DxfIO
+{
+  template <class FlagT>
+    requires std::is_enum_v<FlagT>
+  [[nodiscard]] constexpr auto Has(int flags, FlagT flag) -> bool
+  {
+    const int bits = static_cast<int>(std::to_underlying(flag));
+    return (flags & bits) == bits;
+  }
+}
+== dxfio/geometry/coordinates.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/vector.hpp"
+namespace DxfIO::Geometry
+{
+  [[nodiscard]] DXFIO_API auto ToWorld(Vector point, Vector extrusion) -> Vector;
+  [[nodiscard]] DXFIO_API auto ToObject(Vector point, Vector extrusion) -> Vector;
+}
+== dxfio/geometry/transform.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/blocks/definition.hpp"
+#include "dxfio/entities/insert.hpp"
+#include "dxfio/matrix.hpp"
+#include "dxfio/vector.hpp"
+namespace DxfIO::Geometry
+{
+  [[nodiscard]] DXFIO_API auto TransformOf(const Entities::Insert &insert,
+                                           const Blocks::Definition &block) -> Matrix;
+  [[nodiscard]] DXFIO_API auto Transform(const Matrix &transform, Vector point) -> Vector;
+  [[nodiscard]] DXFIO_API auto Compose(const Matrix &outer, const Matrix &inner) -> Matrix;
 }
 == dxfio/handle.hpp
 #include "dxfio/api.hpp"
@@ -2011,23 +2134,64 @@ namespace DxfIO::Header
 #include "dxfio/api.hpp"
 #include "dxfio/handle.hpp"
 #include <cstddef>
+#include <cstdint>
+#include <optional>
 #include <string>
 namespace DxfIO
 {
+  enum class IssueCode : std::uint8_t
+  {
+    Damaged,
+    Unknown,
+    OutOfRange,
+    NotKept,
+  };
   struct DXFIO_API Issue
   {
-    std::size_t Line{};
+    IssueCode Code{};
+    std::optional<std::size_t> Line{};
     Handle Subject{};
     std::string What{};
     auto operator==(const Issue &) const -> bool = default;
   };
 }
-== dxfio/lineweights.hpp
-namespace DxfIO::Lineweights
+== dxfio/lineweight.hpp
+#include "dxfio/api.hpp"
+#include <cstdint>
+#include <optional>
+namespace DxfIO
 {
-  inline constexpr int ByLayer = -1;
-  inline constexpr int ByBlock = -2;
-  inline constexpr int Standard = -3;
+  enum class Lineweight : std::int16_t
+  {
+    ByLayer = -1,
+    ByBlock = -2,
+    Default = -3,
+    Mm000   = 0,
+    Mm005   = 5,
+    Mm009   = 9,
+    Mm013   = 13,
+    Mm015   = 15,
+    Mm018   = 18,
+    Mm020   = 20,
+    Mm025   = 25,
+    Mm030   = 30,
+    Mm035   = 35,
+    Mm040   = 40,
+    Mm050   = 50,
+    Mm053   = 53,
+    Mm060   = 60,
+    Mm070   = 70,
+    Mm080   = 80,
+    Mm090   = 90,
+    Mm100   = 100,
+    Mm106   = 106,
+    Mm120   = 120,
+    Mm140   = 140,
+    Mm158   = 158,
+    Mm200   = 200,
+    Mm211   = 211,
+  };
+  [[nodiscard]] DXFIO_API auto MillimetersOf(Lineweight lineweight) -> std::optional<double>;
 }
 == dxfio/load.hpp
 #include "dxfio/api.hpp"
@@ -2353,7 +2517,7 @@ namespace DxfIO::Objects
 #include "dxfio/boxed.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/vector.hpp"
 #include <string>
 namespace DxfIO::Objects::MLeaderStyles
@@ -2367,7 +2531,7 @@ namespace DxfIO::Objects::MLeaderStyles
     int LeaderType{1};
     int Color{Colors::PackedByBlock};
     Handle Linetype{};
-    int Lineweight{Lineweights::ByBlock};
+    int Lineweight{-2};
     bool EnableLanding{true};
     double LandingGap{2};
     bool EnableDogleg{true};
@@ -2565,14 +2729,14 @@ namespace DxfIO::Objects
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO::Objects::TableStyles
 {
   struct DXFIO_API Border
   {
-    int Lineweight{Lineweights::ByBlock};
+    int Lineweight{-2};
     bool Visible{true};
     int Color{};
     auto operator==(const Border &) const -> bool = default;
@@ -2958,7 +3122,7 @@ namespace DxfIO::Tables
 #include "dxfio/api.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/symbol.hpp"
 #include "dxfio/tables/record.hpp"
 #include <optional>
@@ -2971,7 +3135,7 @@ namespace DxfIO::Tables
     int Color{Colors::White};
     Symbol Linetype{"Continuous"};
     bool Plot{true};
-    int Lineweight{Lineweights::Standard};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::Default};
     Handle Style{};
     Handle Material{};
     std::optional<int> Rgb{};

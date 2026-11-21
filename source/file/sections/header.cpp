@@ -1,5 +1,7 @@
 #include "header.hpp"
 
+#include "located.hpp"
+
 #include <algorithm>
 #include <cstddef>
 #include <format>
@@ -21,7 +23,8 @@ namespace DxfIO::File::Sections
       if (head.Code != Name)
       {
         return std::unexpected{Failure{
-            .Line = head.Line,
+            .Code = FailureCode::Damaged,
+            .Line = Located(head.Line),
             .What = std::format("header variable expected, found group {}", head.Code),
         }};
       }

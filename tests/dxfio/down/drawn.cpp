@@ -314,24 +314,25 @@ namespace DxfIO::Down
     CHECK(top.at(1).Record.Base.Self       == Handle{.Value = 0x200});
     CHECK(top.at(1).Record.Base.Owner      == Handle{.Value = 0x1f});
     CHECK(top.at(1).Record.Layer           == "Notes");
-    CHECK(top.front().Vertical             == 3);
-    CHECK(top.front().Lettering.Horizontal == 0);
+    CHECK(top.front().Vertical             == Entities::VerticalAlignment::Top);
+    CHECK(top.front().Lettering.Horizontal == Entities::HorizontalAlignment::Left);
     CHECK(top.front().Lettering.Style      == "Romans");
     CHECK(Near(top.front().Lettering.Position, Vector{.X = 10, .Y = 10}));
     CHECK(Near(top.at(2).Lettering.Alignment.value_or(Vector{}), Vector{.X = 10, .Y = 0}));
     body.Attachment                          = 5;
     const std::vector<Entities::Text> middle = Lettered(one, handles);
-    CHECK(middle.front().Vertical             == 2);
-    CHECK(middle.front().Lettering.Horizontal == 1);
+    CHECK(middle.front().Vertical             == Entities::VerticalAlignment::Middle);
+    CHECK(middle.front().Lettering.Horizontal == Entities::HorizontalAlignment::Center);
     CHECK(Near(middle.at(1).Lettering.Position, Vector{.X = 10, .Y = 10}));
     body.Attachment                          = 9;
     const std::vector<Entities::Text> bottom = Lettered(one, handles);
-    CHECK(bottom.front().Vertical == 1);
+    CHECK(bottom.front().Vertical == Entities::VerticalAlignment::Bottom);
     CHECK(Near(bottom.at(2).Lettering.Position, Vector{.X = 10, .Y = 10}));
     body.Attachment = 0;
-    CHECK(Lettered(one, handles).front().Vertical == 3);
+    CHECK(Lettered(one, handles).front().Vertical == Entities::VerticalAlignment::Top);
     body.Attachment = 10;
-    CHECK(Lettered(one, handles).front().Lettering.Horizontal == 0);
+    CHECK(Lettered(one, handles).front().Lettering.Horizontal
+          == Entities::HorizontalAlignment::Left);
   }
 
   TEST_CASE("drawn: MTEXT turned by its direction, else by its rotation")

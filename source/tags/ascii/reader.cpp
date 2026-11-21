@@ -2,6 +2,7 @@
 
 #include "../blanks.hpp"
 #include "encoding/carets.hpp"
+#include "located.hpp"
 #include "tags/codes.hpp"
 #include "tags/glimpse.hpp"
 #include "tags/values.hpp"
@@ -147,15 +148,19 @@ namespace DxfIO::Tags::Ascii
       const std::string_view head = Trimmed(line);
       if (head.empty())
       {
-        return std::unexpected{
-            Failure{.Line = at, .What = "blank line where a group code is expected"}};
+        return std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                       .Line = Located(at),
+                                       .What = "blank line where a group code is expected"}};
       }
-      return std::unexpected{Failure{
-          .Line = at, .What = std::format("group code expected, found \"{}\"", Glimpse(head))}};
+      return std::unexpected{
+          Failure{.Code = FailureCode::Damaged,
+                  .Line = Located(at),
+                  .What = std::format("group code expected, found \"{}\"", Glimpse(head))}};
     }
     if (m_At >= m_Text.size())
     {
-      Tell(Issue{.Line = at,
+      Tell(Issue{.Code = IssueCode::Damaged,
+                 .Line = Located(at),
                  .What =
                      std::format("group {} at the end of the file has no value, left out", *code)});
       return std::optional<Tag>{};
@@ -165,7 +170,8 @@ namespace DxfIO::Tags::Ascii
     if (!value)
     {
       Tell(Issue{
-          .Line = at + 1,
+          .Code = IssueCode::Damaged,
+          .Line = Located(at + 1),
           .What = std::format("{} expected for group {}, found \"{}\", left out", value.error(),
                               *code, Glimpse(text)),
       });
@@ -173,7 +179,9 @@ namespace DxfIO::Tags::Ascii
     }
     if (!Codes::Defined(*code))
     {
-      Tell(Issue{.Line = at, .What = std::format("group {} is no DXF group, kept", *code)});
+      Tell(Issue{.Code = IssueCode::Unknown,
+                 .Line = Located(at),
+                 .What = std::format("group {} is no DXF group, kept", *code)});
     }
     return std::optional{Tag{.Code = *code, .Line = at, .Value = *value}};
   }
@@ -200,7 +208,8 @@ namespace DxfIO::Tags::Ascii
     }
     if (word.size() != text.size())
     {
-      Tell(Issue{.Line = line,
+      Tell(Issue{.Code = IssueCode::Damaged,
+                 .Line = Located(line),
                  .What = std::format("group 0 holds \"{}\" with blanks, trimmed", Glimpse(text))});
     }
     return word;

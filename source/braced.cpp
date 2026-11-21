@@ -1,5 +1,6 @@
 #include "braces.hpp"
 #include "fields/owned.hpp"
+#include "located.hpp"
 #include "tags/codes.hpp"
 
 #include <algorithm>
@@ -114,14 +115,16 @@ namespace DxfIO
     if (lost > 0)
     {
       with.Tell(Issue{
-          .Line = body.front().Line,
+          .Code = IssueCode::Damaged,
+          .Line = Located(body.front().Line),
           .What = std::format("brace {} lost {} of its groups", name, lost),
       });
     }
     if (!closed)
     {
       with.Tell(Issue{
-          .Line = body.front().Line,
+          .Code = IssueCode::Damaged,
+          .Line = Located(body.front().Line),
           .What = std::format("brace {} not closed", name),
       });
     }

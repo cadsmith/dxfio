@@ -137,10 +137,18 @@ namespace DxfIO::Edit
   TEST_CASE("add: a record or a block with no name is refused")
   {
     Document drawing = Create();
-    CHECK(Add(drawing, Tables::Layer{}) == std::unexpected{Failure{0, "a layer needs a name"}});
-    CHECK(Add(drawing, Tables::LType{}) == std::unexpected{Failure{0, "a linetype needs a name"}});
-    CHECK(AddBlock(drawing, "")         == std::unexpected{Failure{0, "a block needs a name"}});
-    CHECK(Add(drawing, Tables::VPort{}) == std::unexpected{Failure{0, "a viewport needs a name"}});
+    CHECK(Add(drawing, Tables::Layer{})
+          == std::unexpected{
+              Failure{.Code = FailureCode::Refused, .What = "layer with no name refused"}});
+    CHECK(Add(drawing, Tables::LType{})
+          == std::unexpected{
+              Failure{.Code = FailureCode::Refused, .What = "linetype with no name refused"}});
+    CHECK(AddBlock(drawing, "")
+          == std::unexpected{
+              Failure{.Code = FailureCode::Refused, .What = "block with no name refused"}});
+    CHECK(Add(drawing, Tables::VPort{})
+          == std::unexpected{
+              Failure{.Code = FailureCode::Refused, .What = "viewport with no name refused"}});
   }
 
   TEST_CASE("edit: an entity added to model space takes the seed and the space's record")
@@ -321,11 +329,11 @@ namespace DxfIO::Edit
     Document   drawing = Create();
     const auto missing = Add(drawing, Entities::Line{}, "Door");
     REQUIRE_FALSE(missing);
-    CHECK(missing.error().What == "there is no block named Door");
+    CHECK(missing.error().What == "block Door missing");
     REQUIRE(AddBlock(drawing, "Door"));
     const auto twice = AddBlock(drawing, "DOOR");
     REQUIRE_FALSE(twice);
-    CHECK(twice.error().What == "a block named DOOR is there already");
+    CHECK(twice.error().What == "block DOOR exists");
   }
 
   TEST_CASE(
@@ -383,7 +391,7 @@ namespace DxfIO::Edit
     Document   drawing = Create();
     const auto twice   = Add(drawing, Named("0"));
     REQUIRE_FALSE(twice);
-    CHECK(twice.error().What == "a record named 0 is there already");
+    CHECK(twice.error().What == "layer 0 exists");
     CHECK_FALSE(Add(drawing, Called<Tables::LType>("continuous")));
     CHECK(Add(drawing, Called<Tables::VPort>("*ACTIVE")));
   }

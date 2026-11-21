@@ -52,7 +52,8 @@ namespace DxfIO
       if (Odd(one))
       {
         return std::unexpected{
-            Failure{.What = "a MESH's edges hold an odd count of vertex indices"}};
+            Failure{.Code = FailureCode::Refused,
+                    .What = "a MESH's edges hold an odd count of vertex indices"}};
       }
       const auto size = static_cast<std::int64_t>(one.Edges.size() / 2);
       return Fields::Value<std::int64_t>::Write(to, Paired, size)

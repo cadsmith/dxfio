@@ -36,7 +36,7 @@ A drawing's other layouts each draw their sheet in a block of their own, and a L
 auto plan = DxfIO::LoadFile("plan.dxf");
 if (!plan)
 {
-  std::println("line {}: {}", plan.error().Line, plan.error().What);
+  std::println("line {}: {}", plan.error().Line.value_or(0), plan.error().What);
   return 1;
 }
 DxfIO::Document &sheets = plan->Document;

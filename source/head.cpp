@@ -3,6 +3,7 @@
 #include "braces.hpp"
 #include "fields/handles.hpp"
 #include "fields/scratch.hpp"
+#include "located.hpp"
 #include "tags/codes.hpp"
 
 #include "dxfio/handle.hpp"
@@ -22,7 +23,8 @@ namespace DxfIO
       if (held)
       {
         with.Tell(Issue{
-            .Line = one.Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(one.Line),
             .What = std::format("group {} given again, one kept", one.Code),
         });
       }

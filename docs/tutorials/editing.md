@@ -12,7 +12,7 @@ The drawing is plan.dxf, the one [Read a drawing](/tutorials/reading/) walks thr
 auto loaded = DxfIO::LoadFile("plan.dxf");
 if (!loaded)
 {
-  std::println("line {}: {}", loaded.error().Line, loaded.error().What);
+  std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
   return 1;
 }
 DxfIO::Document &drawing = loaded->Document;

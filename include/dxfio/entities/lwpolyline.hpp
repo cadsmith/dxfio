@@ -3,14 +3,28 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
 #include "dxfio/widths.hpp"
 
+#include <cstdint>
 #include <optional>
 #include <vector>
 
 namespace DxfIO::Entities
 {
+  /**
+   *  The bits of an LWPOLYLINE's flags, group 70, to test with `Has`.
+   */
+  enum class LwPolylineFlags : std::uint8_t
+  {
+    Closed = 1,
+    /**
+     *  The linetype drawn continuously around the vertices.
+     */
+    ContinuousLinetype = 128,
+  };
+
   /**
    *  An LWPOLYLINE: a 2D polyline that holds its vertices in itself, from R14.
    */
@@ -48,7 +62,7 @@ namespace DxfIO::Entities
      */
     Entities::Record Record{};
     /**
-     *  1 closed, 128 linetype drawn continuously around the vertices. Group 70.
+     *  The bits of LwPolylineFlags. Group 70.
      */
     int Flags{};
     /**

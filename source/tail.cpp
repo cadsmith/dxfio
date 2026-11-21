@@ -3,6 +3,7 @@
 #include "chained.hpp"
 #include "fields/owned.hpp"
 #include "fields/text.hpp"
+#include "located.hpp"
 
 #include <algorithm>
 #include <format>
@@ -35,7 +36,8 @@ namespace DxfIO
         if (!dropped && into.Extended.empty())
         {
           with.Tell(Issue{
-              .Line = one.Line,
+              .Code = IssueCode::Damaged,
+              .Line = Located(one.Line),
               .What = std::format("group {} before its application, left out", one.Code),
           });
           continue;
@@ -51,7 +53,8 @@ namespace DxfIO
       if (dropped)
       {
         with.Tell(Issue{
-            .Line = one.Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(one.Line),
             .What = std::format("extended data of {} given again, the first kept", name),
         });
         continue;

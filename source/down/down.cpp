@@ -218,6 +218,7 @@ namespace DxfIO::Down
                       if (hollow && with.Issues != nullptr)
                       {
                         with.Issues->push_back(Issue{
+                            .Code    = IssueCode::NotKept,
                             .Subject = Entities::Based(one).Self,
                             .What    = std::format("{} left out, its body is not in {}'s form",
                                                    Entities::Named(one), NameOf(with.Release)),
@@ -287,6 +288,7 @@ namespace DxfIO::Down
       if (issues != nullptr)
       {
         issues->push_back(Issue{
+            .Code = IssueCode::NotKept,
             .What = std::format("visual styles left out, {} holds them otherwise", NameOf(release)),
         });
       }
@@ -377,6 +379,7 @@ namespace DxfIO::Down
       if (with.Issues != nullptr)
       {
         with.Issues->push_back(Issue{
+            .Code    = IssueCode::NotKept,
             .Subject = Entities::Based(one).Self,
             .What    = std::format("{} left out, {} has no such entity", Entities::Named(one),
                                    NameOf(with.Release)),
@@ -417,6 +420,7 @@ namespace DxfIO::Down
       if (with.Issues != nullptr)
       {
         with.Issues->push_back(Issue{
+            .Code    = IssueCode::NotKept,
             .Subject = Entities::Based(one).Self,
             .What    = std::format("{} drawn as {} for {}", Entities::Named(one),
                                    Entities::Named(into), NameOf(with.Release)),
@@ -476,6 +480,7 @@ namespace DxfIO::Down
       if (with.Issues != nullptr)
       {
         with.Issues->push_back(Issue{
+            .Code    = IssueCode::NotKept,
             .Subject = Entities::Based(one).Self,
             .What = std::format("{} moved from layer {} to 0, {} has no layer named by a star",
                                 Entities::Named(one), (*found)->Layer.View(), NameOf(with.Release)),
