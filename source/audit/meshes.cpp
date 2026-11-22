@@ -21,6 +21,27 @@ namespace DxfIO::Audit
       return mesh.Data->Vertices.empty() || mesh.Data->Faces.empty();
     }
 
+    /**
+     *  An edge is a pair of vertex indices: an odd count leaves the last without its end, which no
+     *  file can hold, so the save is refused.
+     */
+    template <class DrawingT>
+    void Paired(Auditor<DrawingT> &with, Part<DrawingT, Entities::Mesh> &mesh)
+    {
+      if (mesh.Data->Edges.size() % 2 == 0)
+      {
+        return;
+      }
+      with.Note(
+          Severity::Error,
+          std::format("mesh with {} edge indices, one short of a pair", mesh.Data->Edges.size()),
+          mesh.Record.Base.Self);
+      if constexpr (Auditor<DrawingT>::Fix)
+      {
+        mesh.Data->Edges.pop_back();
+      }
+    }
+
     template <class DrawingT>
     void Creased(Auditor<DrawingT> &with, Part<DrawingT, Entities::Mesh> &mesh)
     {
@@ -43,6 +64,7 @@ namespace DxfIO::Audit
     {
       if (!Empty(mesh))
       {
+        Paired(with, mesh);
         Creased(with, mesh);
         return;
       }
@@ -61,7 +83,8 @@ namespace DxfIO::Audit
 
   /**
    *  A MESH with no vertices or no faces is invalid to AutoCAD: an error, and left out when the
-   *  checks fix. One with a crease count that is not its edge count is given one crease per edge.
+   *  checks fix. One with an odd count of edge indices loses the last, and one with a crease count
+   *  that is not its edge count is given one crease per edge.
    */
   template <class DrawingT>
   void Meshed(Auditor<DrawingT> &with)
