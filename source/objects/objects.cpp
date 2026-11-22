@@ -1,7 +1,6 @@
 #include "../family.hpp"
 #include "objects/io.hpp"
 #include "shapes/data.hpp"
-#include "shapes/defaulted.hpp"
 #include "shapes/dictionary.hpp"
 #include "shapes/gathered.hpp"
 #include "shapes/layout.hpp"
@@ -17,8 +16,17 @@
 #include "shapes/underlay/definition.hpp"
 #include "shapes/wipeout/variables.hpp"
 
+#include <array>
 #include <string_view>
 #include <variant>
+
+namespace DxfIO::Family
+{
+  template <>
+  inline constexpr auto Aliases<Object> = std::array{
+      Alias{.Name = Objects::WithDefault, .Type = DxfIO::Type<Objects::Dictionary>},
+  };
+} // namespace DxfIO::Family
 
 namespace DxfIO::Objects
 {

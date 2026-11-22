@@ -58,7 +58,7 @@ namespace DxfIO
     void Pinned(Tables::Table<KindT> Drawing::*member)
     {
       Drawing head{};
-      (head.*member).Head.Base.Self = High;
+      (head.*member).Control.Base.Self = High;
       CHECK(Past(head) == Above);
       Drawing record{};
       (record.*member).Records.resize(2);
@@ -109,7 +109,7 @@ namespace DxfIO
   {
     Drawing head{};
     head.Loose.resize(2);
-    head.Loose.back().Head.Base.Self = High;
+    head.Loose.back().Control.Base.Self = High;
     CHECK(Past(head) == Above);
     Drawing within{};
     within.Loose.resize(1);

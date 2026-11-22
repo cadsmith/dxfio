@@ -22,7 +22,7 @@ namespace DxfIO::Blocks
                                        " 30\r\n0.0\r\n"
                                        "  3\r\n*Paper_Space\r\n"
                                        "  1\r\n\r\n";
-    const Block                taken = Read<Block>(text);
+    const Entities::Block      taken = Read<Entities::Block>(text);
     CHECK(taken.Name == "*Paper_Space");
     CHECK(taken.Record.Paper);
     CHECK(taken.Record.Layer      == "0");
@@ -42,7 +42,7 @@ namespace DxfIO::Blocks
                                        " 30\r\n0.0\r\n"
                                        "  3\r\n$MODEL_SPACE\r\n"
                                        "  1\r\n\r\n";
-    const Block                taken = Read<Block>(text, Version::R12);
+    const Entities::Block      taken = Read<Entities::Block>(text, Version::R12);
     CHECK(taken.Name == "$MODEL_SPACE");
     CHECK_FALSE(taken.Record.Paper);
     CHECK(Written(taken, Version::R12) == text);

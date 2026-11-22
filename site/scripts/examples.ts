@@ -84,7 +84,7 @@ auto main(int count, char **paths) -> int
     {
       std::println("{}: audit: {}", paths[at], finding.What);
     }
-    if (!report.Clean())
+    if (!report.IsClean())
     {
       ++failed;
     }

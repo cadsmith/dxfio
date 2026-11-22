@@ -330,6 +330,17 @@ namespace DxfIO
     CHECK(Load(*saved));
   }
 
+  TEST_CASE(
+      "save: a dictionary with a default whose part is lost and whose 340 is kept saves the same "
+      "twice")
+  {
+    CHECK(Broken("  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1027\n  0\nENDSEC\n"
+                 "  0\nSECTION\n  2\nOBJECTS\n  0\nACDBDICTIONARYWDFLT\n  5\nE\n330\nC\n"
+                 "100\nAcDbDictionary\n281\nAcDbDictionaryWithDefault\n340\nF\n"
+                 "  0\nENDSEC\n  0\nEOF\n")
+              .empty());
+  }
+
   TEST_CASE("save: every input the fuzzer found keeps the oracle")
   {
     const std::vector<std::filesystem::path> found = Files(Fuzz / "found");
@@ -418,7 +429,7 @@ namespace DxfIO
     Tables::Layer layer{};
     layer.Record.Name = "WALLS";
     drawing.Layer.Records.push_back(layer);
-    drawing.Sections.push_back(Section{.Name = "THUMBNAILIMAGE", .Tags = {}});
+    drawing.Kept.push_back(Section{.Name = "THUMBNAILIMAGE", .Tags = {}});
     const auto saved = Tests::Written(drawing, {.Release = Version::R12});
     REQUIRE(saved);
     CHECK(*saved

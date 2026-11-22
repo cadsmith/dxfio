@@ -50,16 +50,16 @@ namespace DxfIO::Empty
         -> DxfIO::Tables::Table<KindT>
     {
       DxfIO::Tables::Table<KindT> out{};
-      out.Head.Base.Self = handles.Take();
-      out.Head.Name      = std::move(name);
-      out.Head.Count     = static_cast<int>(std::ranges::count_if(
+      out.Control.Base.Self = handles.Take();
+      out.Control.Name      = std::move(name);
+      out.Control.Count     = static_cast<int>(std::ranges::count_if(
           records, [](const KindT &one) -> auto { return !Builtin(one.Record.Name); }));
-      out.Records        = std::move(records);
+      out.Records           = std::move(records);
       for (KindT &one : out.Records)
       {
         DxfIO::Base &base = one.Record.Base;
         base.Self         = base.Self ? base.Self : handles.Take();
-        base.Owner        = out.Head.Base.Self;
+        base.Owner        = out.Control.Base.Self;
       }
       return out;
     }
@@ -139,10 +139,10 @@ namespace DxfIO::Empty
 
     auto Dimstyles(const Roots &ids, Seed &handles) -> DxfIO::Tables::Table<DxfIO::Tables::DimStyle>
     {
-      auto imperial       = Called<DxfIO::Tables::DimStyle>("Standard");
-      imperial.Dimtxsty   = ids.Style;
-      auto out            = Tabled("DIMSTYLE", std::vector{imperial, Metric(ids)}, handles);
-      out.Head.Base.Extra = {
+      auto imperial          = Called<DxfIO::Tables::DimStyle>("Standard");
+      imperial.Dimtxsty      = ids.Style;
+      auto out               = Tabled("DIMSTYLE", std::vector{imperial, Metric(ids)}, handles);
+      out.Control.Base.Extra = {
           Tag{.Code = Named, .Value = std::string{"AcDbDimStyleTable"}},
           Tag{.Code = Count, .Value = std::int64_t{1}},
           Tag{.Code = Entry, .Value = out.Records.back().Record.Base.Self},

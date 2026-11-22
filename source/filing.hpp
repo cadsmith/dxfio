@@ -64,6 +64,16 @@ namespace DxfIO
     return Kept(one, with);
   }
 
+  /**
+   *  The type a record of that kind is written as: its kind's own, unless an overload found with
+   *  the kind says otherwise for the record.
+   */
+  template <class KindT>
+  auto RecordType(const KindT & /*unused*/) -> std::string_view
+  {
+    return Type<KindT>;
+  }
+
   template <class KindT>
   auto Given(Fields::Writing &to, const KindT &one) -> std::expected<void, Failure>
   {
@@ -72,11 +82,20 @@ namespace DxfIO
     {
       return to.Release == to.From ? Fields::Put(to, base.Extra) : std::expected<void, Failure>{};
     };
-    return Fields::Word(to, 0, Type<KindT>)
+    return Fields::Word(to, 0, RecordType(one))
         .and_then([&to, &base] -> auto { return DxfIO::Head(to, base, Self<KindT>); })
         .and_then([&to, &one] -> auto { return Fields::Write(one, to, Shapes<KindT>); })
         .and_then(extra)
         .and_then([&to, &base] -> auto { return Tail(to, base); });
+  }
+
+  /**
+   *  Gives a record read under a name other than its kind's what that name says of it: nothing for
+   *  most kinds.
+   */
+  template <class KindT>
+  void Aliased(KindT & /*unused*/, std::string_view /*type*/)
+  {
   }
 
   template <class KindT>

@@ -70,7 +70,7 @@ namespace DxfIO::Audit
       CAPTURE(release);
       const Report found = Check(Fresh(release));
       CHECK(found.Findings.empty());
-      CHECK(found.Clean());
+      CHECK(found.IsClean());
     }
   }
 
@@ -81,11 +81,11 @@ namespace DxfIO::Audit
     drawing.Entities.emplace_back(Lined(held));
     const Report seen = Check(drawing);
     REQUIRE(seen.Errors() == 1);
-    CHECK_FALSE(seen.Clean());
+    CHECK_FALSE(seen.IsClean());
     CHECK(seen.Findings.front().Subject == held);
     CHECK_FALSE(seen.Findings.front().Fixed);
     const Report fixed = Repair(drawing);
-    CHECK(fixed.Clean());
+    CHECK(fixed.IsClean());
     CHECK(fixed.Findings.front().Fixed);
     const Handle taken = Entities::Based(drawing.Entities.back()).Self;
     CHECK(taken != held);
@@ -98,8 +98,8 @@ namespace DxfIO::Audit
     Drawing                drawing = Fresh();
     const Handle           held    = drawing.Layer.Records.front().Record.Base.Self;
     Tables::Table<Unknown> loose{};
-    loose.Head.Name      = "VX_TABLE";
-    loose.Head.Base.Self = Past(drawing);
+    loose.Control.Name      = "VX_TABLE";
+    loose.Control.Base.Self = Past(drawing);
     loose.Records.push_back(Unknown{.Type = Symbol{"VX_TABLE"}});
     loose.Records.front().Base.Self = held;
     drawing.Loose.push_back(loose);
@@ -107,7 +107,7 @@ namespace DxfIO::Audit
     const Report seen = Check(drawing);
     REQUIRE(seen.Errors() == 1);
     CHECK(seen.Findings.front().Subject == held);
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     CHECK(drawing.Loose.front().Records.front().Base.Self != held);
     CHECK(drawing.Layer.Records.front().Record.Base.Self == held);
     CHECK(Check(drawing).Findings.empty());
@@ -182,10 +182,10 @@ namespace DxfIO::Audit
     View::Block(drawing, "PART")->Block.Record.Base.Extended.push_back(named("WEST"));
     std::get<Objects::Dictionary>(drawing.Objects.front()).Base.Extended.push_back(named("south"));
     Tables::Table<Unknown> loose{};
-    loose.Head.Name      = "VX_TABLE";
-    loose.Head.Base.Self = Past(drawing);
+    loose.Control.Name      = "VX_TABLE";
+    loose.Control.Base.Self = Past(drawing);
     loose.Records.push_back(Unknown{.Type = Symbol{"VX_TABLE"}});
-    loose.Records.front().Base.Self = Handle{.Value = loose.Head.Base.Self.Value + 1};
+    loose.Records.front().Base.Self = Handle{.Value = loose.Control.Base.Self.Value + 1};
     loose.Records.front().Base.Extended.push_back(named("LOOSE"));
     drawing.Loose.push_back(loose);
     WriteSeed(drawing, Past(drawing));
@@ -194,14 +194,14 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.front().What    == "application NORTH not registered");
     CHECK(seen.Findings.front().Subject == View::Record(drawing.Layer, "WALLS")->Record.Base.Self);
     const Report fixed = Repair(drawing);
-    CHECK(fixed.Clean());
+    CHECK(fixed.IsClean());
     for (const std::string_view application : {"SOUTH", "EAST", "NORTH", "WEST", "LOOSE"})
     {
       CAPTURE(application);
       const Tables::AppId *made = View::Record(drawing.AppId, application);
       REQUIRE(made != nullptr);
       CHECK(made->Record.Base.Self);
-      CHECK(made->Record.Base.Owner == drawing.AppId.Head.Base.Self);
+      CHECK(made->Record.Base.Owner == drawing.AppId.Control.Base.Self);
     }
     CHECK(drawing.AppId.Records.size() == 6);
     CHECK(Check(drawing).Findings.empty());
@@ -213,7 +213,7 @@ namespace DxfIO::Audit
     Entities::Line line{};
     line.Record.Base.Extended.push_back(Xdata{.Application = "SOUTH"});
     REQUIRE(Edit::Add(drawing, line));
-    REQUIRE(Repair(drawing).Clean());
+    REQUIRE(Repair(drawing).IsClean());
     const Tables::AppId *made = View::Record(drawing.AppId, "SOUTH");
     REQUIRE(made != nullptr);
     CHECK_FALSE(made->Record.Base.Self);
@@ -243,7 +243,7 @@ namespace DxfIO::Audit
     REQUIRE(seen.Errors()            == 4);
     CHECK(seen.Findings.front().What == "ellipse ratio 2 not between 0 and 1");
     CHECK(seen.Findings.front().Subject == BaseOf(drawing.Entities.front()).Self);
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     const auto &swapped = std::get<Entities::Ellipse>(drawing.Entities.front());
     CHECK(swapped.Axis  == Vector{.X = 0, .Y = 6, .Z = 0});
     CHECK(swapped.Ratio == 0.5);
@@ -273,7 +273,7 @@ namespace DxfIO::Audit
       flat.Ratio = ratio;
       REQUIRE(Edit::Add(drawing, flat));
       CHECK(Check(drawing).Errors() == 1);
-      CHECK(Repair(drawing).Clean());
+      CHECK(Repair(drawing).IsClean());
       CHECK(std::get<Entities::Ellipse>(drawing.Entities.front()).Ratio == 1e-6);
       CHECK(Check(drawing).Findings.empty());
     }
@@ -312,7 +312,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.at(2).What == "no CLASS for HELIX");
     CHECK(seen.Findings.at(3).What == "no CLASS for DICTIONARYVAR");
     const std::size_t before = drawing.Classes.size();
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     REQUIRE(drawing.Classes.size() == before + 4);
     CHECK(
         drawing.Classes.at(before)
@@ -350,7 +350,7 @@ namespace DxfIO::Audit
     const Report seen = Check(early);
     REQUIRE(seen.Errors()            == 1);
     CHECK(seen.Findings.front().What == "no CLASS for LAYOUT");
-    CHECK(Repair(early).Clean());
+    CHECK(Repair(early).IsClean());
     CHECK(early.Classes.back().Tags.size() == 6);
     Objects::DataTable later{};
     later.Base.Self = Handle{.Value = Past(early).Value + 1};
@@ -410,7 +410,7 @@ namespace DxfIO::Audit
     Drawing       drawing = Fresh();
     Tables::Layer nameless{};
     nameless.Record.Base.Self  = Handle{.Value = Past(drawing).Value + 1};
-    nameless.Record.Base.Owner = drawing.Layer.Head.Base.Self;
+    nameless.Record.Base.Owner = drawing.Layer.Control.Base.Self;
     drawing.Layer.Records.push_back(nameless);
     Tables::LType unlined{};
     unlined.Record.Base.Self = Handle{.Value = Past(drawing).Value + 1};
@@ -451,7 +451,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.at(7).What == "text style with no name");
     CHECK(seen.Findings.at(8).What == "dimension style with no name");
     CHECK(seen.Findings.at(9).What == "block with no name, its insert left out");
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     CHECK(std::ranges::none_of(drawing.Layer.Records, [](const Tables::Layer &one) -> bool
                                { return one.Record.Name.empty(); }));
     CHECK(std::ranges::none_of(drawing.LType.Records, [](const Tables::LType &one) -> bool
@@ -489,7 +489,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.front().What == "leader with fewer than two vertices, left out");
     CHECK(seen.Findings.front().Subject == BaseOf(drawing.Entities.front()).Self);
     CHECK(seen.Warnings() == 0);
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     REQUIRE(drawing.Entities.size() == 1);
     CHECK(std::get<Entities::Leader>(drawing.Entities.front()).Data->Points.size() == 2);
     CHECK(View::Block(drawing, "PART")->Entities.empty());
@@ -511,7 +511,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.front().What == "vertex flagged 0 where its polyline asks 32");
     CHECK(seen.Findings.front().Subject == vertices.front().Record.Base.Self);
     CHECK(seen.Findings.back().What     == "vertex flagged 65 where its polyline asks 33");
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     CHECK(vertices.front().Flags == 32);
     CHECK(vertices.back().Flags  == 33);
     CHECK(Check(drawing).Findings.empty());
@@ -533,7 +533,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.front().What == "block TAGGED holds attribute definitions, not flagged so");
     CHECK(seen.Findings.front().Subject == tagged->Block.Record.Base.Self);
     CHECK(seen.Errors() == 0);
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     CHECK(tagged->Block.Flags == 3);
     CHECK(View::Block(drawing, "FIXED")->Block.Flags == 0);
     CHECK(Check(drawing).Findings.empty());
@@ -561,7 +561,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.at(0).Subject == BaseOf(drawing.Entities.front()).Self);
     CHECK(seen.Findings.at(1).What    == "group 1080 is no DXF group, left out");
     CHECK(seen.Findings.at(2).What    == "group 83 is no DXF group, left out");
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     const Base &base = BaseOf(drawing.Entities.front());
     CHECK(base.Extra == std::vector{Tag{.Code = 300, .Value = std::string{"kept"}}});
     CHECK(base.Extended.front().Tags
@@ -579,8 +579,8 @@ namespace DxfIO::Audit
     const Report seen                     = Check(drawing);
     REQUIRE(seen.Errors() == 1);
     CHECK(seen.Findings.front().What
-          == std::format("$HANDSEED {} behind the handles in use", Hex(Seed(drawing))));
-    CHECK(Repair(drawing).Clean());
+          == std::format("$HANDSEED {} behind the handles in use", HexOf(Seed(drawing))));
+    CHECK(Repair(drawing).IsClean());
     CHECK(Seed(drawing) == Handle{.Value = 0xABCDF});
     CHECK(Check(drawing).Findings.empty());
     std::erase_if(drawing.Header,
@@ -588,7 +588,7 @@ namespace DxfIO::Audit
     const Report missing = Check(drawing);
     REQUIRE(missing.Errors()            == 1);
     CHECK(missing.Findings.front().What == "no $HANDSEED");
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     CHECK(Check(drawing).Findings.empty());
     Drawing bare{};
     bare.Entities.push_back(Entities::Line{});
@@ -625,7 +625,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.at(1).What    == "lineweight 284 is none AutoCAD has, 211 taken");
     CHECK(seen.Findings.at(2).What    == "lineweight -4 is none AutoCAD has, -3 taken");
     CHECK(seen.Findings.at(3).What    == "lineweight 7 is none AutoCAD has, 5 taken");
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     CHECK(View::Record(drawing.Layer, "WALLS")->Lineweight == Lineweight::Mm211);
     CHECK(std::get<Entities::Line>(drawing.Entities.at(0)).Record.Lineweight == Lineweight::Mm211);
     CHECK(std::get<Entities::Line>(drawing.Entities.at(1)).Record.Lineweight
@@ -650,11 +650,11 @@ namespace DxfIO::Audit
     CHECK(seen.Errors() == 3);
     CHECK(seen.Findings.front().What == "0 missing");
     const Report fixed = Repair(drawing);
-    CHECK(fixed.Clean());
+    CHECK(fixed.IsClean());
     CHECK(std::ranges::any_of(drawing.Layer.Records, [](const Tables::Layer &one) -> bool
                               { return one.Record.Name == "0"; }));
     CHECK(drawing.AppId.Records.size() == 1);
-    CHECK(drawing.AppId.Records.front().Record.Base.Owner == drawing.AppId.Head.Base.Self);
+    CHECK(drawing.AppId.Records.front().Record.Base.Owner == drawing.AppId.Control.Base.Self);
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -674,7 +674,7 @@ namespace DxfIO::Audit
                   [](const Tables::LType &one) -> bool { return one.Record.Name == "ByBlock"; });
     std::erase_if(drawing.VPort.Records,
                   [](const Tables::VPort &one) -> bool { return one.Record.Name == "*Active"; });
-    REQUIRE(Repair(drawing).Clean());
+    REQUIRE(Repair(drawing).IsClean());
     const auto made =
         std::ranges::find_if(drawing.Layer.Records, [](const Tables::Layer &one) -> bool
                              { return one.Record.Name == "0"; });
@@ -698,7 +698,7 @@ namespace DxfIO::Audit
     drawing.Style.Records.clear();
     drawing.Layer.Records.clear();
     drawing.DimStyle.Records.clear();
-    REQUIRE(Repair(drawing).Clean());
+    REQUIRE(Repair(drawing).IsClean());
     CHECK_FALSE(drawing.Layer.Records.front().Material);
     CHECK_FALSE(drawing.Layer.Records.front().Style);
     CHECK(drawing.DimStyle.Records.front().Dimtxsty
@@ -715,7 +715,7 @@ namespace DxfIO::Audit
                   [](const Tables::AppId &one) -> bool { return one.Record.Name == "ACAD"; });
     std::erase_if(drawing.LType.Records,
                   [](const Tables::LType &one) -> bool { return one.Record.Name == "Continuous"; });
-    REQUIRE(Repair(drawing).Clean());
+    REQUIRE(Repair(drawing).IsClean());
     CHECK(drawing.AppId.Records.front().Record.Name == "ACAD");
     CHECK(drawing.LType.Records.at(2).Record.Name   == "Continuous");
   }
@@ -807,7 +807,7 @@ namespace DxfIO::Audit
     WriteSeed(drawing, Past(drawing));
     const Report seen = Check(drawing);
     REQUIRE(seen.Warnings() == 1);
-    CHECK(seen.Clean());
+    CHECK(seen.IsClean());
     REQUIRE(Repair(drawing).Warnings() == 1);
     CHECK(Entities::Based(drawing.Entities.front()).Self);
     const auto &fixed = std::get<Entities::Line>(drawing.Entities.at(drawing.Entities.size() - 2));
@@ -888,7 +888,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.at(1).What    == "mesh with no vertices, left out");
     CHECK(seen.Findings.at(2).What    == "no CLASS for MESH");
     CHECK(drawing.Entities.size()     == 2);
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     REQUIRE(drawing.Entities.size() == 1);
     CHECK(std::holds_alternative<Entities::Line>(drawing.Entities.front()));
     CHECK(View::Block(drawing, "PART")->Entities.empty());
@@ -935,10 +935,10 @@ namespace DxfIO::Audit
     const Report seen = Check(drawing);
     CHECK(std::ranges::contains(seen.Findings, "mesh with 3 edge indices, one short of a pair",
                                 &Finding::What));
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     const auto &fixed = std::get<Entities::Mesh>(drawing.Blocks.front().Entities.back());
     CHECK(fixed.Data->Edges == std::vector<int>{0, 1});
-    CHECK(Check(drawing).Clean());
+    CHECK(Check(drawing).IsClean());
     CHECK(Save(drawing));
   }
 
@@ -948,13 +948,13 @@ namespace DxfIO::Audit
     std::erase_if(drawing.Header,
                   [](const Header::Variable &one) -> bool { return one.Name == "$HANDSEED"; });
     drawing.AppId.Records.clear();
-    CHECK(Repair(drawing).Clean());
+    CHECK(Repair(drawing).IsClean());
     CHECK(Seed(drawing) == Past(drawing));
     Drawing    empty = Fresh();
     const auto seed  = std::ranges::find(empty.Header, "$HANDSEED", &Header::Variable::Name);
     seed->Values.clear();
     empty.AppId.Records.clear();
-    CHECK(Repair(empty).Clean());
+    CHECK(Repair(empty).IsClean());
     CHECK(Seed(empty) == Past(empty));
   }
 } // namespace DxfIO::Audit
@@ -1013,7 +1013,7 @@ namespace DxfIO::Audit
     drawing.Entities.emplace_back(Lined(Handle{}));
     drawing.AppId.Records.clear();
     const Report fixed = Repair(drawing);
-    CHECK(fixed.Clean());
+    CHECK(fixed.IsClean());
     CHECK(fixed.Errors() == 3);
     CHECK(std::ranges::all_of(fixed.Findings, &Finding::Fixed));
     CHECK(Entities::Based(drawing.Entities.back()).Self);
@@ -1030,7 +1030,7 @@ namespace DxfIO::Audit
     drawing.Entities.emplace_back(Lined(Handle{.Value = last - 2}));
     drawing.Entities.emplace_back(Lined(Handle{}));
     drawing.Entities.emplace_back(Lined(Handle{}));
-    REQUIRE(Repair(drawing).Clean());
+    REQUIRE(Repair(drawing).IsClean());
     CHECK(Entities::Based(drawing.Entities.at(1)).Self == Handle{.Value = last - 1});
     CHECK(Entities::Based(drawing.Entities.back()).Self < Handle{.Value = last - 2});
     CHECK(Check(drawing).Findings.empty());
@@ -1069,7 +1069,7 @@ namespace DxfIO::Audit
   {
     Drawing drawing = Create(Version::R2018);
     REQUIRE(Edit::Add(drawing, Entities::Line{}));
-    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Edit::Space::Paper));
+    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Space::Paper));
     const Tables::BlockRecord &model      = *View::Record(drawing.BlockRecord, "*Model_Space");
     const Handle               shared     = model.Record.Base.Self;
     Tables::BlockRecord       &paper      = *View::Record(drawing.BlockRecord, "*Paper_Space");
@@ -1096,9 +1096,9 @@ namespace DxfIO::Audit
   {
     Drawing drawing = Create(Version::R2018);
     REQUIRE(Edit::Add(drawing, Entities::Line{}));
-    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Edit::Space::Paper));
+    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Space::Paper));
     Tables::BlockRecord &model             = *View::Record(drawing.BlockRecord, "*Model_Space");
-    const Handle         shared            = drawing.Layer.Head.Base.Self;
+    const Handle         shared            = drawing.Layer.Control.Base.Self;
     model.Record.Base.Self                 = shared;
     BaseOf(drawing.Entities.front()).Owner = shared;
     BaseOf(drawing.Entities.back()).Owner  = shared;
@@ -1107,29 +1107,29 @@ namespace DxfIO::Audit
     CHECK(now != shared);
     CHECK(BaseOf(drawing.Entities.front()).Owner == now);
     CHECK(BaseOf(drawing.Entities.back()).Owner  == shared);
-    CHECK(drawing.Layer.Head.Base.Self           == shared);
+    CHECK(drawing.Layer.Control.Base.Self        == shared);
   }
 
   TEST_CASE("audit: a table given a new handle takes its records along, not another's")
   {
-    Drawing      drawing         = Create(Version::R2018);
-    const Handle shared          = drawing.LType.Head.Base.Self;
-    drawing.Layer.Head.Base.Self = shared;
+    Drawing      drawing            = Create(Version::R2018);
+    const Handle shared             = drawing.LType.Control.Base.Self;
+    drawing.Layer.Control.Base.Self = shared;
     for (Tables::Layer &one : drawing.Layer.Records)
     {
       one.Record.Base.Owner = shared;
     }
     Tables::BlockRecord &model = drawing.BlockRecord.Records.front();
-    model.Record.Base.Self     = drawing.BlockRecord.Head.Base.Self;
+    model.Record.Base.Self     = drawing.BlockRecord.Control.Base.Self;
     REQUIRE(Repair(drawing).Errors() == 2);
-    const Handle now = drawing.Layer.Head.Base.Self;
+    const Handle now = drawing.Layer.Control.Base.Self;
     CHECK(now != shared);
     CHECK(std::ranges::all_of(drawing.Layer.Records, [now](const Tables::Layer &one) -> bool
                               { return one.Record.Base.Owner == now; }));
     CHECK(std::ranges::all_of(drawing.LType.Records, [shared](const Tables::LType &one) -> bool
                               { return one.Record.Base.Owner == shared; }));
     CHECK(drawing.BlockRecord.Records.back().Record.Base.Owner
-          == drawing.BlockRecord.Head.Base.Self);
+          == drawing.BlockRecord.Control.Base.Self);
   }
 
   TEST_CASE("audit: what an entity carries is checked too, for its layer, linetype and text style")
@@ -1156,7 +1156,7 @@ namespace DxfIO::Audit
     const Report seen = Check(drawing);
     CHECK(seen.Errors()   == 2);
     CHECK(seen.Warnings() == 2);
-    REQUIRE(Repair(drawing).Clean());
+    REQUIRE(Repair(drawing).IsClean());
     const auto &attributes = std::get<Entities::Insert>(drawing.Entities.front()).Attributes;
     CHECK(attributes.Children.front().Lettering.Style == "Standard");
     const auto &vertices = std::get<Entities::Polyline>(drawing.Entities.back()).Vertices;
@@ -1189,7 +1189,7 @@ namespace DxfIO::Audit
     CHECK(seen.Findings.at(0).What == "POLYLINE has no SEQEND");
     CHECK(seen.Findings.at(1).What == "INSERT attributes not marked to follow it");
     CHECK(seen.Findings.at(2).What == "INSERT has no SEQEND");
-    REQUIRE(Repair(drawing).Clean());
+    REQUIRE(Repair(drawing).IsClean());
     REQUIRE(open.Vertices.Closing);
     CHECK((**open.Vertices.Closing).Record.Base.Self);
     CHECK((**open.Vertices.Closing).Record.Base.Owner == open.Record.Base.Self);
@@ -1239,7 +1239,7 @@ namespace DxfIO::Audit
       const Report seen = Check(drawing);
       CHECK(seen.Errors() >= 6);
       CHECK(std::ranges::none_of(seen.Findings, &Finding::Fixed));
-      CHECK(Repair(drawing).Clean());
+      CHECK(Repair(drawing).IsClean());
       CHECK(Check(drawing).Findings.empty());
     }
   }

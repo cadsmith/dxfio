@@ -17,13 +17,12 @@ namespace DxfIO
     CHECK(BaseOf(fixed).Self == Handle{.Value = 0xc});
   }
 
-  TEST_CASE("object: a dictionary with a default keeps its base in its dictionary")
+  TEST_CASE("object: a dictionary with a default goes by the type of one")
   {
-    Object defaulted = Objects::DictionaryWithDefault{};
+    Object defaulted = Objects::Dictionary{.Default = Handle{}};
     CHECK(TypeOf(defaulted) == "ACDBDICTIONARYWDFLT");
     BaseOf(defaulted).Self = Handle{.Value = 0xd};
-    CHECK(std::get<Objects::DictionaryWithDefault>(defaulted).Dictionary.Base.Self
-          == Handle{.Value = 0xd});
+    CHECK(std::get<Objects::Dictionary>(defaulted).Base.Self == Handle{.Value = 0xd});
     Object kept = Unknown{.Type = Symbol{"ACME_STORE"}, .Base = {}, .Tags = {}};
     CHECK(TypeOf(kept) == "ACME_STORE");
     CHECK_FALSE(BaseOf(kept).Self);

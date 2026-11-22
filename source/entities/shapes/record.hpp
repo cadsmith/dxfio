@@ -64,13 +64,13 @@ namespace DxfIO
       },
       Fields::Field{
           .Code     = 48,
-          .Member   = &Entities::Record::Scale,
+          .Member   = &Entities::Record::LinetypeScale,
           .Fallback = 1.0,
           .Since    = Version::R13,
       },
       Fields::Field{
           .Code     = 60,
-          .Member   = &Entities::Record::Hidden,
+          .Member   = &Entities::Record::Invisible,
           .Fallback = false,
           .Since    = Version::R13,
       },
@@ -82,7 +82,7 @@ namespace DxfIO
       },
       Fields::Field{
           .Code     = 390,
-          .Member   = &Entities::Record::Style,
+          .Member   = &Entities::Record::Plotstyle,
           .Fallback = Handle{},
           .Since    = Version::R2000,
       },

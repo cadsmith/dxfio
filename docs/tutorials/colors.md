@@ -61,13 +61,13 @@ DxfIO::Edit::Add(drawing, heavy);
 
 ## Visibility [#hidden]
 
-`Hidden` makes the entity invisible; it stays in the drawing. `Transparency`, from R2004, is empty while the entity takes its layer's.
+`Invisible` hides the entity; it stays in the drawing. `Transparency`, from R2004, is empty while the entity takes its layer's.
 
 ```cpp
 DxfIO::Entities::Line invisible{};
 invisible.Start = {.X = 0, .Y = 40, .Z = 0};
 invisible.End = {.X = 100, .Y = 40, .Z = 0};
-invisible.Record.Hidden = true;
+invisible.Record.Invisible = true;
 DxfIO::Edit::Add(drawing, invisible);
 ```
 

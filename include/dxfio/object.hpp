@@ -4,7 +4,6 @@
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/objects/datatable.hpp"
-#include "dxfio/objects/defaulted.hpp"
 #include "dxfio/objects/dictionary.hpp"
 #include "dxfio/objects/dictionaryvar.hpp"
 #include "dxfio/objects/group.hpp"
@@ -33,14 +32,13 @@ namespace DxfIO
    *  An object of the OBJECTS section: one of the kinds DXF defines, or an Unknown kept as it came.
    */
   using Object =
-      std::variant<Objects::Dictionary, Objects::DictionaryWithDefault, Objects::Group,
-                   Objects::ImageDef, Objects::ImageDefReactor, Objects::RasterVariables,
-                   Objects::Layout, Objects::Material, Objects::MLeaderStyle, Objects::MLineStyle,
-                   Objects::Placeholder, Objects::Scale, Objects::SortEntsTable,
-                   Objects::TableStyle, Objects::DictionaryVar, Objects::XRecord,
-                   Objects::PlotSettings, Objects::WipeoutVariables, Objects::PdfDefinition,
-                   Objects::DwfDefinition, Objects::DgnDefinition, Objects::VisualStyle,
-                   Objects::DataTable, Objects::AcDbDataTable, Unknown>;
+      std::variant<Objects::Dictionary, Objects::Group, Objects::ImageDef, Objects::ImageDefReactor,
+                   Objects::RasterVariables, Objects::Layout, Objects::Material,
+                   Objects::MLeaderStyle, Objects::MLineStyle, Objects::Placeholder, Objects::Scale,
+                   Objects::SortEntsTable, Objects::TableStyle, Objects::DictionaryVar,
+                   Objects::XRecord, Objects::PlotSettings, Objects::WipeoutVariables,
+                   Objects::PdfDefinition, Objects::DwfDefinition, Objects::DgnDefinition,
+                   Objects::VisualStyle, Objects::DataTable, Objects::AcDbDataTable, Unknown>;
 
   /**
    *  The DXF name of an object, such as "DICTIONARY", or the name an unknown object came in with.

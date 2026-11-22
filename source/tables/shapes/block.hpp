@@ -122,7 +122,7 @@ namespace DxfIO
       },
       Fields::Field{
           .Code   = 281,
-          .Member = &Tables::BlockRecord::Uniform,
+          .Member = &Tables::BlockRecord::Scaling,
           .Since  = Version::R2007,
       },
   };

@@ -21,7 +21,7 @@ namespace DxfIO
     }
   }
 
-  auto Index::Drawn() const -> const Drawing &
+  auto Index::Source() const -> const Drawing &
   {
     return *m_Drawing;
   }

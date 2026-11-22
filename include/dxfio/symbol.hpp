@@ -40,15 +40,15 @@ namespace DxfIO
     /**
      *  The text, valid for as long as the program runs.
      */
-    [[nodiscard]] auto View() const -> std::string_view;
+    [[nodiscard]] auto View() const noexcept -> std::string_view;
     /**
      *  The text as a string, valid for as long as the program runs.
      */
-    [[nodiscard]] auto Str() const -> const std::string &;
+    [[nodiscard]] auto Str() const noexcept -> const std::string &;
     /**
      *  Whether the text has no characters.
      */
-    [[nodiscard]] auto Empty() const -> bool;
+    [[nodiscard]] auto IsEmpty() const noexcept -> bool;
 
     auto operator==(const Symbol &) const -> bool = default;
 

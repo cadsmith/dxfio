@@ -39,12 +39,12 @@ namespace DxfIO::Lift
      */
     auto Spaced(std::string_view name) -> std::string_view
     {
-      if (View::Same(name, "$MODEL_SPACE") || View::Same(name, Model))
+      if (View::Matches(name, "$MODEL_SPACE") || View::Matches(name, Model))
       {
         return Model;
       }
-      return View::Same(name, "$PAPER_SPACE") || View::Same(name, Paper) ? Paper
-                                                                         : std::string_view{};
+      return View::Matches(name, "$PAPER_SPACE") || View::Matches(name, Paper) ? Paper
+                                                                               : std::string_view{};
     }
 
     auto Free(const Drawing &from) -> Seed
@@ -84,7 +84,7 @@ namespace DxfIO::Lift
         RecordT *own = View::Record(into, one.Record.Name);
         Base     base{};
         base.Self       = own == nullptr ? with.Handles->Take() : own->Record.Base.Self;
-        base.Owner      = into.Head.Base.Self;
+        base.Owner      = into.Control.Base.Self;
         base.Extended   = std::move(one.Record.Base.Extended);
         one.Record.Base = std::move(base);
         Audit::Localized(one, *with.Into);
@@ -95,7 +95,7 @@ namespace DxfIO::Lift
         }
         *own = std::move(one);
       }
-      into.Head.Count = std::max(into.Head.Count, static_cast<int>(into.Records.size()));
+      into.Control.Count = std::max(into.Control.Count, static_cast<int>(into.Records.size()));
     }
 
     void Tabled(const Lifting &with, Drawing &from)
@@ -121,9 +121,9 @@ namespace DxfIO::Lift
       Tables::BlockRecord                 record{};
       record.Record.Name       = name;
       record.Record.Base.Self  = with.Handles->Take();
-      record.Record.Base.Owner = table.Head.Base.Self;
+      record.Record.Base.Owner = table.Control.Base.Self;
       table.Records.push_back(std::move(record));
-      table.Head.Count = std::max(table.Head.Count, static_cast<int>(table.Records.size()));
+      table.Control.Count = std::max(table.Control.Count, static_cast<int>(table.Records.size()));
       return table.Records.back().Record.Base.Self;
     }
 
@@ -211,7 +211,7 @@ namespace DxfIO::Lift
       Blocked(with, std::move(one));
     }
     Drawn(with, std::move(from.Entities));
-    into.Sections = std::move(from.Sections);
+    into.Kept = std::move(from.Kept);
     Seeded(into);
     return into;
   }

@@ -61,8 +61,8 @@ namespace DxfIO::Edit
       REQUIRE(self);
       REQUIRE(table.Records.size() == count + 1);
       CHECK(table.Records.back().Record.Base.Self  == *self);
-      CHECK(table.Records.back().Record.Base.Owner == table.Head.Base.Self);
-      CHECK(table.Head.Count == static_cast<int>(count + 1));
+      CHECK(table.Records.back().Record.Base.Owner == table.Control.Base.Self);
+      CHECK(table.Control.Count == static_cast<int>(count + 1));
     }
   } // namespace
 
@@ -166,7 +166,7 @@ namespace DxfIO::Edit
     CHECK(added.Record.Base.Self  == seed);
     CHECK(added.Record.Base.Owner == Recorded(drawing, "*Model_Space"));
     CHECK_FALSE(added.Record.Paper);
-    CHECK(Audit::Check(drawing).Clean());
+    CHECK(Audit::Check(drawing).IsClean());
   }
 
   TEST_CASE("edit: an entity added to paper space is flagged so, and owned by its record")
@@ -177,7 +177,7 @@ namespace DxfIO::Edit
     const auto &added = std::get<Entities::Circle>(drawing.Entities.front());
     CHECK(added.Record.Paper);
     CHECK(added.Record.Base.Owner == Recorded(drawing, "*Paper_Space"));
-    CHECK(Audit::Check(drawing).Clean());
+    CHECK(Audit::Check(drawing).IsClean());
   }
 
   TEST_CASE("edit: the vertices an entity carries take handles, owned by the entity")
@@ -212,7 +212,7 @@ namespace DxfIO::Edit
     CHECK(end.Record.Base.Owner == *self);
     CHECK(end.Record.Layer      == "Walls");
     CHECK(end.Record.Paper);
-    CHECK(Audit::Check(drawing).Clean());
+    CHECK(Audit::Check(drawing).IsClean());
     const auto saved = Save(drawing);
     REQUIRE(saved);
     const auto read = Load(saved->Bytes);
@@ -234,7 +234,7 @@ namespace DxfIO::Edit
     CHECK(added.Follows);
     REQUIRE(added.Attributes.Closing);
     CHECK((**added.Attributes.Closing).Record.Base.Owner == *self);
-    CHECK(Audit::Check(drawing).Clean());
+    CHECK(Audit::Check(drawing).IsClean());
     const auto saved = Save(drawing);
     REQUIRE(saved);
     const auto read = Load(saved->Bytes);
@@ -264,7 +264,7 @@ namespace DxfIO::Edit
     CHECK_FALSE(bare.Attributes.Closing);
     const auto &kept = std::get<Entities::Polyline>(drawing.Entities.at(2));
     CHECK((**kept.Vertices.Closing).Record.Base.Self == Handle{.Value = 0x7000});
-    CHECK(Audit::Check(drawing).Clean());
+    CHECK(Audit::Check(drawing).IsClean());
   }
 
   TEST_CASE("edit: an entity that brings its own handle keeps it, and the seed moves past it")
@@ -288,13 +288,13 @@ namespace DxfIO::Edit
     CHECK(door->Block.Record.Base.Owner  == record);
     CHECK(door->EndBlk.Record.Base.Owner == record);
     CHECK(View::Record(drawing.BlockRecord, "Door")->Record.Base.Owner
-          == drawing.BlockRecord.Head.Base.Self);
+          == drawing.BlockRecord.Control.Base.Self);
 
     const auto self = Add(drawing, Entities::Arc{}, "DOOR");
     REQUIRE(self);
     REQUIRE(door->Entities.size() == 1);
     CHECK(BaseOf(door->Entities.front()).Owner == record);
-    CHECK(Audit::Check(drawing).Clean());
+    CHECK(Audit::Check(drawing).IsClean());
 
     const auto saved = Save(drawing);
     REQUIRE(saved);
@@ -362,7 +362,7 @@ namespace DxfIO::Edit
     Listed(drawing, drawing.Ucs, "Tilted");
     Listed(drawing, drawing.AppId, "DXFIO");
     Listed(drawing, drawing.DimStyle, "Metric2");
-    CHECK(Audit::Check(drawing).Clean());
+    CHECK(Audit::Check(drawing).IsClean());
   }
 
   TEST_CASE("edit: a layer takes layer 0's plot style and material, unless it names its own")
@@ -399,13 +399,13 @@ namespace DxfIO::Edit
   TEST_CASE(
       "edit: a record that brings its own handle keeps it, and a count past the records stays")
   {
-    Drawing       drawing    = Create();
-    Tables::Layer walls      = Named("Walls");
-    walls.Record.Base.Self   = Handle{.Value = 0x6000};
-    drawing.Layer.Head.Count = 40;
-    CHECK(Add(drawing, walls)      == Handle{.Value = 0x6000});
-    CHECK(Seed(drawing)            == Handle{.Value = 0x6001});
-    CHECK(drawing.Layer.Head.Count == 40);
+    Drawing       drawing       = Create();
+    Tables::Layer walls         = Named("Walls");
+    walls.Record.Base.Self      = Handle{.Value = 0x6000};
+    drawing.Layer.Control.Count = 40;
+    CHECK(Add(drawing, walls) == Handle{.Value = 0x6000});
+    CHECK(Seed(drawing)       == Handle{.Value = 0x6001});
+    CHECK(drawing.Layer.Control.Count == 40);
   }
 
   TEST_CASE("edit: past the last handle there is, nothing is added")

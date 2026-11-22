@@ -16,9 +16,9 @@ namespace DxfIO
     constexpr int Base = 16;
   } // namespace
 
-  auto Hex(Handle one) -> std::string
+  auto HexOf(Handle handle) -> std::string
   {
-    return std::format("{:X}", one.Value);
+    return std::format("{:X}", handle.Value);
   }
 
   auto ParseHandle(std::string_view text) -> std::optional<Handle>

@@ -64,13 +64,13 @@ namespace DxfIO::Plan
   TEST_CASE("foreign: a default dictionary loses the entry and the default it held, and every "
             "reactor or extension dictionary naming it goes")
   {
-    Drawing                        drawing = Drawn();
-    Objects::DictionaryWithDefault styles{};
-    styles.Dictionary.Entries = {Objects::Entry{.Name = "Gone", .Soft = Gone, .Hard = {}}};
-    styles.Fallback           = Gone;
+    Drawing             drawing = Drawn();
+    Objects::Dictionary styles{};
+    styles.Entries = {Objects::Entry{.Name = "Gone", .Soft = Gone, .Hard = {}}};
+    styles.Default = Gone;
     drawing.Objects.emplace_back(styles);
-    Objects::DictionaryWithDefault kept{};
-    kept.Fallback = Kept;
+    Objects::Dictionary kept{};
+    kept.Default = Kept;
     drawing.Objects.emplace_back(kept);
     Entities::Line line{};
     line.Record.Base.Reactors   = {Kept, Gone};
@@ -80,10 +80,10 @@ namespace DxfIO::Plan
     other.Record.Base.Dictionary = Kept;
     drawing.Entities.emplace_back(other);
     Foreign(drawing);
-    const auto &held = std::get<Objects::DictionaryWithDefault>(drawing.Objects.at(2));
-    CHECK(held.Dictionary.Entries.empty());
-    CHECK_FALSE(held.Fallback);
-    CHECK(std::get<Objects::DictionaryWithDefault>(drawing.Objects.at(3)).Fallback == Kept);
+    const auto &held = std::get<Objects::Dictionary>(drawing.Objects.at(2));
+    CHECK(held.Entries.empty());
+    CHECK(held.Default == Handle{});
+    CHECK(std::get<Objects::Dictionary>(drawing.Objects.at(3)).Default == Kept);
     const auto &first = std::get<Entities::Line>(drawing.Entities.front());
     CHECK(first.Record.Base.Reactors == std::vector{Kept});
     CHECK_FALSE(first.Record.Base.Dictionary);

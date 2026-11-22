@@ -8,8 +8,8 @@ namespace DxfIO
 {
   TEST_CASE("handle: written in upper case hex")
   {
-    CHECK(Hex(Handle{0x2c20a}) == "2C20A");
-    CHECK(Hex(Handle{})        == "0");
+    CHECK(HexOf(Handle{0x2c20a}) == "2C20A");
+    CHECK(HexOf(Handle{})        == "0");
   }
 
   TEST_CASE("handle: read from hex of either case, blanks aside")

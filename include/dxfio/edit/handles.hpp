@@ -16,7 +16,7 @@ namespace DxfIO::Edit
    *  handles set by hand is trusted, so run Audit::Repair on such a drawing first. Fails when the
    *  drawing already holds the last handle there is.
    */
-  [[nodiscard]] DXFIO_API auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto MakeHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
 } // namespace DxfIO::Edit
 
 #endif /* DXFIO_EDIT_HANDLES_HPP */

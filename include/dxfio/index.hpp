@@ -30,7 +30,7 @@ namespace DxfIO
     /**
      *  The drawing it was read from.
      */
-    [[nodiscard]] auto Drawn() const -> const Drawing &;
+    [[nodiscard]] auto Source() const -> const Drawing &;
 
     /**
      *  Finds the entity of that handle in the ENTITIES section or in a block, or null, as

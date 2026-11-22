@@ -207,9 +207,9 @@ namespace DxfIO::Entities
     const ArcDimension one = Alikened<ArcDimension>(Marked("3B1"));
     CHECK(one.Data->Measure.Block == "*D16");
     CHECK(one.Data->Center != Vector{});
-    CHECK(one.Picture.size() == 2092);
+    CHECK(one.Graphics.size() == 2092);
     const ArcDimension old = Alikened<ArcDimension>(Marked("3B1", Version::R2004), Version::R2004);
-    CHECK(old.Picture.size() == 2064);
+    CHECK(old.Graphics.size() == 2064);
     Fields::Sheet page{Version::R2004};
     page.To.From = Version::R2018;
     REQUIRE(Given(page.To, one));
@@ -220,7 +220,7 @@ namespace DxfIO::Entities
   {
     const LargeRadialDimension one = Alikened<LargeRadialDimension>(Marked("3CD"));
     CHECK(one.Data->Chord != Vector{});
-    CHECK_FALSE(one.Picture.empty());
+    CHECK_FALSE(one.Graphics.empty());
   }
 
   TEST_CASE("dimension: a jogged radius's points read from the groups AutoCAD writes them in")

@@ -104,7 +104,7 @@ namespace DxfIO
      *  The sections dxfio has no type for, such as THUMBNAILIMAGE or ACDSDATA, each kept as its
      *  groups.
      */
-    std::vector<Section> Sections{};
+    std::vector<Section> Kept{};
 
     auto operator==(const Drawing &) const -> bool = default;
   };

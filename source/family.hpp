@@ -46,6 +46,22 @@ namespace DxfIO::Family
   inline constexpr bool Ancient = false;
 
   /**
+   *  A name a record may come in with beside its kind's own, and the kind it is read as.
+   */
+  struct Alias
+  {
+    std::string_view Name;
+    std::string_view Type;
+  };
+
+  /**
+   *  The other names a family's records come in with: none in a family as given, the objects say
+   *  which of theirs.
+   */
+  template <class VariantT>
+  inline constexpr auto Aliases = std::array<Alias, 0>{};
+
+  /**
    *  Whether a record of that name trails the one before it, taken by that one's reading rather
    *  than read on its own: none in a family as given, the entities say which of theirs.
    */
@@ -91,6 +107,7 @@ namespace DxfIO::Family
     {
       with.Tell(std::move(issue));
     }
+    Aliased(out, Tags::Text(one.Tags.front()));
     Follow(out, rest, with);
     return out;
   }
@@ -139,7 +156,8 @@ namespace DxfIO::Family
   {
     const std::string_view type  = Tags::Text(one.Tags.front());
     const auto            &all   = Kinds<VariantT>;
-    const auto            *found = Seek(all, type, &Kind<VariantT>::Type);
+    const Alias           *alias = Seek(Aliases<VariantT>, type, &Alias::Name);
+    const auto *found = Seek(all, alias == nullptr ? type : alias->Type, &Kind<VariantT>::Type);
     return found == nullptr || type.empty() ? all.back() : *found;
   }
 
@@ -227,7 +245,13 @@ namespace DxfIO::Family
     {
       return loose->Type.View();
     }
-    return Kinds<VariantT>.at(one.index()).Type;
+    return std::visit(
+        [](const auto &kind) -> std::string_view
+        {
+          using DxfIO::RecordType;
+          return RecordType(kind);
+        },
+        one);
   }
 
   template <class VariantT>

@@ -22,7 +22,7 @@ Each family is a `std::variant` of the kinds dxfio types, ending with `Unknown`:
 
 Text in memory is UTF-8, whatever the release stored: a code page's bytes and its `\U+` and `\M+` escapes are read into the characters they stand for, and written back the release's way. A drawing whose `$DWGCODEPAGE` dxfio does not carry is the exception: its text is kept byte for byte, escapes and all, so it saves back the same.
 
-The names records repeat, of a layer, a linetype, a style or a block, are `Symbol`s: each text is stored once for the whole program and shared, so copying one copies a pointer. The store only grows, by one entry for each distinct name a program ever reads. `==` on a `Symbol` compares case and all, while DXF names are the same in any case: `View::Same` compares them as AutoCAD does, and the `View` lookups use it.
+The names records repeat, of a layer, a linetype, a style or a block, are `Symbol`s: each text is stored once for the whole program and shared, so copying one copies a pointer. The store only grows, by one entry for each distinct name a program ever reads. `==` on a `Symbol` compares case and all, while DXF names are the same in any case: `View::Matches` compares them as AutoCAD does, and the `View` lookups use it.
 
 ## Pointers into a drawing [#pointers]
 

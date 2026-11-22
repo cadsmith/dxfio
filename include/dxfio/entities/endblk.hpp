@@ -1,10 +1,10 @@
-#ifndef DXFIO_BLOCKS_ENDBLK_HPP
-#define DXFIO_BLOCKS_ENDBLK_HPP
+#ifndef DXFIO_ENTITIES_ENDBLK_HPP
+#define DXFIO_ENTITIES_ENDBLK_HPP
 
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
 
-namespace DxfIO::Blocks
+namespace DxfIO::Entities
 {
   /**
    *  An ENDBLK: the record that closes a block.
@@ -18,6 +18,6 @@ namespace DxfIO::Blocks
 
     auto operator==(const EndBlk &) const -> bool = default;
   };
-} // namespace DxfIO::Blocks
+} // namespace DxfIO::Entities
 
-#endif /* DXFIO_BLOCKS_ENDBLK_HPP */
+#endif /* DXFIO_ENTITIES_ENDBLK_HPP */

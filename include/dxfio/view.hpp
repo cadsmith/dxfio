@@ -28,7 +28,7 @@ namespace DxfIO::View
   /**
    *  Tells whether two DXF names are the same, as AutoCAD compares them: without case.
    */
-  [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
+  [[nodiscard]] DXFIO_API auto Matches(std::string_view one, std::string_view other) -> bool;
 
   /**
    *  The block of that name, compared without case, or null.
@@ -51,7 +51,7 @@ namespace DxfIO::View
   [[nodiscard]] auto Record(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
   {
     const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
+                                            { return Matches(record.Record.Name, name); });
     return found == table.Records.end() ? nullptr : &*found;
   }
 
@@ -64,7 +64,7 @@ namespace DxfIO::View
       -> const RecordT *
   {
     const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
+                                            { return Matches(record.Record.Name, name); });
     return found == table.Records.end() ? nullptr : &*found;
   }
 

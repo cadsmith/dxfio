@@ -39,15 +39,48 @@ namespace DxfIO::Objects
     CHECK(page.Out == Text);
   }
 
-  TEST_CASE("objects: the base of each kind, a defaulted dictionary's too")
+  TEST_CASE(
+      "objects: a dictionary with a default missing its own part keeps its type, written back")
+  {
+    constexpr std::string_view text = "  0\r\nACDBDICTIONARYWDFLT\r\n  5\r\nE\r\n330\r\nC\r\n"
+                                      "100\r\nAcDbDictionary\r\n281\r\n     1\r\n";
+    const auto                 all  = Tags::All(text);
+    REQUIRE(all);
+    const auto records = File::Sections::Records(*all);
+    REQUIRE(records);
+    const std::vector<Object> read = Objects::Read(*records, Fields::Reading{});
+    REQUIRE(read.size() == 1);
+    const auto *dictionary = std::get_if<Dictionary>(&read.front());
+    REQUIRE(dictionary != nullptr);
+    CHECK(dictionary->Default == Handle{});
+    CHECK(Type(read.front())  == "ACDBDICTIONARYWDFLT");
+    Fields::Sheet page;
+    REQUIRE(Write(page.To, read));
+    CHECK(page.Out.starts_with("  0\r\nACDBDICTIONARYWDFLT\r\n"));
+  }
+
+  TEST_CASE("objects: a dictionary with a default and no 340 is written back the same, a 340 kept "
+            "past its part read again as its default")
+  {
+    constexpr std::string_view text = "  0\r\nACDBDICTIONARYWDFLT\r\n  5\r\nE\r\n330\r\nC\r\n"
+                                      "100\r\nAcDbDictionary\r\n281\r\n     1\r\n"
+                                      "100\r\nAcDbDictionaryWithDefault\r\n";
+    const auto                 all  = Tags::All(text);
+    REQUIRE(all);
+    const auto records = File::Sections::Records(*all);
+    REQUIRE(records);
+    const std::vector<Object> read = Objects::Read(*records, Fields::Reading{});
+    Fields::Sheet             page;
+    REQUIRE(Write(page.To, read));
+    CHECK(page.Out == text);
+  }
+
+  TEST_CASE("objects: the base of each kind")
   {
     const Handle self{.Value = 0x2a};
     Dictionary   plain{};
     plain.Base.Self = self;
     CHECK(Based(Object{plain}).Self == self);
-    DictionaryWithDefault fallback{};
-    fallback.Dictionary = plain;
-    CHECK(Based(Object{fallback}).Self == self);
     Unknown kept{};
     kept.Base.Self = self;
     CHECK(Based(Object{kept}).Self == self);
@@ -63,7 +96,7 @@ namespace DxfIO::Objects
 
   TEST_CASE("objects: a material's maps on the heap, copied with it")
   {
-    CHECK(sizeof(Object) < sizeof(Maps) / 2);
+    CHECK(sizeof(Object) < sizeof(Materials::Maps) / 2);
     CHECK(sizeof(Layout) < sizeof(Plot) * 2);
     Material one{};
     one.Maps->Bump.File = "bump.png";

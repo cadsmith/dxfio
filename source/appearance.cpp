@@ -19,7 +19,7 @@ namespace DxfIO
   {
     Appearance look;
     look.Layer =
-        outer != nullptr && View::Same(record.Layer.View(), "0") ? outer->Layer : record.Layer;
+        outer != nullptr && View::Matches(record.Layer.View(), "0") ? outer->Layer : record.Layer;
     const Tables::Layer  fallback{};
     const auto          *found = View::Record<Tables::Layer>(drawing, look.Layer.View());
     const Tables::Layer &layer = found == nullptr ? fallback : *found;
@@ -41,11 +41,11 @@ namespace DxfIO
       look.Rgb   = record.Rgb;
       break;
     }
-    if (View::Same(record.Linetype.View(), ByLayer))
+    if (View::Matches(record.Linetype.View(), ByLayer))
     {
       look.Linetype = layer.Linetype;
     }
-    else if (View::Same(record.Linetype.View(), ByBlock))
+    else if (View::Matches(record.Linetype.View(), ByBlock))
     {
       look.Linetype = outer != nullptr ? outer->Linetype : Symbol{"Continuous"};
     }

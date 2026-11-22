@@ -49,7 +49,7 @@ AC1032, R2018
 
 ## Tables [#tables]
 
-Each table is a member of the drawing: its `Head`, and its `Records` in the order the file gave them. A layer's `Color` is an AutoCAD Color Index and its `Linetype` the name of a linetype; [Layers](/tutorials/layers/) has the rest.
+Each table is a member of the drawing: its `Control`, and its `Records` in the order the file gave them. A layer's `Color` is an AutoCAD Color Index and its `Linetype` the name of a linetype; [Layers](/tutorials/layers/) has the rest.
 
 ```cpp
 for (const DxfIO::Tables::Layer &layer : drawing.Layer.Records)

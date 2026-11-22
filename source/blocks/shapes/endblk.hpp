@@ -5,7 +5,7 @@
 #include "fields/subclass.hpp"
 #include "shapes.hpp"
 
-#include "dxfio/blocks/endblk.hpp"
+#include "dxfio/entities/endblk.hpp"
 
 #include <string_view>
 #include <tuple>
@@ -13,13 +13,13 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Blocks::EndBlk> = std::tuple{
-      Entities::Part<Blocks::EndBlk>,
+  inline constexpr auto Shapes<Entities::EndBlk> = std::tuple{
+      Entities::Part<Entities::EndBlk>,
       Fields::Subclass{.Marker = "AcDbBlockEnd"},
   };
 
   template <>
-  inline constexpr std::string_view Type<Blocks::EndBlk> = "ENDBLK";
+  inline constexpr std::string_view Type<Entities::EndBlk> = "ENDBLK";
 } // namespace DxfIO
 
 #endif /* DXFIO_BLOCKS_SHAPES_ENDBLK_HPP */

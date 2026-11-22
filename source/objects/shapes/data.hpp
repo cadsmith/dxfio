@@ -32,10 +32,11 @@ namespace DxfIO
 
     inline constexpr int Titled = 2;
 
-    inline auto Columned(std::vector<DxfIO::Tag> all) -> std::optional<std::vector<Column>>
+    inline auto Columned(std::vector<DxfIO::Tag> all)
+        -> std::optional<std::vector<DataTables::Column>>
     {
-      std::vector<Column> out;
-      std::size_t         at = 0;
+      std::vector<DataTables::Column> out;
+      std::size_t                     at = 0;
       while (at < all.size())
       {
         DxfIO::Tag &one = all.at(at);
@@ -48,7 +49,7 @@ namespace DxfIO
           {
             return std::nullopt;
           }
-          out.push_back(Column{
+          out.push_back(DataTables::Column{
               .Kind  = static_cast<int>(kind),
               .Name  = std::move(std::get<std::string>(all.at(at + 1).Value)),
               .Cells = {},
@@ -71,7 +72,7 @@ namespace DxfIO
     template <Edition KindV>
     void Filled(DataTableOf<KindV> &one, Fields::Walk &in)
     {
-      if (std::optional<std::vector<Column>> read = Columned(in.Rest()))
+      if (std::optional<std::vector<DataTables::Column>> read = Columned(in.Rest()))
       {
         one.Columns = std::move(*read);
         in.Spend();
@@ -83,7 +84,7 @@ namespace DxfIO
     {
       return Chained(
           one.Columns,
-          [&to](const Column &column) -> std::expected<void, Failure>
+          [&to](const DataTables::Column &column) -> std::expected<void, Failure>
           {
             return Fields::Value<int>::Write(to, Typed, column.Kind)
                 .and_then([&] -> auto

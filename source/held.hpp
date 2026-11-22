@@ -57,7 +57,7 @@ namespace DxfIO
   template <class RecordT, class VisitT>
   void Held(const Tables::Table<RecordT> &table, const VisitT &visit)
   {
-    visit(table.Head.Base.Self);
+    visit(table.Control.Base.Self);
     for (const RecordT &one : table.Records)
     {
       visit(Based(one).Self);

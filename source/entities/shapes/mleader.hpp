@@ -282,7 +282,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::MultiLeader> = std::tuple{
       Entities::Part<Entities::MultiLeader>,
-      Fields::Picture{.Member = &Entities::MultiLeader::Picture},
+      Fields::Picture{.Member = &Entities::MultiLeader::Graphics},
       Fields::Part{
           .Member = &Entities::MultiLeader::MLeader,
           .Fields = Shapes<Entities::MultiLeaders::MLeader>,

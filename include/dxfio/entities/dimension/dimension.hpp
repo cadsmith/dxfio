@@ -261,7 +261,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     /**
      *  The arc measured and how the dimension is drawn, from the AcDbArcDimension subclass.
      */
@@ -314,7 +314,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     /**
      *  The curve measured and the jog, from the AcDbRadialDimensionLarge subclass.
      */

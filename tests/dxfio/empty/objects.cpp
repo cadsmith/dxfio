@@ -75,8 +75,8 @@ namespace DxfIO::Empty
                                       "ACAD_PLOTSTYLENAME", "ACAD_SCALELIST", "ACAD_TABLESTYLE"});
     CHECK(Names(fresh.All.at(2)) == std::vector<std::string>{"Layout1", "Model"});
     CHECK(Names(fresh.All.at(4)) == std::vector<std::string>{"Standard"});
-    const auto &styles = std::get<Objects::DictionaryWithDefault>(fresh.All.at(7));
-    CHECK(styles.Fallback == fresh.Ids.Normal);
+    const auto &styles = std::get<Objects::Dictionary>(fresh.All.at(7));
+    CHECK(styles.Default == fresh.Ids.Normal);
   }
 
   TEST_CASE("objects: each one owned and watched by the dictionary naming it")
@@ -95,7 +95,7 @@ namespace DxfIO::Empty
           },
           one);
     }
-    CHECK(seen.size() == fresh.All.size() - 1);
+    CHECK(seen.size() == fresh.All.size());
     const auto &layout = std::get<Objects::Layout>(fresh.All.at(11));
     CHECK(layout.Base.Owner    == std::get<Objects::Dictionary>(fresh.All.at(2)).Base.Self);
     CHECK(layout.Base.Reactors == std::vector{layout.Base.Owner});

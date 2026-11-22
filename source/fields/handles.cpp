@@ -21,7 +21,7 @@ namespace DxfIO::Fields
 
   auto Value<Handle>::Write(Writing &to, int code, Handle held) -> std::expected<void, Failure>
   {
-    const std::string written = Hex(held);
+    const std::string written = HexOf(held);
     return to.To->Put(Tags::Tag{.Code = code, .Value = std::string_view{written}});
   }
 } // namespace DxfIO::Fields

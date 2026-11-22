@@ -42,14 +42,14 @@ namespace DxfIO::Tables
   TEST_CASE("tables: a kind's table into its member, others kept unknown")
   {
     const Drawing drawing = Read(Text);
-    CHECK(drawing.Layer.Head.Name        == "LAYER");
-    CHECK(drawing.Layer.Head.Count       == 9);
+    CHECK(drawing.Layer.Control.Name     == "LAYER");
+    CHECK(drawing.Layer.Control.Count    == 9);
     REQUIRE(drawing.Layer.Records.size() == 1);
     CHECK(drawing.Layer.Records.front().Record.Name == "0");
-    CHECK(drawing.VPort.Head.Name    == "VPORT");
-    CHECK(drawing.DimStyle.Head.Name == "DIMSTYLE");
-    CHECK(drawing.Loose.size()       == 1);
-    CHECK(drawing.Style.Head.Name.empty());
+    CHECK(drawing.VPort.Control.Name    == "VPORT");
+    CHECK(drawing.DimStyle.Control.Name == "DIMSTYLE");
+    CHECK(drawing.Loose.size()          == 1);
+    CHECK(drawing.Style.Control.Name.empty());
   }
 
   TEST_CASE("tables: a table given again kept out, the first kept and told")
@@ -62,10 +62,10 @@ namespace DxfIO::Tables
     Drawing            drawing{};
     std::vector<Issue> issues;
     Tables::Read(*nests, drawing, Fields::Reading{.Issues = &issues});
-    CHECK(drawing.Layer.Head.Count == 1);
-    REQUIRE(issues.size()          == 1);
-    CHECK(issues.front().Line      == 9);
-    CHECK(issues.front().What      == "table LAYER given again, the first kept");
+    CHECK(drawing.Layer.Control.Count == 1);
+    REQUIRE(issues.size()             == 1);
+    CHECK(issues.front().Line         == 9);
+    CHECK(issues.front().What         == "table LAYER given again, the first kept");
   }
 
   TEST_CASE("tables: a record not of its table's kind left out and told, a stranger's kept")
@@ -108,7 +108,7 @@ namespace DxfIO::Tables
   {
     Drawing drawing = Read(Text);
     drawing.Loose.push_back(Table<Unknown>{
-        .Head    = Tables::Head{.Name = "LAYER"},
+        .Control = Tables::Control{.Name = "LAYER"},
         .Records = {},
     });
     Fields::Sheet page{};

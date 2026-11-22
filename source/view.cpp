@@ -18,12 +18,12 @@ namespace DxfIO::View
     {
       const auto found =
           std::ranges::find_if(drawing.Blocks, [name](const Blocks::Definition &one) -> bool
-                               { return Same(one.Block.Name, name); });
+                               { return Matches(one.Block.Name, name); });
       return found == drawing.Blocks.end() ? nullptr : &*found;
     }
   } // namespace
 
-  auto Same(std::string_view one, std::string_view other) -> bool
+  auto Matches(std::string_view one, std::string_view other) -> bool
   {
     return Ascii::Same(one, other);
   }
@@ -67,7 +67,7 @@ namespace DxfIO::View
     for (const Object &one : drawing.Objects)
     {
       const auto *layout = std::get_if<Objects::Layout>(&one);
-      if (layout != nullptr && Same(layout->Name, name))
+      if (layout != nullptr && Matches(layout->Name, name))
       {
         return layout;
       }
@@ -93,7 +93,7 @@ namespace DxfIO::View
   {
     const auto found =
         std::ranges::find_if(dictionary.Entries, [name](const Objects::Entry &one) -> bool
-                             { return Same(one.Name, name); });
+                             { return Matches(one.Name, name); });
     if (found == dictionary.Entries.end())
     {
       return nullptr;

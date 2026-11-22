@@ -26,7 +26,7 @@ namespace DxfIO::Empty
       std::string         Name;
       Objects::Dictionary Dictionary{};
       std::vector<Object> Held;
-      Handle              Fallback{};
+      Handle              Default{};
     };
 
     void Entered(Objects::Dictionary &into, std::string name, DxfIO::Base &one)
@@ -87,7 +87,7 @@ namespace DxfIO::Empty
       Objects::Placeholder normal{};
       normal.Base.Self = ids.Normal;
       Kept(out, "Normal", std::move(normal));
-      out.Fallback = ids.Normal;
+      out.Default = ids.Normal;
       return out;
     }
 
@@ -120,14 +120,11 @@ namespace DxfIO::Empty
 
     auto Shelved(Shelf &one) -> Object
     {
-      if (!one.Fallback)
+      if (one.Default)
       {
-        return std::move(one.Dictionary);
+        one.Dictionary.Default = one.Default;
       }
-      return Objects::DictionaryWithDefault{
-          .Dictionary = std::move(one.Dictionary),
-          .Fallback   = one.Fallback,
-      };
+      return std::move(one.Dictionary);
     }
 
     auto Rooted(const Roots &ids, std::vector<Shelf> all) -> std::vector<Object>

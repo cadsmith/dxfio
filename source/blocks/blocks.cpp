@@ -17,9 +17,9 @@ namespace DxfIO::Blocks
      *  The ENDBLK a file left out: on the block's layer, owned by its block record, with no handle
      *  until an audit gives it one.
      */
-    auto Closed(const Block &block) -> EndBlk
+    auto Closed(const Entities::Block &block) -> Entities::EndBlk
     {
-      EndBlk out{};
+      Entities::EndBlk out{};
       out.Record.Layer      = block.Record.Layer;
       out.Record.Base.Owner = block.Record.Base.Owner;
       out.Record.Paper      = block.Record.Paper;
@@ -33,9 +33,9 @@ namespace DxfIO::Blocks
     out.reserve(all.size());
     for (const File::Nest &one : all)
     {
-      auto   block    = Taken<Block>(one.Head, with);
-      auto   entities = Entities::Read(one.Records, with);
-      EndBlk endblk   = one.End ? Taken<EndBlk>(*one.End, with) : Closed(block);
+      auto             block    = Taken<Entities::Block>(one.Head, with);
+      auto             entities = Entities::Read(one.Records, with);
+      Entities::EndBlk endblk   = one.End ? Taken<Entities::EndBlk>(*one.End, with) : Closed(block);
       out.push_back(Definition{
           .Block    = std::move(block),
           .Entities = std::move(entities),

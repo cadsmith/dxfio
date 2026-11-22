@@ -55,14 +55,14 @@ DxfIO::Edit::Add(drawing, axis);
 
 ## On one entity [#entity]
 
-An entity that names a linetype in `Record.Linetype` is drawn with it, whatever its layer's. `Edit::Add` does not check the name: `Audit::Check` reports one the table does not hold, and `Audit::Repair` sets it to ByLayer. `Record.Scale` scales the pattern for that entity alone: at 2, each dash and space is twice as long.
+An entity that names a linetype in `Record.Linetype` is drawn with it, whatever its layer's. `Edit::Add` does not check the name: `Audit::Check` reports one the table does not hold, and `Audit::Repair` sets it to ByLayer. `Record.LinetypeScale` scales the pattern for that entity alone: at 2, each dash and space is twice as long.
 
 ```cpp
 DxfIO::Entities::Circle hole{};
 hole.Center = {.X = 100, .Y = 0, .Z = 0};
 hole.Radius = 60;
 hole.Record.Linetype = DxfIO::Symbol{"DashDot"};
-hole.Record.Scale = 2;
+hole.Record.LinetypeScale = 2;
 DxfIO::Edit::Add(drawing, hole);
 ```
 

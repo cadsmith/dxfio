@@ -95,7 +95,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::ArcDimension> = std::tuple{
       Entities::Part<Entities::ArcDimension>,
-      Fields::Picture{.Member = &Entities::ArcDimension::Picture},
+      Fields::Picture{.Member = &Entities::ArcDimension::Graphics},
       Fields::Part{
           .Member = &Entities::ArcDimension::Data,
           .Fields = Shapes<Entities::ArcDimensionData>,
@@ -105,7 +105,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::LargeRadialDimension> = std::tuple{
       Entities::Part<Entities::LargeRadialDimension>,
-      Fields::Picture{.Member = &Entities::LargeRadialDimension::Picture},
+      Fields::Picture{.Member = &Entities::LargeRadialDimension::Graphics},
       Fields::Part{
           .Member = &Entities::LargeRadialDimension::Data,
           .Fields = Shapes<Entities::LargeRadialDimensionData>,

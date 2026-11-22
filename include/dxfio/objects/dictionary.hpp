@@ -5,6 +5,7 @@
 #include "dxfio/base.hpp"
 #include "dxfio/handle.hpp"
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -32,7 +33,8 @@ namespace DxfIO::Objects
   };
 
   /**
-   *  A DICTIONARY: objects found by name, such as the drawing's layouts, groups or styles.
+   *  A DICTIONARY: objects found by name, such as the drawing's layouts, groups or styles. One with
+   *  a default is an ACDBDICTIONARYWDFLT, such as the plot style names with Normal.
    */
   struct DXFIO_API Dictionary
   {
@@ -53,6 +55,10 @@ namespace DxfIO::Objects
      *  The entries, in the order the file gives them.
      */
     std::vector<Objects::Entry> Entries{};
+    /**
+     *  The object taken when a name is not found. Group 340.
+     */
+    std::optional<Handle> Default{};
 
     auto operator==(const Dictionary &) const -> bool = default;
   };

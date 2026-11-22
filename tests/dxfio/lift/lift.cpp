@@ -67,7 +67,7 @@ namespace DxfIO::Lift
       CHECK(View::Record(back.Drawing.LType, "ByBlock") != nullptr);
       CHECK_FALSE(back.Drawing.Objects.empty());
       CHECK_FALSE(back.Drawing.Classes.empty());
-      CHECK(back.Drawing.Layer.Head.Base.Self);
+      CHECK(back.Drawing.Layer.Control.Base.Self);
       CHECK(Audit::Check(back.Drawing).Findings.empty());
       REQUIRE(back.Drawing.Entities.size() == 1);
       CHECK(BaseOf(back.Drawing.Entities.front()).Owner == Owner(back.Drawing, "*Model_Space"));
@@ -111,12 +111,12 @@ namespace DxfIO::Lift
     CHECK(first->Color == 3);
     CHECK(first->Style);
     CHECK(first->Record.Base.Self);
-    CHECK(first->Record.Base.Owner == back.Drawing.Layer.Head.Base.Self);
+    CHECK(first->Record.Base.Owner == back.Drawing.Layer.Control.Base.Self);
     const Tables::Layer *made = View::Record(back.Drawing.Layer, "WALLS");
     REQUIRE(made != nullptr);
     CHECK(made->Color             == 5);
     CHECK(made->Style             == first->Style);
-    CHECK(made->Record.Base.Owner == back.Drawing.Layer.Head.Base.Self);
+    CHECK(made->Record.Base.Owner == back.Drawing.Layer.Control.Base.Self);
     CHECK(std::ranges::count(back.Drawing.Layer.Records, "0",
                              [](const Tables::Layer &one) -> std::string_view
                              { return one.Record.Name; })
@@ -147,7 +147,7 @@ namespace DxfIO::Lift
     REQUIRE(View::Block(drawing, "$PAPER_SPACE") != nullptr);
     REQUIRE(Edit::Add(drawing, Entities::Circle{}, "$PAPER_SPACE"));
     REQUIRE(Edit::Add(drawing, Entities::Arc{}, "$MODEL_SPACE"));
-    REQUIRE(Edit::Add(drawing, Entities::Line{}, Edit::Space::Paper));
+    REQUIRE(Edit::Add(drawing, Entities::Line{}, Space::Paper));
     const Loaded back = Raised(drawing, Version::R2000);
     CHECK(View::Block(back.Drawing, "$PAPER_SPACE") == nullptr);
     CHECK(View::Record(back.Drawing.BlockRecord, "$PAPER_SPACE") == nullptr);

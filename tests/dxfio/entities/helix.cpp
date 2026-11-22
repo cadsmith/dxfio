@@ -42,7 +42,7 @@ namespace DxfIO::Entities
     CHECK(one.Data.Rise      == doctest::Approx(10.0 / 3));
     CHECK(one.Data.RightHanded);
     CHECK(one.Data.Constraint == 1);
-    CHECK_FALSE(one.Picture.empty());
+    CHECK_FALSE(one.Graphics.empty());
   }
 
   TEST_CASE("helix: every release alike")

@@ -63,7 +63,7 @@ namespace DxfIO::Entities
     CHECK(one.Data->Creases.size()   == one.Data->Edges.size() / 2);
     CHECK(one.Data->Overridden       == 0);
     CHECK(one.Data->Overrides.empty());
-    CHECK_FALSE(one.Picture.empty());
+    CHECK_FALSE(one.Graphics.empty());
   }
 
   TEST_CASE("mesh: every release alike, the picture under its own code")

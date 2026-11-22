@@ -61,7 +61,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::Image> = std::tuple{
       Entities::Part<Entities::Image>,
-      Fields::Picture{.Member = &Entities::Image::Picture},
+      Fields::Picture{.Member = &Entities::Image::Graphics},
       Fields::Subclass{.Marker = "AcDbRasterImage"},
       Fields::Part{
           .Member = &Entities::Image::Raster,
@@ -72,7 +72,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::Wipeout> = std::tuple{
       Entities::Part<Entities::Wipeout>,
-      Fields::Picture{.Member = &Entities::Wipeout::Picture},
+      Fields::Picture{.Member = &Entities::Wipeout::Graphics},
       Fields::Subclass{.Marker = "AcDbWipeout"},
       Fields::Part{
           .Member = &Entities::Wipeout::Raster,

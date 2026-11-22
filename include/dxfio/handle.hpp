@@ -35,7 +35,7 @@ namespace DxfIO
    *  The handle as DXF writes it: uppercase hex with no leading zeros, such as "1F", and "0" for
    *  the null handle.
    */
-  [[nodiscard]] DXFIO_API auto Hex(Handle one) -> std::string;
+  [[nodiscard]] DXFIO_API auto HexOf(Handle handle) -> std::string;
 
   /**
    *  Reads a handle written in hex, in either case, with spaces or tabs around it; "0" gives the

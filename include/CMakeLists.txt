@@ -3,9 +3,7 @@ set(DXFIO_HEADERS
   dxfio/appearance.hpp
   dxfio/audit/audit.hpp
   dxfio/base.hpp
-  dxfio/blocks/block.hpp
   dxfio/blocks/definition.hpp
-  dxfio/blocks/endblk.hpp
   dxfio/boxed.hpp
   dxfio/brace.hpp
   dxfio/color.hpp
@@ -16,14 +14,15 @@ set(DXFIO_HEADERS
   dxfio/dxfio.hpp
   dxfio/edit/add.hpp
   dxfio/edit/handles.hpp
-  dxfio/edit/space.hpp
   dxfio/entities/arc.hpp
   dxfio/entities/attdef.hpp
   dxfio/entities/attrib.hpp
+  dxfio/entities/block.hpp
   dxfio/entities/circle.hpp
   dxfio/entities/dimension/dimension.hpp
   dxfio/entities/dimension/measure.hpp
   dxfio/entities/ellipse.hpp
+  dxfio/entities/endblk.hpp
   dxfio/entities/face.hpp
   dxfio/entities/hatch/edge.hpp
   dxfio/entities/hatch/gradient.hpp
@@ -76,7 +75,6 @@ set(DXFIO_HEADERS
   dxfio/matrix.hpp
   dxfio/object.hpp
   dxfio/objects/datatable.hpp
-  dxfio/objects/defaulted.hpp
   dxfio/objects/dictionary.hpp
   dxfio/objects/dictionaryvar.hpp
   dxfio/objects/group.hpp
@@ -98,13 +96,14 @@ set(DXFIO_HEADERS
   dxfio/raw.hpp
   dxfio/save.hpp
   dxfio/section.hpp
+  dxfio/space.hpp
   dxfio/symbol.hpp
   dxfio/tables/appid.hpp
   dxfio/tables/axes.hpp
   dxfio/tables/block.hpp
+  dxfio/tables/control.hpp
   dxfio/tables/dimstyle.hpp
   dxfio/tables/face.hpp
-  dxfio/tables/head.hpp
   dxfio/tables/layer.hpp
   dxfio/tables/ltype.hpp
   dxfio/tables/record.hpp

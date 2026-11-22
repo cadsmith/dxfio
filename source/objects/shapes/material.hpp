@@ -39,71 +39,72 @@ namespace DxfIO
 
     template <int Method, int Factor, int Color>
     inline constexpr auto Shaded = std::tuple{
-        Fields::Field<MaterialColor, int, int>{
+        Fields::Field<Materials::MaterialColor, int, int>{
             .Code     = Method,
-            .Member   = &MaterialColor::Method,
+            .Member   = &Materials::MaterialColor::Method,
             .Fallback = 0,
         },
-        Fields::Field<MaterialColor, double, double>{
+        Fields::Field<Materials::MaterialColor, double, double>{
             .Code     = Factor,
-            .Member   = &MaterialColor::Factor,
+            .Member   = &Materials::MaterialColor::Factor,
             .Fallback = 1.0,
         },
-        Fields::Field<MaterialColor, int, int>{
+        Fields::Field<Materials::MaterialColor, int, int>{
             .Code     = Color,
-            .Member   = &MaterialColor::Color,
+            .Member   = &Materials::MaterialColor::Color,
             .Fallback = -1040187392,
         },
     };
 
     template <Codes At>
     inline constexpr auto Channel = std::tuple{
-        Fields::Field<Map, double, double>{
+        Fields::Field<Materials::Map, double, double>{
             .Code     = At.Blend,
-            .Member   = &Map::Blend,
+            .Member   = &Materials::Map::Blend,
             .Fallback = 1.0,
         },
-        Fields::Field<Map, int, int>{
+        Fields::Field<Materials::Map, int, int>{
             .Code     = At.Source,
-            .Member   = &Map::Source,
+            .Member   = &Materials::Map::Source,
             .Fallback = At.Fallback,
         },
-        Fields::Field<Map, std::string, std::string_view>{
+        Fields::Field<Materials::Map, std::string, std::string_view>{
             .Code     = At.File,
-            .Member   = &Map::File,
+            .Member   = &Materials::Map::File,
             .Fallback = std::string_view{},
         },
-        Fields::Field<Map, int, int>{
+        Fields::Field<Materials::Map, int, int>{
             .Code     = At.Projection,
-            .Member   = &Map::Projection,
+            .Member   = &Materials::Map::Projection,
             .Fallback = 2,
         },
-        Fields::Field<Map, int, int>{
+        Fields::Field<Materials::Map, int, int>{
             .Code     = At.Tiling,
-            .Member   = &Map::Tiling,
+            .Member   = &Materials::Map::Tiling,
             .Fallback = 1,
         },
-        Fields::Field<Map, int, int>{
+        Fields::Field<Materials::Map, int, int>{
             .Code     = At.Automatic,
-            .Member   = &Map::Automatic,
+            .Member   = &Materials::Map::Automatic,
             .Fallback = 1,
         },
-        Fields::Field<Map, Matrix, Matrix>{
+        Fields::Field<Materials::Map, Matrix, Matrix>{
             .Code     = At.Transform,
-            .Member   = &Map::Transform,
+            .Member   = &Materials::Map::Transform,
             .Fallback = Identity,
         },
     };
 
-    template <Map Maps::*Member, Codes At>
-    inline constexpr Fields::Part<Objects::Maps, Map, std::remove_const_t<decltype(Channel<At>)>>
+    template <Materials::Map Materials::Maps::*Member, Codes At>
+    inline constexpr Fields::Part<Materials::Maps, Materials::Map,
+                                  std::remove_const_t<decltype(Channel<At>)>>
         Placed{
             .Member = Member,
             .Fields = Channel<At>,
     };
 
-    template <Map Maps::*Member, Codes At>
-    inline constexpr Fields::Part<Material, Boxed<Objects::Maps>,
+    template <Materials::Map Materials::Maps::*Member, Codes At>
+    inline constexpr Fields::Part<Material, Boxed<Materials::Maps>,
                                   std::tuple<std::remove_const_t<decltype(Placed<Member, At>)>>>
         Mapped{.Member = &Material::Maps, .Fields = std::tuple{Placed<Member, At>}};
 
@@ -150,7 +151,7 @@ namespace DxfIO
           .Member = &Objects::Material::Diffuse,
           .Fields = Objects::Shaded<71, 41, 91>,
       },
-      Objects::Mapped<&Objects::Maps::Diffuse,
+      Objects::Mapped<&Objects::Materials::Maps::Diffuse,
                       Objects::Codes{
                           .Blend      = 42,
                           .Source     = 72,
@@ -169,7 +170,7 @@ namespace DxfIO
           .Member = &Objects::Material::Specular,
           .Fields = Objects::Shaded<76, 45, 92>,
       },
-      Objects::Mapped<&Objects::Maps::Specular,
+      Objects::Mapped<&Objects::Materials::Maps::Specular,
                       Objects::Codes{
                           .Blend      =  46,
                           .Source     =  77,
@@ -179,7 +180,7 @@ namespace DxfIO
                           .Automatic  = 170,
                           .Transform  =  47,
                       }>,
-      Objects::Mapped<&Objects::Maps::Reflection,
+      Objects::Mapped<&Objects::Materials::Maps::Reflection,
                       Objects::Codes{
                           .Blend      =  48,
                           .Source     = 171,
@@ -194,7 +195,7 @@ namespace DxfIO
           .Member   = &Objects::Material::Opacity,
           .Fallback = 1.0,
       },
-      Objects::Mapped<&Objects::Maps::Opacity,
+      Objects::Mapped<&Objects::Materials::Maps::Opacity,
                       Objects::Codes{
                           .Blend      = 141,
                           .Source     = 175,
@@ -204,7 +205,7 @@ namespace DxfIO
                           .Automatic  = 178,
                           .Transform  = 142,
                       }>,
-      Objects::Mapped<&Objects::Maps::Bump,
+      Objects::Mapped<&Objects::Materials::Maps::Bump,
                       Objects::Codes{
                           .Blend      = 143,
                           .Source     = 179,
@@ -219,7 +220,7 @@ namespace DxfIO
           .Member   = &Objects::Material::Refraction,
           .Fallback = 1.0,
       },
-      Objects::Mapped<&Objects::Maps::Refraction,
+      Objects::Mapped<&Objects::Materials::Maps::Refraction,
                       Objects::Codes{
                           .Blend      = 146,
                           .Source     = 273,

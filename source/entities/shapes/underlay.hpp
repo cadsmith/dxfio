@@ -58,7 +58,7 @@ namespace DxfIO
   template <Entities::UnderlayKind KindV>
   inline constexpr auto Shapes<Entities::UnderlayOf<KindV>> = std::tuple{
       Entities::Part<Entities::UnderlayOf<KindV>>,
-      Fields::Picture{.Member = &Entities::UnderlayOf<KindV>::Picture},
+      Fields::Picture{.Member = &Entities::UnderlayOf<KindV>::Graphics},
       Fields::Part{
           .Member = &Entities::UnderlayOf<KindV>::Data,
           .Fields = Shapes<Entities::UnderlayData>,

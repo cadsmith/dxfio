@@ -64,9 +64,9 @@ namespace DxfIO::Audit
   struct DXFIO_API Report
   {
     std::vector<Finding> Findings{};
-    [[nodiscard]] auto Clean() const -> bool;
-    [[nodiscard]] auto Errors() const -> std::size_t;
-    [[nodiscard]] auto Warnings() const -> std::size_t;
+    [[nodiscard]] auto IsClean() const noexcept -> bool;
+    [[nodiscard]] auto Errors() const noexcept -> std::size_t;
+    [[nodiscard]] auto Warnings() const noexcept -> std::size_t;
   };
   [[nodiscard]] DXFIO_API auto Check(const Drawing &drawing) -> Report;
   DXFIO_API auto Repair(Drawing &drawing) -> Report;
@@ -92,48 +92,19 @@ namespace DxfIO
     auto operator==(const Base &) const -> bool = default;
   };
 }
-== dxfio/blocks/block.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/entities/record.hpp"
-#include "dxfio/vector.hpp"
-#include <string>
-namespace DxfIO::Blocks
-{
-  struct DXFIO_API Block
-  {
-    Entities::Record Record{};
-    std::string Name{};
-    int Flags{};
-    Vector Origin{};
-    std::string Path{};
-    std::string Description{};
-    auto operator==(const Block &) const -> bool = default;
-  };
-}
 == dxfio/blocks/definition.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/block.hpp"
-#include "dxfio/blocks/endblk.hpp"
+#include "dxfio/entities/block.hpp"
+#include "dxfio/entities/endblk.hpp"
 #include "dxfio/entity.hpp"
 namespace DxfIO::Blocks
 {
   struct DXFIO_API Definition
   {
-    Blocks::Block Block{};
+    DxfIO::Entities::Block Block{};
     DxfIO::Entities::List Entities{};
-    Blocks::EndBlk EndBlk{};
+    DxfIO::Entities::EndBlk EndBlk{};
     auto operator==(const Definition &) const -> bool = default;
-  };
-}
-== dxfio/blocks/endblk.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/entities/record.hpp"
-namespace DxfIO::Blocks
-{
-  struct DXFIO_API EndBlk
-  {
-    Entities::Record Record{};
-    auto operator==(const EndBlk &) const -> bool = default;
   };
 }
 == dxfio/boxed.hpp
@@ -320,7 +291,7 @@ namespace DxfIO
     std::vector<Blocks::Definition> Blocks{};
     DxfIO::Entities::List Entities{};
     std::vector<Object> Objects{};
-    std::vector<Section> Sections{};
+    std::vector<Section> Kept{};
     auto operator==(const Drawing &) const -> bool = default;
   };
   [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
@@ -336,7 +307,6 @@ namespace DxfIO
 #include "dxfio/drawing.hpp"
 #include "dxfio/edit/add.hpp"
 #include "dxfio/edit/handles.hpp"
-#include "dxfio/edit/space.hpp"
 #include "dxfio/flags.hpp"
 #include "dxfio/geometry/coordinates.hpp"
 #include "dxfio/geometry/transform.hpp"
@@ -345,16 +315,17 @@ namespace DxfIO
 #include "dxfio/lineweight.hpp"
 #include "dxfio/load.hpp"
 #include "dxfio/save.hpp"
+#include "dxfio/space.hpp"
 #include "dxfio/tables/face.hpp"
 #include "dxfio/version.hpp"
 #include "dxfio/view.hpp"
 == dxfio/edit/add.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/drawing.hpp"
-#include "dxfio/edit/space.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/handle.hpp"
+#include "dxfio/space.hpp"
 #include <expected>
 #include <string_view>
 namespace DxfIO::Edit
@@ -382,17 +353,7 @@ namespace DxfIO::Edit
 #include <expected>
 namespace DxfIO::Edit
 {
-  [[nodiscard]] DXFIO_API auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
-}
-== dxfio/edit/space.hpp
-#include <cstdint>
-namespace DxfIO::Edit
-{
-  enum class Space : std::uint8_t
-  {
-    Model,
-    Paper,
-  };
+  [[nodiscard]] DXFIO_API auto MakeHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
 }
 == dxfio/entities/arc.hpp
 #include "dxfio/api.hpp"
@@ -453,6 +414,24 @@ namespace DxfIO::Entities
     VerticalAlignment Vertical{};
     bool Locked{};
     auto operator==(const Attrib &) const -> bool = default;
+  };
+}
+== dxfio/entities/block.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/entities/record.hpp"
+#include "dxfio/vector.hpp"
+#include <string>
+namespace DxfIO::Entities
+{
+  struct DXFIO_API Block
+  {
+    Entities::Record Record{};
+    std::string Name{};
+    int Flags{};
+    Vector Origin{};
+    std::string Path{};
+    std::string Description{};
+    auto operator==(const Block &) const -> bool = default;
   };
 }
 == dxfio/entities/circle.hpp
@@ -563,7 +542,7 @@ namespace DxfIO::Entities
   struct DXFIO_API ArcDimension
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::ArcDimensionData> Data{};
     auto operator==(const ArcDimension &) const -> bool = default;
   };
@@ -579,7 +558,7 @@ namespace DxfIO::Entities
   struct DXFIO_API LargeRadialDimension
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::LargeRadialDimensionData> Data{};
     auto operator==(const LargeRadialDimension &) const -> bool = default;
   };
@@ -633,6 +612,17 @@ namespace DxfIO::Entities
     double Start{};
     double End{Turn};
     auto operator==(const Ellipse &) const -> bool = default;
+  };
+}
+== dxfio/entities/endblk.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/entities/record.hpp"
+namespace DxfIO::Entities
+{
+  struct DXFIO_API EndBlk
+  {
+    Entities::Record Record{};
+    auto operator==(const EndBlk &) const -> bool = default;
   };
 }
 == dxfio/entities/face.hpp
@@ -829,7 +819,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Helix
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Curve> Curve{};
     Entities::HelixData Data{};
     auto operator==(const Helix &) const -> bool = default;
@@ -979,7 +969,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Light
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::LightData> Data{};
     auto operator==(const Light &) const -> bool = default;
   };
@@ -1062,7 +1052,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Mesh
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::MeshData> Data{};
     auto operator==(const Mesh &) const -> bool = default;
   };
@@ -1136,21 +1126,21 @@ namespace DxfIO::Entities
   struct DXFIO_API Region
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     auto operator==(const Region &) const -> bool = default;
   };
   struct DXFIO_API Body
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     auto operator==(const Body &) const -> bool = default;
   };
   struct DXFIO_API Solid3d
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     Handle History{};
     auto operator==(const Solid3d &) const -> bool = default;
@@ -1169,7 +1159,7 @@ namespace DxfIO::Entities
   struct SurfaceOf
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     int UIsolines{6};
     int VIsolines{6};
@@ -1413,7 +1403,7 @@ namespace DxfIO::Entities
   struct DXFIO_API MultiLeader
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<MultiLeaders::MLeader> MLeader{};
     auto operator==(const MultiLeader &) const -> bool = default;
   };
@@ -1550,14 +1540,14 @@ namespace DxfIO::Entities
   struct DXFIO_API Image
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Raster> Raster{};
     auto operator==(const Image &) const -> bool = default;
   };
   struct DXFIO_API Wipeout
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Raster> Raster{};
     auto operator==(const Wipeout &) const -> bool = default;
   };
@@ -1593,8 +1583,8 @@ namespace DxfIO::Entities
     Symbol Layer{"0"};
     Symbol Linetype{"ByLayer"};
     Handle Material{};
-    Handle Style{};
-    double Scale{1};
+    Handle Plotstyle{};
+    double LinetypeScale{1};
     std::optional<std::string> Book{};
     std::optional<int> Rgb{};
     std::optional<int> Transparency{};
@@ -1602,7 +1592,7 @@ namespace DxfIO::Entities
     DxfIO::Lineweight Lineweight{DxfIO::Lineweight::ByLayer};
     int Shadow{};
     bool Paper{};
-    bool Hidden{};
+    bool Invisible{};
     auto operator==(const Record &) const -> bool = default;
   };
 }
@@ -1637,7 +1627,7 @@ namespace DxfIO::Entities
   struct DXFIO_API SectionObject
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::SectionObjectData> Data{};
     auto operator==(const SectionObject &) const -> bool = default;
   };
@@ -1750,7 +1740,7 @@ namespace DxfIO::Entities
   struct DXFIO_API AcadTable
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Symbol Block{""};
     Vector Position{};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
@@ -1843,7 +1833,7 @@ namespace DxfIO::Entities
   struct UnderlayOf
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::UnderlayData> Data{};
     auto operator==(const UnderlayOf &) const -> bool = default;
   };
@@ -2102,7 +2092,7 @@ namespace DxfIO
     constexpr explicit operator bool() const { return Value != 0; }
     constexpr auto operator<=>(const Handle &) const = default;
   };
-  [[nodiscard]] DXFIO_API auto Hex(Handle one) -> std::string;
+  [[nodiscard]] DXFIO_API auto HexOf(Handle handle) -> std::string;
   [[nodiscard]] DXFIO_API auto ParseHandle(std::string_view text) -> std::optional<Handle>;
 }
 template <>
@@ -2141,7 +2131,7 @@ namespace DxfIO
   {
   public:
     explicit Index(const Drawing &drawing);
-    [[nodiscard]] auto Drawn() const -> const Drawing &;
+    [[nodiscard]] auto Source() const -> const Drawing &;
     [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
     [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
   private:
@@ -2253,7 +2243,6 @@ namespace DxfIO
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/objects/datatable.hpp"
-#include "dxfio/objects/defaulted.hpp"
 #include "dxfio/objects/dictionary.hpp"
 #include "dxfio/objects/dictionaryvar.hpp"
 #include "dxfio/objects/group.hpp"
@@ -2277,14 +2266,13 @@ namespace DxfIO
 namespace DxfIO
 {
   using Object =
-      std::variant<Objects::Dictionary, Objects::DictionaryWithDefault, Objects::Group,
-                   Objects::ImageDef, Objects::ImageDefReactor, Objects::RasterVariables,
-                   Objects::Layout, Objects::Material, Objects::MLeaderStyle, Objects::MLineStyle,
-                   Objects::Placeholder, Objects::Scale, Objects::SortEntsTable,
-                   Objects::TableStyle, Objects::DictionaryVar, Objects::XRecord,
-                   Objects::PlotSettings, Objects::WipeoutVariables, Objects::PdfDefinition,
-                   Objects::DwfDefinition, Objects::DgnDefinition, Objects::VisualStyle,
-                   Objects::DataTable, Objects::AcDbDataTable, Unknown>;
+      std::variant<Objects::Dictionary, Objects::Group, Objects::ImageDef, Objects::ImageDefReactor,
+                   Objects::RasterVariables, Objects::Layout, Objects::Material,
+                   Objects::MLeaderStyle, Objects::MLineStyle, Objects::Placeholder, Objects::Scale,
+                   Objects::SortEntsTable, Objects::TableStyle, Objects::DictionaryVar,
+                   Objects::XRecord, Objects::PlotSettings, Objects::WipeoutVariables,
+                   Objects::PdfDefinition, Objects::DwfDefinition, Objects::DgnDefinition,
+                   Objects::VisualStyle, Objects::DataTable, Objects::AcDbDataTable, Unknown>;
   [[nodiscard]] DXFIO_API auto TypeOf(const Object &one) -> std::string_view;
   [[nodiscard]] DXFIO_API auto BaseOf(const Object &one) -> const Base &;
   [[nodiscard]] DXFIO_API auto BaseOf(Object &one) -> Base &;
@@ -2296,7 +2284,7 @@ namespace DxfIO
 #include <cstdint>
 #include <string>
 #include <vector>
-namespace DxfIO::Objects
+namespace DxfIO::Objects::DataTables
 {
   struct DXFIO_API Column
   {
@@ -2305,6 +2293,9 @@ namespace DxfIO::Objects
     std::vector<DxfIO::Tag> Cells{};
     auto operator==(const Column &) const -> bool = default;
   };
+}
+namespace DxfIO::Objects
+{
   enum class Edition : std::uint8_t
   {
     Early,
@@ -2317,29 +2308,17 @@ namespace DxfIO::Objects
     int Version{2};
     int Rows{};
     std::string Name{};
-    std::vector<Column> Columns{};
+    std::vector<DataTables::Column> Columns{};
     auto operator==(const DataTableOf &) const -> bool = default;
   };
   using DataTable = DataTableOf<Edition::Current>;
   using AcDbDataTable = DataTableOf<Edition::Early>;
 }
-== dxfio/objects/defaulted.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/handle.hpp"
-#include "dxfio/objects/dictionary.hpp"
-namespace DxfIO::Objects
-{
-  struct DXFIO_API DictionaryWithDefault
-  {
-    Objects::Dictionary Dictionary{};
-    Handle Fallback{};
-    auto operator==(const DictionaryWithDefault &) const -> bool = default;
-  };
-}
 == dxfio/objects/dictionary.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/handle.hpp"
+#include <optional>
 #include <string>
 #include <vector>
 namespace DxfIO::Objects
@@ -2357,6 +2336,7 @@ namespace DxfIO::Objects
     bool HardOwner{};
     int Cloning{1};
     std::vector<Objects::Entry> Entries{};
+    std::optional<Handle> Default{};
     auto operator==(const Dictionary &) const -> bool = default;
   };
 }
@@ -2463,7 +2443,7 @@ namespace DxfIO::Objects
 #include "dxfio/matrix.hpp"
 #include <optional>
 #include <string>
-namespace DxfIO::Objects
+namespace DxfIO::Objects::Materials
 {
   struct DXFIO_API MaterialColor
   {
@@ -2501,18 +2481,21 @@ namespace DxfIO::Objects
     };
     auto operator==(const Maps &) const -> bool = default;
   };
+}
+namespace DxfIO::Objects
+{
   struct DXFIO_API Material
   {
     DxfIO::Base Base{};
     std::string Name{};
     std::string Description{};
-    MaterialColor Ambient{};
-    MaterialColor Diffuse{};
+    Materials::MaterialColor Ambient{};
+    Materials::MaterialColor Diffuse{};
     double Gloss{0.5};
-    MaterialColor Specular{};
+    Materials::MaterialColor Specular{};
     double Opacity{1};
     double Refraction{1};
-    Boxed<Objects::Maps> Maps{};
+    Boxed<Materials::Maps> Maps{};
     double Translucence{};
     double Illumination{};
     double Reflectivity{};
@@ -2916,6 +2899,16 @@ namespace DxfIO
     auto operator==(const Section &) const -> bool = default;
   };
 }
+== dxfio/space.hpp
+#include <cstdint>
+namespace DxfIO
+{
+  enum class Space : std::uint8_t
+  {
+    Model,
+    Paper,
+  };
+}
 == dxfio/symbol.hpp
 #include "dxfio/api.hpp"
 #include <cstddef>
@@ -2932,9 +2925,9 @@ namespace DxfIO
     explicit Symbol(std::string_view text);
     explicit Symbol(const std::string &text);
     explicit Symbol(const char *text);
-    [[nodiscard]] auto View() const -> std::string_view;
-    [[nodiscard]] auto Str() const -> const std::string &;
-    [[nodiscard]] auto Empty() const -> bool;
+    [[nodiscard]] auto View() const noexcept -> std::string_view;
+    [[nodiscard]] auto Str() const noexcept -> const std::string &;
+    [[nodiscard]] auto IsEmpty() const noexcept -> bool;
     auto operator==(const Symbol &) const -> bool = default;
     auto operator==(std::string_view text) const -> bool;
   private:
@@ -3001,8 +2994,22 @@ namespace DxfIO::Tables
     std::vector<Handle> Inserts{};
     int Units{};
     bool Explodable{true};
-    bool Uniform{};
+    int Scaling{};
     auto operator==(const BlockRecord &) const -> bool = default;
+  };
+}
+== dxfio/tables/control.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/base.hpp"
+#include <string>
+namespace DxfIO::Tables
+{
+  struct DXFIO_API Control
+  {
+    DxfIO::Base Base{};
+    std::string Name{};
+    int Count{};
+    auto operator==(const Control &) const -> bool = default;
   };
 }
 == dxfio/tables/dimstyle.hpp
@@ -3115,20 +3122,6 @@ namespace DxfIO::Tables
   };
   [[nodiscard]] DXFIO_API auto Named(const Style &one) -> std::optional<Face>;
 }
-== dxfio/tables/head.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/base.hpp"
-#include <string>
-namespace DxfIO::Tables
-{
-  struct DXFIO_API Head
-  {
-    DxfIO::Base Base{};
-    std::string Name{};
-    int Count{};
-    auto operator==(const Head &) const -> bool = default;
-  };
-}
 == dxfio/tables/layer.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/colors.hpp"
@@ -3220,14 +3213,14 @@ namespace DxfIO::Tables
   };
 }
 == dxfio/tables/table.hpp
-#include "dxfio/tables/head.hpp"
+#include "dxfio/tables/control.hpp"
 #include <vector>
 namespace DxfIO::Tables
 {
   template <class RecordT>
   struct Table
   {
-    Tables::Head Head{};
+    Tables::Control Control{};
     std::vector<RecordT> Records{};
     auto operator==(const Table &) const -> bool = default;
   };
@@ -3430,7 +3423,7 @@ namespace DxfIO
 #include <vector>
 namespace DxfIO::View
 {
-  [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
+  [[nodiscard]] DXFIO_API auto Matches(std::string_view one, std::string_view other) -> bool;
   [[nodiscard]] DXFIO_API auto Block(Drawing &drawing, std::string_view name)
       -> Blocks::Definition *;
   [[nodiscard]] DXFIO_API auto Block(const Drawing &drawing, std::string_view name)
@@ -3440,7 +3433,7 @@ namespace DxfIO::View
   [[nodiscard]] auto Record(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
   {
     const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
+                                            { return Matches(record.Record.Name, name); });
     return found == table.Records.end() ? nullptr : &*found;
   }
   template <class RecordT>
@@ -3449,7 +3442,7 @@ namespace DxfIO::View
       -> const RecordT *
   {
     const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
+                                            { return Matches(record.Record.Name, name); });
     return found == table.Records.end() ? nullptr : &*found;
   }
   template <class RecordT, class DrawingT>

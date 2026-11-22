@@ -61,7 +61,7 @@ namespace DxfIO
     template <class KindT>
     inline constexpr auto Modeled = std::tuple{
         Part<KindT>,
-        Fields::Picture{.Member = &KindT::Picture},
+        Fields::Picture{.Member = &KindT::Graphics},
         Fields::Part{
             .Member = &KindT::Geometry,
             .Fields = Shapes<Geometry>,

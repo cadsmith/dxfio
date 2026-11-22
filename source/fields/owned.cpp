@@ -124,7 +124,7 @@ namespace DxfIO::Fields
             },
             [&to, &one](Handle named) -> std::expected<void, Failure>
             {
-              const std::string written = Hex(named);
+              const std::string written = HexOf(named);
               return to.To->Put(Tags::Tag{
                   .Code  = one.Code,
                   .Value = std::string_view{written},

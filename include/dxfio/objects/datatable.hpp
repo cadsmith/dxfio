@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace DxfIO::Objects
+namespace DxfIO::Objects::DataTables
 {
   /**
    *  One column of a data table, its cells kept as the groups they came in.
@@ -31,7 +31,10 @@ namespace DxfIO::Objects
 
     auto operator==(const Column &) const -> bool = default;
   };
+} // namespace DxfIO::Objects::DataTables
 
+namespace DxfIO::Objects
+{
   /**
    *  Which name a data table goes by: it is ACDBDATATABLE in R2000 and DATATABLE after it.
    */
@@ -73,7 +76,7 @@ namespace DxfIO::Objects
     /**
      *  The columns, left to right; their count is group 90.
      */
-    std::vector<Column> Columns{};
+    std::vector<DataTables::Column> Columns{};
 
     auto operator==(const DataTableOf &) const -> bool = default;
   };
