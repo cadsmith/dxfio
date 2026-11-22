@@ -104,6 +104,10 @@ namespace DxfIO::Audit
       Listed(drawing.AppId, out, "record");
       Listed(drawing.DimStyle, out, "record");
       Listed(drawing.BlockRecord, out, Recorded);
+      for (auto &one : drawing.Loose)
+      {
+        Listed(one, out, "record");
+      }
       for (auto &one : drawing.Blocks)
       {
         out.push_back(Holder<DrawingT>{.Base = &one.Block.Record.Base, .Kind = "block"});

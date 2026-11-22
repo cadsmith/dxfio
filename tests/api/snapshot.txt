@@ -170,14 +170,7 @@ namespace DxfIO
     auto operator*() const -> const ValueT & { return m_Value ? *m_Value : Default(); }
     auto operator->() -> ValueT * { return &Held(); }
     auto operator->() const -> const ValueT * { return &**this; }
-    auto operator==(const Boxed &other) const -> bool
-    {
-      if (!m_Value || !other.m_Value)
-      {
-        return !m_Value && !other.m_Value;
-      }
-      return *m_Value == *other.m_Value;
-    }
+    auto operator==(const Boxed &other) const -> bool { return **this == *other; }
   private:
     static auto Copied(const Boxed &other) -> std::unique_ptr<ValueT>
     {
