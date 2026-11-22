@@ -155,7 +155,7 @@ namespace DxfIO::Entities
      */
     bool DefaultLighting{true};
     /**
-     *  The default lighting: 1 one distant light, 2 two distant lights. Group 282, from R2007.
+     *  The default lighting: 0 one distant light, 1 two distant lights. Group 282, from R2007.
      */
     int DefaultLightingType{1};
     /**

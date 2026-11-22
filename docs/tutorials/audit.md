@@ -35,7 +35,7 @@ DxfIO::Edit::Add(drawing, door);
 
 ## Check [#check]
 
-`Audit::Check` leaves the drawing as it is and lists its findings in the order the checks ran: handles, required records, references, meshes, SEQENDs. An error is a finding AutoCAD would refuse or recover the drawing for; with warnings alone, it opens the drawing as it is. `Clean` is false while an error is left unfixed.
+`Audit::Check` leaves the drawing as it is and lists its findings in the order the checks ran: `$HANDSEED`, handles, names, required records, applications, references, lineweights, meshes, ellipses, leaders, SEQENDs, attribute definitions, group codes, classes. An error is a finding AutoCAD would refuse or recover the drawing for; with warnings alone, it opens the drawing as it is. `Clean` is false while an error is left unfixed.
 
 ```cpp
 const auto listed = [](const DxfIO::Audit::Report &report)

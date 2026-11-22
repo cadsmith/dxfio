@@ -39,7 +39,7 @@ namespace DxfIO::Tables
      */
     double Scale{1};
     /**
-     *  The rotation of the shape or text. Group 50, from R13.
+     *  The rotation of the shape or text in radians. Group 50, from R13.
      */
     double Rotation{};
     /**

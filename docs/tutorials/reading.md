@@ -26,7 +26,7 @@ const DxfIO::Drawing &drawing = loaded->Drawing;
 
 ## The release [#release]
 
-`Header` holds the header variables in the order the file gave them, each a name and the groups of its value. A group's `Value` is a variant of the type its code calls for: `$ACADVER` has one group 1, the release's code as text. `Release` turns the code into a `Version`, and `Name` gives its short name.
+`Header` holds the header variables in the order the file gave them, each a name and the groups of its value. A group's `Value` is a variant of the type its code calls for: `$ACADVER` has one group 1, the release's code as text. `ReleaseOf` turns the code into a `Version`, and `NameOf` gives its short name.
 
 ```cpp
 for (const DxfIO::Header::Variable &variable : drawing.Header)

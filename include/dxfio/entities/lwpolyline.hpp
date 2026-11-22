@@ -18,7 +18,7 @@ namespace DxfIO::Entities
    */
   enum class LwPolylineFlags : std::uint8_t
   {
-    Closed = 1,
+    Closed = 1, /**< Its last vertex joined to its first. */
     /**
      *  The linetype drawn continuously around the vertices.
      */

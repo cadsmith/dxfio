@@ -15,7 +15,6 @@ namespace DxfIO::Entities
 {
   /**
    *  What every entity carries in its AcDbEntity subclass: its layer, linetype, color and the rest.
-   *  The members stand widest first, so the record holds no padding.
    */
   struct DXFIO_API Record
   {

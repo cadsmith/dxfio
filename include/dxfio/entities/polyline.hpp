@@ -18,18 +18,18 @@ namespace DxfIO::Entities
   enum class PolylineFlags : std::uint8_t
   {
     /**
-     *  A mesh closed along M.
+     *  A polyline closed, its last vertex joined to its first; a polygon mesh closed along M.
      */
     Closed      =  1,
-    CurveFit    =  2,
-    SplineFit   =  4,
-    Polyline3d  =  8,
-    PolygonMesh = 16,
+    CurveFit    =  2, /**< Curve-fit vertices added.  */
+    SplineFit   =  4, /**< Spline-fit vertices added. */
+    Polyline3d  =  8, /**< A 3D polyline.             */
+    PolygonMesh = 16, /**< A polygon mesh.            */
     /**
      *  A polygon mesh closed along N.
      */
     ClosedN      = 32,
-    PolyfaceMesh = 64,
+    PolyfaceMesh = 64, /**< A polyface mesh. */
     /**
      *  The linetype drawn continuously around the vertices.
      */

@@ -14,10 +14,10 @@ namespace DxfIO
    */
   enum class ColorMethod : std::uint8_t
   {
-    ByLayer = 0xC0,
-    ByBlock = 0xC1,
-    Rgb     = 0xC2,
-    Index   = 0xC3, /**< An entry of the AutoCAD palette. */
+    ByLayer = 0xC0, /**< The layer's color.                         */
+    ByBlock = 0xC1, /**< The color of the insert drawing the block. */
+    Rgb     = 0xC2, /**< A true color in the low 24 bits.           */
+    Index   = 0xC3, /**< An entry of the AutoCAD palette.           */
   };
 
   /**
@@ -25,8 +25,8 @@ namespace DxfIO
    */
   enum class TransparencyMethod : std::uint8_t
   {
-    ByLayer = 0,
-    ByBlock = 1,
+    ByLayer = 0, /**< The layer's transparency.                          */
+    ByBlock = 1, /**< The transparency of the insert drawing the block.  */
     Alpha   = 2, /**< The low byte holds the alpha: 0 clear, 255 opaque. */
   };
 

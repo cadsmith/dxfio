@@ -29,8 +29,14 @@ namespace DxfIO
      *  The true color as 0xRRGGBB, when the color has one.
      */
     std::optional<int> Rgb{};
-    Symbol             Linetype{"Continuous"};
-    DxfIO::Lineweight  Lineweight{DxfIO::Lineweight::Default};
+    /**
+     *  The name of the linetype it is drawn with, never ByLayer or ByBlock.
+     */
+    Symbol Linetype{"Continuous"};
+    /**
+     *  The lineweight it is drawn with, never ByLayer or ByBlock.
+     */
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::Default};
 
     auto operator==(const Appearance &) const -> bool = default;
   };

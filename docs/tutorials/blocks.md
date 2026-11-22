@@ -6,7 +6,7 @@ A block defined once with its own entities and attribute definitions, then place
 
 ## A block [#block]
 
-`Edit::AddBlock` makes an empty block, with its block record where the drawing has block records. Entities added under the block's name go into it, in the block's own coordinates: an insert puts the block's base point, `Begin.Origin`, at its own position.
+`Edit::AddBlock` makes an empty block, with its block record where the drawing has block records. Entities added under the block's name go into it, in the block's own coordinates: an insert puts the block's base point, `Block.Origin`, at its own position.
 
 ```cpp
 DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
@@ -48,13 +48,14 @@ DxfIO::Edit::Add(drawing, size, "Valve");
 
 ## The block's flags [#flags]
 
-Bit 2 of `Begin.Flags` says the block has attribute definitions that are not constant. `AddBlock` leaves the flags at 0, so set it once the block has its ATTDEFs.
+Bit 2 of `Block.Flags` says the block has attribute definitions that are not constant. `AddBlock` leaves the flags at 0, and `Edit::Add` sets that bit when it adds such an ATTDEF to the block, so both ATTDEFs above have set it.
 
 ```cpp
-if (DxfIO::Blocks::Definition *valve = DxfIO::View::Block(drawing, "Valve"))
-{
-  valve->Block.Flags = 2;
-}
+std::println("flags {}", DxfIO::View::Block(drawing, "Valve")->Block.Flags);
+```
+
+```text title="Output"
+flags 2
 ```
 
 ## Inserts [#inserts]

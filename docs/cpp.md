@@ -18,9 +18,13 @@
   several words into a few letters found nowhere else is spelled out:
   `ACDBDICTIONARYWDFLT` is `DictionaryWithDefault`. The names are the ones a
   DXF file and AutoCAD's reference use, and no spelled-out form holds without
-  an exception: `Viewport` is the VIEWPORT entity, not a VPORT.
+  an exception: `Viewport` is the VIEWPORT entity, not a VPORT. One more:
+  `AcDbDataTable` keeps its prefix, as R2000's ACDBDATATABLE and the later
+  DATATABLE are two layouts of one kind, and `DataTable` names the other.
 - Any other public type is named in whole words for what it holds, never with
-  a name a kind takes: `Definition`, `Section`, `Tag`, `SaveOptions`.
+  a name a kind takes: `Definition`, `Section`, `Tag`, `SaveOptions`. A part
+  nested in the namespace of its type may share a kind's name when the part
+  is that shape: `Entities::Edges::Line` is a hatch edge drawn as a line.
 - A member for a group the DXF reference leaves unnamed is `Unknown` and its
   place among the record's unnamed groups, counted from 1 in the file's order:
   `Unknown1`, `Unknown2`. Its note opens with "Unnamed in the DXF reference"
