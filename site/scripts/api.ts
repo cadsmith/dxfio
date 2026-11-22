@@ -69,13 +69,21 @@ const unblocked = (lines: string[]): string =>
       .join(' '),
   )
 
-// The `/** */` block that ends above a declaration, only blank or `//` lines, as a NOLINT, between them; empty without
-// one, and for a `/**< */` note, which belongs to the line it ends.
+// A run of `///` lines' text, joined.
+const slashed = (lines: string[]): string => squeeze(lines.map((line) => line.replace(/^\/\/\/\s?/, '')).join(' '))
+
+// The `/** */` block, or the run of `///` lines, that ends above a declaration, only blank or `//` lines, as a NOLINT,
+// between them; empty without one, and for a `/**< */` note, which belongs to the line it ends.
 const docBefore = (text: string, at: number): string => {
   const lines = text.slice(0, text.lastIndexOf('\n', at - 1) + 1).split('\n')
   lines.pop()
   const between = (line: string) => line === '' || (line.startsWith('//') && !line.startsWith('///'))
   while (lines.length > 0 && between(lines.at(-1)?.trim() ?? '')) lines.pop()
+  if ((lines.at(-1)?.trim() ?? '').startsWith('///')) {
+    const run: string[] = []
+    while ((lines.at(-1)?.trim() ?? '').startsWith('///')) run.unshift(lines.pop()?.trim() ?? '')
+    return slashed(run)
+  }
   if (!(lines.at(-1)?.trim() ?? '').endsWith('*/')) return ''
   const block: string[] = []
   while (lines.length > 0) {
@@ -227,6 +235,10 @@ const lined = (body: string): Line[] => {
       }
       continue
     }
+    if (trimmed.startsWith('///')) {
+      out.push({ doc: slashed([trimmed]) })
+      continue
+    }
     if (trimmed.startsWith('//')) continue
     const at = whole.indexOf('/**')
     if (at < 0) {
@@ -359,10 +371,11 @@ const headers: Header[] = walk(include)
       })
     }
     const outside = (at: number) => !spans.some(([from, to]) => at > from && at < to)
-    const enums = [...text.matchAll(/enum class (\w+)\s*:\s*[\w:]+\s*\{([^}]*)\}/g)].map((one) => ({
+    // An enum's body runs to the brace that closes it, a brace inside a note left alone.
+    const enums = [...text.matchAll(/enum class (\w+)\s*:\s*[\w:]+\s*\{/g)].map((one) => ({
       name: filled(one, 1),
       doc: docBefore(text, one.index),
-      values: statements(enumerated(filled(one, 2)))
+      values: statements(enumerated(text.slice(one.index + one[0].length, closing(text, one.index + one[0].length - 1))))
         .map((value) => {
           const code = value.code.replace(/;$/, '')
           const equals = code.indexOf('=')
