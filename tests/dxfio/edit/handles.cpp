@@ -39,8 +39,8 @@ namespace DxfIO::Edit
   {
     Drawing      drawing = Create();
     const Handle seed    = Seed(drawing);
-    const auto   first   = NewHandle(drawing);
-    const auto   second  = NewHandle(drawing);
+    const auto   first   = MakeHandle(drawing);
+    const auto   second  = MakeHandle(drawing);
     REQUIRE(first);
     REQUIRE(second);
     CHECK(*first        == seed);
@@ -52,10 +52,10 @@ namespace DxfIO::Edit
   {
     Drawing drawing{};
     drawing.Entities.emplace_back(Lined(Handle{.Value = 0x40}));
-    CHECK(NewHandle(drawing)      == Handle{.Value = 0x41});
+    CHECK(MakeHandle(drawing)     == Handle{.Value = 0x41});
     REQUIRE(drawing.Header.size() == 1);
     CHECK(Seeding(drawing).Values == std::vector{Tag{.Code = 5, .Value = Handle{.Value = 0x42}}});
-    CHECK(NewHandle(drawing)      == Handle{.Value = 0x42});
+    CHECK(MakeHandle(drawing)     == Handle{.Value = 0x42});
   }
 
   TEST_CASE("edit: a drawing whose $HANDSEED is gone gives a new handle each time")
@@ -63,8 +63,8 @@ namespace DxfIO::Edit
     Drawing drawing = Create(Version::R2018);
     std::erase_if(drawing.Header,
                   [](const Header::Variable &one) -> bool { return one.Name == "$HANDSEED"; });
-    const auto first  = NewHandle(drawing);
-    const auto second = NewHandle(drawing);
+    const auto first  = MakeHandle(drawing);
+    const auto second = MakeHandle(drawing);
     REQUIRE(first);
     REQUIRE(second);
     CHECK(second->Value == first->Value + 1);
@@ -77,10 +77,10 @@ namespace DxfIO::Edit
     Drawing drawing{};
     drawing.Entities.emplace_back(Lined(Handle{.Value = 0x40}));
     drawing.Header.push_back(Header::Variable{.Name = "$HANDSEED", .Values = {}});
-    CHECK(NewHandle(drawing) == Handle{.Value = 0x41});
-    CHECK(Seed(drawing)      == Handle{.Value = 0x42});
+    CHECK(MakeHandle(drawing) == Handle{.Value = 0x41});
+    CHECK(Seed(drawing)       == Handle{.Value = 0x42});
     drawing.Header.front().Values.front() = Tag{.Code = 5, .Value = std::string{"walls"}};
-    CHECK(NewHandle(drawing) == Handle{.Value = 0x41});
+    CHECK(MakeHandle(drawing) == Handle{.Value = 0x41});
     CHECK(std::get<Handle>(drawing.Header.front().Values.front().Value) == Handle{.Value = 0x42});
   }
 
@@ -88,12 +88,12 @@ namespace DxfIO::Edit
   {
     Drawing seeded                       = Create();
     Seeding(seeded).Values.front().Value = Handle{.Value = Last};
-    const auto none                      = NewHandle(seeded);
+    const auto none                      = MakeHandle(seeded);
     REQUIRE_FALSE(none);
     CHECK(none.error().What == "no handle left past the last one");
 
     Drawing full{};
     full.Entities.emplace_back(Lined(Handle{.Value = Last}));
-    CHECK_FALSE(NewHandle(full));
+    CHECK_FALSE(MakeHandle(full));
   }
 } // namespace DxfIO::Edit

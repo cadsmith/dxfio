@@ -80,7 +80,7 @@ namespace DxfIO::Empty
                          " 41\r\n1.0\r\n 50\r\n0.0\r\n 71\r\n     0\r\n"
                          " 42\r\n2.5\r\n  3\r\narial.ttf\r\n  4\r\n\r\n"
                          "1001\r\nACAD\r\n1000\r\nArial\r\n1071\r\n       34\r\n",
-                         Hex(style.Record.Base.Self), Hex(style.Record.Base.Owner)));
+                         HexOf(style.Record.Base.Self), HexOf(style.Record.Base.Owner)));
     const auto &iso = fresh.Drawing.DimStyle.Records.back();
     CHECK(Written(iso)
           == std::format("  0\r\nDIMSTYLE\r\n105\r\n{}\r\n330\r\n{}\r\n"
@@ -95,8 +95,8 @@ namespace DxfIO::Empty
                          "271\r\n     2\r\n272\r\n     2\r\n274\r\n     3\r\n"
                          "278\r\n    44\r\n283\r\n     0\r\n284\r\n     8\r\n"
                          "340\r\n{}\r\n",
-                         Hex(iso.Record.Base.Self), Hex(iso.Record.Base.Owner),
-                         Hex(fresh.Ids.Style)));
+                         HexOf(iso.Record.Base.Self), HexOf(iso.Record.Base.Owner),
+                         HexOf(fresh.Ids.Style)));
   }
 
   TEST_CASE("tables: a new drawing's records as AutoCAD writes them, from R2000")

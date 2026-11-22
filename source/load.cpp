@@ -223,7 +223,7 @@ namespace DxfIO
       into.Issues.push_back(Issue{
           .Code = IssueCode::Damaged,
           .What = std::format("$HANDSEED {} is not past the handles in use, raised to {}",
-                              Hex(*seed), Hex(past)),
+                              HexOf(*seed), HexOf(past)),
       });
       *seed = past;
     }

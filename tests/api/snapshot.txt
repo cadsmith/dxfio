@@ -64,9 +64,9 @@ namespace DxfIO::Audit
   struct DXFIO_API Report
   {
     std::vector<Finding> Findings{};
-    [[nodiscard]] auto Clean() const -> bool;
-    [[nodiscard]] auto Errors() const -> std::size_t;
-    [[nodiscard]] auto Warnings() const -> std::size_t;
+    [[nodiscard]] auto IsClean() const noexcept -> bool;
+    [[nodiscard]] auto Errors() const noexcept -> std::size_t;
+    [[nodiscard]] auto Warnings() const noexcept -> std::size_t;
   };
   [[nodiscard]] DXFIO_API auto Check(const Drawing &drawing) -> Report;
   DXFIO_API auto Repair(Drawing &drawing) -> Report;
@@ -382,7 +382,7 @@ namespace DxfIO::Edit
 #include <expected>
 namespace DxfIO::Edit
 {
-  [[nodiscard]] DXFIO_API auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto MakeHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
 }
 == dxfio/edit/space.hpp
 #include <cstdint>
@@ -2102,7 +2102,7 @@ namespace DxfIO
     constexpr explicit operator bool() const { return Value != 0; }
     constexpr auto operator<=>(const Handle &) const = default;
   };
-  [[nodiscard]] DXFIO_API auto Hex(Handle one) -> std::string;
+  [[nodiscard]] DXFIO_API auto HexOf(Handle handle) -> std::string;
   [[nodiscard]] DXFIO_API auto ParseHandle(std::string_view text) -> std::optional<Handle>;
 }
 template <>
@@ -2141,7 +2141,7 @@ namespace DxfIO
   {
   public:
     explicit Index(const Drawing &drawing);
-    [[nodiscard]] auto Drawn() const -> const Drawing &;
+    [[nodiscard]] auto Source() const -> const Drawing &;
     [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
     [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
   private:
@@ -2932,9 +2932,9 @@ namespace DxfIO
     explicit Symbol(std::string_view text);
     explicit Symbol(const std::string &text);
     explicit Symbol(const char *text);
-    [[nodiscard]] auto View() const -> std::string_view;
-    [[nodiscard]] auto Str() const -> const std::string &;
-    [[nodiscard]] auto Empty() const -> bool;
+    [[nodiscard]] auto View() const noexcept -> std::string_view;
+    [[nodiscard]] auto Str() const noexcept -> const std::string &;
+    [[nodiscard]] auto IsEmpty() const noexcept -> bool;
     auto operator==(const Symbol &) const -> bool = default;
     auto operator==(std::string_view text) const -> bool;
   private:
@@ -3430,7 +3430,7 @@ namespace DxfIO
 #include <vector>
 namespace DxfIO::View
 {
-  [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
+  [[nodiscard]] DXFIO_API auto Matches(std::string_view one, std::string_view other) -> bool;
   [[nodiscard]] DXFIO_API auto Block(Drawing &drawing, std::string_view name)
       -> Blocks::Definition *;
   [[nodiscard]] DXFIO_API auto Block(const Drawing &drawing, std::string_view name)
@@ -3440,7 +3440,7 @@ namespace DxfIO::View
   [[nodiscard]] auto Record(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
   {
     const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
+                                            { return Matches(record.Record.Name, name); });
     return found == table.Records.end() ? nullptr : &*found;
   }
   template <class RecordT>
@@ -3449,7 +3449,7 @@ namespace DxfIO::View
       -> const RecordT *
   {
     const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
+                                            { return Matches(record.Record.Name, name); });
     return found == table.Records.end() ? nullptr : &*found;
   }
   template <class RecordT, class DrawingT>

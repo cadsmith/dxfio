@@ -159,11 +159,11 @@ namespace DxfIO::Edit
 
   auto Add(Drawing &drawing, Entity one, std::string_view block) -> std::expected<Handle, Failure>
   {
-    if (View::Same(block, Model))
+    if (View::Matches(block, Model))
     {
       return Add(drawing, std::move(one), Space::Model);
     }
-    if (View::Same(block, Paper))
+    if (View::Matches(block, Paper))
     {
       return Add(drawing, std::move(one), Space::Paper);
     }

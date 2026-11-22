@@ -19,7 +19,7 @@ namespace DxfIO
       REQUIRE(loaded);
       const Drawing &drawing = loaded->Drawing;
       const Index    index{drawing};
-      CHECK(&index.Drawn() == &drawing);
+      CHECK(&index.Source() == &drawing);
       for (const Entity &one : drawing.Entities)
       {
         CHECK(index.FindEntity(BaseOf(one).Self) == FindEntity(drawing, BaseOf(one).Self));
@@ -47,7 +47,7 @@ namespace DxfIO
     const auto held = Edit::Add(drawing, Entities::Circle{}, "Door");
     REQUIRE(held);
     const Index index{drawing};
-    CHECK(&index.Drawn() == &drawing);
+    CHECK(&index.Source() == &drawing);
     const Entity *circle = index.FindEntity(*held);
     REQUIRE(circle != nullptr);
     CHECK(circle == FindEntity(drawing, *held));

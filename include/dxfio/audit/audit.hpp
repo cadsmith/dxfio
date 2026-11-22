@@ -68,17 +68,17 @@ namespace DxfIO::Audit
     /**
      *  Whether no error is left unfixed: AutoCAD would open the drawing without recovering it.
      */
-    [[nodiscard]] auto Clean() const -> bool;
+    [[nodiscard]] auto IsClean() const noexcept -> bool;
 
     /**
      *  The number of findings that are errors, fixed or not.
      */
-    [[nodiscard]] auto Errors() const -> std::size_t;
+    [[nodiscard]] auto Errors() const noexcept -> std::size_t;
 
     /**
      *  The number of findings that are warnings, fixed or not.
      */
-    [[nodiscard]] auto Warnings() const -> std::size_t;
+    [[nodiscard]] auto Warnings() const noexcept -> std::size_t;
   };
 
   /**

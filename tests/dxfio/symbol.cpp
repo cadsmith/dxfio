@@ -23,7 +23,7 @@ namespace DxfIO
 
   TEST_CASE("symbol: an empty name, read back as text")
   {
-    CHECK(Symbol{}.Empty());
+    CHECK(Symbol{}.IsEmpty());
     CHECK(Symbol{""}            == Symbol{});
     CHECK(Symbol{"0"}.View()    == "0");
     CHECK(Symbol{"walls"}       == std::string_view{"walls"});

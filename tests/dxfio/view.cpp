@@ -11,10 +11,10 @@ namespace DxfIO::View
 {
   TEST_CASE("view: names compare without case")
   {
-    CHECK(Same("Walls", "WALLS"));
-    CHECK(Same("", ""));
-    CHECK_FALSE(Same("Walls", "Wall"));
-    CHECK_FALSE(Same("Walls", "Halls"));
+    CHECK(Matches("Walls", "WALLS"));
+    CHECK(Matches("", ""));
+    CHECK_FALSE(Matches("Walls", "Wall"));
+    CHECK_FALSE(Matches("Walls", "Halls"));
   }
 
   TEST_CASE("view: a block and a table record are found by name, without case")

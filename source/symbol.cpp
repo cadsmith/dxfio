@@ -79,17 +79,17 @@ namespace DxfIO
 
   Symbol::Symbol(const char *text) : m_Text(Interned(text)) {}
 
-  auto Symbol::View() const -> std::string_view
+  auto Symbol::View() const noexcept -> std::string_view
   {
     return *m_Text;
   }
 
-  auto Symbol::Str() const -> const std::string &
+  auto Symbol::Str() const noexcept -> const std::string &
   {
     return *m_Text;
   }
 
-  auto Symbol::Empty() const -> bool
+  auto Symbol::IsEmpty() const noexcept -> bool
   {
     return m_Text->empty();
   }

@@ -51,17 +51,17 @@ namespace DxfIO::Audit
     }
   } // namespace
 
-  auto Report::Clean() const -> bool
+  auto Report::IsClean() const noexcept -> bool
   {
     return std::ranges::none_of(Findings, Unfixed);
   }
 
-  auto Report::Errors() const -> std::size_t
+  auto Report::Errors() const noexcept -> std::size_t
   {
     return static_cast<std::size_t>(std::ranges::count(Findings, Severity::Error, &Finding::Level));
   }
 
-  auto Report::Warnings() const -> std::size_t
+  auto Report::Warnings() const noexcept -> std::size_t
   {
     return static_cast<std::size_t>(
         std::ranges::count(Findings, Severity::Warning, &Finding::Level));

@@ -29,7 +29,7 @@ const auto told = [](const std::vector<DxfIO::Issue> &issues)
   {
     if (issue.Subject)
     {
-      std::println("  {}: {}", DxfIO::Hex(issue.Subject), issue.What);
+      std::println("  {}: {}", DxfIO::HexOf(issue.Subject), issue.What);
     }
     else
     {

@@ -39,12 +39,12 @@ namespace DxfIO::Lift
      */
     auto Spaced(std::string_view name) -> std::string_view
     {
-      if (View::Same(name, "$MODEL_SPACE") || View::Same(name, Model))
+      if (View::Matches(name, "$MODEL_SPACE") || View::Matches(name, Model))
       {
         return Model;
       }
-      return View::Same(name, "$PAPER_SPACE") || View::Same(name, Paper) ? Paper
-                                                                         : std::string_view{};
+      return View::Matches(name, "$PAPER_SPACE") || View::Matches(name, Paper) ? Paper
+                                                                               : std::string_view{};
     }
 
     auto Free(const Drawing &from) -> Seed

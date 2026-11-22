@@ -4,7 +4,7 @@
 
 namespace DxfIO::Edit
 {
-  auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>
+  auto MakeHandle(Drawing &drawing) -> std::expected<Handle, Failure>
   {
     return Seeded(drawing).transform(
         [&drawing](Seed handles) -> Handle

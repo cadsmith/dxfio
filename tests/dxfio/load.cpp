@@ -54,7 +54,7 @@ namespace DxfIO
     CHECK(Seed(read->Drawing)   == std::vector{Tag{.Code = 5, .Value = past}});
     REQUIRE(read->Issues.size() == 1);
     CHECK(read->Issues.front().What
-          == std::format("$HANDSEED 2 is not past the handles in use, raised to {}", Hex(past)));
+          == std::format("$HANDSEED 2 is not past the handles in use, raised to {}", HexOf(past)));
     const auto added = Edit::Add(read->Drawing, Entities::Line{});
     REQUIRE(added);
     CHECK(*added == past);

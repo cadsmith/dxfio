@@ -43,7 +43,7 @@ namespace DxfIO::Audit
     }
     if (past && seed < past)
     {
-      with.Note(Severity::Error, std::format("$HANDSEED {} behind the handles in use", Hex(seed)),
+      with.Note(Severity::Error, std::format("$HANDSEED {} behind the handles in use", HexOf(seed)),
                 {});
     }
   }

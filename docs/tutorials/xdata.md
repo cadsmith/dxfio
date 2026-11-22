@@ -48,7 +48,7 @@ if (!saved)
 
 ## Read it back [#read]
 
-`FindEntity` finds the line by the handle `Edit::Add` returned, and `BaseOf` gives the extended data of any entity. Other applications' data may sit beside yours, kept as it was read; `View::Same` matches the name as AutoCAD does, without case.
+`FindEntity` finds the line by the handle `Edit::Add` returned, and `BaseOf` gives the extended data of any entity. Other applications' data may sit beside yours, kept as it was read; `View::Matches` matches the name as AutoCAD does, without case.
 
 ```cpp
 const auto loaded = DxfIO::LoadFile("xdata.dxf");
@@ -60,7 +60,7 @@ if (!loaded)
 const DxfIO::Entity *found = DxfIO::FindEntity(loaded->Drawing, *handle);
 for (const DxfIO::Xdata &data : DxfIO::BaseOf(*found).Extended)
 {
-  if (!DxfIO::View::Same(data.Application, "WALLPLAN"))
+  if (!DxfIO::View::Matches(data.Application, "WALLPLAN"))
   {
     continue;
   }
