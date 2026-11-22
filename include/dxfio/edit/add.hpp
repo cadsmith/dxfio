@@ -3,10 +3,10 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/drawing.hpp"
-#include "dxfio/edit/space.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/handle.hpp"
+#include "dxfio/space.hpp"
 
 #include <expected>
 #include <string_view>

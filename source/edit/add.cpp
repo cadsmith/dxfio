@@ -129,11 +129,12 @@ namespace DxfIO::Edit
             {
               base.Self = handles.Take();
             }
-            base.Owner       = table.Head.Base.Self;
+            base.Owner       = table.Control.Base.Self;
             const Handle out = base.Self;
             Moved(drawing, std::max(handles.Next(), After(out)));
             table.Records.push_back(std::move(one));
-            table.Head.Count = std::max(table.Head.Count, static_cast<int>(table.Records.size()));
+            table.Control.Count =
+                std::max(table.Control.Count, static_cast<int>(table.Records.size()));
             return out;
           });
     }
@@ -209,12 +210,12 @@ namespace DxfIO::Edit
           {
             Tables::BlockRecord record{};
             record.Record.Base.Self  = handles.Take();
-            record.Record.Base.Owner = drawing.BlockRecord.Head.Base.Self;
+            record.Record.Base.Owner = drawing.BlockRecord.Control.Base.Self;
             record.Record.Name       = std::string{name};
             owner                    = record.Record.Base.Self;
             drawing.BlockRecord.Records.push_back(std::move(record));
-            drawing.BlockRecord.Head.Count =
-                std::max(drawing.BlockRecord.Head.Count,
+            drawing.BlockRecord.Control.Count =
+                std::max(drawing.BlockRecord.Control.Count,
                          static_cast<int>(drawing.BlockRecord.Records.size()));
           }
           Blocks::Definition block{};

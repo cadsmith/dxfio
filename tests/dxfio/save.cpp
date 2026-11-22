@@ -418,7 +418,7 @@ namespace DxfIO
     Tables::Layer layer{};
     layer.Record.Name = "WALLS";
     drawing.Layer.Records.push_back(layer);
-    drawing.Sections.push_back(Section{.Name = "THUMBNAILIMAGE", .Tags = {}});
+    drawing.Kept.push_back(Section{.Name = "THUMBNAILIMAGE", .Tags = {}});
     const auto saved = Tests::Written(drawing, {.Release = Version::R12});
     REQUIRE(saved);
     CHECK(*saved

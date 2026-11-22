@@ -6,9 +6,9 @@
 #include "file/section.hpp"
 
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/block.hpp"
 #include "dxfio/blocks/definition.hpp"
-#include "dxfio/blocks/endblk.hpp"
+#include "dxfio/entities/block.hpp"
+#include "dxfio/entities/endblk.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 

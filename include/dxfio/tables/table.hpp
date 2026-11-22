@@ -1,7 +1,7 @@
 #ifndef DXFIO_TABLES_TABLE_HPP
 #define DXFIO_TABLES_TABLE_HPP
 
-#include "dxfio/tables/head.hpp"
+#include "dxfio/tables/control.hpp"
 
 #include <vector>
 
@@ -16,7 +16,7 @@ namespace DxfIO::Tables
     /**
      *  The TABLE record that opens the table.
      */
-    Tables::Head Head{};
+    Tables::Control Control{};
     /**
      *  The records of the table, in the order the file gives them.
      */

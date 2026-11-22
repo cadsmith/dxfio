@@ -6,7 +6,7 @@
 
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
-#include "dxfio/tables/head.hpp"
+#include "dxfio/tables/control.hpp"
 
 #include <cstddef>
 #include <expected>
@@ -14,9 +14,9 @@
 
 namespace DxfIO::Tables
 {
-  auto Headed(const File::Record &one, const Fields::Reading &with) -> Tables::Head;
+  auto Headed(const File::Record &one, const Fields::Reading &with) -> Tables::Control;
 
-  auto Headed(Fields::Writing &to, const Tables::Head &one) -> std::expected<void, Failure>;
+  auto Headed(Fields::Writing &to, const Tables::Control &one) -> std::expected<void, Failure>;
 } // namespace DxfIO::Tables
 
 #endif /* DXFIO_TABLES_HEADING_HPP */

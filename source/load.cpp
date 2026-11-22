@@ -123,7 +123,7 @@ namespace DxfIO
       {
         held.Tags.push_back(Fields::Owned(one, with.Text));
       }
-      into.Drawing.Sections.push_back(std::move(held));
+      into.Drawing.Kept.push_back(std::move(held));
       return {};
     }
 

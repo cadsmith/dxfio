@@ -1,5 +1,5 @@
-#ifndef DXFIO_TABLES_HEAD_HPP
-#define DXFIO_TABLES_HEAD_HPP
+#ifndef DXFIO_TABLES_CONTROL_HPP
+#define DXFIO_TABLES_CONTROL_HPP
 
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
@@ -11,7 +11,7 @@ namespace DxfIO::Tables
   /**
    *  The TABLE record that opens a table of the TABLES section.
    */
-  struct DXFIO_API Head
+  struct DXFIO_API Control
   {
     /**
      *  The handle, owner, reactors and extended data.
@@ -26,8 +26,8 @@ namespace DxfIO::Tables
      */
     int Count{};
 
-    auto operator==(const Head &) const -> bool = default;
+    auto operator==(const Control &) const -> bool = default;
   };
 } // namespace DxfIO::Tables
 
-#endif /* DXFIO_TABLES_HEAD_HPP */
+#endif /* DXFIO_TABLES_CONTROL_HPP */

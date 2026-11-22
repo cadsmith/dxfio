@@ -134,7 +134,7 @@ namespace DxfIO
       const Drawing drawing = Create(release);
       CHECK(drawing.Objects.size() == 4);
       CHECK(drawing.Classes.empty());
-      CHECK(drawing.DimStyle.Head.Base.Extra.empty());
+      CHECK(drawing.DimStyle.Control.Base.Extra.empty());
       for (const Tables::BlockRecord &one : drawing.BlockRecord.Records)
       {
         CHECK_FALSE(one.Layout);
@@ -143,7 +143,7 @@ namespace DxfIO
       CHECK_FALSE(drawing.Layer.Records.front().Material);
     }
     const Drawing modern = Create(Version::R2000);
-    CHECK_FALSE(modern.DimStyle.Head.Base.Extra.empty());
+    CHECK_FALSE(modern.DimStyle.Control.Base.Extra.empty());
     CHECK(modern.BlockRecord.Records.front().Layout);
     CHECK(modern.Layer.Records.front().Style);
   }

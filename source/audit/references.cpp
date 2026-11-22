@@ -84,8 +84,8 @@ namespace DxfIO::Audit
             *std::ranges::min_element(layers.Records, {}, [](const Tables::Layer &layer) -> bool
                                       { return layer.Record.Name != "0"; });
         made.Record.Base       = {};
-        made.Record.Base.Owner = layers.Head.Base.Self;
-        if (layers.Head.Base.Self)
+        made.Record.Base.Owner = layers.Control.Base.Self;
+        if (layers.Control.Base.Self)
         {
           made.Record.Base.Self = with.Take();
         }

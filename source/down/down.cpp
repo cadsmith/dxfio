@@ -119,7 +119,7 @@ namespace DxfIO::Down
     template <class RecordT>
     void Bared(Tables::Table<RecordT> &table)
     {
-      table.Head.Base = {};
+      table.Control.Base = {};
       for (RecordT &one : table.Records)
       {
         one.Record.Base = {};
@@ -129,9 +129,9 @@ namespace DxfIO::Down
     template <class RecordT>
     void Loosened(Tables::Table<RecordT> &table)
     {
-      table.Head.Base.Extra.clear();
-      table.Head.Base.Dictionary = {};
-      table.Head.Base.Reactors.clear();
+      table.Control.Base.Extra.clear();
+      table.Control.Base.Dictionary = {};
+      table.Control.Base.Reactors.clear();
       for (RecordT &one : table.Records)
       {
         one.Record.Base.Dictionary = {};
@@ -756,8 +756,8 @@ namespace DxfIO::Down
     void Unsectioned(Drawing &from)
     {
       std::erase_if(from.Order, [&from](const std::string &name) -> bool
-                    { return std::ranges::contains(from.Sections, name, &Section::Name); });
-      from.Sections.clear();
+                    { return std::ranges::contains(from.Kept, name, &Section::Name); });
+      from.Kept.clear();
     }
 
     void Eldest(Drawing &from)

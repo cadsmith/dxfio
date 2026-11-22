@@ -87,8 +87,8 @@ namespace DxfIO
     auto Foreign(Fields::Writing &to, const Drawing &from, std::string_view name)
         -> std::expected<void, Failure>
     {
-      const auto found = std::ranges::find(from.Sections, name, &Section::Name);
-      if (found == from.Sections.end())
+      const auto found = std::ranges::find(from.Kept, name, &Section::Name);
+      if (found == from.Kept.end())
       {
         return {};
       }
@@ -113,7 +113,7 @@ namespace DxfIO
     template <class RecordT>
     auto Filled(const Tables::Table<RecordT> &one) -> bool
     {
-      return one.Head.Name.size() + one.Records.size() != 0;
+      return one.Control.Name.size() + one.Records.size() != 0;
     }
 
     auto Tabled(const Drawing &drawing) -> bool
@@ -176,7 +176,7 @@ namespace DxfIO
                                                 { return Rank(one) > Rank(name); });
         out.emplace(later, name);
       }
-      for (const Section &one : drawing.Sections)
+      for (const Section &one : drawing.Kept)
       {
         if (!std::ranges::contains(out, one.Name))
         {

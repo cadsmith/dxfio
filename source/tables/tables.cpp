@@ -37,14 +37,15 @@ namespace DxfIO::Tables
     struct Kind
     {
       std::string_view Name;
-      void (*Read)(const File::Nest &one, const Tables::Head &head, const Filling &into){nullptr};
+      void (*Read)(const File::Nest &one, const Tables::Control &head,
+                   const Filling &into){nullptr};
       std::expected<void, Failure> (*Write)(Fields::Writing &to, const Drawing &from){nullptr};
     };
 
     template <class KindT>
     auto Wrote(Fields::Writing &to, const Table<KindT> &one) -> std::expected<void, Failure>
     {
-      return Headed(to, one.Head)
+      return Headed(to, one.Control)
           .and_then(
               [&to, &one] -> std::expected<void, Failure>
               {
@@ -55,7 +56,7 @@ namespace DxfIO::Tables
     }
 
     template <class KindT>
-    auto Fits(const File::Record &record, const Tables::Head &head, const Filling &into) -> bool
+    auto Fits(const File::Record &record, const Tables::Control &head, const Filling &into) -> bool
     {
       if constexpr (std::is_same_v<KindT, Unknown>)
       {
@@ -77,10 +78,10 @@ namespace DxfIO::Tables
     }
 
     template <class KindT>
-    auto Tabled(const File::Nest &one, const Tables::Head &head, const Filling &into)
+    auto Tabled(const File::Nest &one, const Tables::Control &head, const Filling &into)
         -> Table<KindT>
     {
-      Table<KindT> out{.Head = head, .Records = {}};
+      Table<KindT> out{.Control = head, .Records = {}};
       out.Records.reserve(one.Records.size());
       for (const File::Record &record : one.Records)
       {
@@ -93,7 +94,7 @@ namespace DxfIO::Tables
     }
 
     template <class KindT, Table<KindT> Drawing::*Member>
-    void Filled(const File::Nest &one, const Tables::Head &head, const Filling &into)
+    void Filled(const File::Nest &one, const Tables::Control &head, const Filling &into)
     {
       into.Drawing->*Member = Tabled<KindT>(one, head, into);
     }
@@ -105,7 +106,7 @@ namespace DxfIO::Tables
     auto Written(Fields::Writing &to, const Drawing &from) -> std::expected<void, Failure>
     {
       const Table<KindT> &one = from.*Member;
-      if (!one.Head.Name.empty())
+      if (!one.Control.Name.empty())
       {
         return Wrote(to, one);
       }
@@ -114,11 +115,11 @@ namespace DxfIO::Tables
         return {};
       }
       Table<KindT> named = one;
-      named.Head.Name    = Type<KindT>;
+      named.Control.Name = Type<KindT>;
       return Wrote(to, named);
     }
 
-    void Loose(const File::Nest &one, const Tables::Head &head, const Filling &into)
+    void Loose(const File::Nest &one, const Tables::Control &head, const Filling &into)
     {
       into.Drawing->Loose.push_back(Tabled<Unknown>(one, head, into));
     }
@@ -158,8 +159,8 @@ namespace DxfIO::Tables
       return Chained(drawing.Loose,
                      [&](const Table<Unknown> &one) -> std::expected<void, Failure>
                      {
-                       return Named(one.Head.Name) == nullptr ? Wrote(to, one)
-                                                              : std::expected<void, Failure>{};
+                       return Named(one.Control.Name) == nullptr ? Wrote(to, one)
+                                                                 : std::expected<void, Failure>{};
                      });
     }
   } // namespace
@@ -170,7 +171,7 @@ namespace DxfIO::Tables
     std::vector<std::string> seen;
     for (const File::Nest &one : all)
     {
-      const Tables::Head head = Headed(one.Head, with);
+      const Tables::Control head = Headed(one.Head, with);
       if (std::ranges::contains(seen, head.Name))
       {
         with.Tell(Issue{

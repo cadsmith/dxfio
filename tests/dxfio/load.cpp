@@ -86,7 +86,7 @@ namespace DxfIO
                                       "OBJECTS"});
     CHECK(Header::Declared(drawing.Header) == Version::R2018);
     CHECK(drawing.Layer.Records.size() > 0);
-    CHECK(drawing.AppId.Head.Name == "APPID");
+    CHECK(drawing.AppId.Control.Name == "APPID");
     CHECK(drawing.LType.Records.size() > 0);
     CHECK(drawing.Loose.empty());
     CHECK_FALSE(drawing.Entities.empty());
@@ -111,8 +111,8 @@ namespace DxfIO
                            "  5\n2A\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
     CHECK(read->Drawing.Entities.empty());
-    REQUIRE(read->Drawing.Sections.size()            == 1);
-    CHECK(read->Drawing.Sections.front().Tags.size() == 2);
+    REQUIRE(read->Drawing.Kept.size()            == 1);
+    CHECK(read->Drawing.Kept.front().Tags.size() == 2);
     const auto saved = Tests::Written(read->Drawing, SaveOptions{});
     REQUIRE(saved);
     CHECK(saved->contains("\\U+0045NTITIES"));

@@ -13,12 +13,12 @@ namespace DxfIO::Tables
   namespace
   {
     constexpr auto Named = std::tuple{
-        Fields::Field{.Code = 2, .Member = &Head::Name},
+        Fields::Field{.Code = 2, .Member = &Control::Name},
     };
 
     constexpr auto Counted = std::tuple{
         Fields::Subclass{.Marker = "AcDbSymbolTable"},
-        Fields::Field{.Code = 70, .Member = &Head::Count},
+        Fields::Field{.Code = 70, .Member = &Control::Count},
     };
   } // namespace
 } // namespace DxfIO::Tables
@@ -26,17 +26,17 @@ namespace DxfIO::Tables
 namespace DxfIO
 {
   template <>
-  constexpr auto Shapes<Tables::Head> = std::tuple_cat(Tables::Named, Tables::Counted);
+  constexpr auto Shapes<Tables::Control> = std::tuple_cat(Tables::Named, Tables::Counted);
 } // namespace DxfIO
 
 namespace DxfIO::Tables
 {
-  auto Headed(const File::Record &one, const Fields::Reading &with) -> Tables::Head
+  auto Headed(const File::Record &one, const Fields::Reading &with) -> Tables::Control
   {
-    return Taken<Tables::Head>(one, with);
+    return Taken<Tables::Control>(one, with);
   }
 
-  auto Headed(Fields::Writing &to, const Tables::Head &one) -> std::expected<void, Failure>
+  auto Headed(Fields::Writing &to, const Tables::Control &one) -> std::expected<void, Failure>
   {
     const auto extra = [&to, &one] -> std::expected<void, Failure>
     {

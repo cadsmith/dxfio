@@ -26,9 +26,9 @@ namespace DxfIO::Audit
       Tables::AppId                 made{};
       made.Record.Name       = name;
       made.Record.Base.Self  = self;
-      made.Record.Base.Owner = table.Head.Base.Self;
+      made.Record.Base.Owner = table.Control.Base.Self;
       table.Records.push_back(std::move(made));
-      table.Head.Count = std::max(table.Head.Count, static_cast<int>(table.Records.size()));
+      table.Control.Count = std::max(table.Control.Count, static_cast<int>(table.Records.size()));
     }
   } // namespace
 
@@ -59,7 +59,7 @@ namespace DxfIO::Audit
               known.emplace(one.Application);
               if constexpr (Auditor<DrawingT>::Fix)
               {
-                const Handle self = with.Drawing->AppId.Head.Base.Self ? with.Take() : Handle{};
+                const Handle self = with.Drawing->AppId.Control.Base.Self ? with.Take() : Handle{};
                 Registered(*with.Drawing, one.Application, self);
               }
             }

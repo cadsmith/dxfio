@@ -14,7 +14,7 @@ namespace DxfIO::Blocks
                                        "100\r\nAcDbEntity\r\n"
                                        "  8\r\n0\r\n"
                                        "100\r\nAcDbBlockEnd\r\n";
-    const EndBlk               taken = Read<EndBlk>(text);
+    const Entities::EndBlk     taken = Read<Entities::EndBlk>(text);
     CHECK(taken.Record.Base.Self == Handle{.Value = 0x21});
     CHECK_FALSE(taken.Record.Paper);
     CHECK(Written(taken) == text);

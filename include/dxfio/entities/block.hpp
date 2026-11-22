@@ -1,5 +1,5 @@
-#ifndef DXFIO_BLOCKS_BLOCK_HPP
-#define DXFIO_BLOCKS_BLOCK_HPP
+#ifndef DXFIO_ENTITIES_BLOCK_HPP
+#define DXFIO_ENTITIES_BLOCK_HPP
 
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace DxfIO::Blocks
+namespace DxfIO::Entities
 {
   /**
    *  A BLOCK: the record that opens a block, with its name and the base point inserts place it by.
@@ -42,6 +42,6 @@ namespace DxfIO::Blocks
 
     auto operator==(const Block &) const -> bool = default;
   };
-} // namespace DxfIO::Blocks
+} // namespace DxfIO::Entities
 
-#endif /* DXFIO_BLOCKS_BLOCK_HPP */
+#endif /* DXFIO_ENTITIES_BLOCK_HPP */

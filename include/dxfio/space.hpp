@@ -1,9 +1,9 @@
-#ifndef DXFIO_EDIT_SPACE_HPP
-#define DXFIO_EDIT_SPACE_HPP
+#ifndef DXFIO_SPACE_HPP
+#define DXFIO_SPACE_HPP
 
 #include <cstdint>
 
-namespace DxfIO::Edit
+namespace DxfIO
 {
   /**
    *  Where an entity of the ENTITIES section is drawn.
@@ -19,6 +19,6 @@ namespace DxfIO::Edit
      */
     Paper,
   };
-} // namespace DxfIO::Edit
+} // namespace DxfIO
 
-#endif /* DXFIO_EDIT_SPACE_HPP */
+#endif /* DXFIO_SPACE_HPP */

@@ -63,7 +63,7 @@ namespace DxfIO::Audit
   template <class TableT, class VisitT>
   void Tabled(TableT &table, const VisitT &visit)
   {
-    visit(table.Head.Base);
+    visit(table.Control.Base);
     for (auto &one : table.Records)
     {
       visit(Based(one));

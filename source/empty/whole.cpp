@@ -27,7 +27,7 @@ namespace DxfIO::Empty
 
     void Pruned(Drawing &drawing)
     {
-      drawing.DimStyle.Head.Base.Extra.clear();
+      drawing.DimStyle.Control.Base.Extra.clear();
       for (Tables::BlockRecord &one : drawing.BlockRecord.Records)
       {
         one.Layout = {};

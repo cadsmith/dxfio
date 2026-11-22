@@ -269,21 +269,21 @@ namespace DxfIO::Down
   TEST_CASE("down: a drawing for R12 holds no section R12 has not")
   {
     Drawing from = Fresh();
-    from.Sections.push_back(Section{.Name = "ACDSDATA", .Tags = {}});
+    from.Kept.push_back(Section{.Name = "ACDSDATA", .Tags = {}});
     from.Order.emplace_back("ACDSDATA");
     const Drawing out = Narrowed(from, Version::R12, nullptr);
     CHECK(out.Order == std::vector<std::string>{"HEADER", "TABLES", "BLOCKS", "ENTITIES"});
     CHECK(out.Classes.empty());
     CHECK(out.Objects.empty());
-    CHECK(out.Sections.empty());
-    CHECK(out.BlockRecord.Head.Name.empty());
+    CHECK(out.Kept.empty());
+    CHECK(out.BlockRecord.Control.Name.empty());
     CHECK(out.BlockRecord.Records.empty());
   }
 
   TEST_CASE("down: table records keep no handle, R12 reads none")
   {
     const Drawing out = Narrowed(Fresh(), Version::R12, nullptr);
-    CHECK_FALSE(out.Layer.Head.Base.Self);
+    CHECK_FALSE(out.Layer.Control.Base.Self);
     REQUIRE_FALSE(out.Layer.Records.empty());
     CHECK_FALSE(out.Layer.Records.front().Record.Base.Self);
     CHECK(out.Style.Records.front().Record.Base.Extended.empty());
@@ -324,11 +324,11 @@ namespace DxfIO::Down
   TEST_CASE("down: R10 has neither applications nor dimension styles")
   {
     const Drawing out = Narrowed(Fresh(), Version::R10, nullptr);
-    CHECK(out.AppId.Head.Name.empty());
-    CHECK(out.DimStyle.Head.Name.empty());
+    CHECK(out.AppId.Control.Name.empty());
+    CHECK(out.DimStyle.Control.Name.empty());
     const Drawing kept = Narrowed(Fresh(), Version::R12, nullptr);
-    CHECK_FALSE(kept.AppId.Head.Name.empty());
-    CHECK_FALSE(kept.DimStyle.Head.Name.empty());
+    CHECK_FALSE(kept.AppId.Control.Name.empty());
+    CHECK_FALSE(kept.DimStyle.Control.Name.empty());
   }
 
   TEST_CASE("down: a kind R12 has stays, its handle and extended data with it")
@@ -520,18 +520,18 @@ namespace DxfIO::Down
     CHECK(out.Blocks.front().Block.Name == "*Model_Space");
     CHECK(out.Blocks.front().Block.Record.Base.Self);
     CHECK(out.Classes.empty());
-    CHECK(out.DimStyle.Head.Base.Extra.empty());
+    CHECK(out.DimStyle.Control.Base.Extra.empty());
   }
 
   TEST_CASE("down: R13 and R14 name no section they leave out")
   {
     Drawing                        from  = Fresh();
     const std::vector<std::string> order = from.Order;
-    from.Sections.push_back(
+    from.Kept.push_back(
         Section{.Name = "THUMBNAILIMAGE", .Tags = {Tag{.Code = 90, .Value = std::int64_t{0}}}});
     from.Order.emplace_back("THUMBNAILIMAGE");
     const Drawing out = Narrowed(from, Version::R14, nullptr);
-    CHECK(out.Sections.empty());
+    CHECK(out.Kept.empty());
     CHECK(out.Order == order);
     const auto saved = Tests::Written(from, SaveOptions{.Release = Version::R13});
     REQUIRE(saved);
@@ -729,7 +729,7 @@ namespace DxfIO::Down
     from.Entities.emplace_back(line);
     from.Entities.emplace_back(left);
     from.Layer.Records.front().Record.Base.Dictionary = Handle{0x22};
-    from.Layer.Head.Base.Dictionary                   = Handle{0x23};
+    from.Layer.Control.Base.Dictionary                = Handle{0x23};
     Objects::Scale scale{};
     scale.Base.Self = Handle{0x21};
     from.Objects.emplace_back(scale);
@@ -739,7 +739,7 @@ namespace DxfIO::Down
     CHECK_FALSE(base.Dictionary);
     CHECK(base.Reactors.empty());
     CHECK_FALSE(out.Layer.Records.front().Record.Base.Dictionary);
-    CHECK_FALSE(out.Layer.Head.Base.Dictionary);
+    CHECK_FALSE(out.Layer.Control.Base.Dictionary);
   }
 
   TEST_CASE("down: R10 keeps no extended data, it has no applications")

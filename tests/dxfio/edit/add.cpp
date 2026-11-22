@@ -61,8 +61,8 @@ namespace DxfIO::Edit
       REQUIRE(self);
       REQUIRE(table.Records.size() == count + 1);
       CHECK(table.Records.back().Record.Base.Self  == *self);
-      CHECK(table.Records.back().Record.Base.Owner == table.Head.Base.Self);
-      CHECK(table.Head.Count == static_cast<int>(count + 1));
+      CHECK(table.Records.back().Record.Base.Owner == table.Control.Base.Self);
+      CHECK(table.Control.Count == static_cast<int>(count + 1));
     }
   } // namespace
 
@@ -288,7 +288,7 @@ namespace DxfIO::Edit
     CHECK(door->Block.Record.Base.Owner  == record);
     CHECK(door->EndBlk.Record.Base.Owner == record);
     CHECK(View::Record(drawing.BlockRecord, "Door")->Record.Base.Owner
-          == drawing.BlockRecord.Head.Base.Self);
+          == drawing.BlockRecord.Control.Base.Self);
 
     const auto self = Add(drawing, Entities::Arc{}, "DOOR");
     REQUIRE(self);
@@ -399,13 +399,13 @@ namespace DxfIO::Edit
   TEST_CASE(
       "edit: a record that brings its own handle keeps it, and a count past the records stays")
   {
-    Drawing       drawing    = Create();
-    Tables::Layer walls      = Named("Walls");
-    walls.Record.Base.Self   = Handle{.Value = 0x6000};
-    drawing.Layer.Head.Count = 40;
-    CHECK(Add(drawing, walls)      == Handle{.Value = 0x6000});
-    CHECK(Seed(drawing)            == Handle{.Value = 0x6001});
-    CHECK(drawing.Layer.Head.Count == 40);
+    Drawing       drawing       = Create();
+    Tables::Layer walls         = Named("Walls");
+    walls.Record.Base.Self      = Handle{.Value = 0x6000};
+    drawing.Layer.Control.Count = 40;
+    CHECK(Add(drawing, walls) == Handle{.Value = 0x6000});
+    CHECK(Seed(drawing)       == Handle{.Value = 0x6001});
+    CHECK(drawing.Layer.Control.Count == 40);
   }
 
   TEST_CASE("edit: past the last handle there is, nothing is added")

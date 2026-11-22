@@ -75,7 +75,7 @@ namespace DxfIO::Audit
     template <class DrawingT, class TableT>
     void Listed(TableT &table, std::vector<Holder<DrawingT>> &out, std::string_view kind)
     {
-      out.push_back(Holder<DrawingT>{.Base = &table.Head.Base, .Kind = "table"});
+      out.push_back(Holder<DrawingT>{.Base = &table.Control.Base, .Kind = "table"});
       for (auto &one : table.Records)
       {
         out.push_back(Holder<DrawingT>{.Base = &Based(one), .Kind = kind, .Led = true});

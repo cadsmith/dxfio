@@ -2,8 +2,8 @@
 #define DXFIO_BLOCKS_DEFINITION_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/block.hpp"
-#include "dxfio/blocks/endblk.hpp"
+#include "dxfio/entities/block.hpp"
+#include "dxfio/entities/endblk.hpp"
 #include "dxfio/entity.hpp"
 
 namespace DxfIO::Blocks
@@ -16,7 +16,7 @@ namespace DxfIO::Blocks
     /**
      *  The BLOCK that opens the block, with its name, flags and base point.
      */
-    Blocks::Block Block{};
+    DxfIO::Entities::Block Block{};
     /**
      *  The entities of the block, in the order they are drawn.
      */
@@ -24,7 +24,7 @@ namespace DxfIO::Blocks
     /**
      *  The ENDBLK that closes the block.
      */
-    Blocks::EndBlk EndBlk{};
+    DxfIO::Entities::EndBlk EndBlk{};
 
     auto operator==(const Definition &) const -> bool = default;
   };

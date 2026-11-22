@@ -98,8 +98,8 @@ namespace DxfIO::Audit
     Drawing                drawing = Fresh();
     const Handle           held    = drawing.Layer.Records.front().Record.Base.Self;
     Tables::Table<Unknown> loose{};
-    loose.Head.Name      = "VX_TABLE";
-    loose.Head.Base.Self = Past(drawing);
+    loose.Control.Name      = "VX_TABLE";
+    loose.Control.Base.Self = Past(drawing);
     loose.Records.push_back(Unknown{.Type = Symbol{"VX_TABLE"}});
     loose.Records.front().Base.Self = held;
     drawing.Loose.push_back(loose);
@@ -182,10 +182,10 @@ namespace DxfIO::Audit
     View::Block(drawing, "PART")->Block.Record.Base.Extended.push_back(named("WEST"));
     std::get<Objects::Dictionary>(drawing.Objects.front()).Base.Extended.push_back(named("south"));
     Tables::Table<Unknown> loose{};
-    loose.Head.Name      = "VX_TABLE";
-    loose.Head.Base.Self = Past(drawing);
+    loose.Control.Name      = "VX_TABLE";
+    loose.Control.Base.Self = Past(drawing);
     loose.Records.push_back(Unknown{.Type = Symbol{"VX_TABLE"}});
-    loose.Records.front().Base.Self = Handle{.Value = loose.Head.Base.Self.Value + 1};
+    loose.Records.front().Base.Self = Handle{.Value = loose.Control.Base.Self.Value + 1};
     loose.Records.front().Base.Extended.push_back(named("LOOSE"));
     drawing.Loose.push_back(loose);
     WriteSeed(drawing, Past(drawing));
@@ -201,7 +201,7 @@ namespace DxfIO::Audit
       const Tables::AppId *made = View::Record(drawing.AppId, application);
       REQUIRE(made != nullptr);
       CHECK(made->Record.Base.Self);
-      CHECK(made->Record.Base.Owner == drawing.AppId.Head.Base.Self);
+      CHECK(made->Record.Base.Owner == drawing.AppId.Control.Base.Self);
     }
     CHECK(drawing.AppId.Records.size() == 6);
     CHECK(Check(drawing).Findings.empty());
@@ -410,7 +410,7 @@ namespace DxfIO::Audit
     Drawing       drawing = Fresh();
     Tables::Layer nameless{};
     nameless.Record.Base.Self  = Handle{.Value = Past(drawing).Value + 1};
-    nameless.Record.Base.Owner = drawing.Layer.Head.Base.Self;
+    nameless.Record.Base.Owner = drawing.Layer.Control.Base.Self;
     drawing.Layer.Records.push_back(nameless);
     Tables::LType unlined{};
     unlined.Record.Base.Self = Handle{.Value = Past(drawing).Value + 1};
@@ -654,7 +654,7 @@ namespace DxfIO::Audit
     CHECK(std::ranges::any_of(drawing.Layer.Records, [](const Tables::Layer &one) -> bool
                               { return one.Record.Name == "0"; }));
     CHECK(drawing.AppId.Records.size() == 1);
-    CHECK(drawing.AppId.Records.front().Record.Base.Owner == drawing.AppId.Head.Base.Self);
+    CHECK(drawing.AppId.Records.front().Record.Base.Owner == drawing.AppId.Control.Base.Self);
     CHECK(Check(drawing).Findings.empty());
   }
 
@@ -1069,7 +1069,7 @@ namespace DxfIO::Audit
   {
     Drawing drawing = Create(Version::R2018);
     REQUIRE(Edit::Add(drawing, Entities::Line{}));
-    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Edit::Space::Paper));
+    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Space::Paper));
     const Tables::BlockRecord &model      = *View::Record(drawing.BlockRecord, "*Model_Space");
     const Handle               shared     = model.Record.Base.Self;
     Tables::BlockRecord       &paper      = *View::Record(drawing.BlockRecord, "*Paper_Space");
@@ -1096,9 +1096,9 @@ namespace DxfIO::Audit
   {
     Drawing drawing = Create(Version::R2018);
     REQUIRE(Edit::Add(drawing, Entities::Line{}));
-    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Edit::Space::Paper));
+    REQUIRE(Edit::Add(drawing, Entities::Circle{}, Space::Paper));
     Tables::BlockRecord &model             = *View::Record(drawing.BlockRecord, "*Model_Space");
-    const Handle         shared            = drawing.Layer.Head.Base.Self;
+    const Handle         shared            = drawing.Layer.Control.Base.Self;
     model.Record.Base.Self                 = shared;
     BaseOf(drawing.Entities.front()).Owner = shared;
     BaseOf(drawing.Entities.back()).Owner  = shared;
@@ -1107,29 +1107,29 @@ namespace DxfIO::Audit
     CHECK(now != shared);
     CHECK(BaseOf(drawing.Entities.front()).Owner == now);
     CHECK(BaseOf(drawing.Entities.back()).Owner  == shared);
-    CHECK(drawing.Layer.Head.Base.Self           == shared);
+    CHECK(drawing.Layer.Control.Base.Self        == shared);
   }
 
   TEST_CASE("audit: a table given a new handle takes its records along, not another's")
   {
-    Drawing      drawing         = Create(Version::R2018);
-    const Handle shared          = drawing.LType.Head.Base.Self;
-    drawing.Layer.Head.Base.Self = shared;
+    Drawing      drawing            = Create(Version::R2018);
+    const Handle shared             = drawing.LType.Control.Base.Self;
+    drawing.Layer.Control.Base.Self = shared;
     for (Tables::Layer &one : drawing.Layer.Records)
     {
       one.Record.Base.Owner = shared;
     }
     Tables::BlockRecord &model = drawing.BlockRecord.Records.front();
-    model.Record.Base.Self     = drawing.BlockRecord.Head.Base.Self;
+    model.Record.Base.Self     = drawing.BlockRecord.Control.Base.Self;
     REQUIRE(Repair(drawing).Errors() == 2);
-    const Handle now = drawing.Layer.Head.Base.Self;
+    const Handle now = drawing.Layer.Control.Base.Self;
     CHECK(now != shared);
     CHECK(std::ranges::all_of(drawing.Layer.Records, [now](const Tables::Layer &one) -> bool
                               { return one.Record.Base.Owner == now; }));
     CHECK(std::ranges::all_of(drawing.LType.Records, [shared](const Tables::LType &one) -> bool
                               { return one.Record.Base.Owner == shared; }));
     CHECK(drawing.BlockRecord.Records.back().Record.Base.Owner
-          == drawing.BlockRecord.Head.Base.Self);
+          == drawing.BlockRecord.Control.Base.Self);
   }
 
   TEST_CASE("audit: what an entity carries is checked too, for its layer, linetype and text style")

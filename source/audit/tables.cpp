@@ -38,13 +38,13 @@ namespace DxfIO::Audit
           continue;
         }
         with.Note(Severity::Error, std::format("{} missing", one.Record.Name),
-                  table.Head.Base.Self);
+                  table.Control.Base.Self);
         if constexpr (Auditor<DrawingT>::Fix)
         {
           RecordT made           = one;
           made.Record.Base       = {};
-          made.Record.Base.Owner = table.Head.Base.Self;
-          if (table.Head.Base.Self)
+          made.Record.Base.Owner = table.Control.Base.Self;
+          if (table.Control.Base.Self)
           {
             made.Record.Base.Self = with.Take();
           }
