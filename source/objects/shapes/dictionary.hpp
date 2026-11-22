@@ -67,6 +67,10 @@ namespace DxfIO
       }
     }
 
+    /**
+     *  Writes the AcDbDictionaryWithDefault part of a dictionary that has a default: its marker,
+     *  and its 340 when the default names a record, so one read without a 340 is written back so.
+     */
     inline auto Defaults(const Dictionary &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
       if (!one.Default)
@@ -74,7 +78,12 @@ namespace DxfIO
         return {};
       }
       return Fields::Mark(Defaulting, to)
-          .and_then([&one, &to] -> auto { return Fields::Put(DefaultPointer, one, to); });
+          .and_then(
+              [&one, &to] -> std::expected<void, Failure>
+              {
+                return *one.Default ? Fields::Put(DefaultPointer, one, to)
+                                    : std::expected<void, Failure>{};
+              });
     }
   } // namespace Objects
 

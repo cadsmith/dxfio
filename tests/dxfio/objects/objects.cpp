@@ -59,6 +59,22 @@ namespace DxfIO::Objects
     CHECK(page.Out.starts_with("  0\r\nACDBDICTIONARYWDFLT\r\n"));
   }
 
+  TEST_CASE("objects: a dictionary with a default and no 340 is written back the same, a 340 kept "
+            "past its part read again as its default")
+  {
+    constexpr std::string_view text = "  0\r\nACDBDICTIONARYWDFLT\r\n  5\r\nE\r\n330\r\nC\r\n"
+                                      "100\r\nAcDbDictionary\r\n281\r\n     1\r\n"
+                                      "100\r\nAcDbDictionaryWithDefault\r\n";
+    const auto                 all  = Tags::All(text);
+    REQUIRE(all);
+    const auto records = File::Sections::Records(*all);
+    REQUIRE(records);
+    const std::vector<Object> read = Objects::Read(*records, Fields::Reading{});
+    Fields::Sheet             page;
+    REQUIRE(Write(page.To, read));
+    CHECK(page.Out == text);
+  }
+
   TEST_CASE("objects: the base of each kind")
   {
     const Handle self{.Value = 0x2a};
