@@ -68,6 +68,30 @@ namespace DxfIO::File
     CHECK(Framed("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n")->size() == 1);
   }
 
+  TEST_CASE("file: a section missing its ENDSEC closes at the next SECTION or EOF, told")
+  {
+    std::vector<Issue> issues;
+    const auto         sections = Framed("  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n"
+                                         "  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n"
+                                         "  0\nEOF\n",
+                                         &issues);
+    REQUIRE(sections);
+    REQUIRE(sections->size()          == 2);
+    CHECK(sections->at(0).Name        == "HEADER");
+    CHECK(sections->at(0).Body.size() == 1);
+    CHECK(sections->at(1).Name        == "ENTITIES");
+    CHECK(sections->at(1).Body.size() == 1);
+    CHECK(issues
+          == std::vector{
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 1,
+                    .What = "ENDSEC of HEADER missing, closed at the next SECTION"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 7,
+                    .What = "ENDSEC of ENTITIES missing, closed at EOF"},
+          });
+  }
+
   TEST_CASE("file: a TABLE outside a TABLES section opens one that runs to the next section, told")
   {
     std::vector<Issue> issues;

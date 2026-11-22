@@ -52,10 +52,16 @@ namespace DxfIO::File
     return one;
   }
 
-  auto Cursor::Until(std::string_view end) -> std::expected<std::vector<Record>, Failure>
+  auto Cursor::At(std::string_view name) const -> bool
+  {
+    return !Done() && Tags::Holds(Rest().front(), 0, name);
+  }
+
+  auto Cursor::Until(std::string_view end, std::string_view open)
+      -> std::expected<std::vector<Record>, Failure>
   {
     std::vector<Record> out;
-    while (!Done() && !Tags::Holds(Rest().front(), 0, end))
+    while (!Done() && !At(end) && !At(open))
     {
       std::expected<Record, Failure> one = Take();
       if (!one)
@@ -63,12 +69,6 @@ namespace DxfIO::File
         return std::unexpected{one.error()};
       }
       out.push_back(*one);
-    }
-    if (Done())
-    {
-      return std::unexpected{Failure{.Code = FailureCode::Damaged,
-                                     .Line = Located(Line()),
-                                     .What = std::format("{} missing", end)}};
     }
     return out;
   }

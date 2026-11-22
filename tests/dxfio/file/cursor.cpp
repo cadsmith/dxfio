@@ -53,22 +53,30 @@ namespace DxfIO::File
     const auto all = Tags::All("  0\nLAYER\n  2\n0\n  0\nLAYER\n  2\nwalls\n  0\nENDTAB\n");
     REQUIRE(all);
     Cursor     in{*all};
-    const auto layers = in.Until("ENDTAB");
+    const auto layers = in.Until("ENDTAB", "TABLE");
     REQUIRE(layers);
     CHECK(layers->size() == 2);
+    CHECK(in.At("ENDTAB"));
     const auto end = in.Take("ENDTAB");
     REQUIRE(end);
     CHECK(in.Done());
+    CHECK_FALSE(in.At("ENDTAB"));
   }
 
-  TEST_CASE("cursor: the records up to one never found are a failure")
+  TEST_CASE("cursor: the records up to the next opener, or to the last, when no closer comes")
   {
-    const auto all = Tags::All("  0\nLAYER\n  2\n0\n");
+    const auto all = Tags::All("  0\nLAYER\n  2\n0\n  0\nTABLE\n  2\nSTYLE\n");
     REQUIRE(all);
-    Cursor in{*all};
-    CHECK(in.Until("ENDTAB")
-          == std::unexpected{
-              Failure{.Code = FailureCode::Damaged, .Line = 3, .What = "ENDTAB missing"}});
+    Cursor     in{*all};
+    const auto layers = in.Until("ENDTAB", "TABLE");
+    REQUIRE(layers);
+    CHECK(layers->size() == 1);
+    CHECK(in.At("TABLE"));
+    REQUIRE(in.Take());
+    const auto rest = in.Until("ENDTAB", "TABLE");
+    REQUIRE(rest);
+    CHECK(rest->empty());
+    CHECK(in.Done());
   }
 
   TEST_CASE("cursor: an empty run of tags has no line")
@@ -85,7 +93,7 @@ namespace DxfIO::File
     const auto all = Tags::All("  8\n0\n  0\nENDSEC\n");
     REQUIRE(all);
     Cursor     in{*all};
-    const auto run = in.Until("ENDSEC");
+    const auto run = in.Until("ENDSEC", "SECTION");
     REQUIRE_FALSE(run);
     CHECK(run.error().What == "group 0 expected, found group 8");
   }

@@ -78,9 +78,9 @@ namespace DxfIO
             .Fill = [](const File::Section &from, Loaded &into,
                        const Fields::Reading &with) -> Filled
             {
-              return File::Sections::Tables(from.Body).transform(
-                  [&into, &with](const std::vector<File::Nest> &parts) -> void
-                  { Tables::Read(parts, into.Drawing, with); });
+              return File::Sections::Tables(from.Body, with.Issues)
+                  .transform([&into, &with](const std::vector<File::Nest> &parts) -> void
+                             { Tables::Read(parts, into.Drawing, with); });
             },
         },
         Known{
@@ -88,9 +88,9 @@ namespace DxfIO
             .Fill = [](const File::Section &from, Loaded &into,
                        const Fields::Reading &with) -> Filled
             {
-              return File::Sections::Blocks(from.Body).transform(
-                  [&into, &with](const std::vector<File::Nest> &parts) -> void
-                  { into.Drawing.Blocks = Blocks::Read(parts, with); });
+              return File::Sections::Blocks(from.Body, with.Issues)
+                  .transform([&into, &with](const std::vector<File::Nest> &parts) -> void
+                             { into.Drawing.Blocks = Blocks::Read(parts, with); });
             },
         },
         Known{

@@ -6,7 +6,7 @@ Load a DXF file, tell which release wrote it, and see what its tables and entiti
 
 ## Load [#load]
 
-`LoadFile` reads a file, ASCII or binary, of any release from R10 to R2018. It fails only when the bytes are not DXF; anything it stepped over, mended or kept as it came is listed in `Issues` with its line. plan.dxf, which AutoCAD 2026 wrote, loads with none.
+`LoadFile` reads a file, ASCII or binary, of any release from R10 to R2018. It fails when the file cannot be read or is not DXF; anything it stepped over, mended or kept as it came is listed in `Issues` with its line. plan.dxf, which AutoCAD 2026 wrote, loads with none.
 
 ```cpp
 #include "dxfio/dxfio.hpp"
