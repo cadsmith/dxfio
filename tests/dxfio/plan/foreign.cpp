@@ -90,6 +90,32 @@ namespace DxfIO::Plan
     CHECK(std::get<Entities::Line>(drawing.Entities.back()).Record.Base.Dictionary == Kept);
   }
 
+  TEST_CASE("foreign: what an object left out owns goes with it, and a header variable naming "
+            "either is cleared")
+  {
+    Drawing             drawing = Drawn();
+    Objects::Dictionary owned{};
+    owned.Base.Self  = Handle{0x12};
+    owned.Base.Owner = Gone;
+    drawing.Objects.emplace_back(owned);
+    Objects::XRecord deeper{};
+    deeper.Base.Self  = Handle{0x13};
+    deeper.Base.Owner = Handle{0x12};
+    drawing.Objects.insert(drawing.Objects.begin(), Object{deeper});
+    drawing.Header.push_back(Header::Variable{.Name   = "$CMATERIAL",
+                                              .Values = {Tag{.Code = 347, .Value = Handle{0x13}}}});
+    drawing.Header.push_back(
+        Header::Variable{.Name = "$CLAYER", .Values = {Tag{.Code = 8, .Value = std::string{"0"}}}});
+    std::vector<Issue> issues;
+    Foreign(drawing, &issues);
+    CHECK(drawing.Objects.size() == 2);
+    CHECK_FALSE(std::get<Handle>(drawing.Header.front().Values.front().Value));
+    CHECK(drawing.Header.back().Values.front().Value == Content{std::string{"0"}});
+    REQUIRE(issues.size()     == 3);
+    CHECK(issues.front().What == "XRECORD left out with the object that owns it");
+    CHECK(issues.back().What  == "DICTIONARY left out with the object that owns it");
+  }
+
   TEST_CASE("foreign: an unknown object with no handle takes no entry with it")
   {
     Drawing drawing = Drawn();

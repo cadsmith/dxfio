@@ -875,7 +875,7 @@ namespace DxfIO::Down
     const auto         saved =
         Tests::Written(drawn->Drawing, SaveOptions{.Release = Version::R2018}, &told);
     REQUIRE(saved);
-    REQUIRE(told.size()   == 63);
+    REQUIRE(told.size()   == 67);
     CHECK(told.at(1).What == "3DSOLID left out, its body is not in R2018's form");
   }
 
