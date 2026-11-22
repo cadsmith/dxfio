@@ -11,7 +11,9 @@
 namespace DxfIO::Edit
 {
   /**
-   *  Takes a handle no record of the drawing holds, and moves $HANDSEED past it. Fails when the
+   *  Takes the handle $HANDSEED names, or the one past every handle held when there is no seed, and
+   *  moves $HANDSEED past it. Load raises a seed behind the handles in use; one left behind by
+   *  handles set by hand is trusted, so run Audit::Repair on such a drawing first. Fails when the
    *  drawing already holds the last handle there is.
    */
   [[nodiscard]] DXFIO_API auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>;

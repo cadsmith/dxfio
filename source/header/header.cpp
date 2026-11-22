@@ -114,6 +114,22 @@ namespace DxfIO::Header
               && held.Values.front().Code == wanted.Values.front().Code);
     }
 
+    /**
+     *  A variable a drawing lacks, as a new drawing of the release holds it, its handles null: they
+     *  name records of that new drawing, not of this one.
+     */
+    auto Unpointed(Variable one) -> Variable
+    {
+      for (Tag &value : one.Values)
+      {
+        if (std::holds_alternative<Handle>(value.Value))
+        {
+          value.Value = Handle{};
+        }
+      }
+      return one;
+    }
+
     auto Rewritten(Fields::Writing &to, std::span<const Variable> all)
         -> std::expected<void, Failure>
     {
@@ -121,7 +137,7 @@ namespace DxfIO::Header
       const auto                  kept = [&](const Variable &wanted) -> std::expected<void, Failure>
       {
         const auto held = std::ranges::find(all, wanted.Name, &Variable::Name);
-        return Written(to, held != all.end() && Fits(*held, wanted) ? *held : wanted);
+        return Written(to, held != all.end() && Fits(*held, wanted) ? *held : Unpointed(wanted));
       };
       const auto others = [&](const Variable &one) -> std::expected<void, Failure>
       {

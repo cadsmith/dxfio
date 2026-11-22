@@ -1,5 +1,6 @@
 #include "down/down.hpp"
 
+#include "ascii.hpp"
 #include "drawn.hpp"
 #include "empty/classes.hpp"
 #include "entities/io.hpp"
@@ -773,8 +774,12 @@ namespace DxfIO::Down
       Bared(from.Ucs);
       Bared(from.AppId);
       Bared(from.DimStyle);
-      std::erase_if(from.LType.Records, [](const Tables::LType &one) -> bool
-                    { return one.Record.Name.starts_with("By"); });
+      std::erase_if(from.LType.Records,
+                    [](const Tables::LType &one) -> bool
+                    {
+                      return Ascii::Same(one.Record.Name, "ByLayer")
+                          || Ascii::Same(one.Record.Name, "ByBlock");
+                    });
       std::erase_if(from.Layer.Records, [](const Tables::Layer &one) -> bool
                     { return one.Record.Name.starts_with('*'); });
     }

@@ -3,6 +3,7 @@
 #include "../fuzz/oracle.hpp"
 #include "disk.hpp"
 #include "header/io.hpp"
+#include "past.hpp"
 #include "tags/sentinel.hpp"
 #include "written.hpp"
 
@@ -156,6 +157,42 @@ namespace DxfIO
       REQUIRE(second);
       CHECK(second->Drawing == first->Drawing);
     }
+  }
+
+  TEST_CASE("save: a drawing saved to a later release names no handle it does not hold in the "
+            "variables that release adds")
+  {
+    const auto read = Load(Bytes(Acad() / "entities-r2004.dxf"));
+    REQUIRE(read);
+    const auto later = Save(read->Drawing, SaveOptions{.Release = Version::R2018});
+    REQUIRE(later);
+    const auto back = Load(later->Bytes);
+    REQUIRE(back);
+    for (const std::string_view name : {"$CMATERIAL", "$INTERFEREOBJVS", "$INTERFEREVPVS"})
+    {
+      CAPTURE(name);
+      const auto found = std::ranges::find(back->Drawing.Header, name, &Header::Variable::Name);
+      REQUIRE(found != back->Drawing.Header.end());
+      CHECK_FALSE(std::get<Handle>(found->Values.front().Value));
+    }
+  }
+
+  TEST_CASE("save: a drawing with no $HANDSEED saved to another release is given one past its "
+            "handles")
+  {
+    auto read = Load(Bytes(Acad() / "entities-r2004.dxf"));
+    REQUIRE(read);
+    std::erase_if(read->Drawing.Header,
+                  [](const Header::Variable &one) -> bool { return one.Name == "$HANDSEED"; });
+    const auto later = Save(read->Drawing, SaveOptions{.Release = Version::R2018});
+    REQUIRE(later);
+    const auto back = Load(later->Bytes);
+    REQUIRE(back);
+    const auto seed = std::ranges::find(back->Drawing.Header, "$HANDSEED", &Header::Variable::Name);
+    REQUIRE(seed != back->Drawing.Header.end());
+    const Handle given = std::get<Handle>(seed->Values.front().Value);
+    CHECK(given);
+    CHECK(given == Past(back->Drawing));
   }
 
   TEST_CASE("save: a page not carried stays named, its text the same bytes")

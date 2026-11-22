@@ -6,10 +6,12 @@
 #include "entities/io.hpp"
 #include "fields/owned.hpp"
 #include "fields/text.hpp"
+#include "handseed.hpp"
 #include "header/io.hpp"
 #include "lift/lift.hpp"
 #include "objects/io.hpp"
 #include "parallel.hpp"
+#include "past.hpp"
 #include "plan/foreign.hpp"
 #include "raw/io.hpp"
 #include "seek.hpp"
@@ -260,7 +262,11 @@ namespace DxfIO
       Drawing out = Down::Narrowed(drawing, release, issues);
       if (release > Header::Declared(out.Header))
       {
-        out.Objects = Plan::Foreign(std::move(out.Objects));
+        Plan::Foreign(out, issues);
+      }
+      if (!ReadSeed(out))
+      {
+        WriteSeed(out, Past(out));
       }
       return out;
     }

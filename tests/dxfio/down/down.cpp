@@ -294,6 +294,16 @@ namespace DxfIO::Down
     const Drawing out = Narrowed(Fresh(), Version::R12, nullptr);
     CHECK(out.LType.Records.size() == 1);
     CHECK(out.LType.Records.front().Record.Name == "Continuous");
+    Drawing named = Fresh();
+    for (const char *name : {"BYLAYER", "byblock", "Bypass"})
+    {
+      Tables::LType one{};
+      one.Record.Name = name;
+      named.LType.Records.push_back(one);
+    }
+    const Drawing kept = Narrowed(named, Version::R12, nullptr);
+    REQUIRE(kept.LType.Records.size()           == 2);
+    CHECK(kept.LType.Records.back().Record.Name == "Bypass");
   }
 
   TEST_CASE("down: the two spaces take R12's names, other sheets are left out")
@@ -865,7 +875,7 @@ namespace DxfIO::Down
     const auto         saved =
         Tests::Written(drawn->Drawing, SaveOptions{.Release = Version::R2018}, &told);
     REQUIRE(saved);
-    REQUIRE(told.size()   == 13);
+    REQUIRE(told.size()   == 67);
     CHECK(told.at(1).What == "3DSOLID left out, its body is not in R2018's form");
   }
 
