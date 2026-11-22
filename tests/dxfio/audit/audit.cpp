@@ -93,6 +93,26 @@ namespace DxfIO::Audit
     CHECK(Check(drawing).Findings.empty());
   }
 
+  TEST_CASE("audit: a record of a table dxfio does not type, sharing a handle, takes a new one")
+  {
+    Drawing                drawing = Fresh();
+    const Handle           held    = drawing.Layer.Records.front().Record.Base.Self;
+    Tables::Table<Unknown> loose{};
+    loose.Head.Name      = "VX_TABLE";
+    loose.Head.Base.Self = Past(drawing);
+    loose.Records.push_back(Unknown{.Type = Symbol{"VX_TABLE"}});
+    loose.Records.front().Base.Self = held;
+    drawing.Loose.push_back(loose);
+    WriteSeed(drawing, Past(drawing));
+    const Report seen = Check(drawing);
+    REQUIRE(seen.Errors() == 1);
+    CHECK(seen.Findings.front().Subject == held);
+    CHECK(Repair(drawing).Clean());
+    CHECK(drawing.Loose.front().Records.front().Base.Self != held);
+    CHECK(drawing.Layer.Records.front().Record.Base.Self == held);
+    CHECK(Check(drawing).Findings.empty());
+  }
+
   TEST_CASE("audit: no handle at all, one given, its vertices follow")
   {
     Drawing            drawing = Fresh();
@@ -162,10 +182,13 @@ namespace DxfIO::Audit
     View::Block(drawing, "PART")->Block.Record.Base.Extended.push_back(named("WEST"));
     std::get<Objects::Dictionary>(drawing.Objects.front()).Base.Extended.push_back(named("south"));
     Tables::Table<Unknown> loose{};
-    loose.Head.Name = "VX_TABLE";
+    loose.Head.Name      = "VX_TABLE";
+    loose.Head.Base.Self = Past(drawing);
     loose.Records.push_back(Unknown{.Type = Symbol{"VX_TABLE"}});
+    loose.Records.front().Base.Self = Handle{.Value = loose.Head.Base.Self.Value + 1};
     loose.Records.front().Base.Extended.push_back(named("LOOSE"));
     drawing.Loose.push_back(loose);
+    WriteSeed(drawing, Past(drawing));
     const Report seen = Check(drawing);
     CHECK(seen.Errors() == 5);
     CHECK(seen.Findings.front().What    == "application NORTH not registered");
@@ -895,6 +918,28 @@ namespace DxfIO::Audit
     const auto &fixed = std::get<Entities::Mesh>(
         drawing.Blocks.front().Entities.at(drawing.Blocks.front().Entities.size() - 2));
     CHECK(fixed.Data->Creases == std::vector{0.5, 0.0});
+  }
+
+  TEST_CASE("audit: a mesh with an edge index short of a pair loses it, and then saves")
+  {
+    Drawing        drawing = Fresh();
+    Entities::Mesh mesh{};
+    mesh.Record.Base.Self = Past(drawing);
+    mesh.Data->Vertices   = {Vector{}, Vector{.X = 1}, Vector{.Y = 1}};
+    mesh.Data->Faces      = {3, 0, 1, 2};
+    mesh.Data->Edges      = {0, 1, 1};
+    mesh.Data->Creases    = {0.5};
+    drawing.Blocks.front().Entities.emplace_back(mesh);
+    WriteSeed(drawing, Past(drawing));
+    CHECK_FALSE(Save(drawing));
+    const Report seen = Check(drawing);
+    CHECK(std::ranges::contains(seen.Findings, "mesh with 3 edge indices, one short of a pair",
+                                &Finding::What));
+    CHECK(Repair(drawing).Clean());
+    const auto &fixed = std::get<Entities::Mesh>(drawing.Blocks.front().Entities.back());
+    CHECK(fixed.Data->Edges == std::vector<int>{0, 1});
+    CHECK(Check(drawing).Clean());
+    CHECK(Save(drawing));
   }
 
   TEST_CASE("audit: a drawing with no seed to set still repairs, and is given one")

@@ -4,6 +4,15 @@
 
 namespace DxfIO::Fields
 {
+  namespace
+  {
+    /**
+     *  The bytes that end a group in one form of file or the other, which a word carries only as
+     *  carets.
+     */
+    constexpr std::string_view Cutting{"\r\n\0", 3};
+  } // namespace
+
   auto Value<std::string>::Read(Walk &in, int code) -> std::optional<std::string>
   {
     const Tags::Tag *one = in.Take(code);
@@ -23,7 +32,7 @@ namespace DxfIO::Fields
 
   auto Word(Writing &to, int code, std::string_view text) -> std::expected<void, Failure>
   {
-    if (text.find_first_of("\r\n") == std::string_view::npos)
+    if (text.find_first_of(Cutting) == std::string_view::npos)
     {
       return to.To->Put(Tags::Tag{.Code = code, .Value = text});
     }

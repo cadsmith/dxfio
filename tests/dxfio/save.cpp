@@ -3,6 +3,7 @@
 #include "../fuzz/oracle.hpp"
 #include "disk.hpp"
 #include "header/io.hpp"
+#include "past.hpp"
 #include "tags/sentinel.hpp"
 #include "written.hpp"
 
@@ -16,6 +17,7 @@
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <ios>
 #include <limits>
 #include <sstream>
@@ -157,6 +159,42 @@ namespace DxfIO
     }
   }
 
+  TEST_CASE("save: a drawing saved to a later release names no handle it does not hold in the "
+            "variables that release adds")
+  {
+    const auto read = Load(Bytes(Acad() / "entities-r2004.dxf"));
+    REQUIRE(read);
+    const auto later = Save(read->Drawing, SaveOptions{.Release = Version::R2018});
+    REQUIRE(later);
+    const auto back = Load(later->Bytes);
+    REQUIRE(back);
+    for (const std::string_view name : {"$CMATERIAL", "$INTERFEREOBJVS", "$INTERFEREVPVS"})
+    {
+      CAPTURE(name);
+      const auto found = std::ranges::find(back->Drawing.Header, name, &Header::Variable::Name);
+      REQUIRE(found != back->Drawing.Header.end());
+      CHECK_FALSE(std::get<Handle>(found->Values.front().Value));
+    }
+  }
+
+  TEST_CASE("save: a drawing with no $HANDSEED saved to another release is given one past its "
+            "handles")
+  {
+    auto read = Load(Bytes(Acad() / "entities-r2004.dxf"));
+    REQUIRE(read);
+    std::erase_if(read->Drawing.Header,
+                  [](const Header::Variable &one) -> bool { return one.Name == "$HANDSEED"; });
+    const auto later = Save(read->Drawing, SaveOptions{.Release = Version::R2018});
+    REQUIRE(later);
+    const auto back = Load(later->Bytes);
+    REQUIRE(back);
+    const auto seed = std::ranges::find(back->Drawing.Header, "$HANDSEED", &Header::Variable::Name);
+    REQUIRE(seed != back->Drawing.Header.end());
+    const Handle given = std::get<Handle>(seed->Values.front().Value);
+    CHECK(given);
+    CHECK(given == Past(back->Drawing));
+  }
+
   TEST_CASE("save: a page not carried stays named, its text the same bytes")
   {
     constexpr std::string_view page = "$DWGCODEPAGE\r\n  3\r\n";
@@ -176,6 +214,24 @@ namespace DxfIO
         read->Drawing, SaveOptions{.Release = Version::R2000, .Codepage = "ANSI_1252"});
     REQUIRE(chosen);
     CHECK(chosen->contains("  3\r\nANSI_1252\r\n"));
+  }
+
+  TEST_CASE("save: text of a page not carried has its escapes read once when its page changes")
+  {
+    constexpr std::string_view page = "$DWGCODEPAGE\r\n  3\r\n";
+    std::string                text = Bytes(Acad() / "texts-r2000.dxf");
+    text.replace(text.find(page) + page.size(), 9, "DOS850");
+    const std::string left = "\r\nleft\r\n";
+    text.replace(text.find(left), left.size(), "\r\ncaf\\U+00E9^Jbar\r\n");
+    const auto read = Load(text);
+    REQUIRE(read);
+    const auto wide = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
+    REQUIRE(wide);
+    CHECK(wide->contains("\r\ncaf\u00e9^Jbar\r\n"));
+    const auto chosen = Tests::Written(
+        read->Drawing, SaveOptions{.Release = Version::R2000, .Codepage = "ANSI_1252"});
+    REQUIRE(chosen);
+    CHECK(chosen->contains("\r\ncaf\xe9^Jbar\r\n"));
   }
 
   TEST_CASE("save: an East Asian page read as its characters, written as its bytes")
@@ -562,6 +618,21 @@ namespace DxfIO
     const auto unwritten = SaveFile(fresh, nowhere);
     REQUIRE_FALSE(unwritten);
     CHECK(unwritten.error().What == "cannot write " + nowhere.string());
+  }
+
+  TEST_CASE("save: a file a refused save would replace is left as it was")
+  {
+    const std::filesystem::path file =
+        std::filesystem::temp_directory_path() / "dxfio-save-refused.dxf";
+    {
+      std::ofstream before{file, std::ios::binary};
+      before << "kept";
+    }
+    const auto refused = SaveFile(Create(Version::R2018), file, SaveOptions{.Codepage = "none"});
+    REQUIRE_FALSE(refused);
+    CHECK(refused.error().Code == FailureCode::Refused);
+    CHECK(Bytes(file)          == "kept");
+    std::filesystem::remove(file);
   }
 
   namespace

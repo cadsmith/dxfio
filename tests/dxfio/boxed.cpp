@@ -82,13 +82,14 @@ namespace DxfIO
 
 namespace DxfIO
 {
-  TEST_CASE("boxed: one holding a value against one moved from")
+  TEST_CASE("boxed: one holding a value against one moved from, which equals a default part")
   {
     Boxed<std::string>       full{std::string{"walls"}};
     Boxed<std::string>       source{std::string{"doors"}};
     const Boxed<std::string> taken = std::move(source);
     // NOLINTBEGIN(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
-    CHECK_FALSE(full == source);
+    CHECK_FALSE(full           == source);
+    CHECK(Boxed<std::string>{} == source);
     full = source;
     // NOLINTEND(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
     CHECK(full.Valueless());

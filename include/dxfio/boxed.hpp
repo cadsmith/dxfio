@@ -88,16 +88,9 @@ namespace DxfIO
     auto operator->() const -> const ValueT * { return &**this; }
 
     /**
-     *  Whether both hold equal parts, or both are valueless.
+     *  Whether both hold equal parts, a valueless box counting as one holding a default part.
      */
-    auto operator==(const Boxed &other) const -> bool
-    {
-      if (!m_Value || !other.m_Value)
-      {
-        return !m_Value && !other.m_Value;
-      }
-      return *m_Value == *other.m_Value;
-    }
+    auto operator==(const Boxed &other) const -> bool { return **this == *other; }
 
   private:
     static auto Copied(const Boxed &other) -> std::unique_ptr<ValueT>

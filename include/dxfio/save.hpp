@@ -70,7 +70,8 @@ namespace DxfIO
       -> std::expected<std::vector<Issue>, Failure>;
 
   /**
-   *  Writes a drawing to a file, replacing it.
+   *  Writes a drawing to a file, replacing it. The file is opened only once the drawing is written,
+   *  so a save that fails leaves it as it was; a write that fails partway does not.
    */
   [[nodiscard]] DXFIO_API auto SaveFile(const Drawing &drawing, const std::filesystem::path &file,
                                         const SaveOptions &with = {})
