@@ -115,6 +115,20 @@ namespace DxfIO::Tags
       return std::unexpected{
           Failure{.Code = value.error().Code, .Line = Located(line), .What = value.error().What}};
     }
+    if (const auto *text = std::get_if<std::string_view>(&*value))
+    {
+      const bool             ascii = m_Form == Form::Ascii;
+      const std::string_view cut   = ascii ? std::string_view{"\r\n"} : std::string_view{"\0", 1};
+      if (text->find_first_of(cut) != std::string_view::npos)
+      {
+        return std::unexpected{Failure{
+            .Code = FailureCode::Refused,
+            .Line = Located(line),
+            .What = std::format("group {} holds {}, which would cut it short", one.Code,
+                                ascii ? "a line break" : "a NUL"),
+        }};
+      }
+    }
     if (m_Form != Form::Ascii)
     {
       return Pack(one.Code, *value);

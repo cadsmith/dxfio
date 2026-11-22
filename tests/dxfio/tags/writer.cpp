@@ -280,6 +280,17 @@ namespace DxfIO::Tags
     }
   }
 
+  TEST_CASE("writer: text that would cut its group short is refused: a line break in ASCII, a NUL "
+            "in binary")
+  {
+    using namespace std::string_view_literals;
+    CHECK(Refused(Tag{.Code = 1, .Value = "a\nb"sv}, Form::Ascii));
+    CHECK(Refused(Tag{.Code = 1, .Value = "a\rb"sv}, Form::Ascii));
+    CHECK(Refused(Tag{.Code = 1, .Value = "a\0b"sv}));
+    CHECK(Packed(Tag{.Code = 1, .Value = "a\0b"sv}, Form::Ascii) == "  1\r\na\0b\r\n"sv);
+    CHECK(Packed(Tag{.Code = 1, .Value = "a\nb"sv}) == "\x01\0a\nb\0"sv);
+  }
+
   TEST_CASE("writer: binary, bytes kept as text cannot be packed")
   {
     using namespace std::string_view_literals;

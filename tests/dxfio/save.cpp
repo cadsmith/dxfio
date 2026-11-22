@@ -16,6 +16,7 @@
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <ios>
 #include <limits>
 #include <sstream>
@@ -176,6 +177,24 @@ namespace DxfIO
         read->Drawing, SaveOptions{.Release = Version::R2000, .Codepage = "ANSI_1252"});
     REQUIRE(chosen);
     CHECK(chosen->contains("  3\r\nANSI_1252\r\n"));
+  }
+
+  TEST_CASE("save: text of a page not carried has its escapes read once when its page changes")
+  {
+    constexpr std::string_view page = "$DWGCODEPAGE\r\n  3\r\n";
+    std::string                text = Bytes(Acad() / "texts-r2000.dxf");
+    text.replace(text.find(page) + page.size(), 9, "DOS850");
+    const std::string left = "\r\nleft\r\n";
+    text.replace(text.find(left), left.size(), "\r\ncaf\\U+00E9^Jbar\r\n");
+    const auto read = Load(text);
+    REQUIRE(read);
+    const auto wide = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R2018});
+    REQUIRE(wide);
+    CHECK(wide->contains("\r\ncaf\u00e9^Jbar\r\n"));
+    const auto chosen = Tests::Written(
+        read->Drawing, SaveOptions{.Release = Version::R2000, .Codepage = "ANSI_1252"});
+    REQUIRE(chosen);
+    CHECK(chosen->contains("\r\ncaf\xe9^Jbar\r\n"));
   }
 
   TEST_CASE("save: an East Asian page read as its characters, written as its bytes")
@@ -562,6 +581,21 @@ namespace DxfIO
     const auto unwritten = SaveFile(fresh, nowhere);
     REQUIRE_FALSE(unwritten);
     CHECK(unwritten.error().What == "cannot write " + nowhere.string());
+  }
+
+  TEST_CASE("save: a file a refused save would replace is left as it was")
+  {
+    const std::filesystem::path file =
+        std::filesystem::temp_directory_path() / "dxfio-save-refused.dxf";
+    {
+      std::ofstream before{file, std::ios::binary};
+      before << "kept";
+    }
+    const auto refused = SaveFile(Create(Version::R2018), file, SaveOptions{.Codepage = "none"});
+    REQUIRE_FALSE(refused);
+    CHECK(refused.error().Code == FailureCode::Refused);
+    CHECK(Bytes(file)          == "kept");
+    std::filesystem::remove(file);
   }
 
   namespace
