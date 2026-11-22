@@ -22,21 +22,22 @@ namespace DxfIO::File::Sections
     /**
      *  How an issue names a nest: by the name its head gives in group 2, else by its kind.
      */
-    auto Called(const Record &head, Kind kind) -> std::string
+    auto Called(const Record &head, const Kind &kind) -> std::string
     {
       const auto found = std::ranges::find(head.Tags, 2, &Tags::Tag::Code);
       return found == head.Tags.end() ? std::format("a {}", kind.Open)
                                       : std::string{Tags::Text(*found)};
     }
 
-    auto Taken(Cursor &in, Kind kind, std::vector<Issue> *issues) -> std::expected<Nest, Failure>
+    auto Taken(Cursor &in, const Kind &kind, std::vector<Issue> *issues)
+        -> std::expected<Nest, Failure>
     {
       return in.Take(kind.Open).and_then(
-          [&in, kind, issues](const Record &head) -> std::expected<Nest, Failure>
+          [&in, &kind, issues](const Record &head) -> std::expected<Nest, Failure>
           {
             return in.Until(kind.Close, kind.Open)
                 .transform(
-                    [&in, kind, issues, &head](std::vector<Record> inside) -> Nest
+                    [&in, &kind, issues, &head](std::vector<Record> inside) -> Nest
                     {
                       Nest out{.Head = head, .Records = std::move(inside), .End = std::nullopt};
                       if (in.At(kind.Close))
@@ -59,7 +60,7 @@ namespace DxfIO::File::Sections
           });
     }
 
-    auto All(std::span<const Tags::Tag> body, Kind kind, std::vector<Issue> *issues)
+    auto All(std::span<const Tags::Tag> body, const Kind &kind, std::vector<Issue> *issues)
         -> std::expected<std::vector<Nest>, Failure>
     {
       std::vector<Nest> out;

@@ -109,6 +109,12 @@ namespace DxfIO::File
           == std::vector{Issue{.Code = IssueCode::Damaged,
                                .Line = 7,
                                .What = "TABLE outside a TABLES section, taken as one"}});
+    const auto closed = Framed("  0\nTABLE\n  2\n\n  0\nENDSEC\n  0\nSECTION\n  2\nENTITIES\n"
+                               "  0\nENDSEC\n");
+    REQUIRE(closed);
+    REQUIRE(closed->size()            == 2);
+    CHECK(closed->front().Body.size() == 2);
+    CHECK(closed->back().Name         == "ENTITIES");
     const auto last = Framed("  0\nTABLE\n  2\nLAYER\n  0\nENDTAB\n  0\nEOF\n");
     REQUIRE(last);
     REQUIRE(last->size()            == 1);

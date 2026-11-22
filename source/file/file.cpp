@@ -43,9 +43,14 @@ namespace DxfIO::File
       return Tags::Holds(*next, 0, "EOF") ? "EOF" : "the next SECTION";
     }
 
+    auto Ends(const Tags::Tag &one) -> bool
+    {
+      return Closes(one) || Opens(one);
+    }
+
     /**
      *  A TABLE where a SECTION should open: the tables of an exporter that wrote no TABLES around
-     *  them, taken as that section, up to the next one or EOF.
+     *  them, taken as that section, up to an ENDSEC, which closes it, or the next section or EOF.
      */
     auto Tabled(std::span<const Tags::Tag> &rest, std::vector<Issue> *issues) -> Section
     {
@@ -53,10 +58,11 @@ namespace DxfIO::File
                          .Line = Located(rest.front().Line),
                          .What = "TABLE outside a TABLES section, taken as one"});
       const std::span<const Tags::Tag> after = rest.subspan(1);
-      const auto                       end   = std::ranges::find_if(after, Opens);
+      const auto                       end   = std::ranges::find_if(after, Ends);
       const std::size_t                count = 1 + static_cast<std::size_t>(end - after.begin());
       const Section                    out{.Name = "TABLES", .Body = rest.first(count)};
-      rest = rest.subspan(count);
+      const bool                       closed = end != after.end() && Closes(*end);
+      rest                                    = rest.subspan(closed ? count + 1 : count);
       return out;
     }
 
@@ -85,9 +91,8 @@ namespace DxfIO::File
       }
       const std::string_view           name   = Tags::Text(after.front());
       const std::span<const Tags::Tag> inside = after.subspan(1);
-      const auto end   = std::ranges::find_if(inside, [](const Tags::Tag &one) -> bool
-                                              { return Closes(one) || Opens(one); });
-      const auto count = static_cast<std::size_t>(end - inside.begin());
+      const auto                       end    = std::ranges::find_if(inside, Ends);
+      const auto                       count  = static_cast<std::size_t>(end - inside.begin());
       if (end != inside.end() && Closes(*end))
       {
         rest = inside.subspan(count + 1);
