@@ -115,6 +115,10 @@ namespace DxfIO::File
     REQUIRE(closed->size()            == 2);
     CHECK(closed->front().Body.size() == 2);
     CHECK(closed->back().Name         == "ENTITIES");
+    const auto unended = Framed("  0\nTABLE\n  2\nLAYER\n  0\nENDTAB\n");
+    REQUIRE(unended);
+    REQUIRE(unended->size()            == 1);
+    CHECK(unended->front().Body.size() == 3);
     const auto last = Framed("  0\nTABLE\n  2\nLAYER\n  0\nENDTAB\n  0\nEOF\n");
     REQUIRE(last);
     REQUIRE(last->size()            == 1);
