@@ -146,6 +146,12 @@ namespace DxfIO::View
     CHECK(Entry(drawing, *root, "ACAD_LAYOUT") == Entry(fixed, *root, "acad_layout"));
     CHECK(Dictionary(drawing, "acad_layout")   == Dictionary(fixed, "ACAD_LAYOUT"));
     CHECK(Dictionary(drawing, "nope")          == nullptr);
+    Objects::Dictionary hard{};
+    hard.Entries = {Objects::Entry{.Name = "Hard", .Hard = root->Base.Self}};
+    CHECK(Entry(drawing, hard, "hard") == &drawing.Objects.front());
+    CHECK(Entry(fixed, hard, "HARD")   == &drawing.Objects.front());
+    Drawing bare{};
+    CHECK(Dictionary(bare, "ACAD_LAYOUT") == nullptr);
   }
 
   namespace
