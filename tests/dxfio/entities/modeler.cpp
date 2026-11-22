@@ -113,7 +113,7 @@ namespace DxfIO::Entities
     REQUIRE(one.Geometry->Lines.size()    == 3);
     CHECK(one.Geometry->Lines.at(1).Code  == 3);
     CHECK(one.Geometry->Lines.back().Code == 1);
-    CHECK(Replayed<Region>(Oldest("REGION", ""), Version::R2000).Picture.empty());
+    CHECK(Replayed<Region>(Oldest("REGION", ""), Version::R2000).Graphics.empty());
   }
 
   TEST_CASE("modeler: alike only with what it holds alike")
@@ -126,7 +126,7 @@ namespace DxfIO::Entities
     Region flat{};
     CHECK(flat == Region{});
     Body body{};
-    body.Picture = {std::byte{'x'}};
+    body.Graphics = {std::byte{'x'}};
     CHECK(body != Body{});
     LoftedSurface sheet{};
     sheet.UIsolines = 1;

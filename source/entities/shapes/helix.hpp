@@ -36,7 +36,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::Helix> = std::tuple{
       Entities::Part<Entities::Helix>,
-      Fields::Picture{.Member = &Entities::Helix::Picture},
+      Fields::Picture{.Member = &Entities::Helix::Graphics},
       Fields::Part{
           .Member = &Entities::Helix::Curve,
           .Fields = Shapes<Entities::Curve>,

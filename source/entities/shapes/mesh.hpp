@@ -103,7 +103,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::Mesh> = std::tuple{
       Entities::Part<Entities::Mesh>,
-      Fields::Picture{.Member = &Entities::Mesh::Picture},
+      Fields::Picture{.Member = &Entities::Mesh::Graphics},
       Fields::Part{
           .Member = &Entities::Mesh::Data,
           .Fields = Shapes<Entities::MeshData>,

@@ -52,7 +52,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::SectionObject> = std::tuple{
       Entities::Part<Entities::SectionObject>,
-      Fields::Picture{.Member = &Entities::SectionObject::Picture},
+      Fields::Picture{.Member = &Entities::SectionObject::Graphics},
       Fields::Part{
           .Member = &Entities::SectionObject::Data,
           .Fields = Shapes<Entities::SectionObjectData>,

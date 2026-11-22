@@ -24,7 +24,7 @@ namespace DxfIO
   template <>
   inline constexpr auto Shapes<Entities::AcadTable> = std::tuple{
       Entities::Part<Entities::AcadTable>,
-      Fields::Picture{.Member = &Entities::AcadTable::Picture},
+      Fields::Picture{.Member = &Entities::AcadTable::Graphics},
       Fields::Subclass{.Marker = "AcDbBlockReference"},
       Fields::Field{.Code = 2, .Member = &Entities::AcadTable::Block},
       Fields::Field{.Code = 10, .Member = &Entities::AcadTable::Position},

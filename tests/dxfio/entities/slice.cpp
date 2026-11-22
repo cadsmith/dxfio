@@ -38,7 +38,7 @@ namespace DxfIO::Entities
     CHECK(one.Data->Vertices.back()   == Vector{.X = 250});
     CHECK(one.Data->Back.empty());
     CHECK(one.Data->Settings == Handle{.Value = 0x316});
-    CHECK_FALSE(one.Picture.empty());
+    CHECK_FALSE(one.Graphics.empty());
     CHECK_FALSE(one.Record.Base.Extended.empty());
   }
 

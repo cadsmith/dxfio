@@ -542,7 +542,7 @@ namespace DxfIO::Entities
   struct DXFIO_API ArcDimension
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::ArcDimensionData> Data{};
     auto operator==(const ArcDimension &) const -> bool = default;
   };
@@ -558,7 +558,7 @@ namespace DxfIO::Entities
   struct DXFIO_API LargeRadialDimension
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::LargeRadialDimensionData> Data{};
     auto operator==(const LargeRadialDimension &) const -> bool = default;
   };
@@ -819,7 +819,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Helix
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Curve> Curve{};
     Entities::HelixData Data{};
     auto operator==(const Helix &) const -> bool = default;
@@ -969,7 +969,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Light
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::LightData> Data{};
     auto operator==(const Light &) const -> bool = default;
   };
@@ -1052,7 +1052,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Mesh
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::MeshData> Data{};
     auto operator==(const Mesh &) const -> bool = default;
   };
@@ -1126,21 +1126,21 @@ namespace DxfIO::Entities
   struct DXFIO_API Region
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     auto operator==(const Region &) const -> bool = default;
   };
   struct DXFIO_API Body
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     auto operator==(const Body &) const -> bool = default;
   };
   struct DXFIO_API Solid3d
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     Handle History{};
     auto operator==(const Solid3d &) const -> bool = default;
@@ -1159,7 +1159,7 @@ namespace DxfIO::Entities
   struct SurfaceOf
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Geometry> Geometry{};
     int UIsolines{6};
     int VIsolines{6};
@@ -1403,7 +1403,7 @@ namespace DxfIO::Entities
   struct DXFIO_API MultiLeader
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<MultiLeaders::MLeader> MLeader{};
     auto operator==(const MultiLeader &) const -> bool = default;
   };
@@ -1540,14 +1540,14 @@ namespace DxfIO::Entities
   struct DXFIO_API Image
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Raster> Raster{};
     auto operator==(const Image &) const -> bool = default;
   };
   struct DXFIO_API Wipeout
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::Raster> Raster{};
     auto operator==(const Wipeout &) const -> bool = default;
   };
@@ -1627,7 +1627,7 @@ namespace DxfIO::Entities
   struct DXFIO_API SectionObject
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::SectionObjectData> Data{};
     auto operator==(const SectionObject &) const -> bool = default;
   };
@@ -1740,7 +1740,7 @@ namespace DxfIO::Entities
   struct DXFIO_API AcadTable
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Symbol Block{""};
     Vector Position{};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
@@ -1833,7 +1833,7 @@ namespace DxfIO::Entities
   struct UnderlayOf
   {
     Entities::Record Record{};
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     Boxed<Entities::UnderlayData> Data{};
     auto operator==(const UnderlayOf &) const -> bool = default;
   };

@@ -94,7 +94,7 @@ namespace DxfIO::Entities
     CHECK(all.Arrowheads.empty());
     CHECK(all.BlockAttributes.empty());
     CHECK_FALSE(all.ExtendToText);
-    CHECK_FALSE(one.Picture.empty());
+    CHECK_FALSE(one.Graphics.empty());
   }
 
   TEST_CASE("mleader: every release alike, each with the groups it has")

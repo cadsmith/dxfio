@@ -85,7 +85,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::vector<std::byte> Picture{};
+    std::vector<std::byte> Graphics{};
     /**
      *  The plane, its line and its indicator, from the AcDbSection subclass.
      */
