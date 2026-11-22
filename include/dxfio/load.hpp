@@ -43,8 +43,9 @@ namespace DxfIO
 
   /**
    *  Reads a drawing from the bytes of a DXF file, ASCII or binary, of any release from R10 to
-   *  R2018. Fails only when the bytes are not DXF at all; anything it can step over becomes an
-   *  issue.
+   *  R2018. Fails when the bytes are not DXF, or when a section's groups cannot be cut into
+   *  records, as a group other than 0 where a record should open; anything it can step over, as a
+   *  missing ENDSEC, ENDTAB or ENDBLK, becomes an issue.
    */
   [[nodiscard]] DXFIO_API auto Load(std::string_view bytes, const LoadOptions &with = {})
       -> std::expected<Loaded, Failure>;

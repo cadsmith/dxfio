@@ -6,6 +6,7 @@
 
 #include "dxfio/api.hpp"
 
+#include <optional>
 #include <span>
 #include <string_view>
 #include <vector>
@@ -22,7 +23,10 @@ namespace DxfIO::File
   {
     Record              Head;
     std::vector<Record> Records;
-    Record              End;
+    /**
+     *  The closer, none when the file left it out.
+     */
+    std::optional<Record> End;
   };
 
   struct DXFIO_API Section

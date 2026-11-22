@@ -26,7 +26,17 @@ namespace DxfIO::File
 
     auto Take(std::string_view name) -> std::expected<Record, Failure>;
 
-    auto Until(std::string_view end) -> std::expected<std::vector<Record>, Failure>;
+    /**
+     *  Whether a record of that name is next.
+     */
+    [[nodiscard]] auto At(std::string_view name) const -> bool;
+
+    /**
+     *  The records up to the next one named end or open, or to the last: what a nest holds, up to
+     *  its closer or, when that is missing, to the next nest.
+     */
+    auto Until(std::string_view end, std::string_view open)
+        -> std::expected<std::vector<Record>, Failure>;
 
   private:
     [[nodiscard]] auto Rest() const -> std::span<const Tags::Tag>;

@@ -336,10 +336,62 @@ namespace DxfIO
           == std::unexpected{Failure{.Code = FailureCode::Damaged,
                                      .Line = 5,
                                      .What = "header variable expected, found group 1"}});
-    CHECK(Load("  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n"
-               "  0\nSECTION\n  2\nTABLES\n  0\nTABLE\n  2\nLAYER\n  0\nENDSEC\n  0\nEOF\n")
-          == std::unexpected{
-              Failure{.Code = FailureCode::Damaged, .Line = 13, .What = "ENDTAB missing"}});
+    CHECK(Load("  0\nSECTION\n  2\nENTITIES\n  8\n0\n  0\nENDSEC\n  0\nEOF\n")
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 5, .What = "group 0 expected, found group 8"}});
+  }
+
+  TEST_CASE("load: a section missing its ENDSEC closes at the next one, which is kept, told")
+  {
+    const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n"
+                           "  0\nSECTION\n  2\nOBJECTS\n  0\nDICTIONARY\n  0\nENDSEC\n"
+                           "  0\nSECTION\n  2\nBLOCKS\n  0\nEOF\n");
+    REQUIRE(read);
+    CHECK(read->Drawing.Order == std::vector<std::string>{"ENTITIES", "OBJECTS", "BLOCKS"});
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(std::holds_alternative<Entities::Line>(read->Drawing.Entities.front()));
+    CHECK(read->Drawing.Objects.size() == 1);
+    CHECK(read->Issues
+          == std::vector{
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 1,
+                    .What = "ENDSEC of ENTITIES missing, closed at the next SECTION"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 15,
+                    .What = "ENDSEC of BLOCKS missing, closed at EOF"},
+          });
+  }
+
+  TEST_CASE("load: a table or a block missing its closer closes at the next, which is kept, told")
+  {
+    const auto read =
+        Load("  0\nSECTION\n  2\nTABLES\n  0\nTABLE\n  2\nLAYER\n  0\nLAYER\n  2\nwalls\n"
+             "  0\nTABLE\n  2\nSTYLE\n  0\nSTYLE\n  2\nnotes\n  0\nENDTAB\n  0\nENDSEC\n"
+             "  0\nSECTION\n  2\nBLOCKS\n  0\nBLOCK\n  2\nbolt\n  8\npins\n  0\nCIRCLE\n"
+             "  0\nBLOCK\n  2\nnut\n  0\nLINE\n  0\nENDSEC\n  0\nEOF\n");
+    REQUIRE(read);
+    REQUIRE(read->Drawing.Layer.Records.size()            == 1);
+    CHECK(read->Drawing.Layer.Records.front().Record.Name == "walls");
+    REQUIRE(read->Drawing.Style.Records.size()            == 1);
+    CHECK(read->Drawing.Style.Records.front().Record.Name == "notes");
+    REQUIRE(read->Drawing.Blocks.size()           == 2);
+    CHECK(read->Drawing.Blocks.front().Block.Name == "bolt");
+    CHECK(read->Drawing.Blocks.front().Entities.size()     == 1);
+    CHECK(read->Drawing.Blocks.front().EndBlk.Record.Layer == "pins");
+    CHECK(read->Drawing.Blocks.back().Block.Name           == "nut");
+    CHECK(read->Drawing.Blocks.back().Entities.size()      == 1);
+    CHECK(read->Issues
+          == std::vector{
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 5,
+                    .What = "ENDTAB of LAYER missing, closed at the next TABLE"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 29,
+                    .What = "ENDBLK of bolt missing, closed at the next BLOCK"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 37,
+                    .What = "ENDBLK of nut missing, closed at the end of the section"},
+          });
   }
 
   namespace

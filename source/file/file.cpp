@@ -31,8 +31,26 @@ namespace DxfIO::File
     }
 
     /**
+     *  Where a section missing its ENDSEC closes: at the tag that opens what follows, or at the end
+     *  of the file when none does.
+     */
+    auto Stop(const Tags::Tag *next) -> std::string_view
+    {
+      if (next == nullptr)
+      {
+        return "the end of the file";
+      }
+      return Tags::Holds(*next, 0, "EOF") ? "EOF" : "the next SECTION";
+    }
+
+    auto Ends(const Tags::Tag &one) -> bool
+    {
+      return Closes(one) || Opens(one);
+    }
+
+    /**
      *  A TABLE where a SECTION should open: the tables of an exporter that wrote no TABLES around
-     *  them, taken as that section, up to the next one or EOF.
+     *  them, taken as that section, up to an ENDSEC, which closes it, or the next section or EOF.
      */
     auto Tabled(std::span<const Tags::Tag> &rest, std::vector<Issue> *issues) -> Section
     {
@@ -40,10 +58,11 @@ namespace DxfIO::File
                          .Line = Located(rest.front().Line),
                          .What = "TABLE outside a TABLES section, taken as one"});
       const std::span<const Tags::Tag> after = rest.subspan(1);
-      const auto                       end   = std::ranges::find_if(after, Opens);
+      const auto                       end   = std::ranges::find_if(after, Ends);
       const std::size_t                count = 1 + static_cast<std::size_t>(end - after.begin());
       const Section                    out{.Name = "TABLES", .Body = rest.first(count)};
-      rest = rest.subspan(count);
+      const bool                       closed = end != after.end() && Closes(*end);
+      rest                                    = rest.subspan(closed ? count + 1 : count);
       return out;
     }
 
@@ -72,20 +91,20 @@ namespace DxfIO::File
       }
       const std::string_view           name   = Tags::Text(after.front());
       const std::span<const Tags::Tag> inside = after.subspan(1);
-      const auto                       end    = std::ranges::find_if(inside, Closes);
-      if (end == inside.end())
+      const auto                       end    = std::ranges::find_if(inside, Ends);
+      const auto                       count  = static_cast<std::size_t>(end - inside.begin());
+      if (end != inside.end() && Closes(*end))
       {
-        Tell(issues,
-             Issue{
-                 .Code = IssueCode::Damaged,
-                 .Line = Located(start.Line),
-                 .What = std::format("ENDSEC of {} missing, closed at the end of the file", name),
-             });
-        rest = {};
-        return Section{.Name = name, .Body = inside};
+        rest = inside.subspan(count + 1);
+        return Section{.Name = name, .Body = inside.first(count)};
       }
-      const auto count = static_cast<std::size_t>(end - inside.begin());
-      rest             = inside.subspan(count + 1);
+      const std::string_view where = Stop(end == inside.end() ? nullptr : &*end);
+      Tell(issues, Issue{
+                       .Code = IssueCode::Damaged,
+                       .Line = Located(start.Line),
+                       .What = std::format("ENDSEC of {} missing, closed at {}", name, where),
+                   });
+      rest = inside.subspan(count);
       return Section{.Name = name, .Body = inside.first(count)};
     }
   } // namespace
