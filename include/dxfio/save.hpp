@@ -35,8 +35,8 @@ namespace DxfIO
      */
     bool Binary{};
     /**
-     *  The threads the entities and objects are written on: 0 for as many as the machine has, 1 for
-     *  the calling thread alone. The bytes come out the same whatever the count.
+     *  The threads the entities and objects are written on: 0 or less for as many as the machine
+     *  has, 1 for the calling thread alone. The bytes come out the same whatever the count.
      */
     int Threads{0};
   };

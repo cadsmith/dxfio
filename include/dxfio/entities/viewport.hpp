@@ -67,9 +67,10 @@ namespace DxfIO::Entities
      */
     Vector Target{};
     /**
-     *  The lens length of a perspective view. Group 42, from R2000.
+     *  The lens length of a perspective view, in millimeters: 50 for a new viewport, 0 for one read
+     *  without it, as AutoCAD reads it. Group 42, from R2000.
      */
-    double LensLength{};
+    double LensLength{50};
     /**
      *  The offset of the front clipping plane from the target. Group 43, from R2000.
      */
@@ -118,9 +119,10 @@ namespace DxfIO::Entities
      */
     int Render{};
     /**
-     *  1 when the viewport keeps its own UCS, made current when it is active. Group 71, from R2000.
+     *  Whether the viewport keeps its own UCS, made current when it is active. Group 71, from
+     *  R2000.
      */
-    int UcsPerViewport{1};
+    bool UcsPerViewport{true};
     /**
      *  1 when the UCS icon is drawn at the UCS origin. Group 74, from R2000.
      */
@@ -178,7 +180,7 @@ namespace DxfIO::Entities
      *  The color book of the ambient light, joined to the color's name by a $. Group 431, from
      *  R2007.
      */
-    std::string Book{};
+    std::optional<std::string> Book{};
     /**
      *  The SUN that lights the viewport. Group 361, from R2007.
      */

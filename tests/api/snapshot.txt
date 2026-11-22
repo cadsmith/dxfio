@@ -233,6 +233,7 @@ namespace DxfIO::Colors
   inline constexpr int ByLayer = 256;
   inline constexpr int PackedByLayer = -1073741824;
   inline constexpr int PackedByBlock = -1056964608;
+  inline constexpr int PackedBlack = -1040187392;
 }
 == dxfio/corners.hpp
 #include "dxfio/vector.hpp"
@@ -296,8 +297,10 @@ namespace DxfIO
   };
   [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
   [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
+  auto FindEntity(const Drawing &&drawing, Handle self) -> const Entity * = delete;
   [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
   [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
+  auto FindObject(const Drawing &&drawing, Handle self) -> const Object * = delete;
 }
 == dxfio/dxfio.hpp
 #include "dxfio/appearance.hpp"
@@ -330,20 +333,28 @@ namespace DxfIO
 #include <string_view>
 namespace DxfIO::Edit
 {
-  DXFIO_API auto Add(Drawing &drawing, Entity one, Space space = Space::Model)
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Entity one, Space space = Space::Model)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Entity one, std::string_view block)
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Entity one, std::string_view block)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto AddBlock(Drawing &drawing, std::string_view name)
+  [[nodiscard]] DXFIO_API auto AddBlock(Drawing &drawing, std::string_view name)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::VPort one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::LType one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::Layer one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::Style one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::View one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::AppId one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Drawing &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::VPort one)
+      -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::LType one)
+      -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::Layer one)
+      -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::Style one)
+      -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::View one)
+      -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::Ucs one)
+      -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::AppId one)
+      -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::DimStyle one)
+      -> std::expected<Handle, Failure>;
 }
 == dxfio/edit/handles.hpp
 #include "dxfio/api.hpp"
@@ -585,8 +596,8 @@ namespace DxfIO::Entities
     std::optional<double> LineSpacingFactor{};
     double Measured{-1};
     int Unknown1{};
-    int FlipFirst{};
-    int FlipSecond{};
+    bool FlipFirst{};
+    bool FlipSecond{};
     std::optional<double> Oblique{};
     std::optional<double> TextRotation{};
     std::optional<double> BlockRotation{};
@@ -1039,7 +1050,7 @@ namespace DxfIO::Entities
   struct DXFIO_API MeshData
   {
     int Version{2};
-    int Blend{};
+    bool Blend{};
     int Level{};
     std::vector<Vector> Vertices{};
     std::vector<int> Faces{};
@@ -1527,7 +1538,7 @@ namespace DxfIO::Entities
     Vector Size{};
     Handle Definition{};
     int Flags{7};
-    int Clipped{};
+    bool Clipped{};
     int Brightness{50};
     int Contrast{50};
     int Fade{};
@@ -1902,7 +1913,7 @@ namespace DxfIO::Entities
     Vector Grid{};
     Vector Direction{Up};
     Vector Target{};
-    double LensLength{};
+    double LensLength{50};
     double Front{};
     double Back{};
     double ViewHeight{-1};
@@ -1914,7 +1925,7 @@ namespace DxfIO::Entities
     Handle Clip{};
     std::string Sheet{};
     int Render{};
-    int UcsPerViewport{1};
+    bool UcsPerViewport{true};
     int UcsIconAtOrigin{};
     Tables::Axes Axes{};
     int ShadePlotMode{};
@@ -1928,7 +1939,7 @@ namespace DxfIO::Entities
     double Contrast{};
     int Ambient{250};
     std::optional<int> Rgb{};
-    std::string Book{};
+    std::optional<std::string> Book{};
     Handle Sun{};
     auto operator==(const ViewportData &) const -> bool = default;
   };
@@ -2131,6 +2142,7 @@ namespace DxfIO
   {
   public:
     explicit Index(const Drawing &drawing);
+    explicit Index(const Drawing &&drawing) = delete;
     [[nodiscard]] auto Source() const -> const Drawing &;
     [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
     [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
@@ -2440,6 +2452,7 @@ namespace DxfIO::Objects
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/matrix.hpp"
 #include <optional>
 #include <string>
@@ -2449,7 +2462,7 @@ namespace DxfIO::Objects::Materials
   {
     int Method{};
     double Factor{1};
-    int Color{-1040187392};
+    int Color{Colors::PackedBlack};
     auto operator==(const MaterialColor &) const -> bool = default;
   };
   struct DXFIO_API Map
@@ -2588,6 +2601,7 @@ namespace DxfIO::Objects
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
+#include "dxfio/symbol.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO::Objects::MLineStyles
@@ -2596,7 +2610,7 @@ namespace DxfIO::Objects::MLineStyles
   {
     double Offset{};
     int Color{Colors::ByLayer};
-    std::string Linetype{"BYLAYER"};
+    Symbol Linetype{"BYLAYER"};
     auto operator==(const Element &) const -> bool = default;
   };
 }
@@ -2724,6 +2738,7 @@ namespace DxfIO::Objects
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/lineweight.hpp"
+#include "dxfio/symbol.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO::Objects::TableStyles
@@ -2737,7 +2752,7 @@ namespace DxfIO::Objects::TableStyles
   };
   struct DXFIO_API RowStyle
   {
-    std::string Style{};
+    Symbol Style{};
     double Height{4.5};
     int Alignment{1};
     int Color{};
@@ -3045,12 +3060,12 @@ namespace DxfIO::Tables
     double Dimjogang{45};
     int Dimtfill{};
     int Dimtfillclr{};
-    int Dimtol{};
-    int Dimlim{};
-    int Dimtih{1};
-    int Dimtoh{1};
-    int Dimse1{};
-    int Dimse2{};
+    bool Dimtol{};
+    bool Dimlim{};
+    bool Dimtih{true};
+    bool Dimtoh{true};
+    bool Dimse1{};
+    bool Dimse2{};
     int Dimtad{};
     int Dimzin{};
     int Dimazin{};
@@ -3064,12 +3079,12 @@ namespace DxfIO::Tables
     double Dimtfac{1};
     double Dimgap{0.09};
     double Dimaltrnd{};
-    int Dimalt{};
+    bool Dimalt{};
     int Dimaltd{2};
-    int Dimtofl{};
-    int Dimsah{};
-    int Dimtix{};
-    int Dimsoxd{};
+    bool Dimtofl{};
+    bool Dimsah{};
+    bool Dimtix{};
+    bool Dimsoxd{};
     int Dimclrd{};
     int Dimclre{};
     int Dimclrt{};
@@ -3084,13 +3099,13 @@ namespace DxfIO::Tables
     int Dimdsep{'.'};
     int Dimtmove{};
     int Dimjust{};
-    int Dimsd1{};
-    int Dimsd2{};
+    bool Dimsd1{};
+    bool Dimsd2{};
     int Dimtolj{1};
     int Dimtzin{};
     int Dimaltz{};
     int Dimalttz{};
-    int Dimupt{};
+    bool Dimupt{};
     int Dimatfit{3};
     bool Dimfxlon{};
     Handle Dimtxsty{};
@@ -3120,7 +3135,7 @@ namespace DxfIO::Tables
     std::int64_t Flags{};
     auto operator==(const Face &) const -> bool = default;
   };
-  [[nodiscard]] DXFIO_API auto Named(const Style &one) -> std::optional<Face>;
+  [[nodiscard]] DXFIO_API auto FaceOf(const Style &one) -> std::optional<Face>;
 }
 == dxfio/tables/layer.hpp
 #include "dxfio/api.hpp"
@@ -3428,6 +3443,7 @@ namespace DxfIO::View
       -> Blocks::Definition *;
   [[nodiscard]] DXFIO_API auto Block(const Drawing &drawing, std::string_view name)
       -> const Blocks::Definition *;
+  auto Block(const Drawing &&drawing, std::string_view name) -> const Blocks::Definition * = delete;
   template <class RecordT>
     requires requires(const RecordT &record) { record.Record.Name; }
   [[nodiscard]] auto Record(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
@@ -3497,17 +3513,37 @@ namespace DxfIO::View
   {
     return Record(TableOf<RecordT>(drawing), name);
   }
+  template <class RecordT>
+  auto Record(const Drawing &&drawing, std::string_view name) -> const RecordT * = delete;
+  [[nodiscard]] DXFIO_API auto ModelSpace(Drawing &drawing) -> Tables::BlockRecord *;
   [[nodiscard]] DXFIO_API auto ModelSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
+  auto ModelSpace(const Drawing &&drawing) -> const Tables::BlockRecord * = delete;
+  [[nodiscard]] DXFIO_API auto PaperSpace(Drawing &drawing) -> Tables::BlockRecord *;
   [[nodiscard]] DXFIO_API auto PaperSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
+  auto PaperSpace(const Drawing &&drawing) -> const Tables::BlockRecord * = delete;
+  [[nodiscard]] DXFIO_API auto Layouts(Drawing &drawing) -> std::vector<Objects::Layout *>;
   [[nodiscard]] DXFIO_API auto Layouts(const Drawing &drawing)
       -> std::vector<const Objects::Layout *>;
+  auto Layouts(const Drawing &&drawing) -> std::vector<const Objects::Layout *> = delete;
+  [[nodiscard]] DXFIO_API auto Layout(Drawing &drawing, std::string_view name) -> Objects::Layout *;
   [[nodiscard]] DXFIO_API auto Layout(const Drawing &drawing, std::string_view name)
       -> const Objects::Layout *;
+  auto Layout(const Drawing &&drawing, std::string_view name) -> const Objects::Layout * = delete;
+  [[nodiscard]] DXFIO_API auto Root(Drawing &drawing) -> Objects::Dictionary *;
   [[nodiscard]] DXFIO_API auto Root(const Drawing &drawing) -> const Objects::Dictionary *;
+  auto Root(const Drawing &&drawing) -> const Objects::Dictionary * = delete;
+  [[nodiscard]] DXFIO_API auto Entry(Drawing &drawing, const Objects::Dictionary &dictionary,
+                                     std::string_view name) -> Object *;
   [[nodiscard]] DXFIO_API auto Entry(const Drawing &drawing, const Objects::Dictionary &dictionary,
                                      std::string_view name) -> const Object *;
+  auto Entry(const Drawing &&drawing, const Objects::Dictionary &dictionary, std::string_view name)
+      -> const Object * = delete;
+  [[nodiscard]] DXFIO_API auto Dictionary(Drawing &drawing, std::string_view name)
+      -> Objects::Dictionary *;
   [[nodiscard]] DXFIO_API auto Dictionary(const Drawing &drawing, std::string_view name)
       -> const Objects::Dictionary *;
+  auto Dictionary(const Drawing &&drawing, std::string_view name)
+      -> const Objects::Dictionary * = delete;
 }
 == dxfio/widths.hpp
 #include "dxfio/api.hpp"

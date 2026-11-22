@@ -24,7 +24,7 @@ namespace DxfIO::Entities
     /**
      *  Whether creases are blended. Group 72.
      */
-    int Blend{};
+    bool Blend{};
     /**
      *  The level of subdivision smoothing. Group 91.
      */

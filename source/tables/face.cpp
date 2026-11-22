@@ -29,7 +29,7 @@ namespace DxfIO::Tables
     }
   } // namespace
 
-  auto Named(const Style &one) -> std::optional<Face>
+  auto FaceOf(const Style &one) -> std::optional<Face>
   {
     const std::vector<Xdata> &all   = one.Record.Base.Extended;
     const auto                found = std::ranges::find(all, Owner, &Xdata::Application);

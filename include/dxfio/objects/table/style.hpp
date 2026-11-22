@@ -5,6 +5,7 @@
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/lineweight.hpp"
+#include "dxfio/symbol.hpp"
 
 #include <string>
 #include <vector>
@@ -42,7 +43,7 @@ namespace DxfIO::Objects::TableStyles
     /**
      *  The name of the text style. Group 7.
      */
-    std::string Style{};
+    Symbol Style{};
     /**
      *  The height of the text. Group 140.
      */

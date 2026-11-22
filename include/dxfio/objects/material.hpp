@@ -4,6 +4,7 @@
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/matrix.hpp"
 
 #include <optional>
@@ -25,9 +26,10 @@ namespace DxfIO::Objects::Materials
      */
     double Factor{1};
     /**
-     *  The color, packed into one integer as AutoCAD does. Group 90, 91 or 92 by shade.
+     *  The color, packed into one integer as AutoCAD does: black, true color, unless the file says
+     *  otherwise. Group 90, 91 or 92 by shade.
      */
-    int Color{-1040187392};
+    int Color{Colors::PackedBlack};
 
     auto operator==(const MaterialColor &) const -> bool = default;
   };

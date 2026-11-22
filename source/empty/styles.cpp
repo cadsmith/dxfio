@@ -48,7 +48,7 @@ namespace DxfIO::Empty
     auto Cell(double height, int alignment) -> Objects::TableStyles::RowStyle
     {
       Objects::TableStyles::RowStyle out{};
-      out.Style     = "Standard";
+      out.Style     = Symbol{"Standard"};
       out.Height    = height;
       out.Alignment = alignment;
       return out;

@@ -52,7 +52,7 @@ namespace DxfIO
         Fields::Field<Materials::MaterialColor, int, int>{
             .Code     = Color,
             .Member   = &Materials::MaterialColor::Color,
-            .Fallback = -1040187392,
+            .Fallback = Colors::PackedBlack,
         },
     };
 

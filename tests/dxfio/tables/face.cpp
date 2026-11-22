@@ -28,7 +28,7 @@ namespace DxfIO::Tables
   {
     const Style bold = Held("ACAD", {Tag{.Code = 1000, .Value = std::string{"Arial"}},
                                      Tag{.Code = 1071, .Value = std::int64_t{33554466}}});
-    const std::optional<Face> found = Named(bold);
+    const std::optional<Face> found = FaceOf(bold);
     REQUIRE(found);
     CHECK(found->Family == "Arial");
     CHECK((found->Flags & (1 << 25)) != 0);
@@ -38,15 +38,15 @@ namespace DxfIO::Tables
   TEST_CASE("face: flags of 0 where it gives none")
   {
     const std::optional<Face> found =
-        Named(Held("ACAD", {Tag{.Code = 1000, .Value = std::string{"Arial"}}}));
+        FaceOf(Held("ACAD", {Tag{.Code = 1000, .Value = std::string{"Arial"}}}));
     REQUIRE(found);
     CHECK(found->Flags == 0);
   }
 
   TEST_CASE("face: none with no family, or from another application")
   {
-    CHECK_FALSE(Named(Style{}));
-    CHECK_FALSE(Named(Held("ACAD", {Tag{.Code = 1071, .Value = std::int64_t{34}}})));
-    CHECK_FALSE(Named(Held("OTHER", {Tag{.Code = 1000, .Value = std::string{"Arial"}}})));
+    CHECK_FALSE(FaceOf(Style{}));
+    CHECK_FALSE(FaceOf(Held("ACAD", {Tag{.Code = 1071, .Value = std::int64_t{34}}})));
+    CHECK_FALSE(FaceOf(Held("OTHER", {Tag{.Code = 1000, .Value = std::string{"Arial"}}})));
   }
 } // namespace DxfIO::Tables

@@ -32,7 +32,7 @@ namespace DxfIO::Tables
    *  The TrueType face a text style names in its extended data, or none when it uses a font file
    *  alone.
    */
-  [[nodiscard]] DXFIO_API auto Named(const Style &one) -> std::optional<Face>;
+  [[nodiscard]] DXFIO_API auto FaceOf(const Style &one) -> std::optional<Face>;
 } // namespace DxfIO::Tables
 
 #endif /* DXFIO_TABLES_FACE_HPP */
