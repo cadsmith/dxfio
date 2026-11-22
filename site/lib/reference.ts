@@ -5,7 +5,7 @@ import type { Header, Kind } from '../scripts/api.ts'
 
 export const headers = data as Header[]
 
-export const order = ['Start', 'Edit', 'Drawing', 'Entities', 'Objects', 'Tables', 'Blocks', 'Audit', 'Values']
+export const order = ['Start', 'Edit', 'View', 'Drawing', 'Entities', 'Objects', 'Tables', 'Blocks', 'Audit', 'Values']
 
 // A header's page; the one that includes them all is the reference's own.
 export const reference = (path: string) => (path === 'dxfio.hpp' ? '/reference/' : `/reference/${path.replace(/\.hpp$/, '')}/`)

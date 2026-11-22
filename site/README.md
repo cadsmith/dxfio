@@ -23,8 +23,8 @@ given as `## Title [#id]`.
 
 A fence takes a title as ` ```cpp title="plan.cpp" `, and fences next to
 each other with a `tab="…"` become tabs: ` ```cmake tab="CMakeLists.txt" `.
-GitHub's alerts, `> [!NOTE]`, `> [!IMPORTANT]` and `> [!CAUTION]`, become
-callouts. A page links another by its address, such as
+GitHub's alerts, `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`
+and `> [!CAUTION]`, become callouts. A page links another by its address, such as
 `[Layers](/tutorials/layers/)`. The section headed `[#kinds]` gets the
 table of every kind with a type at its end, from `generated/kinds.json`.
 
@@ -42,14 +42,16 @@ SITE_URL=https://dxfio.dev/ npm run build
 
 Each page then names its full address as canonical, and `out/sitemap.xml`
 lists them all. The site is served at a host's root: a `SITE_URL` with a
-path stops the build rather than linking every page wrong. Vercel needs no setting: with `SITE_URL` unset, the build
-takes the project's production address. Every page also has its Markdown at
+path stops the build rather than linking every page wrong. Vercel needs no
+setting: with `SITE_URL` unset, the build takes the project's production
+address. Every page also has its Markdown at
 `/llms.mdx/<page>/content.md`, a card image at `/og/<page>/image.png`, and
 `/llms.txt` lists them for a language model.
 
 ## The examples
 
-`npm run examples` needs `../build/release/lib/libdxfio.a`. The C++ of a
+`npm run examples` needs `../build/release/lib/libdxfio.a`. CI does not run
+it: run it before a change to the docs or the interface lands. The C++ of a
 page is the body of a `main`, or a whole program when it has its own. It
 must compile with warnings as errors and run; a ` ```text title="Output" `
 fence is what it must print, and every DXF it writes must read back without
@@ -58,8 +60,8 @@ files too, and names pick pages: `-- layers text`.
 
 ## The reference
 
-`npm run api`, which `dev` and `build` run first, reads the `///` comments
-of `../include/dxfio` and writes `generated/headers.json` and
+`npm run api`, which `dev` and `build` run first, reads the `/** */` doc
+blocks and `/**< */` notes of `../include/dxfio` and writes `generated/headers.json` and
 `generated/kinds.json`, from which each header gets its page and its
 entries in the search. It prints how many declarations have a comment;
 `node scripts/api.ts --missing` lists the ones that have none.
