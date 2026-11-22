@@ -2,6 +2,9 @@
 
 #include "objects/io.hpp"
 
+#include "dxfio/create.hpp"
+#include "dxfio/entities/line.hpp"
+
 #include <doctest/doctest.h>
 
 #include <string>
@@ -17,8 +20,9 @@ namespace DxfIO::Plan
 
     constexpr Handle Gone{0x11};
 
-    auto Drawn() -> std::vector<Object>
+    auto Drawn() -> Drawing
     {
+      Drawing out{};
       Unknown style{};
       style.Type      = Symbol{"VISUALSTYLE"};
       style.Base.Self = Gone;
@@ -27,45 +31,85 @@ namespace DxfIO::Plan
       Objects::Dictionary names{};
       names.Entries = {Objects::Entry{.Name = "Kept", .Soft = Kept, .Hard = {}},
                        Objects::Entry{.Name = "Gone", .Soft = Gone, .Hard = {}}};
-      return {Object{names}, Object{scale}, Object{style}};
+      out.Objects   = {Object{names}, Object{scale}, Object{style}};
+      return out;
     }
   } // namespace
 
-  TEST_CASE("foreign: what no kind types stays behind, its entry with it")
+  TEST_CASE("foreign: what no kind types stays behind, its entry with it, told")
   {
-    const std::vector<Object> out = Foreign(Drawn());
-    REQUIRE(out.size() == 2);
-    const auto *names = std::get_if<Objects::Dictionary>(&out.front());
+    Drawing            drawing = Drawn();
+    std::vector<Issue> issues;
+    Foreign(drawing, &issues);
+    REQUIRE(drawing.Objects.size() == 2);
+    const auto *names = std::get_if<Objects::Dictionary>(&drawing.Objects.front());
     REQUIRE(names != nullptr);
     REQUIRE(names->Entries.size()     == 1);
     CHECK(names->Entries.front().Name == "Kept");
+    CHECK(issues
+          == std::vector{Issue{.Code    = IssueCode::NotKept,
+                               .Subject = Gone,
+                               .What    = "VISUALSTYLE left out, its groups are in R12's form"}});
   }
 
   TEST_CASE("foreign: an entry held hard goes the same way")
   {
-    std::vector<Object> all = Drawn();
-    std::get<Objects::Dictionary>(all.front()).Entries.at(1) =
+    Drawing drawing = Drawn();
+    std::get<Objects::Dictionary>(drawing.Objects.front()).Entries.at(1) =
         Objects::Entry{.Name = "Gone", .Soft = {}, .Hard = Gone};
-    const std::vector<Object> out = Foreign(std::move(all));
-    CHECK(std::get<Objects::Dictionary>(out.front()).Entries.size() == 1);
+    Foreign(drawing);
+    CHECK(std::get<Objects::Dictionary>(drawing.Objects.front()).Entries.size() == 1);
+  }
+
+  TEST_CASE("foreign: a default dictionary loses the entry and the default it held, and every "
+            "reactor or extension dictionary naming it goes")
+  {
+    Drawing                        drawing = Drawn();
+    Objects::DictionaryWithDefault styles{};
+    styles.Dictionary.Entries = {Objects::Entry{.Name = "Gone", .Soft = Gone, .Hard = {}}};
+    styles.Fallback           = Gone;
+    drawing.Objects.emplace_back(styles);
+    Objects::DictionaryWithDefault kept{};
+    kept.Fallback = Kept;
+    drawing.Objects.emplace_back(kept);
+    Entities::Line line{};
+    line.Record.Base.Reactors   = {Kept, Gone};
+    line.Record.Base.Dictionary = Gone;
+    drawing.Entities.emplace_back(line);
+    Entities::Line other{};
+    other.Record.Base.Dictionary = Kept;
+    drawing.Entities.emplace_back(other);
+    Foreign(drawing);
+    const auto &held = std::get<Objects::DictionaryWithDefault>(drawing.Objects.at(2));
+    CHECK(held.Dictionary.Entries.empty());
+    CHECK_FALSE(held.Fallback);
+    CHECK(std::get<Objects::DictionaryWithDefault>(drawing.Objects.at(3)).Fallback == Kept);
+    const auto &first = std::get<Entities::Line>(drawing.Entities.front());
+    CHECK(first.Record.Base.Reactors == std::vector{Kept});
+    CHECK_FALSE(first.Record.Base.Dictionary);
+    CHECK(std::get<Entities::Line>(drawing.Entities.back()).Record.Base.Dictionary == Kept);
   }
 
   TEST_CASE("foreign: an unknown object with no handle takes no entry with it")
   {
-    std::vector<Object> all = Drawn();
-    all.emplace_back(Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Tags = {}});
-    const std::vector<Object> out = Foreign(std::move(all));
-    REQUIRE(out.size() == 2);
-    const auto &names = std::get<Objects::Dictionary>(out.front());
+    Drawing drawing = Drawn();
+    drawing.Objects.emplace_back(Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Tags = {}});
+    Foreign(drawing);
+    REQUIRE(drawing.Objects.size() == 2);
+    const auto &names = std::get<Objects::Dictionary>(drawing.Objects.front());
     REQUIRE(names.Entries.size()     == 1);
     CHECK(names.Entries.front().Name == "Kept");
   }
 
-  TEST_CASE("foreign: objects with nothing foreign come back the same")
+  TEST_CASE("foreign: a drawing with nothing foreign comes back the same")
   {
-    std::vector<Object> all = Drawn();
-    all.pop_back();
-    std::get<Objects::Dictionary>(all.front()).Entries.pop_back();
-    CHECK(Foreign(all) == all);
+    Drawing drawing = Drawn();
+    drawing.Objects.pop_back();
+    std::get<Objects::Dictionary>(drawing.Objects.front()).Entries.pop_back();
+    const Drawing      before = drawing;
+    std::vector<Issue> issues;
+    Foreign(drawing, &issues);
+    CHECK(drawing == before);
+    CHECK(issues.empty());
   }
 } // namespace DxfIO::Plan

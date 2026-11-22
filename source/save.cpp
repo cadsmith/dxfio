@@ -260,7 +260,7 @@ namespace DxfIO
       Drawing out = Down::Narrowed(drawing, release, issues);
       if (release > Header::Declared(out.Header))
       {
-        out.Objects = Plan::Foreign(std::move(out.Objects));
+        Plan::Foreign(out, issues);
       }
       return out;
     }

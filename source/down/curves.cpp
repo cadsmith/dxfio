@@ -22,6 +22,17 @@ namespace DxfIO::Down
 
     constexpr std::size_t Spanned = 16;
 
+    /**
+     *  The highest degree AutoCAD gives a spline; a file claiming more is drawn as its control
+     *  polygon, as the cost of a point grows with the square of the degree.
+     */
+    constexpr int Steepest = 11;
+
+    /**
+     *  The most points a spline is drawn with, however many control points it has.
+     */
+    constexpr std::size_t Finest = 65'536;
+
     auto Plus(const Vector &one, const Vector &other) -> Vector
     {
       return Vector{.X = one.X + other.X, .Y = one.Y + other.Y, .Z = one.Z + other.Z};
@@ -107,6 +118,7 @@ namespace DxfIO::Down
     auto Valid(const Entities::Curve &one) -> bool
     {
       return one.Degree >= 1
+          && one.Degree <= Steepest
           && one.ControlPoints.size() > static_cast<std::size_t>(one.Degree)
           && one.Knots.size() == one.ControlPoints.size() + static_cast<std::size_t>(one.Degree) + 1
           && std::ranges::is_sorted(one.Knots)
@@ -124,10 +136,11 @@ namespace DxfIO::Down
       {
         return one.ControlPoints;
       }
-      const auto          degree = static_cast<std::size_t>(one.Degree);
-      const double        first  = one.Knots.at(degree);
-      const double        last   = one.Knots.at(one.ControlPoints.size());
-      const std::size_t   steps  = std::max(Around, Spanned * (one.ControlPoints.size() - degree));
+      const auto        degree = static_cast<std::size_t>(one.Degree);
+      const double      first  = one.Knots.at(degree);
+      const double      last   = one.Knots.at(one.ControlPoints.size());
+      const std::size_t steps =
+          std::clamp(Spanned * (one.ControlPoints.size() - degree), Around, Finest);
       std::vector<Vector> out;
       out.reserve(steps + 1);
       std::vector<Homogeneous> local;

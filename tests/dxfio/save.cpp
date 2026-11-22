@@ -157,6 +157,24 @@ namespace DxfIO
     }
   }
 
+  TEST_CASE("save: a drawing saved to a later release names no handle it does not hold in the "
+            "variables that release adds")
+  {
+    const auto read = Load(Bytes(Acad() / "entities-r2004.dxf"));
+    REQUIRE(read);
+    const auto later = Save(read->Drawing, SaveOptions{.Release = Version::R2018});
+    REQUIRE(later);
+    const auto back = Load(later->Bytes);
+    REQUIRE(back);
+    for (const std::string_view name : {"$CMATERIAL", "$INTERFEREOBJVS", "$INTERFEREVPVS"})
+    {
+      CAPTURE(name);
+      const auto found = std::ranges::find(back->Drawing.Header, name, &Header::Variable::Name);
+      REQUIRE(found != back->Drawing.Header.end());
+      CHECK_FALSE(std::get<Handle>(found->Values.front().Value));
+    }
+  }
+
   TEST_CASE("save: a page not carried stays named, its text the same bytes")
   {
     constexpr std::string_view page = "$DWGCODEPAGE\r\n  3\r\n";

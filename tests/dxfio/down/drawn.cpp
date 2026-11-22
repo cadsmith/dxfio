@@ -210,6 +210,35 @@ namespace DxfIO::Down
     CHECK(Traced(many, handles).Vertices.Children.size() == 161);
   }
 
+  TEST_CASE("drawn: a spline steeper than AutoCAD draws is its control polygon; a long one is "
+            "drawn with 65536 steps at most")
+  {
+    Seed             handles;
+    Entities::Spline steep{};
+    steep.Curve->Degree = 12;
+    for (int at = 0; at <= 12; ++at)
+    {
+      steep.Curve->ControlPoints.push_back(Vector{.X = static_cast<double>(at)});
+    }
+    steep.Curve->Knots.assign(13, 0);
+    steep.Curve->Knots.resize(26, 1);
+    CHECK(Traced(steep, handles).Vertices.Children.size() == 13);
+    Entities::Spline highest = steep;
+    highest.Curve->Degree    = 11;
+    highest.Curve->Knots.pop_back();
+    CHECK(Traced(highest, handles).Vertices.Children.size() == 129);
+    Entities::Spline longest{};
+    longest.Curve->Degree = 1;
+    longest.Curve->Knots  = {0};
+    for (int at = 0; at <= 5000; ++at)
+    {
+      longest.Curve->ControlPoints.push_back(Vector{.X = static_cast<double>(at)});
+      longest.Curve->Knots.push_back(static_cast<double>(at));
+    }
+    longest.Curve->Knots.push_back(5000);
+    CHECK(Traced(longest, handles).Vertices.Children.size() == 65'537);
+  }
+
   TEST_CASE("drawn: a spline whose end knot repeats past its degree ends on the last span")
   {
     Entities::Spline out{};
