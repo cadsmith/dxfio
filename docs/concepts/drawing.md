@@ -26,7 +26,7 @@ The names records repeat, of a layer, a linetype, a style or a block, are `Symbo
 
 ## Pointers into a drawing [#pointers]
 
-`FindEntity`, `FindObject`, an `Index` and the `View` lookups return pointers into the drawing's lists. A pointer is good until the list it points into changes: an `Edit::Add` to that list, an `Audit::Repair`, or any change of your own. Look it up again after one.
+`FindEntity`, `FindObject`, an `Index` and the `View` lookups return pointers into the drawing's lists. A pointer is good until the list it points into changes: an `Edit::Add` to that list, an `Audit::Repair`, or any change of your own. Look it up again after one, and build a new `Index`: one holds such pointers for every entity and object.
 
 ## Threads [#threads]
 
