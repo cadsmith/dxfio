@@ -41,7 +41,8 @@ namespace DxfIO
   inline constexpr Vector Up{.X = 0, .Y = 0, .Z = 1};
 
   /**
-   *  A full turn: every angle of the library is in radians.
+   *  A full turn in radians. Angles follow the DXF reference: degrees for most, as an arc's ends or
+   *  an insert's rotation, radians where a field says so, as an ellipse's parameters.
    */
   inline constexpr double Turn = 2.0 * std::numbers::pi;
 } // namespace DxfIO

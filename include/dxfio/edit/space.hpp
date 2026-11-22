@@ -15,7 +15,7 @@ namespace DxfIO::Edit
      */
     Model,
     /**
-     *  The paper space of the first layout, the *Paper_Space block.
+     *  The paper space of the active layout, the *Paper_Space block.
      */
     Paper,
   };

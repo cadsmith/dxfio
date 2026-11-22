@@ -37,7 +37,7 @@ DxfIO::Edit::Add(drawing, arrow);
 
 ## Arcs and a closed outline [#arcs]
 
-A vertex's `Bulge` makes the segment from it an arc: the tangent of a quarter of the arc's angle, so 1 is a half circle and 0 a straight segment. `Flags` 1 closes the polyline with a segment from the last vertex back to the first, which takes the last vertex's bulge and widths.
+A vertex's `Bulge` makes the segment from it an arc: the tangent of a quarter of the arc's angle, so 1 is a half circle and 0 a straight segment. `Flags` 1, `LwPolylineFlags::Closed`, closes the polyline with a segment from the last vertex back to the first, which takes the last vertex's bulge and widths. `DxfIO::Has(slot.Flags, DxfIO::Entities::LwPolylineFlags::Closed)` tests it.
 
 ```cpp
 DxfIO::Entities::LwPolyline slot{};
@@ -53,7 +53,7 @@ DxfIO::Edit::Add(drawing, slot);
 
 ## A 3D polyline [#polyline]
 
-A POLYLINE keeps its vertices as VERTEX entities that follow it in the file. `Flags` 8 makes it a 3D polyline: its vertices are in world coordinates, and each takes flag 32.
+A POLYLINE keeps its vertices as VERTEX entities that follow it in the file. `Flags` 8, `PolylineFlags::Polyline3d`, makes it a 3D polyline: its vertices are in world coordinates, and `Edit::Add` gives each the flag 32 a 3D polyline's vertex takes.
 
 ```cpp
 const std::vector<DxfIO::Vector> route{
@@ -69,7 +69,6 @@ for (const DxfIO::Vector &at : route)
 {
   DxfIO::Entities::Vertex vertex{};
   vertex.Position = at;
-  vertex.Flags = 32;
   pipe.Vertices.Children.push_back(vertex);
 }
 ```

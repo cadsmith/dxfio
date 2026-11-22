@@ -39,6 +39,9 @@ namespace DxfIO
    */
   struct DXFIO_API Issue
   {
+    /**
+     *  What kind of issue it is, to act on without reading What.
+     */
     IssueCode Code{};
     /**
      *  The line of the file it was found on, counting from 1, when one is to blame; none in a save

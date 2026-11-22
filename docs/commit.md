@@ -12,7 +12,10 @@
   - `test`: Adds or updates tests.
   - `chore`: Build system, tooling, or maintenance tasks.
 - Scope must reflect the affected directory or component.
-- Descriptions must be lowercase.
+- Descriptions must start with a lowercase letter; a name such as `API`
+  keeps its case.
+- A change that breaks the public interface takes a `!` before the colon:
+  `refactor(include)!: rename the lookups`.
 - Descriptions must use the imperative mood.
 - Commit messages must not end with a period.
 

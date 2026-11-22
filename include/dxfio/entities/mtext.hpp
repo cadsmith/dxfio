@@ -129,7 +129,7 @@ namespace DxfIO::Entities
      */
     std::optional<Vector> Direction{};
     /**
-     *  The rotation, when the file gives it rather than a direction. Group 50.
+     *  The rotation in radians, when the file gives it rather than a direction. Group 50.
      */
     std::optional<double> Rotation{};
     /**

@@ -22,8 +22,14 @@ namespace DxfIO
   class DXFIO_API Index
   {
   public:
+    /**
+     *  Reads the handles of every entity and object of the drawing, once.
+     */
     explicit Index(const Drawing &drawing);
 
+    /**
+     *  The drawing it was read from.
+     */
     [[nodiscard]] auto Drawn() const -> const Drawing &;
 
     /**

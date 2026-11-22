@@ -18,16 +18,27 @@ Its guide, tutorials and reference: <https://dxfio.dev>.
 ```cpp
 #include "dxfio/dxfio.hpp"
 
-auto loaded = DxfIO::LoadFile("plan.dxf");
-if (!loaded)
+#include <print>
+
+auto main() -> int
 {
-  return loaded.error();
+  auto loaded = DxfIO::LoadFile("plan.dxf");
+  if (!loaded)
+  {
+    std::println("{}", loaded.error().What);
+    return 1;
+  }
+  DxfIO::Entities::Line line{};
+  line.End = DxfIO::Vector{.X = 100, .Y = 50, .Z = 0};
+  if (const auto added = DxfIO::Edit::Add(loaded->Drawing, line); !added)
+  {
+    std::println("{}", added.error().What);
+    return 1;
+  }
+  const auto saved = DxfIO::SaveFile(loaded->Drawing, "plan-r2010.dxf",
+                                     {.Release = DxfIO::Version::R2010});
+  return saved ? 0 : 1;
 }
-DxfIO::Entities::Line line{};
-line.End = DxfIO::Vector{.X = 100, .Y = 50, .Z = 0};
-DxfIO::Edit::Add(loaded->Drawing, line);
-const auto saved = DxfIO::SaveFile(loaded->Drawing, "plan-r2010.dxf",
-                                   {.Release = DxfIO::Version::R2010});
 ```
 
 What it keeps, the kinds it types, how it saves to other releases, its audit
@@ -64,10 +75,11 @@ the machine has; `LoadOptions{.Threads = 1}` and `SaveOptions{.Threads = 1}`
 keep them to the calling thread, and the drawing, its issues and the bytes come
 out the same either way.
 
-It needs nothing but the standard library: tests and doctest only when dxfio is
-the top level project. That library must read a `double` with `std::from_chars`:
-libc++ 20, libstdc++ 11 and MSVC 19.24 (Visual Studio 2019 16.4) are the first
-that do.
+It needs CMake 3.28 and a C++23 compiler and standard library, nothing else:
+the tests and doctest come in only when dxfio is the top level project. CI
+builds it with GCC 15, Clang 23 on libstdc++, Apple Clang on macOS 26 and MSVC
+on Windows Server 2025; older toolchains are not tested. It builds as a static
+library, or as a shared one with `BUILD_SHARED_LIBS=ON`.
 
 ## Build and test
 
@@ -98,15 +110,21 @@ in its summary.
 ## Continuous integration
 
 [ci.yml](.github/workflows/ci.yml) runs on every pull request and push to
-`main`: clang-format, the CMake guidelines, the public interface's snapshot
-and the pull request's title; the `release` preset built and tested with GCC,
-Clang, Apple Clang and MSVC; `sanitize`, `thread`, `memory` and `coverage`
-with Clang 23; `tidy` with clang-tidy 23 on the sources a pull request's change
-reaches, every source on a push; and every fuzz target for a minute on the
-corpus the nightly runs grow. Each job keeps a ccache that a push to `main`
-saves, so a pull request compiles only what it changed, and one that
-changes only `docs`, `site` or Markdown runs the checks alone.
-[fuzz.yml](.github/workflows/fuzz.yml) fuzzes for twenty minutes a target
+`main`:
+
+- clang-format, the CMake guidelines, the public interface's snapshot and the
+  pull request's title;
+- the `release` preset, built and tested with GCC, Clang, Apple Clang and
+  MSVC;
+- `sanitize`, `thread`, `memory` and `coverage` with Clang 23;
+- `tidy` with clang-tidy 23, on the sources a pull request reaches and on
+  every source on a push;
+- each fuzz target for a minute, on the corpus the nightly runs grow.
+
+Each job keeps a ccache that a push to `main` saves, so a pull request
+compiles only what it changed; one that changes only `docs`, `site` or
+Markdown runs the checks alone.
+[fuzz.yml](.github/workflows/fuzz.yml) fuzzes each target for twenty minutes
 every night and keeps what it finds, and
 [codeql.yml](.github/workflows/codeql.yml) runs CodeQL's security and quality
 queries.
@@ -122,8 +140,12 @@ queries.
 | `tests/package` | A program that finds the installed library, built by CI against a fresh install |
 | `tests/fixtures/acad` | Drawings AutoCAD 2026 wrote for each release |
 | `tests/fuzz` | Fuzz targets, their corpus and the inputs they found |
+| `tests/bench` | `dxfio_bench`, which times load and save |
 | `tools/acad` | The AutoCAD console scripts that made the fixtures, and a verifier |
 | `tools/dxf` | The generator of the code page tables |
+| `tools/bench` | The generator of large drawings for the bench |
+| `tools/format` | `style.py`, which lays out comments and alignment after clang-format |
+| `tools/tidy` | The list of sources a change reaches, for clang-tidy |
 | `vendor` | Where doctest is fetched from, when `find_package` does not find it |
 | `cmake` | The package's config file, installed beside its targets |
 | `docs` | The documentation's pages, notes on DXF and on dxfio, and the guidelines |
@@ -135,7 +157,7 @@ queries.
 
 ## The public interface
 
-Every public declaration has a `///` comment, and every header compiles on
+Every public declaration has a `/** */` doc block, and every header compiles on
 its own. `tests/api/snapshot.txt` holds the public headers without their
 comments; the `dxfio_api` test fails when they change, so a change to the
 interface is always a deliberate one. When it is, take the new snapshot:

@@ -42,6 +42,9 @@ namespace DxfIO
    */
   struct DXFIO_API Failure
   {
+    /**
+     *  What kind of failure it is, to act on without reading What.
+     */
     FailureCode Code{};
     /**
      *  The line of the file where it went wrong, counting from 1, when one is to blame; none in a

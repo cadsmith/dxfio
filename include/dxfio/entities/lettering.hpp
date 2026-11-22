@@ -17,9 +17,9 @@ namespace DxfIO::Entities
   // NOLINTNEXTLINE(performance-enum-size): a 16-bit group, any value round-trips
   enum class HorizontalAlignment : std::int16_t
   {
-    Left,
-    Center,
-    Right,
+    Left,   /**< Starting at the position.        */
+    Center, /**< Centered on the alignment point. */
+    Right,  /**< Ending at the alignment point.   */
     /**
      *  Between the position and the alignment point, its height scaled with its width.
      */
@@ -40,10 +40,10 @@ namespace DxfIO::Entities
   // NOLINTNEXTLINE(performance-enum-size): a 16-bit group, any value round-trips
   enum class VerticalAlignment : std::int16_t
   {
-    Baseline,
-    Bottom,
-    Middle,
-    Top,
+    Baseline, /**< The baseline on the point.               */
+    Bottom,   /**< The lowest descender on the point.       */
+    Middle,   /**< The middle of the capitals on the point. */
+    Top,      /**< The top of the capitals on the point.    */
   };
 
   /**

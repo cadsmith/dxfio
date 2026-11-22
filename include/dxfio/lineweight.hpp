@@ -14,8 +14,8 @@ namespace DxfIO
    */
   enum class Lineweight : std::int16_t
   {
-    ByLayer = -1,
-    ByBlock = -2,
+    ByLayer = -1, /**< The layer's lineweight.                         */
+    ByBlock = -2, /**< The lineweight of the insert drawing the block. */
     /**
      *  $LWDEFAULT.
      */

@@ -31,8 +31,8 @@ namespace DxfIO
     Symbol Layer{"0"};
     int Color{Colors::White};
     std::optional<int> Rgb{};
-    Symbol             Linetype{"Continuous"};
-    DxfIO::Lineweight  Lineweight{DxfIO::Lineweight::Default};
+    Symbol Linetype{"Continuous"};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::Default};
     auto operator==(const Appearance &) const -> bool = default;
   };
   [[nodiscard]] DXFIO_API auto AppearanceOf(const Drawing &drawing, const Entities::Record &record,

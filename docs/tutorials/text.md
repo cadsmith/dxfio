@@ -33,7 +33,7 @@ DxfIO::Edit::Add(drawing, title);
 
 ## Justification [#justification]
 
-`Lettering.Horizontal` takes `Left`, `Center`, `Right` or `Middle`, and the text's own `Vertical` `Baseline`, `Bottom`, `Middle` or `Top`. Each of these but left on the baseline holds the text to `Lettering.Alignment`. `Position` is then where the drawn text starts, which depends on the font and which dxfio does not work out, so these texts give it the alignment point too.
+`Lettering.Horizontal` takes `Left`, `Center`, `Right` or `Middle`, and the text's own `Vertical` `Baseline`, `Bottom`, `Middle` or `Top`. `Aligned` and `Fit` instead stretch the text between `Position` and `Alignment`, the first scaling its height with its width, the second keeping it. Each of these but left on the baseline holds the text to `Lettering.Alignment`. `Position` is then where the drawn text starts, which depends on the font and which dxfio does not work out, so these texts give it the alignment point too.
 
 ```cpp
 using Across = DxfIO::Entities::HorizontalAlignment;

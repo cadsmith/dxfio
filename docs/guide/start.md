@@ -6,7 +6,7 @@ dxfio is a C++23 library that reads and writes AutoCAD DXF files: every release 
 
 ## Add it to a project [#add]
 
-dxfio is a static library that needs nothing but the standard library; the tests and doctest are built only when dxfio is the top level project.
+dxfio needs CMake 3.28 and a C++23 compiler and standard library, nothing else; the tests and doctest are built only when dxfio is the top level project. It builds as a static library, or as a shared one with `BUILD_SHARED_LIBS=ON`.
 
 ```cmake tab="CMakeLists.txt"
 add_subdirectory(dxfio)
@@ -21,7 +21,7 @@ ctest --preset debug
 
 ## A first program [#first]
 
-`dxfio/dxfio.hpp` brings in the whole interface, under the namespace `DxfIO`. This program makes a drawing with one line, saves it, and reads it back. Nothing throws: a load or a save that fails returns its `Failure`, with what went wrong and, for a load, on which line.
+`dxfio/dxfio.hpp` brings in the whole interface, under the namespace `DxfIO`. This program makes a drawing with one line, saves it, and reads it back. A bad file never throws: a load or a save that fails returns its `Failure`, with what went wrong and, for an ASCII file, on which line. Only running out of memory, or of threads to start, can throw.
 
 ```cpp title="main.cpp"
 #include "dxfio/dxfio.hpp"
@@ -59,4 +59,4 @@ auto main() -> int
 ```
 
 > [!NOTE]
-> Each tutorial is the body of a `main` like this one. Every one is compiled with warnings as errors and run; its output is the one shown, and every file it writes reads back without an issue and passes the audit of AutoCAD 2026.
+> Each tutorial is the body of a `main` like this one. `npm run examples`, in `site/`, compiles every one with warnings as errors and runs it: its output must be the one shown, and every file it writes must read back without an issue and pass dxfio's audit; with `-- --acad` it runs AutoCAD 2026's audit on them too.

@@ -30,15 +30,21 @@ namespace DxfIO::View
    */
   [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
 
+  /**
+   *  The block of that name, compared without case, or null.
+   */
   [[nodiscard]] DXFIO_API auto Block(Drawing &drawing, std::string_view name)
       -> Blocks::Definition *;
 
+  /**
+   *  The block of that name, compared without case, or null; read only.
+   */
   [[nodiscard]] DXFIO_API auto Block(const Drawing &drawing, std::string_view name)
       -> const Blocks::Definition *;
 
   /**
-   *  The record of that name in a table, such as `Record(drawing.Layer, "Walls")`; one of the
-   *  tables the drawing keeps as Loose too.
+   *  The record of that name in a table, compared without case, such as `Record(drawing.Layer,
+   *  "Walls")`, or null.
    */
   template <class RecordT>
     requires requires(const RecordT &record) { record.Record.Name; }
@@ -49,6 +55,9 @@ namespace DxfIO::View
     return found == table.Records.end() ? nullptr : &*found;
   }
 
+  /**
+   *  The record of that name in a table, compared without case, or null; read only.
+   */
   template <class RecordT>
     requires requires(const RecordT &record) { record.Record.Name; }
   [[nodiscard]] auto Record(const Tables::Table<RecordT> &table, std::string_view name)
@@ -116,6 +125,9 @@ namespace DxfIO::View
     return Record(TableOf<RecordT>(drawing), name);
   }
 
+  /**
+   *  The record of that name in the table of its kind, or null; read only.
+   */
   template <class RecordT>
   [[nodiscard]] auto Record(const Drawing &drawing, std::string_view name) -> const RecordT *
   {
@@ -133,11 +145,14 @@ namespace DxfIO::View
   [[nodiscard]] DXFIO_API auto PaperSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
 
   /**
-   *  In tab order, Model first.
+   *  Every layout of the drawing, in tab order, Model first; none before R2000.
    */
   [[nodiscard]] DXFIO_API auto Layouts(const Drawing &drawing)
       -> std::vector<const Objects::Layout *>;
 
+  /**
+   *  The layout of that name, compared without case, or null.
+   */
   [[nodiscard]] DXFIO_API auto Layout(const Drawing &drawing, std::string_view name)
       -> const Objects::Layout *;
 

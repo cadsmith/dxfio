@@ -32,7 +32,7 @@ namespace DxfIO::Entities
      *  A point of the spline frame.
      */
     ControlPoint = 16,
-    Polyline3d   = 32,
+    Polyline3d   = 32, /**< Of a 3D polyline. */
     /**
      *  Of a polygon mesh; with PolyfaceMesh, a polyface mesh's vertex.
      */
