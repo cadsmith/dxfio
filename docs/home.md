@@ -28,9 +28,12 @@ if (!loaded)
 }
 DxfIO::Drawing &drawing = loaded->Drawing;
 
-DxfIO::Tables::Layer doors{};
-doors.Record.Name = "Doors";
-if (!DxfIO::Edit::Add(drawing, doors)) return 1;
+if (DxfIO::View::Record<DxfIO::Tables::Layer>(drawing, "Doors") == nullptr)
+{
+  DxfIO::Tables::Layer doors{};
+  doors.Record.Name = "Doors";
+  if (!DxfIO::Edit::Add(drawing, doors)) return 1;
+}
 
 DxfIO::Entities::Line line{};
 line.Record.Layer = DxfIO::Symbol{"Doors"};

@@ -50,7 +50,7 @@ namespace DxfIO
         Fields::Flat{.Code = 15, .Member = &ViewportData::Grid},
         Fields::Field{.Code = 16, .Member = &ViewportData::Direction},
         Fields::Field{.Code = 17, .Member = &ViewportData::Target},
-        Fields::Field{.Code = 42, .Member = &ViewportData::LensLength, .Fallback = 0.0},
+        Fields::Field{.Code = 42, .Member = &ViewportData::LensLength},
         Fields::Field{.Code = 43, .Member = &ViewportData::Front},
         Fields::Field{.Code = 44, .Member = &ViewportData::Back},
         Fields::Field{.Code = 45, .Member = &ViewportData::ViewHeight},

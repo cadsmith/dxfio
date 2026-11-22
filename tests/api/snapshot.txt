@@ -1913,7 +1913,7 @@ namespace DxfIO::Entities
     Vector Grid{};
     Vector Direction{Up};
     Vector Target{};
-    double LensLength{50};
+    double LensLength{};
     double Front{};
     double Back{};
     double ViewHeight{-1};

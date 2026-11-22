@@ -67,10 +67,10 @@ namespace DxfIO::Entities
      */
     Vector Target{};
     /**
-     *  The lens length of a perspective view, in millimeters: 50 for a new viewport, 0 for one read
-     *  without it, as AutoCAD reads it. Group 42, from R2000.
+     *  The lens length of a perspective view, in millimeters; 0 without one, as AutoCAD reads a
+     *  VIEWPORT that gives none. Group 42, from R2000.
      */
-    double LensLength{50};
+    double LensLength{};
     /**
      *  The offset of the front clipping plane from the target. Group 43, from R2000.
      */
