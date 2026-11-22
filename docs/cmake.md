@@ -21,7 +21,7 @@
 | `coverage` | `Debug` at `-O1` | Instrumented build for LLVM coverage |
 | `sanitize` | `Debug` at `-O1` | ASan and UBSan instrumented build |
 | `tidy` | `Debug` | The library built through clang-tidy |
-| `fuzz` | `RelWithDebInfo` | libFuzzer targets, needs LLVM clang on the path |
+| `fuzz` | `RelWithDebInfo` | The three libFuzzer targets alone, needs LLVM clang on the path |
 | `thread` | `Debug` at `-O1` | TSan instrumented build of the tests |
 | `memory` | `Debug` at `-O1` | MSan instrumented build of the tests, Linux only; needs LLVM clang on the path and `DXFIO_MEMORY_LIBCXX` set to a libc++ built with MSan |
 
