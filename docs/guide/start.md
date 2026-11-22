@@ -34,7 +34,7 @@ auto main() -> int
 
   DxfIO::Entities::Line line{};
   line.End = {.X = 100, .Y = 50, .Z = 0};
-  DxfIO::Edit::Add(drawing, line);
+  if (!DxfIO::Edit::Add(drawing, line)) return 1;
 
   const auto saved = DxfIO::SaveFile(drawing, "first.dxf");
   if (!saved)

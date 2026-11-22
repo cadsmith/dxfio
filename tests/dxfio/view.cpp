@@ -5,7 +5,9 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <utility>
 #include <variant>
+#include <vector>
 
 namespace DxfIO::View
 {
@@ -77,7 +79,8 @@ namespace DxfIO::View
                                  [](const Objects::Layout *one) -> int { return one->Order; }));
     CHECK(Layout(drawing, "MODEL")   == layouts.front());
     CHECK(Layout(drawing, "Nowhere") == nullptr);
-    CHECK(Layouts(Create(Version::R12)).empty());
+    const Drawing old = Create(Version::R12);
+    CHECK(Layouts(old).empty());
   }
 
   TEST_CASE("view: the root dictionary, and the objects its entries lead to")
@@ -93,8 +96,9 @@ namespace DxfIO::View
     CHECK(std::holds_alternative<Objects::Layout>(*model));
     CHECK(Entry(drawing, *root, "NOPE") == nullptr);
     CHECK(Dictionary(drawing, "NOPE")   == nullptr);
-    CHECK(Root(Drawing{}) == nullptr);
-    CHECK(Dictionary(Drawing{}, "ACAD_LAYOUT") == nullptr);
+    const Drawing empty{};
+    CHECK(Root(empty) == nullptr);
+    CHECK(Dictionary(empty, "ACAD_LAYOUT") == nullptr);
   }
 
   TEST_CASE("view: the root is the dictionary no one owns, wherever it stands")
@@ -120,5 +124,77 @@ namespace DxfIO::View
     CHECK(Entry(drawing, both, "hard") == &drawing.Objects.front());
     CHECK(Entry(drawing, both, "soft") == &drawing.Objects.front());
     CHECK(Entry(drawing, both, "none") == nullptr);
+  }
+
+  TEST_CASE("view: each lookup reaches into a drawing it may change, the same part the read-only "
+            "one finds")
+  {
+    Drawing        drawing = Create();
+    const Drawing &fixed   = drawing;
+    CHECK(ModelSpace(drawing) == ModelSpace(fixed));
+    CHECK(PaperSpace(drawing) == PaperSpace(fixed));
+    const std::vector<Objects::Layout *> layouts = Layouts(drawing);
+    REQUIRE(layouts.size() == Layouts(fixed).size());
+    CHECK(layouts.front()  == Layouts(fixed).front());
+    Objects::Layout *model = Layout(drawing, "model");
+    REQUIRE(model != nullptr);
+    model->Name = "Modelled";
+    CHECK(Layout(fixed, "MODELLED") == model);
+    Objects::Dictionary *root = Root(drawing);
+    CHECK(root == Root(fixed));
+    REQUIRE(root != nullptr);
+    CHECK(Entry(drawing, *root, "ACAD_LAYOUT") == Entry(fixed, *root, "acad_layout"));
+    CHECK(Dictionary(drawing, "acad_layout")   == Dictionary(fixed, "ACAD_LAYOUT"));
+    CHECK(Dictionary(drawing, "nope")          == nullptr);
+  }
+
+  namespace
+  {
+    template <class DrawingT>
+    concept Blocked = requires(DrawingT &&drawing) { Block(std::forward<DrawingT>(drawing), ""); };
+
+    template <class DrawingT>
+    concept Recorded = requires(DrawingT &&drawing) {
+      Record<Tables::Layer>(std::forward<DrawingT>(drawing), "");
+    };
+
+    template <class DrawingT>
+    concept Modelled =
+        requires(DrawingT &&drawing) { ModelSpace(std::forward<DrawingT>(drawing)); };
+
+    template <class DrawingT>
+    concept Papered = requires(DrawingT &&drawing) { PaperSpace(std::forward<DrawingT>(drawing)); };
+
+    template <class DrawingT>
+    concept Laid = requires(DrawingT &&drawing) { Layouts(std::forward<DrawingT>(drawing)); };
+
+    template <class DrawingT>
+    concept Named = requires(DrawingT &&drawing) { Layout(std::forward<DrawingT>(drawing), ""); };
+
+    template <class DrawingT>
+    concept Rooted = requires(DrawingT &&drawing) { Root(std::forward<DrawingT>(drawing)); };
+
+    template <class DrawingT>
+    concept Entered = requires(DrawingT &&drawing) {
+      Entry(std::forward<DrawingT>(drawing), Objects::Dictionary{}, "");
+    };
+
+    template <class DrawingT>
+    concept Looked =
+        requires(DrawingT &&drawing) { Dictionary(std::forward<DrawingT>(drawing), ""); };
+  } // namespace
+
+  TEST_CASE("view: a drawing about to go is refused, as what is found would go with it")
+  {
+    static_assert(Blocked<const Drawing &> && !Blocked<const Drawing>);
+    static_assert(Recorded<const Drawing &> && !Recorded<const Drawing>);
+    static_assert(Modelled<const Drawing &> && !Modelled<const Drawing>);
+    static_assert(Papered<const Drawing &> && !Papered<const Drawing>);
+    static_assert(Laid<const Drawing &> && !Laid<const Drawing>);
+    static_assert(Named<const Drawing &> && !Named<const Drawing>);
+    static_assert(Rooted<const Drawing &> && !Rooted<const Drawing>);
+    static_assert(Entered<const Drawing &> && !Entered<const Drawing>);
+    static_assert(Looked<const Drawing &> && !Looked<const Drawing>);
+    CHECK(Modelled<Drawing &>);
   }
 } // namespace DxfIO::View

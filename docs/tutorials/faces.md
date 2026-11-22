@@ -19,7 +19,7 @@ const DxfIO::Corners bottom{{
 }};
 DxfIO::Entities::Face3d floor{};
 floor.Corners = bottom;
-DxfIO::Edit::Add(drawing, floor);
+if (!DxfIO::Edit::Add(drawing, floor)) return 1;
 ```
 
 ## The sides [#sides]
@@ -37,7 +37,7 @@ for (std::size_t at = 0; at < bottom.size(); ++at)
   const std::size_t next = (at + 1) % bottom.size();
   DxfIO::Entities::Face3d side{};
   side.Corners = {{bottom.at(at), bottom.at(next), top.at(next), top.at(at)}};
-  DxfIO::Edit::Add(drawing, side);
+  if (!DxfIO::Edit::Add(drawing, side)) return 1;
 }
 ```
 
@@ -49,7 +49,7 @@ for (std::size_t at = 0; at < bottom.size(); ++at)
 DxfIO::Entities::Face3d lid{};
 lid.Corners = top;
 lid.Flags = 1 | 2 | 4 | 8;
-DxfIO::Edit::Add(drawing, lid);
+if (!DxfIO::Edit::Add(drawing, lid)) return 1;
 ```
 
 ## Save [#save]

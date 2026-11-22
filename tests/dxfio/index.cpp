@@ -8,6 +8,9 @@
 
 #include <doctest/doctest.h>
 
+#include <type_traits>
+#include <utility>
+
 namespace DxfIO
 {
   TEST_CASE("index: finds every entity and object as FindEntity and FindObject do")
@@ -53,5 +56,25 @@ namespace DxfIO
     CHECK(circle == FindEntity(drawing, *held));
     CHECK(index.FindObject(Handle{}) == nullptr);
     CHECK(index.FindEntity(Handle{.Value = 0xFFFFFF}) == nullptr);
+  }
+
+  namespace
+  {
+    template <class DrawingT>
+    concept FindsEntities =
+        requires(DrawingT &&drawing) { FindEntity(std::forward<DrawingT>(drawing), Handle{}); };
+
+    template <class DrawingT>
+    concept FindsObjects =
+        requires(DrawingT &&drawing) { FindObject(std::forward<DrawingT>(drawing), Handle{}); };
+  } // namespace
+
+  TEST_CASE("index: an index or a find over a drawing about to go is refused")
+  {
+    static_assert(std::is_constructible_v<Index, const Drawing &>);
+    static_assert(!std::is_constructible_v<Index, const Drawing>);
+    static_assert(FindsEntities<const Drawing &> && !FindsEntities<const Drawing>);
+    static_assert(FindsObjects<const Drawing &> && !FindsObjects<const Drawing>);
+    CHECK(FindsEntities<Drawing &>);
   }
 } // namespace DxfIO

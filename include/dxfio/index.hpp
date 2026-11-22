@@ -28,6 +28,11 @@ namespace DxfIO
     explicit Index(const Drawing &drawing);
 
     /**
+     *  Refused: the index would point into a drawing gone.
+     */
+    explicit Index(const Drawing &&drawing) = delete;
+
+    /**
      *  The drawing it was read from.
      */
     [[nodiscard]] auto Source() const -> const Drawing &;

@@ -32,7 +32,7 @@ dashdot.Record.Name = "DashDot";
 dashdot.Description = "__ . __ . __ . __";
 dashdot.Length = 16;
 dashdot.Dashes = {{.Length = 10}, {.Length = -3}, {.Length = 0}, {.Length = -3}};
-DxfIO::Edit::Add(drawing, dashdot);
+if (!DxfIO::Edit::Add(drawing, dashdot)) return 1;
 ```
 
 ## Through a layer [#layer]
@@ -44,13 +44,13 @@ DxfIO::Tables::Layer axes{};
 axes.Record.Name = "Axes";
 axes.Color = 1;
 axes.Linetype = DxfIO::Symbol{"DashDot"};
-DxfIO::Edit::Add(drawing, axes);
+if (!DxfIO::Edit::Add(drawing, axes)) return 1;
 
 DxfIO::Entities::Line axis{};
 axis.Record.Layer = DxfIO::Symbol{"Axes"};
 axis.Start = {.X = -50, .Y = 0, .Z = 0};
 axis.End = {.X = 250, .Y = 0, .Z = 0};
-DxfIO::Edit::Add(drawing, axis);
+if (!DxfIO::Edit::Add(drawing, axis)) return 1;
 ```
 
 ## On one entity [#entity]
@@ -63,7 +63,7 @@ hole.Center = {.X = 100, .Y = 0, .Z = 0};
 hole.Radius = 60;
 hole.Record.Linetype = DxfIO::Symbol{"DashDot"};
 hole.Record.LinetypeScale = 2;
-DxfIO::Edit::Add(drawing, hole);
+if (!DxfIO::Edit::Add(drawing, hole)) return 1;
 ```
 
 ## Save [#save]

@@ -28,14 +28,14 @@ if (!loaded)
 }
 DxfIO::Drawing &drawing = loaded->Drawing;
 
-DxfIO::Tables::Layer walls{};
-walls.Record.Name = "Walls";
-DxfIO::Edit::Add(drawing, walls);
+DxfIO::Tables::Layer doors{};
+doors.Record.Name = "Doors";
+if (!DxfIO::Edit::Add(drawing, doors)) return 1;
 
 DxfIO::Entities::Line line{};
-line.Record.Layer = DxfIO::Symbol{"Walls"};
+line.Record.Layer = DxfIO::Symbol{"Doors"};
 line.End = DxfIO::Vector{.X = 100, .Y = 50, .Z = 0};
-DxfIO::Edit::Add(drawing, line);
+if (!DxfIO::Edit::Add(drawing, line)) return 1;
 ```
 
 ```cpp tab="Save to R12"

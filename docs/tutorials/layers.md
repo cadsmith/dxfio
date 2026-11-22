@@ -30,12 +30,12 @@ DxfIO::Tables::Layer walls{};
 walls.Record.Name = "Walls";
 walls.Color = 1;
 walls.Lineweight = DxfIO::Lineweight::Mm050;
-DxfIO::Edit::Add(drawing, walls);
+if (!DxfIO::Edit::Add(drawing, walls)) return 1;
 
 DxfIO::Tables::Layer doors{};
 doors.Record.Name = "Doors";
 doors.Color = 3;
-DxfIO::Edit::Add(drawing, doors);
+if (!DxfIO::Edit::Add(drawing, doors)) return 1;
 ```
 
 ## Names [#names]
@@ -64,14 +64,14 @@ layer WALLS exists
 DxfIO::Entities::Line wall{};
 wall.Record.Layer = DxfIO::Symbol{"Walls"};
 wall.End = {.X = 400, .Y = 0, .Z = 0};
-DxfIO::Edit::Add(drawing, wall);
+if (!DxfIO::Edit::Add(drawing, wall)) return 1;
 
 DxfIO::Entities::Arc door{};
 door.Record.Layer = DxfIO::Symbol{"Doors"};
 door.Center = {.X = 100, .Y = 0, .Z = 0};
 door.Radius = 90;
 door.End = 90;
-DxfIO::Edit::Add(drawing, door);
+if (!DxfIO::Edit::Add(drawing, door)) return 1;
 ```
 
 ## Off, frozen, locked [#state]
@@ -83,13 +83,13 @@ DxfIO::Tables::Layer grid{};
 grid.Record.Name = "Grid";
 grid.Color = -8;
 grid.Plot = false;
-DxfIO::Edit::Add(drawing, grid);
+if (!DxfIO::Edit::Add(drawing, grid)) return 1;
 
 DxfIO::Tables::Layer survey{};
 survey.Record.Name = "Survey";
 survey.Color = 5;
 survey.Record.Flags = 1 | 4;
-DxfIO::Edit::Add(drawing, survey);
+if (!DxfIO::Edit::Add(drawing, survey)) return 1;
 ```
 
 ## Find and change [#find]

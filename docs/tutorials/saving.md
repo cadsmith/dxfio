@@ -110,7 +110,7 @@ DxfIO::Drawing note = DxfIO::Create(DxfIO::Version::R2004);
 DxfIO::Entities::Text text{};
 text.Lettering.Height = 2.5;
 text.Lettering.Value = "Ø 20";
-DxfIO::Edit::Add(note, text);
+if (!DxfIO::Edit::Add(note, text)) return 1;
 
 const auto cyrillic = DxfIO::Save(note, {.Release = DxfIO::Version::R2004, .Codepage = "ANSI_1251"});
 if (cyrillic)

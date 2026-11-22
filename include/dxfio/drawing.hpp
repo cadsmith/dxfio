@@ -125,6 +125,11 @@ namespace DxfIO
   [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
 
   /**
+   *  Refused: the entity would be gone with the drawing.
+   */
+  auto FindEntity(const Drawing &&drawing, Handle self) -> const Entity * = delete;
+
+  /**
    *  Finds the object of that handle in the OBJECTS section, or null; the null handle finds null.
    */
   [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
@@ -133,6 +138,11 @@ namespace DxfIO
    *  Finds the object of that handle in the OBJECTS section, or null; the null handle finds null.
    */
   [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
+
+  /**
+   *  Refused: the object would be gone with the drawing.
+   */
+  auto FindObject(const Drawing &&drawing, Handle self) -> const Object * = delete;
 } // namespace DxfIO
 
 #endif /* DXFIO_DRAWING_HPP */

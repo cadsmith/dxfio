@@ -13,7 +13,7 @@ DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Tables::AppId application{};
 application.Record.Name = "WALLPLAN";
-DxfIO::Edit::Add(drawing, application);
+if (!DxfIO::Edit::Add(drawing, application)) return 1;
 ```
 
 ## Attach the values [#attach]

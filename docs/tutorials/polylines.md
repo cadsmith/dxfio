@@ -17,7 +17,7 @@ path.Vertices = {
     {.Position = {.X = 30, .Y = 0, .Z = 0}},
     {.Position = {.X = 30, .Y = 20, .Z = 0}},
 };
-DxfIO::Edit::Add(drawing, path);
+if (!DxfIO::Edit::Add(drawing, path)) return 1;
 ```
 
 ## Widths [#widths]
@@ -32,7 +32,7 @@ arrow.Vertices = {
     {.Position = {.X = 24, .Y = 30, .Z = 0}, .Widths = DxfIO::Widths{.Start = 5, .End = 0}},
     {.Position = {.X = 30, .Y = 30, .Z = 0}, .Widths = DxfIO::Widths{.Start = 0, .End = 0}},
 };
-DxfIO::Edit::Add(drawing, arrow);
+if (!DxfIO::Edit::Add(drawing, arrow)) return 1;
 ```
 
 ## Arcs and a closed outline [#arcs]
@@ -48,7 +48,7 @@ slot.Vertices = {
     {.Position = {.X = 30, .Y = 60, .Z = 0}},
     {.Position = {.X = 0, .Y = 60, .Z = 0}, .Bulge = 1},
 };
-DxfIO::Edit::Add(drawing, slot);
+if (!DxfIO::Edit::Add(drawing, slot)) return 1;
 ```
 
 ## A 3D polyline [#polyline]
@@ -78,7 +78,7 @@ for (const DxfIO::Vector &at : route)
 The vertices end with a SEQEND. `Edit::Add` gives the polyline its SEQEND, and gives the vertices and the SEQEND handles of their own.
 
 ```cpp
-DxfIO::Edit::Add(drawing, pipe);
+if (!DxfIO::Edit::Add(drawing, pipe)) return 1;
 ```
 
 ## Save [#save]
