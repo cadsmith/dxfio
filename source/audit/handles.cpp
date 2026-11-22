@@ -1,5 +1,4 @@
 #include "../based.hpp"
-#include "../objects/shapes/defaulted.hpp"
 #include "ascii.hpp"
 #include "checks.hpp"
 #include "entities/io.hpp"

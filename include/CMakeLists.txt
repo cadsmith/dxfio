@@ -75,7 +75,6 @@ set(DXFIO_HEADERS
   dxfio/matrix.hpp
   dxfio/object.hpp
   dxfio/objects/datatable.hpp
-  dxfio/objects/defaulted.hpp
   dxfio/objects/dictionary.hpp
   dxfio/objects/dictionaryvar.hpp
   dxfio/objects/group.hpp

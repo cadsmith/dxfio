@@ -7,6 +7,7 @@
 #include "fields/field.hpp"
 #include "fields/handles.hpp"
 #include "fields/numbers.hpp"
+#include "fields/optional.hpp"
 #include "fields/since.hpp"
 #include "fields/subclass.hpp"
 #include "fields/text.hpp"
@@ -17,6 +18,7 @@
 #include "dxfio/objects/dictionary.hpp"
 
 #include <expected>
+#include <string_view>
 #include <tuple>
 
 namespace DxfIO
@@ -33,6 +35,32 @@ namespace DxfIO
     inline auto Pointing(const Entry &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
       return one.Soft || !one.Hard ? Fields::Put(Pointer, one, to) : std::expected<void, Failure>{};
+    }
+
+    inline constexpr Fields::Subclass Defaulting{.Marker = "AcDbDictionaryWithDefault"};
+
+    inline constexpr Fields::Field DefaultPointer{.Code = 340, .Member = &Dictionary::Default};
+
+    /**
+     *  Reads the default of an ACDBDICTIONARYWDFLT, null when its 340 is missing.
+     */
+    inline void Defaulted(Dictionary &one, Fields::Walk &in)
+    {
+      if (in.Subclass(Defaulting.Marker))
+      {
+        one.Default = Handle{};
+        Fields::Take(DefaultPointer, one, in);
+      }
+    }
+
+    inline auto Defaults(const Dictionary &one, Fields::Writing &to) -> std::expected<void, Failure>
+    {
+      if (!one.Default)
+      {
+        return {};
+      }
+      return Fields::Mark(Defaulting, to)
+          .and_then([&one, &to] -> auto { return Fields::Put(DefaultPointer, one, to); });
     }
   } // namespace Objects
 
@@ -69,10 +97,27 @@ namespace DxfIO
           .Member = &Objects::Dictionary::Entries,
           .Fields = Shapes<Objects::Entry>,
       },
+      Fields::Custom<Objects::Dictionary>{
+          .Read  = Objects::Defaulted,
+          .Write = Objects::Defaults,
+      },
   };
 
   template <>
   inline constexpr std::string_view Type<Objects::Dictionary> = "DICTIONARY";
+
+  namespace Objects
+  {
+    inline constexpr std::string_view WithDefault = "ACDBDICTIONARYWDFLT";
+
+    /**
+     *  The type a dictionary is written as: an ACDBDICTIONARYWDFLT when it has a default.
+     */
+    inline auto RecordType(const Dictionary &one) -> std::string_view
+    {
+      return one.Default ? WithDefault : DxfIO::Type<Dictionary>;
+    }
+  } // namespace Objects
 } // namespace DxfIO
 
 #endif /* DXFIO_OBJECTS_SHAPES_DICTIONARY_HPP */

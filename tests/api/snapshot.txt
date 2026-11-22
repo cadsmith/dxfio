@@ -2243,7 +2243,6 @@ namespace DxfIO
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/objects/datatable.hpp"
-#include "dxfio/objects/defaulted.hpp"
 #include "dxfio/objects/dictionary.hpp"
 #include "dxfio/objects/dictionaryvar.hpp"
 #include "dxfio/objects/group.hpp"
@@ -2267,14 +2266,13 @@ namespace DxfIO
 namespace DxfIO
 {
   using Object =
-      std::variant<Objects::Dictionary, Objects::DictionaryWithDefault, Objects::Group,
-                   Objects::ImageDef, Objects::ImageDefReactor, Objects::RasterVariables,
-                   Objects::Layout, Objects::Material, Objects::MLeaderStyle, Objects::MLineStyle,
-                   Objects::Placeholder, Objects::Scale, Objects::SortEntsTable,
-                   Objects::TableStyle, Objects::DictionaryVar, Objects::XRecord,
-                   Objects::PlotSettings, Objects::WipeoutVariables, Objects::PdfDefinition,
-                   Objects::DwfDefinition, Objects::DgnDefinition, Objects::VisualStyle,
-                   Objects::DataTable, Objects::AcDbDataTable, Unknown>;
+      std::variant<Objects::Dictionary, Objects::Group, Objects::ImageDef, Objects::ImageDefReactor,
+                   Objects::RasterVariables, Objects::Layout, Objects::Material,
+                   Objects::MLeaderStyle, Objects::MLineStyle, Objects::Placeholder, Objects::Scale,
+                   Objects::SortEntsTable, Objects::TableStyle, Objects::DictionaryVar,
+                   Objects::XRecord, Objects::PlotSettings, Objects::WipeoutVariables,
+                   Objects::PdfDefinition, Objects::DwfDefinition, Objects::DgnDefinition,
+                   Objects::VisualStyle, Objects::DataTable, Objects::AcDbDataTable, Unknown>;
   [[nodiscard]] DXFIO_API auto TypeOf(const Object &one) -> std::string_view;
   [[nodiscard]] DXFIO_API auto BaseOf(const Object &one) -> const Base &;
   [[nodiscard]] DXFIO_API auto BaseOf(Object &one) -> Base &;
@@ -2316,23 +2314,11 @@ namespace DxfIO::Objects
   using DataTable = DataTableOf<Edition::Current>;
   using AcDbDataTable = DataTableOf<Edition::Early>;
 }
-== dxfio/objects/defaulted.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/handle.hpp"
-#include "dxfio/objects/dictionary.hpp"
-namespace DxfIO::Objects
-{
-  struct DXFIO_API DictionaryWithDefault
-  {
-    Objects::Dictionary Dictionary{};
-    Handle Fallback{};
-    auto operator==(const DictionaryWithDefault &) const -> bool = default;
-  };
-}
 == dxfio/objects/dictionary.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/handle.hpp"
+#include <optional>
 #include <string>
 #include <vector>
 namespace DxfIO::Objects
@@ -2350,6 +2336,7 @@ namespace DxfIO::Objects
     bool HardOwner{};
     int Cloning{1};
     std::vector<Objects::Entry> Entries{};
+    std::optional<Handle> Default{};
     auto operator==(const Dictionary &) const -> bool = default;
   };
 }

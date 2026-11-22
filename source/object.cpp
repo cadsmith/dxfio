@@ -2,7 +2,6 @@
 
 #include "based.hpp"
 #include "objects/io.hpp"
-#include "objects/shapes/defaulted.hpp"
 
 #include <variant>
 

@@ -73,9 +73,10 @@ namespace DxfIO::Audit
     {
       for (const Object &one : drawing.Objects)
       {
-        if (const auto *held = std::get_if<Objects::DictionaryWithDefault>(&one))
+        const auto *held = std::get_if<Objects::Dictionary>(&one);
+        if (held != nullptr && held->Default)
         {
-          return held->Fallback;
+          return *held->Default;
         }
       }
       return {};

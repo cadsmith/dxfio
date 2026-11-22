@@ -85,18 +85,14 @@ namespace DxfIO::Plan
       if (auto *table = std::get_if<Objects::Dictionary>(&one))
       {
         Prune(*table, gone);
+        if (table->Default && Gone(gone, *table->Default))
+        {
+          table->Default = Handle{};
+        }
       }
       else if (auto *record = std::get_if<Objects::XRecord>(&one))
       {
         Unnamed(record->Data, gone);
-      }
-      else if (auto *defaulted = std::get_if<Objects::DictionaryWithDefault>(&one))
-      {
-        Prune(defaulted->Dictionary, gone);
-        if (Gone(gone, defaulted->Fallback))
-        {
-          defaulted->Fallback = {};
-        }
       }
     }
 

@@ -103,4 +103,44 @@ namespace DxfIO::Objects
           == "  0\r\nDICTIONARY\r\n  5\r\n13C\r\n330\r\n10\r\n"
              "100\r\nAcDbDictionary\r\n");
   }
+
+  TEST_CASE("dictionary: the plot style names, with their default, read from AutoCAD's record")
+  {
+    constexpr std::string_view text  = "  0\r\nACDBDICTIONARYWDFLT\r\n"
+                                       "  5\r\nE\r\n"
+                                       "102\r\n{ACAD_REACTORS\r\n"
+                                       "330\r\nC\r\n"
+                                       "102\r\n}\r\n"
+                                       "330\r\nC\r\n"
+                                       "100\r\nAcDbDictionary\r\n"
+                                       "281\r\n     1\r\n"
+                                       "  3\r\nNormal\r\n"
+                                       "350\r\nF\r\n"
+                                       "100\r\nAcDbDictionaryWithDefault\r\n"
+                                       "340\r\nF\r\n";
+    const Dictionary           taken = Read<Dictionary>(text);
+    CHECK(taken.Base.Self            == Handle{.Value = 0xE});
+    CHECK(taken.Base.Reactors        == std::vector{Handle{.Value = 0xC}});
+    REQUIRE(taken.Entries.size()     == 1);
+    CHECK(taken.Entries.front().Name == "Normal");
+    CHECK(taken.Default  == Handle{.Value = 0xF});
+    CHECK(Written(taken) == text);
+  }
+
+  TEST_CASE("dictionary: an entry of one with a default pointing nowhere keeps its 350")
+  {
+    constexpr std::string_view text  = "  0\r\nACDBDICTIONARYWDFLT\r\n"
+                                       "  5\r\nE\r\n"
+                                       "330\r\nC\r\n"
+                                       "100\r\nAcDbDictionary\r\n"
+                                       "281\r\n     1\r\n"
+                                       "  3\r\nNormal\r\n"
+                                       "350\r\n0\r\n"
+                                       "100\r\nAcDbDictionaryWithDefault\r\n"
+                                       "340\r\nF\r\n";
+    const Dictionary           taken = Read<Dictionary>(text);
+    REQUIRE(taken.Entries.size() == 1);
+    CHECK_FALSE(taken.Entries.front().Soft);
+    CHECK(Written(taken) == text);
+  }
 } // namespace DxfIO::Objects

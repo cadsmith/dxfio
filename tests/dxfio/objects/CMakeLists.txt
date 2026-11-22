@@ -1,7 +1,6 @@
 target_sources(dxfio_tests
   PRIVATE
     data.cpp
-    defaulted.cpp
     dictionary.cpp
     gathered.cpp
     layout.cpp

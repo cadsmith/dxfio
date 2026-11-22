@@ -39,15 +39,12 @@ namespace DxfIO::Objects
     CHECK(page.Out == Text);
   }
 
-  TEST_CASE("objects: the base of each kind, a defaulted dictionary's too")
+  TEST_CASE("objects: the base of each kind")
   {
     const Handle self{.Value = 0x2a};
     Dictionary   plain{};
     plain.Base.Self = self;
     CHECK(Based(Object{plain}).Self == self);
-    DictionaryWithDefault fallback{};
-    fallback.Dictionary = plain;
-    CHECK(Based(Object{fallback}).Self == self);
     Unknown kept{};
     kept.Base.Self = self;
     CHECK(Based(Object{kept}).Self == self);

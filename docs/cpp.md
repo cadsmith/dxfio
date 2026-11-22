@@ -12,15 +12,17 @@
   `XLine`, `AttDef`, `Attrib`, `SeqEnd`, `Block` and `EndBlk`, `LType`,
   `VPort`, `DimStyle`, `AppId`, `LwPolyline`, `AcadTable`, `ImageDefReactor`,
   `Placeholder`, `Face3d`. An abbreviation stays one word: `Attrib`, not
-  `AttRib`. It stays abbreviated when AutoCAD uses it on its own, as a command,
-  a system variable or a table, so a reader takes it as a word: `LType`,
-  `VPort`, `DimStyle`, `AttDef`, `MText`, `SeqEnd`, `EndBlk`. One that packs
-  several words into a few letters found nowhere else is spelled out:
-  `ACDBDICTIONARYWDFLT` is `DictionaryWithDefault`. The names are the ones a
-  DXF file and AutoCAD's reference use, and no spelled-out form holds without
-  an exception: `Viewport` is the VIEWPORT entity, not a VPORT. One more:
-  `AcDbDataTable` keeps its prefix, as R2000's ACDBDATATABLE and the later
-  DATATABLE are two layouts of one kind, and `DataTable` names the other.
+  `AttRib`. It stays abbreviated when AutoCAD uses it on its own, as a
+  command, a system variable or a table, so a reader takes it as a word:
+  `LType`, `VPort`, `DimStyle`, `AttDef`, `MText`, `SeqEnd`, `EndBlk`. One
+  that packs several words into a few letters found nowhere else is spelled
+  out. A kind that differs from another only by a member is that kind with the
+  member: `ACDBDICTIONARYWDFLT` is a `Dictionary` whose `Default` is set. The
+  names are the ones a DXF file and AutoCAD's reference use, and no
+  spelled-out form holds without an exception: `Viewport` is the VIEWPORT
+  entity, not a VPORT. One more: `AcDbDataTable` keeps its prefix, as R2000's
+  ACDBDATATABLE and the later DATATABLE are two layouts of one kind, and
+  `DataTable` names the other.
 - Any other public type is named in whole words for what it holds, never with
   a name a kind takes: `Definition`, `Section`, `Tag`, `SaveOptions`. A part
   nested in the namespace of its type may share a kind's name when the part
