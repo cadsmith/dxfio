@@ -2,7 +2,7 @@ import { createGetUrl } from 'fumadocs-core/source'
 
 export const appName = 'dxfio'
 export const description =
-  'dxfio is a C++23 library that reads and writes AutoCAD DXF, ASCII and binary, every release from R10 to R2018, nothing lost.'
+  'dxfio is a C++23 library that reads and writes AutoCAD DXF, ASCII and binary, every release from R10 to R2018, nothing lost on a round trip.'
 export const docsImageRoute = '/og'
 export const docsContentRoute = '/llms.mdx'
 

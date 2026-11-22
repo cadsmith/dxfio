@@ -61,30 +61,54 @@ const groups: [string, (path: string) => boolean][] = [
   ['Values', () => true],
 ]
 
+// A doc block's text: its `/**`, `*/` and leading `*` dropped, its lines joined.
+const unblocked = (lines: string[]): string =>
+  squeeze(
+    lines
+      .map((line) => line.trim().replace(/^\/\*\*<?/, '').replace(/\*\/$/, '').replace(/^\*(?!\/)/, ''))
+      .join(' '),
+  )
+
+// A run of `///` lines' text, joined.
+const slashed = (lines: string[]): string => squeeze(lines.map((line) => line.replace(/^\/\/\/\s?/, '')).join(' '))
+
+// The `/** */` block, or the run of `///` lines, that ends above a declaration, only blank or `//` lines, as a NOLINT,
+// between them; empty without one, and for a `/**< */` note, which belongs to the line it ends.
 const docBefore = (text: string, at: number): string => {
   const lines = text.slice(0, text.lastIndexOf('\n', at - 1) + 1).split('\n')
   lines.pop()
-  const out: string[] = []
-  while (lines.length > 0) {
-    const line = lines.pop()?.trim() ?? ''
-    if (!line.startsWith('///')) break
-    out.unshift(line.replace(/^\/\/\/\s?/, ''))
+  const between = (line: string) => line === '' || (line.startsWith('//') && !line.startsWith('///'))
+  while (lines.length > 0 && between(lines.at(-1)?.trim() ?? '')) lines.pop()
+  if ((lines.at(-1)?.trim() ?? '').startsWith('///')) {
+    const run: string[] = []
+    while ((lines.at(-1)?.trim() ?? '').startsWith('///')) run.unshift(lines.pop()?.trim() ?? '')
+    return slashed(run)
   }
-  return out.join(' ')
+  if (!(lines.at(-1)?.trim() ?? '').endsWith('*/')) return ''
+  const block: string[] = []
+  while (lines.length > 0) {
+    const line = (lines.pop() ?? '').trim()
+    block.unshift(line)
+    if (line.startsWith('/**')) return line.startsWith('/**<') ? '' : unblocked(block)
+    if (!line.startsWith('*')) return ''
+  }
+  return ''
 }
 
 const closing = (text: string, open: number): number => {
   let depth = 0
   let at = open
   while (at < text.length) {
-    if (text[at] === '/' && text[at + 1] === '/') {
-      const end = text.indexOf('\n', at)
+    if (text.startsWith('//', at) || text.startsWith('/*', at)) {
+      const line = text.startsWith('//', at)
+      const end = line ? text.indexOf('\n', at) : text.indexOf('*/', at + 2)
       if (end < 0) return text.length
-      at = end + 1
+      at = end + (line ? 1 : 2)
       continue
     }
-    if (text[at] === '{') depth += 1
-    if (text[at] === '}') {
+    const char = text.charAt(at)
+    if (char === '{') depth += 1
+    if (char === '}') {
       depth -= 1
       if (depth === 0) return at
     }
@@ -187,28 +211,72 @@ const field = (code: string): { type: string; name: string; value?: string } | u
 
 type Statement = { code: string; doc: string }
 
+// A line of a body: a doc block, or code with the `/**< */` note that ends it; a block or a note over several lines is
+// one, `//` lines none.
+type Line = { doc?: string; code?: string; note?: string }
+
+const attach = (out: Line[], lines: string[], note: boolean) => {
+  const text = unblocked(lines)
+  const last = out.at(-1)
+  if (note && last?.code !== undefined) last.note = squeeze(`${last.note ?? ''} ${text}`)
+  else out.push({ doc: text })
+}
+
+const lined = (body: string): Line[] => {
+  const out: Line[] = []
+  let open: { lines: string[]; note: boolean } | undefined
+  for (const whole of body.split('\n')) {
+    const trimmed = whole.trim()
+    if (open !== undefined) {
+      open.lines.push(trimmed)
+      if (trimmed.endsWith('*/')) {
+        attach(out, open.lines, open.note)
+        open = undefined
+      }
+      continue
+    }
+    if (trimmed.startsWith('///')) {
+      out.push({ doc: slashed([trimmed]) })
+      continue
+    }
+    if (trimmed.startsWith('//')) continue
+    const at = whole.indexOf('/**')
+    if (at < 0) {
+      out.push({ code: whole })
+      continue
+    }
+    const comment = whole.slice(at).trim()
+    if (whole.slice(0, at).trim() !== '') out.push({ code: whole.slice(0, at) })
+    const note = comment.startsWith('/**<')
+    if (comment.length > 4 && comment.endsWith('*/')) attach(out, [comment], note)
+    else open = { lines: [comment], note }
+  }
+  return out
+}
+
 const statements = (body: string): Statement[] => {
   const out: Statement[] = []
   let depth = 0
   let code = ''
   let doc: string[] = []
   const flush = () => {
-    if (squeeze(code)) out.push({ code: squeeze(code), doc: doc.join(' ') })
+    if (squeeze(code)) out.push({ code: squeeze(code), doc: squeeze(doc.join(' ')) })
     code = ''
     doc = []
   }
-  for (const raw of body.split('\n')) {
-    const line = raw.trim()
-    if (depth === 0 && line.startsWith('///')) {
-      doc.push(line.replace(/^\/\/\/\s?/, ''))
+  for (const one of lined(body)) {
+    if (one.doc !== undefined) {
+      if (depth === 0) doc.push(one.doc)
       continue
     }
-    if (line.startsWith('//')) continue
+    const raw = one.code ?? ''
+    const line = raw.trim()
     if (depth === 0 && /^(public|private|protected):$/.test(line)) {
       code = line
       flush()
       continue
     }
+    const before = out.length
     const opened = depth
     for (const char of raw) {
       if (char === '{' || char === '(') depth += 1
@@ -219,9 +287,22 @@ const statements = (body: string): Statement[] => {
     code += '\n'
     if (depth === 0 && opened === 0 && line.endsWith('}')) flush()
     if (depth === 0 && opened > 0 && line === '}') flush()
+    const last = out.at(-1)
+    if (one.note !== undefined && last !== undefined && out.length > before) last.doc = squeeze(`${last.doc} ${one.note}`)
   }
   return out
 }
+
+// An enum's body as statements: each enumerator's comma a semicolon, its note kept after it.
+const enumerated = (body: string): string =>
+  body
+    .split('\n')
+    .map((line) => {
+      const at = line.indexOf('/**<')
+      const code = at < 0 ? line : line.slice(0, at)
+      return code.trimEnd().replace(/,$/, ';') + (at < 0 ? '' : ` ${line.slice(at)}`)
+    })
+    .join('\n')
 
 const membersOf = (body: string, kind: 'struct' | 'class') => {
   const fields: Field[] = []
@@ -290,10 +371,11 @@ const headers: Header[] = walk(include)
       })
     }
     const outside = (at: number) => !spans.some(([from, to]) => at > from && at < to)
-    const enums = [...text.matchAll(/enum class (\w+)\s*:\s*[\w:]+\s*\{([^}]*)\}/g)].map((one) => ({
+    // An enum's body runs to the brace that closes it, a brace inside a note left alone.
+    const enums = [...text.matchAll(/enum class (\w+)\s*:\s*[\w:]+\s*\{/g)].map((one) => ({
       name: filled(one, 1),
       doc: docBefore(text, one.index),
-      values: statements(filled(one, 2).replace(/,\s*$/gm, ';'))
+      values: statements(enumerated(text.slice(one.index + one[0].length, closing(text, one.index + one[0].length - 1))))
         .map((value) => {
           const code = value.code.replace(/;$/, '')
           const equals = code.indexOf('=')
