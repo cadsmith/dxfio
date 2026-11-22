@@ -62,6 +62,21 @@ namespace DxfIO::Plan
     }
 
     /**
+     *  Nulls the handles among tags that name an object gone.
+     */
+    void Unnamed(std::vector<Tag> &tags, const std::vector<Handle> &gone)
+    {
+      for (Tag &value : tags)
+      {
+        if (const auto *named = std::get_if<Handle>(&value.Value);
+            named != nullptr && Gone(gone, *named))
+        {
+          value.Value = Handle{};
+        }
+      }
+    }
+
+    /**
      *  Drops the entries of a dictionary, and the default of one that has it, that name a record
      *  gone.
      */
@@ -70,6 +85,10 @@ namespace DxfIO::Plan
       if (auto *table = std::get_if<Objects::Dictionary>(&one))
       {
         Prune(*table, gone);
+      }
+      else if (auto *record = std::get_if<Objects::XRecord>(&one))
+      {
+        Unnamed(record->Data, gone);
       }
       else if (auto *defaulted = std::get_if<Objects::DictionaryWithDefault>(&one))
       {
@@ -100,28 +119,10 @@ namespace DxfIO::Plan
       for (const Object &one : drawing.Objects)
       {
         const Handle self = Objects::Based(one).Self;
-        if (std::holds_alternative<Unknown>(one) || Gone(gone, self))
+        if (Leaving(one, gone))
         {
           issues->push_back(
               Issue{.Code = IssueCode::NotKept, .Subject = self, .What = Why(one, from)});
-        }
-      }
-    }
-
-    /**
-     *  Nulls the handles of the header that name an object gone.
-     */
-    void Unnamed(std::vector<Header::Variable> &header, const std::vector<Handle> &gone)
-    {
-      for (Header::Variable &one : header)
-      {
-        for (Tag &value : one.Values)
-        {
-          if (const auto *named = std::get_if<Handle>(&value.Value);
-              named != nullptr && Gone(gone, *named))
-          {
-            value.Value = Handle{};
-          }
         }
       }
     }
@@ -134,10 +135,12 @@ namespace DxfIO::Plan
     {
       Told(drawing, gone, issues);
     }
-    std::erase_if(
-        drawing.Objects, [&gone](const Object &one) -> bool
-        { return std::holds_alternative<Unknown>(one) || Gone(gone, Objects::Based(one).Self); });
-    Unnamed(drawing.Header, gone);
+    std::erase_if(drawing.Objects,
+                  [&gone](const Object &one) -> bool { return Leaving(one, gone); });
+    for (Header::Variable &one : drawing.Header)
+    {
+      Unnamed(one.Values, gone);
+    }
     for (Object &one : drawing.Objects)
     {
       Pruned(one, gone);

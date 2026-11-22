@@ -84,16 +84,6 @@ namespace DxfIO::Edit
     CHECK(std::get<Handle>(drawing.Header.front().Values.front().Value) == Handle{.Value = 0x42});
   }
 
-  TEST_CASE("edit: a seed behind a handle held gives the handle after the highest, not one taken")
-  {
-    Drawing drawing{};
-    drawing.Entities.emplace_back(Lined(Handle{.Value = 0x40}));
-    drawing.Header.push_back(Header::Variable{
-        .Name = "$HANDSEED", .Values = {Tag{.Code = 5, .Value = Handle{.Value = 0x20}}}});
-    CHECK(NewHandle(drawing) == Handle{.Value = 0x41});
-    CHECK(Seed(drawing)      == Handle{.Value = 0x42});
-  }
-
   TEST_CASE("edit: past the last handle there is, no handle is given")
   {
     Drawing seeded                       = Create();

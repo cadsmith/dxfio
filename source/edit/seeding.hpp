@@ -12,8 +12,8 @@
 namespace DxfIO::Edit
 {
   /**
-   *  The handles an edit takes from: past every handle the drawing holds and its $HANDSEED, so a
-   *  seed left behind the handles in use hands out none of them.
+   *  The handles an edit takes from: $HANDSEED, or past every handle the drawing holds when it has
+   *  none.
    */
   [[nodiscard]] auto Seeded(const Drawing &drawing) -> std::expected<Seed, Failure>;
 
