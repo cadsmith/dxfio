@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <format>
+#include <string>
 #include <utility>
 #include <variant>
 
@@ -37,10 +38,10 @@ namespace DxfIO::Plan
     auto Left(std::span<const Object> all) -> std::vector<Handle>
     {
       std::vector<Handle> out;
-      std::size_t         before = 0;
-      do
+      bool                grew = true;
+      while (grew)
       {
-        before = out.size();
+        const std::size_t before = out.size();
         for (const Object &one : all)
         {
           const Handle self = Objects::Based(one).Self;
@@ -49,7 +50,8 @@ namespace DxfIO::Plan
             out.insert(std::ranges::upper_bound(out, self), self);
           }
         }
-      } while (out.size() != before);
+        grew = out.size() != before;
+      }
       return out;
     }
 
@@ -79,28 +81,29 @@ namespace DxfIO::Plan
       }
     }
 
-    void Told(std::span<const Object> all, const std::vector<Handle> &gone, Version from,
-              std::vector<Issue> *issues)
+    /**
+     *  Why an object goes: its kind is not typed, or what owns it goes.
+     */
+    auto Why(const Object &one, Version from) -> std::string
     {
-      for (const Object &one : all)
+      if (const auto *kept = std::get_if<Unknown>(&one))
+      {
+        return std::format("{} left out, its groups are in {}'s form", kept->Type.View(),
+                           NameOf(from));
+      }
+      return std::format("{} left out with the object that owns it", Objects::Type(one));
+    }
+
+    void Told(const Drawing &drawing, const std::vector<Handle> &gone, std::vector<Issue> *issues)
+    {
+      const Version from = Header::Declared(drawing.Header);
+      for (const Object &one : drawing.Objects)
       {
         const Handle self = Objects::Based(one).Self;
-        if (const auto *kept = std::get_if<Unknown>(&one))
+        if (std::holds_alternative<Unknown>(one) || Gone(gone, self))
         {
-          issues->push_back(Issue{
-              .Code    = IssueCode::NotKept,
-              .Subject = self,
-              .What    = std::format("{} left out, its groups are in {}'s form", kept->Type.View(),
-                                     NameOf(from)),
-          });
-        }
-        else if (Gone(gone, self))
-        {
-          issues->push_back(Issue{
-              .Code    = IssueCode::NotKept,
-              .Subject = self,
-              .What = std::format("{} left out with the object that owns it", Objects::Type(one)),
-          });
+          issues->push_back(
+              Issue{.Code = IssueCode::NotKept, .Subject = self, .What = Why(one, from)});
         }
       }
     }
@@ -114,7 +117,8 @@ namespace DxfIO::Plan
       {
         for (Tag &value : one.Values)
         {
-          if (const auto *named = std::get_if<Handle>(&value.Value); named && Gone(gone, *named))
+          if (const auto *named = std::get_if<Handle>(&value.Value);
+              named != nullptr && Gone(gone, *named))
           {
             value.Value = Handle{};
           }
@@ -128,7 +132,7 @@ namespace DxfIO::Plan
     const std::vector<Handle> gone = Left(drawing.Objects);
     if (issues != nullptr)
     {
-      Told(drawing.Objects, gone, Header::Declared(drawing.Header), issues);
+      Told(drawing, gone, issues);
     }
     std::erase_if(
         drawing.Objects, [&gone](const Object &one) -> bool
