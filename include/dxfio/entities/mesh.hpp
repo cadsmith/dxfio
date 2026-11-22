@@ -4,10 +4,10 @@
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
 #include "dxfio/entities/record.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/vector.hpp"
 
-#include <string>
+#include <cstddef>
 #include <vector>
 
 namespace DxfIO::Entities
@@ -15,7 +15,7 @@ namespace DxfIO::Entities
   /**
    *  The AcDbSubDMesh subclass of a MESH: its vertices, faces, edges and creases.
    */
-  struct DXFIO_API Net
+  struct DXFIO_API MeshData
   {
     /**
      *  The version of the mesh's layout. Group 71.
@@ -54,9 +54,9 @@ namespace DxfIO::Entities
     /**
      *  The overrides that follow, kept as the groups they came in.
      */
-    std::vector<Group> Overrides{};
+    std::vector<Tag> Overrides{};
 
-    auto operator==(const Net &) const -> bool = default;
+    auto operator==(const MeshData &) const -> bool = default;
   };
 
   /**
@@ -72,11 +72,11 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The vertices, faces, edges and creases, from the AcDbSubDMesh subclass.
      */
-    Boxed<Entities::Net> Net{};
+    Boxed<Entities::MeshData> Data{};
 
     auto operator==(const Mesh &) const -> bool = default;
   };

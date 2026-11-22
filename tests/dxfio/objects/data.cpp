@@ -27,12 +27,12 @@ namespace DxfIO::Objects
       out.Columns   = {
           Column{.Kind  = 1,
                  .Name  = "Count",
-                 .Cells = {DxfIO::Group{.Code = 93, .Value = std::int64_t{3}},
-                           DxfIO::Group{.Code = 93, .Value = std::int64_t{4}}}},
+                 .Cells = {DxfIO::Tag{.Code = 93, .Value = std::int64_t{3}},
+                           DxfIO::Tag{.Code = 93, .Value = std::int64_t{4}}}},
           Column{.Kind  = 4,
                  .Name  = "Part",
-                 .Cells = {DxfIO::Group{.Code = 3, .Value = std::string{"bolt"}},
-                           DxfIO::Group{.Code = 3, .Value = std::string{"nut"}}}},
+                 .Cells = {DxfIO::Tag{.Code = 3, .Value = std::string{"bolt"}},
+                           DxfIO::Tag{.Code = 3, .Value = std::string{"nut"}}}},
       };
       return out;
     }
@@ -123,11 +123,11 @@ namespace DxfIO::Objects
 {
   TEST_CASE("data table: a type with no name after it is a cell, last or not")
   {
-    const auto kept = Columned({DxfIO::Group{.Code = 92, .Value = std::int64_t{1}},
-                                DxfIO::Group{.Code = 2, .Value = std::string{"Count"}},
-                                DxfIO::Group{.Code = 92, .Value = std::int64_t{4}},
-                                DxfIO::Group{.Code = 93, .Value = std::int64_t{3}},
-                                DxfIO::Group{.Code = 92, .Value = std::int64_t{5}}});
+    const auto kept = Columned({DxfIO::Tag{.Code = 92, .Value = std::int64_t{1}},
+                                DxfIO::Tag{.Code = 2, .Value = std::string{"Count"}},
+                                DxfIO::Tag{.Code = 92, .Value = std::int64_t{4}},
+                                DxfIO::Tag{.Code = 93, .Value = std::int64_t{3}},
+                                DxfIO::Tag{.Code = 92, .Value = std::int64_t{5}}});
     REQUIRE(kept);
     REQUIRE(kept->size()             == 1);
     CHECK(kept->front().Cells.size() == 3);
@@ -135,9 +135,9 @@ namespace DxfIO::Objects
 
   TEST_CASE("data table: a type no int holds opens no column")
   {
-    CHECK_FALSE(Columned({DxfIO::Group{.Code = 92, .Value = std::int64_t{4294967296}},
-                          DxfIO::Group{.Code = 2, .Value = std::string{"Count"}}}));
-    CHECK_FALSE(Columned({DxfIO::Group{.Code = 92, .Value = std::int64_t{-2147483649}},
-                          DxfIO::Group{.Code = 2, .Value = std::string{"Count"}}}));
+    CHECK_FALSE(Columned({DxfIO::Tag{.Code = 92, .Value = std::int64_t{4294967296}},
+                          DxfIO::Tag{.Code = 2, .Value = std::string{"Count"}}}));
+    CHECK_FALSE(Columned({DxfIO::Tag{.Code = 92, .Value = std::int64_t{-2147483649}},
+                          DxfIO::Tag{.Code = 2, .Value = std::string{"Count"}}}));
   }
 } // namespace DxfIO::Objects

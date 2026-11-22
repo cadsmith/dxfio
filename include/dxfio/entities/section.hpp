@@ -7,6 +7,7 @@
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
@@ -17,7 +18,7 @@ namespace DxfIO::Entities
    *  The AcDbSection subclass of a SECTIONOBJECT: the plane that cuts the model and the line it is
    *  drawn with.
    */
-  struct DXFIO_API Cut
+  struct DXFIO_API SectionObjectData
   {
     /**
      *  What the section cuts with: 1 a plane, 2 a boundary, 4 a volume. Group 90.
@@ -68,7 +69,7 @@ namespace DxfIO::Entities
      */
     Handle Settings{};
 
-    auto operator==(const Cut &) const -> bool = default;
+    auto operator==(const SectionObjectData &) const -> bool = default;
   };
 
   /**
@@ -84,11 +85,11 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The plane, its line and its indicator, from the AcDbSection subclass.
      */
-    Boxed<Entities::Cut> Cut{};
+    Boxed<Entities::SectionObjectData> Data{};
 
     auto operator==(const SectionObject &) const -> bool = default;
   };

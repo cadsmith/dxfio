@@ -7,14 +7,15 @@
 #include "dxfio/entities/spline.hpp"
 #include "dxfio/vector.hpp"
 
-#include <string>
+#include <cstddef>
+#include <vector>
 
 namespace DxfIO::Entities
 {
   /**
    *  The AcDbHelix subclass of a HELIX: the axis, radius and turns the coil follows.
    */
-  struct DXFIO_API Coil
+  struct DXFIO_API HelixData
   {
     /**
      *  The major version of the helix's layout. Group 90.
@@ -27,7 +28,7 @@ namespace DxfIO::Entities
     /**
      *  The base point of the axis, in world coordinates. Groups 10, 20, 30.
      */
-    Vector Base{};
+    Vector BasePoint{};
     /**
      *  The point the helix starts at, in world coordinates. Groups 11, 21, 31.
      */
@@ -51,14 +52,14 @@ namespace DxfIO::Entities
     /**
      *  Whether the helix turns right-handed. Group 290.
      */
-    bool Right{true};
+    bool RightHanded{true};
     /**
      *  What is kept when the helix is edited: 0 the height of a turn, 1 the turns, 2 the height.
      *  Group 280.
      */
     int Constraint{};
 
-    auto operator==(const Coil &) const -> bool = default;
+    auto operator==(const HelixData &) const -> bool = default;
   };
 
   /**
@@ -74,7 +75,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The spline that draws the helix, from the AcDbSpline subclass.
      */
@@ -82,7 +83,7 @@ namespace DxfIO::Entities
     /**
      *  The axis, radius and turns, from the AcDbHelix subclass.
      */
-    Entities::Coil Coil{};
+    Entities::HelixData Data{};
 
     auto operator==(const Helix &) const -> bool = default;
   };

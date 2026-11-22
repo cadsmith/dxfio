@@ -29,8 +29,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("vertex: a curve's, its bulge and its flags")
   {
-    const DxfIO::Document file  = Heavy();
-    const Polyline       &taken = Traced(file.Entities, 0x2fa);
+    const DxfIO::Drawing file  = Heavy();
+    const Polyline      &taken = Traced(file.Entities, 0x2fa);
     REQUIRE(taken.Vertices.Children.size() >= 2);
     CHECK(taken.Vertices.Children.front().Bulge > 0);
     CHECK(taken.Vertices.Children.at(1).Flags == 1);
@@ -38,8 +38,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("vertex: a spline's frame and its fitted points")
   {
-    const DxfIO::Document file  = Heavy();
-    const Polyline       &taken = Traced(file.Entities, 0x303);
+    const DxfIO::Drawing file  = Heavy();
+    const Polyline      &taken = Traced(file.Entities, 0x303);
     REQUIRE(taken.Vertices.Children.size() >= 2);
     CHECK(taken.Vertices.Children.at(0).Flags == 16);
     CHECK(taken.Vertices.Children.at(1).Flags == 8);
@@ -47,15 +47,15 @@ namespace DxfIO::Entities
 
   TEST_CASE("vertex: an identifier before its flags, a tangent after them")
   {
-    const DxfIO::Document file  = Heavy();
-    const Polyline       &taken = Traced(file.Entities, 0x48a);
+    const DxfIO::Drawing file  = Heavy();
+    const Polyline      &taken = Traced(file.Entities, 0x48a);
     REQUIRE(taken.Vertices.Children.size() == 2);
     const Vertex &first = taken.Vertices.Children.front();
-    CHECK(first.Start == 1.0);
-    CHECK(first.End   == 2.0);
-    CHECK(first.Bulge == 0.5);
-    CHECK(first.Id    == 7);
-    CHECK(first.Flags == 2);
+    CHECK(first.StartWidth == 1.0);
+    CHECK(first.EndWidth   == 2.0);
+    CHECK(first.Bulge      == 0.5);
+    CHECK(first.Id         == 7);
+    CHECK(first.Flags      == 2);
     CHECK(first.Tangent > 28);
     const std::string text = Written(first);
     CHECK(text.find(" 42\r\n") < text.find(" 91\r\n"));
@@ -65,8 +65,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("vertex: its identifier not written below R2010, but in the release it came from")
   {
-    const DxfIO::Document file  = Heavy();
-    const Vertex         &first = Traced(file.Entities, 0x48a).Vertices.Children.front();
+    const DxfIO::Drawing file  = Heavy();
+    const Vertex        &first = Traced(file.Entities, 0x48a).Vertices.Children.front();
     REQUIRE(first.Id == 7);
     for (const Version release : {Version::R2000, Version::R2004, Version::R2007})
     {
@@ -79,16 +79,16 @@ namespace DxfIO::Entities
   TEST_CASE(
       "vertex: its identifier written from R2010, whatever release it came from, never in R12")
   {
-    const DxfIO::Document file  = Heavy();
-    const Vertex         &first = Traced(file.Entities, 0x48a).Vertices.Children.front();
+    const DxfIO::Drawing file  = Heavy();
+    const Vertex        &first = Traced(file.Entities, 0x48a).Vertices.Children.front();
     CHECK(Moved(first, Version::R2010, Version::R2004).contains(" 91\r\n        7\r\n"));
     CHECK_FALSE(Written(first, Version::R12).contains(" 91\r\n"));
   }
 
   TEST_CASE("vertex: a face's corners, negative for an edge not drawn")
   {
-    const DxfIO::Document file  = Heavy();
-    const Polyline       &taken = Traced(file.Entities, 0x374);
+    const DxfIO::Drawing file  = Heavy();
+    const Polyline      &taken = Traced(file.Entities, 0x374);
     REQUIRE(taken.Vertices.Children.size() == 7);
     const Vertex &square = taken.Vertices.Children.at(5);
     CHECK(square.First  == 1);
@@ -101,8 +101,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("vertex: a face's corners of 0 left out")
   {
-    const DxfIO::Document file  = Heavy();
-    const Polyline       &taken = Traced(file.Entities, 0x482);
+    const DxfIO::Drawing file  = Heavy();
+    const Polyline      &taken = Traced(file.Entities, 0x482);
     REQUIRE(taken.Vertices.Children.size() == 5);
     const std::string text = Written(taken.Vertices.Children.at(3));
     CHECK(text.contains(" 72\r\n     2\r\n"));
@@ -143,7 +143,7 @@ namespace DxfIO::Entities
   TEST_CASE("vertex: a width written at 0, unlike a width not given")
   {
     Vertex held            = Flagged(0);
-    held.Start             = 0.0;
+    held.StartWidth        = 0.0;
     const std::string text = Written(held);
     CHECK(text.contains(" 40\r\n0.0\r\n"));
     CHECK_FALSE(text.contains(" 41\r\n"));

@@ -93,7 +93,7 @@ namespace DxfIO::Down
     {
       if constexpr (Among<KindT, Entities::Point, Entities::Line, Entities::Circle, Entities::Arc,
                           Entities::Text, Entities::Shape, Entities::Solid, Entities::Trace,
-                          Entities::Face3d, Entities::Attdef, Entities::Insert, Entities::Polyline,
+                          Entities::Face3d, Entities::AttDef, Entities::Insert, Entities::Polyline,
                           Entities::Dimension, Entities::LwPolyline>)
       {
         return Version::R10;
@@ -145,8 +145,8 @@ namespace DxfIO::Down
       out.Position.Z = one.Elevation;
       out.Thickness  = one.Thickness;
       out.Flags      = Masked(one.Flags, Closed + Generated);
-      out.Start      = one.Width.value_or(0.0);
-      out.End        = one.Width.value_or(0.0);
+      out.StartWidth = one.Width.value_or(0.0);
+      out.EndWidth   = one.Width.value_or(0.0);
       out.Extrusion  = one.Extrusion;
       for (const Entities::LwPolyline::Vertex &vertex : one.Vertices)
       {
@@ -156,12 +156,12 @@ namespace DxfIO::Down
         child.Bulge    = vertex.Bulge;
         if (vertex.Widths)
         {
-          child.Start = vertex.Widths->Start;
-          child.End   = vertex.Widths->End;
+          child.StartWidth = vertex.Widths->Start;
+          child.EndWidth   = vertex.Widths->End;
         }
         out.Vertices.Children.push_back(std::move(child));
       }
-      out.Vertices.Closing = Boxed{Entities::Seqend{.Record = Child(one.Record, handles)}};
+      out.Vertices.Closing = Boxed{Entities::SeqEnd{.Record = Child(one.Record, handles)}};
       return out;
     }
 
@@ -218,9 +218,10 @@ namespace DxfIO::Down
                       if (hollow && with.Issues != nullptr)
                       {
                         with.Issues->push_back(Issue{
-                            .Record = Entities::Based(one).Self,
-                            .What   = std::format("{} left out, its body is not in {}'s form",
-                                                  Entities::Named(one), Name(with.Release)),
+                            .Code    = IssueCode::NotKept,
+                            .Subject = Entities::Based(one).Self,
+                            .What    = std::format("{} left out, its body is not in {}'s form",
+                                                   Entities::Named(one), NameOf(with.Release)),
                         });
                       }
                       return hollow;
@@ -258,12 +259,12 @@ namespace DxfIO::Down
       {
         if (auto *port = std::get_if<Entities::Viewport>(&one))
         {
-          Unpointed(port->Port->Style, gone);
+          Unpointed(port->Data->VisualStyle, gone);
         }
       }
     }
 
-    void Restyled(Document &from, Version release, std::vector<Issue> *issues)
+    void Restyled(Drawing &from, Version release, std::vector<Issue> *issues)
     {
       if (Era(release) == Era(Header::Declared(from.Header)))
       {
@@ -287,7 +288,8 @@ namespace DxfIO::Down
       if (issues != nullptr)
       {
         issues->push_back(Issue{
-            .What = std::format("visual styles left out, {} holds them otherwise", Name(release)),
+            .Code = IssueCode::NotKept,
+            .What = std::format("visual styles left out, {} holds them otherwise", NameOf(release)),
         });
       }
       for (Object &one : from.Objects)
@@ -300,7 +302,7 @@ namespace DxfIO::Down
       }
       for (Header::Variable &one : from.Header)
       {
-        for (Group &value : one.Values)
+        for (Tag &value : one.Values)
         {
           if (auto *held = std::get_if<Handle>(&value.Value))
           {
@@ -308,16 +310,16 @@ namespace DxfIO::Down
           }
         }
       }
-      for (Tables::Vport &one : from.Vport.Records)
+      for (Tables::VPort &one : from.VPort.Records)
       {
-        Unpointed(one.Style, gone);
+        Unpointed(one.VisualStyle, gone);
       }
       for (Tables::View &one : from.View.Records)
       {
-        Unpointed(one.Style, gone);
+        Unpointed(one.VisualStyle, gone);
       }
       Unstyled(from.Entities, gone);
-      for (Blocks::Block &one : from.Blocks)
+      for (Blocks::Definition &one : from.Blocks)
       {
         Unstyled(one.Entities, gone);
       }
@@ -337,7 +339,7 @@ namespace DxfIO::Down
     {
       for (Raw &one : all)
       {
-        for (Group &group : one.Groups)
+        for (Tag &group : one.Tags)
         {
           if (group.Code == 1 && group.Value == Content{std::string{from}})
           {
@@ -347,7 +349,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Retabled(Document &from, Version release)
+    void Retabled(Drawing &from, Version release)
     {
       const bool early = release <= Version::R2000;
       for (Object &one : from.Objects)
@@ -377,9 +379,10 @@ namespace DxfIO::Down
       if (with.Issues != nullptr)
       {
         with.Issues->push_back(Issue{
-            .Record = Entities::Based(one).Self,
-            .What   = std::format("{} left out, {} has no such entity", Entities::Named(one),
-                                  Name(with.Release)),
+            .Code    = IssueCode::NotKept,
+            .Subject = Entities::Based(one).Self,
+            .What    = std::format("{} left out, {} has no such entity", Entities::Named(one),
+                                   NameOf(with.Release)),
         });
       }
     }
@@ -417,9 +420,10 @@ namespace DxfIO::Down
       if (with.Issues != nullptr)
       {
         with.Issues->push_back(Issue{
-            .Record = Entities::Based(one).Self,
-            .What   = std::format("{} drawn as {} for {}", Entities::Named(one),
-                                  Entities::Named(into), Name(with.Release)),
+            .Code    = IssueCode::NotKept,
+            .Subject = Entities::Based(one).Self,
+            .What    = std::format("{} drawn as {} for {}", Entities::Named(one),
+                                   Entities::Named(into), NameOf(with.Release)),
         });
       }
     }
@@ -476,9 +480,10 @@ namespace DxfIO::Down
       if (with.Issues != nullptr)
       {
         with.Issues->push_back(Issue{
-            .Record = Entities::Based(one).Self,
-            .What   = std::format("{} moved from layer {} to 0, {} has no layer named by a star",
-                                  Entities::Named(one), (*found)->Layer.View(), Name(with.Release)),
+            .Code    = IssueCode::NotKept,
+            .Subject = Entities::Based(one).Self,
+            .What = std::format("{} moved from layer {} to 0, {} has no layer named by a star",
+                                Entities::Named(one), (*found)->Layer.View(), NameOf(with.Release)),
         });
       }
       for (Entities::Record *record : all)
@@ -552,20 +557,20 @@ namespace DxfIO::Down
       return name.starts_with(Paper) && name != Paper;
     }
 
-    void Blocked(Document &from, Seed &handles, const Narrowing &with)
+    void Blocked(Drawing &from, Seed &handles, const Narrowing &with)
     {
       std::erase_if(from.Blocks,
-                    [](const Blocks::Block &one) -> bool { return Sheet(one.Begin.Name); });
-      for (Blocks::Block &one : from.Blocks)
+                    [](const Blocks::Definition &one) -> bool { return Sheet(one.Block.Name); });
+      for (Blocks::Definition &one : from.Blocks)
       {
         if (with.Release < Version::R13)
         {
-          if (const std::string_view space = Space(one.Begin.Name); !space.empty())
+          if (const std::string_view space = Space(one.Block.Name); !space.empty())
           {
-            one.Begin.Name = space;
+            one.Block.Name = space;
           }
-          one.Begin.Record.Base = {};
-          one.End.Record.Base   = {};
+          one.Block.Record.Base  = {};
+          one.EndBlk.Record.Base = {};
         }
         Narrow(one.Entities, handles, with);
       }
@@ -573,9 +578,8 @@ namespace DxfIO::Down
 
     auto Listed(const Raw &one) -> bool
     {
-      const auto  name = std::ranges::find(one.Groups, 1, &Group::Code);
-      const auto *text =
-          name == one.Groups.end() ? nullptr : std::get_if<std::string>(&name->Value);
+      const auto  name = std::ranges::find(one.Tags, 1, &Tag::Code);
+      const auto *text = name == one.Tags.end() ? nullptr : std::get_if<std::string>(&name->Value);
       return text != nullptr && std::ranges::contains(Declared, *text);
     }
 
@@ -641,7 +645,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Thinned(Document &from, std::set<Handle> &gone)
+    void Thinned(Drawing &from, std::set<Handle> &gone)
     {
       std::erase_if(from.Classes, [](const Raw &one) -> bool { return !Listed(one); });
       const auto *root =
@@ -715,7 +719,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Seeded(Document &from, Handle next)
+    void Seeded(Drawing &from, Handle next)
     {
       const auto seed = std::ranges::find(from.Header, "$HANDSEED", &Header::Variable::Name);
       if (seed != from.Header.end() && !seed->Values.empty())
@@ -724,7 +728,7 @@ namespace DxfIO::Down
       }
     }
 
-    void Dated(Document &from)
+    void Dated(Drawing &from)
     {
       std::set<Handle> gone;
       std::erase_if(from.Objects,
@@ -748,44 +752,44 @@ namespace DxfIO::Down
       }
     }
 
-    void Unsectioned(Document &from)
+    void Unsectioned(Drawing &from)
     {
       std::erase_if(from.Order, [&from](const std::string &name) -> bool
                     { return std::ranges::contains(from.Sections, name, &Section::Name); });
       from.Sections.clear();
     }
 
-    void Eldest(Document &from)
+    void Eldest(Drawing &from)
     {
       from.Order.assign(Sections.begin(), Sections.end());
       from.Objects.clear();
       from.Classes.clear();
       from.BlockRecord = {};
-      Bared(from.Vport);
-      Bared(from.Ltype);
+      Bared(from.VPort);
+      Bared(from.LType);
       Bared(from.Layer);
       Bared(from.Style);
       Bared(from.View);
       Bared(from.Ucs);
-      Bared(from.Appid);
-      Bared(from.Dimstyle);
-      std::erase_if(from.Ltype.Records, [](const Tables::Ltype &one) -> bool
+      Bared(from.AppId);
+      Bared(from.DimStyle);
+      std::erase_if(from.LType.Records, [](const Tables::LType &one) -> bool
                     { return one.Record.Name.starts_with("By"); });
       std::erase_if(from.Layer.Records, [](const Tables::Layer &one) -> bool
                     { return one.Record.Name.starts_with('*'); });
     }
 
-    void Elder(Document &from, std::set<Handle> &gone)
+    void Elder(Drawing &from, std::set<Handle> &gone)
     {
       Thinned(from, gone);
-      Loosened(from.Vport);
-      Loosened(from.Ltype);
+      Loosened(from.VPort);
+      Loosened(from.LType);
       Loosened(from.Layer);
       Loosened(from.Style);
       Loosened(from.View);
       Loosened(from.Ucs);
-      Loosened(from.Appid);
-      Loosened(from.Dimstyle);
+      Loosened(from.AppId);
+      Loosened(from.DimStyle);
       Loosened(from.BlockRecord);
       std::erase_if(from.BlockRecord.Records,
                     [](const Tables::BlockRecord &one) -> bool { return Sheet(one.Record.Name); });
@@ -798,7 +802,7 @@ namespace DxfIO::Down
     /**
      *  The drawing as the release holds it, before the CLASS records it needs.
      */
-    auto Converted(Document from, Version release, std::vector<Issue> *issues) -> Document
+    auto Converted(Drawing from, Version release, std::vector<Issue> *issues) -> Drawing
     {
       if (release >= Version::R2000)
       {
@@ -808,7 +812,7 @@ namespace DxfIO::Down
       const Emptying emptying{
           .Release = release, .From = Header::Declared(from.Header), .Issues = issues};
       Emptied(from.Entities, emptying);
-      for (Blocks::Block &one : from.Blocks)
+      for (Blocks::Definition &one : from.Blocks)
       {
         Emptied(one.Entities, emptying);
       }
@@ -837,15 +841,15 @@ namespace DxfIO::Down
       }
       if (release < Version::R12)
       {
-        from.Appid    = {};
-        from.Dimstyle = {};
+        from.AppId    = {};
+        from.DimStyle = {};
       }
       Blocked(from, handles, with);
       Narrow(from.Entities, handles, with);
       if (release >= Version::R13)
       {
         Unwatched(from.Objects, gone);
-        for (Blocks::Block &one : from.Blocks)
+        for (Blocks::Definition &one : from.Blocks)
         {
           Loosen(one.Entities, gone);
         }
@@ -861,10 +865,10 @@ namespace DxfIO::Down
    *  R2000: a drawing given a release not its own gets the records that release needs for what it
    *  still holds. One kept at its own release is written as it came.
    */
-  auto Narrowed(Document from, Version release, std::vector<Issue> *issues) -> Document
+  auto Narrowed(Drawing from, Version release, std::vector<Issue> *issues) -> Drawing
   {
     const Version own = Header::Declared(from.Header);
-    Document      out = Converted(std::move(from), release, issues);
+    Drawing       out = Converted(std::move(from), release, issues);
     if (release >= Version::R13 && release != own)
     {
       std::ranges::move(Empty::Undeclared(out, release), std::back_inserter(out.Classes));

@@ -4,7 +4,7 @@
 #include "based.hpp"
 #include "objects/io.hpp"
 
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/entities/sequence.hpp"
 #include "dxfio/handle.hpp"
 
@@ -73,7 +73,7 @@ namespace DxfIO
     visit(Objects::Based(one).Self);
     if (const auto *order = std::get_if<Objects::SortEntsTable>(&one))
     {
-      for (const Objects::Sortents::Entry &entry : order->Entries)
+      for (const Objects::SortEntsTables::Entry &entry : order->Entries)
       {
         visit(entry.Entity);
         visit(entry.Key.value_or(Handle{}));
@@ -86,25 +86,25 @@ namespace DxfIO
    *  its entities and what they carry, its objects, and the handles a draw order names.
    */
   template <class VisitT>
-  void Held(const Document &from, const VisitT &visit)
+  void Held(const Drawing &from, const VisitT &visit)
   {
-    Held(from.Vport, visit);
-    Held(from.Ltype, visit);
+    Held(from.VPort, visit);
+    Held(from.LType, visit);
     Held(from.Layer, visit);
     Held(from.Style, visit);
     Held(from.View, visit);
     Held(from.Ucs, visit);
-    Held(from.Appid, visit);
-    Held(from.Dimstyle, visit);
+    Held(from.AppId, visit);
+    Held(from.DimStyle, visit);
     Held(from.BlockRecord, visit);
     for (const Tables::Table<Unknown> &one : from.Loose)
     {
       Held(one, visit);
     }
-    for (const Blocks::Block &one : from.Blocks)
+    for (const Blocks::Definition &one : from.Blocks)
     {
-      visit(one.Begin.Record.Base.Self);
-      visit(one.End.Record.Base.Self);
+      visit(one.Block.Record.Base.Self);
+      visit(one.EndBlk.Record.Base.Self);
       for (const Entity &held : one.Entities)
       {
         Held(held, visit);

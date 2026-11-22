@@ -14,21 +14,21 @@ namespace DxfIO
     {
       return {};
     }
-    const Options with{.Release = Header::Declared(first->Document.Header)};
-    const auto    once = Save(first->Document, with);
+    const SaveOptions with{.Release = Header::Declared(first->Drawing.Header)};
+    const auto        once = Save(first->Drawing, with);
     if (!once)
     {
-      return "the document read did not save: " + once.error().What;
+      return "the drawing read did not save: " + once.error().What;
     }
     const auto second = Load(once->Bytes);
     if (!second)
     {
       return "the text saved did not load: " + second.error().What;
     }
-    const auto twice = Save(second->Document, with);
+    const auto twice = Save(second->Drawing, with);
     if (!twice)
     {
-      return "the document read again did not save: " + twice.error().What;
+      return "the drawing read again did not save: " + twice.error().What;
     }
     if (twice->Bytes != once->Bytes)
     {
@@ -37,7 +37,7 @@ namespace DxfIO
     for (const Version release : {Version::R10, Version::R12, Version::R13, Version::R14,
                                   Version::R2000, Version::R2007, Version::R2018})
     {
-      const auto other = Save(first->Document, Options{.Release = release});
+      const auto other = Save(first->Drawing, SaveOptions{.Release = release});
       if (!other)
       {
         continue;

@@ -2,7 +2,7 @@
 #define DXFIO_DOWN_DOWN_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/issue.hpp"
 #include "dxfio/version.hpp"
 
@@ -10,8 +10,8 @@
 
 namespace DxfIO::Down
 {
-  [[nodiscard]] DXFIO_API auto Narrowed(Document from, Version release, std::vector<Issue> *issues)
-      -> Document;
+  [[nodiscard]] DXFIO_API auto Narrowed(Drawing from, Version release, std::vector<Issue> *issues)
+      -> Drawing;
 } // namespace DxfIO::Down
 
 #endif /* DXFIO_DOWN_DOWN_HPP */

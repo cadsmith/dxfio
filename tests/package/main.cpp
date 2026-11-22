@@ -14,6 +14,6 @@ auto main(int count, char **paths) -> int
     std::puts(loaded.error().What.c_str());
     return 1;
   }
-  std::printf("%zu entities\n", loaded->Document.Entities.size());
+  std::printf("%zu entities\n", loaded->Drawing.Entities.size());
   return 0;
 }

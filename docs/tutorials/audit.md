@@ -9,7 +9,7 @@ A drawing broken on purpose, what `Audit::Check` finds in it, and what `Audit::R
 `Edit::Add` gives an entity a new handle only when it has none, and adds it whatever layer, linetype or block it names. That is enough to break a new drawing four ways: a circle takes the handle of a line, a line names a layer and a linetype the drawing lacks, and an insert places a block that is not there.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Entities::Line line{};
 line.End = {.X = 100, .Y = 0, .Z = 0};

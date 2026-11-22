@@ -6,21 +6,17 @@
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstddef>
 #include <string>
+#include <vector>
 
 namespace DxfIO::Entities
 {
   /**
-   *  The true color a new light takes: white, as 0xRRGGBB. Not a color index: Colors::White is
-   *  that.
-   */
-  inline constexpr int Lamplight = 0xFFFFFF;
-
-  /**
    *  The AcDbLight subclass of a LIGHT: its kind, color and place, and how it falls off and casts
    *  shadows.
    */
-  struct DXFIO_API Lamp
+  struct DXFIO_API LightData
   {
     /**
      *  The version of the light's layout. Group 90.
@@ -46,7 +42,7 @@ namespace DxfIO::Entities
      *  The true color of the light, as 0xRRGGBB. Group 421 from R2004; up to R2000, packed in a
      *  group 90.
      */
-    int Rgb{Lamplight};
+    int Rgb{0xFFFFFF};
     /**
      *  Whether the light's glyph is plotted. Group 291.
      */
@@ -75,11 +71,11 @@ namespace DxfIO::Entities
     /**
      *  The distance the light starts to reach from, when it is limited. Group 41.
      */
-    double Start{1};
+    double AttenuationStart{1};
     /**
      *  The distance the light stops reaching at, when it is limited. Group 42.
      */
-    double End{10};
+    double AttenuationEnd{10};
     /**
      *  The angle of a spot light's bright inner cone, in degrees. Group 50.
      */
@@ -91,7 +87,7 @@ namespace DxfIO::Entities
     /**
      *  Whether the light casts shadows. Group 293.
      */
-    bool Casting{true};
+    bool CastShadows{true};
     /**
      *  The kind of shadow: 0 ray traced, 1 shadow map. Group 73.
      */
@@ -105,7 +101,7 @@ namespace DxfIO::Entities
      */
     int Softness{1};
 
-    auto operator==(const Lamp &) const -> bool = default;
+    auto operator==(const LightData &) const -> bool = default;
   };
 
   /**
@@ -121,11 +117,11 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The kind, color and place of the light, from the AcDbLight subclass.
      */
-    Boxed<Entities::Lamp> Lamp{};
+    Boxed<Entities::LightData> Data{};
 
     auto operator==(const Light &) const -> bool = default;
   };

@@ -3,7 +3,7 @@
 #include "checks.hpp"
 #include "entities/io.hpp"
 
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 #include "dxfio/entity.hpp"
 
 #include <algorithm>
@@ -24,14 +24,14 @@ namespace DxfIO::Audit
      *  Whether a block holds an ATTDEF that is not constant: in its own entities, or, for a space's
      *  block, in those of the ENTITIES section drawn in that space.
      */
-    auto Defining(const Document &drawing, const Blocks::Block &block) -> bool
+    auto Defining(const Drawing &drawing, const Blocks::Definition &block) -> bool
     {
       if (std::ranges::any_of(block.Entities, Entities::Attributing))
       {
         return true;
       }
-      const bool paper = Ascii::Same(block.Begin.Name, Paper);
-      if (!paper && !Ascii::Same(block.Begin.Name, Model))
+      const bool paper = Ascii::Same(block.Block.Name, Paper);
+      if (!paper && !Ascii::Same(block.Block.Name, Model))
       {
         return false;
       }
@@ -46,27 +46,27 @@ namespace DxfIO::Audit
    *  flagged as holding them: a block holding one and not flagged so is a warning, and flagged when
    *  the checks fix.
    */
-  template <class DocumentT>
-  void Attributed(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Attributed(Auditor<DrawingT> &with)
   {
     for (auto &block : with.Drawing->Blocks)
     {
-      if (Masked(block.Begin.Flags, Holding) != 0 || !Defining(*with.Drawing, block))
+      if (Masked(block.Block.Flags, Holding) != 0 || !Defining(*with.Drawing, block))
       {
         continue;
       }
       with.Note(
           Severity::Warning,
-          std::format("block {} holds attribute definitions, not flagged so", block.Begin.Name),
-          block.Begin.Record.Base.Self);
-      if constexpr (Auditor<DocumentT>::Fix)
+          std::format("block {} holds attribute definitions, not flagged so", block.Block.Name),
+          block.Block.Record.Base.Self);
+      if constexpr (Auditor<DrawingT>::Fix)
       {
-        block.Begin.Flags += Holding;
+        block.Block.Flags += Holding;
       }
     }
   }
 
-  template void Attributed(Auditor<Document> &with);
+  template void Attributed(Auditor<Drawing> &with);
 
-  template void Attributed(Auditor<const Document> &with);
+  template void Attributed(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

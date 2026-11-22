@@ -21,17 +21,17 @@ namespace DxfIO
 
     auto Copied(const File::Record &one, const Fields::Reading &with) -> Raw
     {
-      Raw                              out{.Type = std::string{one.Name}, .Groups = {}};
+      Raw                              out{.Type = std::string{one.Name}, .Tags = {}};
       const std::span<const Tags::Tag> body = one.Tags.subspan(1);
-      out.Groups.reserve(body.size());
+      out.Tags.reserve(body.size());
       for (const Tags::Tag &held : body)
       {
-        out.Groups.push_back(Fields::Owned(held, with.Text));
+        out.Tags.push_back(Fields::Owned(held, with.Text));
       }
       return out;
     }
 
-    auto Counted(Fields::Writing &to, const Group &one) -> std::expected<void, Failure>
+    auto Counted(Fields::Writing &to, const Tag &one) -> std::expected<void, Failure>
     {
       if (one.Code == Instances && to.Release < Version::R2004)
       {
@@ -43,7 +43,7 @@ namespace DxfIO
           [&to, gained] -> std::expected<void, Failure>
           {
             return gained ? Fields::Put(to,
-                                        Group{
+                                        Tag{
                                             .Code  = Instances,
                                             .Value = std::int64_t{0},
                                         })
@@ -57,7 +57,7 @@ namespace DxfIO
           .and_then(
               [&to, &one] -> std::expected<void, Failure>
               {
-                return Chained(one.Groups, [&to](const Group &held) -> std::expected<void, Failure>
+                return Chained(one.Tags, [&to](const Tag &held) -> std::expected<void, Failure>
                                { return Counted(to, held); });
               });
     }

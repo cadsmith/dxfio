@@ -3,7 +3,7 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <vector>
 
@@ -25,7 +25,7 @@ namespace DxfIO::Objects
     /**
      *  The application's groups, in the order they came.
      */
-    std::vector<DxfIO::Group> Data{};
+    std::vector<DxfIO::Tag> Data{};
 
     auto operator==(const XRecord &) const -> bool = default;
   };

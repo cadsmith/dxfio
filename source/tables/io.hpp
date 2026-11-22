@@ -5,7 +5,7 @@
 #include "file/section.hpp"
 
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 
@@ -15,9 +15,9 @@
 
 namespace DxfIO::Tables
 {
-  DXFIO_API void               Read(std::span<const File::Nest> all, Document &drawing,
+  DXFIO_API void               Read(std::span<const File::Nest> all, Drawing &drawing,
                                     const Fields::Reading &with);
-  [[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, const Document &drawing)
+  [[nodiscard]] DXFIO_API auto Write(Fields::Writing &to, const Drawing &drawing)
       -> std::expected<void, Failure>;
 } // namespace DxfIO::Tables
 

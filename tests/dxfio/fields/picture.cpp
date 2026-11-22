@@ -1,11 +1,13 @@
 #include "fields/picture.hpp"
 
+#include "../bytes.hpp"
 #include "fields/read.hpp"
 #include "fixture.hpp"
 #include "tags/tags.hpp"
 
 #include <doctest/doctest.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -18,12 +20,12 @@ namespace DxfIO::Fields
   {
     struct Shown
     {
-      std::string Bytes;
+      std::vector<std::byte> Bytes;
     };
 
     const std::tuple Shapes{Picture{.Member = &Shown::Bytes}};
 
-    auto Read(std::string_view text) -> std::string
+    auto Read(std::string_view text) -> std::vector<std::byte>
     {
       const auto all = Tags::All(text);
       REQUIRE(all);
@@ -37,15 +39,15 @@ namespace DxfIO::Fields
 
   TEST_CASE("picture: its chunks joined, whichever code gave the size")
   {
-    CHECK(Read(" 92\n3\n310\nAB\n310\nCDEF\n") == "\xab\xcd\xef");
-    CHECK(Read("160\n3\n310\nABCDEF\n")        == "\xab\xcd\xef");
+    CHECK(Read(" 92\n3\n310\nAB\n310\nCDEF\n") == Tests::BytesOf("\xab\xcd\xef"));
+    CHECK(Read("160\n3\n310\nABCDEF\n")        == Tests::BytesOf("\xab\xcd\xef"));
     CHECK(Read("").empty());
   }
 
   TEST_CASE("picture: its size on the release's code, then its bytes")
   {
-    const std::string bytes = "\xab\xcd";
-    Sheet             old{Version::R2007};
+    const std::vector<std::byte> bytes = Tests::BytesOf("\xab\xcd");
+    Sheet                        old{Version::R2007};
     REQUIRE(Write(Shown{.Bytes = bytes}, old.To, Shapes));
     CHECK(old.Out.starts_with(" 92\r\n"));
     CHECK(old.Out.contains("310\r\nABCD\r\n"));
@@ -61,7 +63,7 @@ namespace DxfIO::Fields
     CHECK(empty.Out.empty());
     Sheet other{Version::R2007};
     other.To.From = Version::R2018;
-    REQUIRE(Write(Shown{.Bytes = "x"}, other.To, Shapes));
+    REQUIRE(Write(Shown{.Bytes = Tests::BytesOf("x")}, other.To, Shapes));
     CHECK(other.Out.empty());
   }
 } // namespace DxfIO::Fields
@@ -91,7 +93,7 @@ namespace DxfIO::Fields
     Walk  in{all, Reading{}};
     Shown out{};
     Fields::Read(out, in, Shapes);
-    CHECK(out.Bytes == "\xab\xcd");
+    CHECK(out.Bytes == Tests::BytesOf("\xab\xcd"));
     CHECK_FALSE(in.Whole());
   }
 
@@ -105,7 +107,7 @@ namespace DxfIO::Fields
     Walk  in{all, Reading{}};
     Shown out{};
     Fields::Read(out, in, Shapes);
-    CHECK(out.Bytes == "\xab\xcd\xef");
+    CHECK(out.Bytes == Tests::BytesOf("\xab\xcd\xef"));
     CHECK(in.Whole());
   }
 } // namespace DxfIO::Fields

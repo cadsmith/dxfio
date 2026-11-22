@@ -83,7 +83,7 @@ namespace DxfIO::Down
       return Vector{.X = Dot(one, from.X), .Y = Dot(one, from.Y), .Z = Dot(one, from.Z)};
     }
 
-    auto Turned(const Entities::Paragraph &one, const Axes &from) -> double
+    auto Turned(const Entities::MTextData &one, const Axes &from) -> double
     {
       if (one.Direction)
       {
@@ -125,12 +125,12 @@ namespace DxfIO::Down
 
   auto Lettered(const Entities::MText &one, Seed &handles) -> std::vector<Entities::Text>
   {
-    const Entities::Paragraph     &body  = *one.Paragraph;
+    const Entities::MTextData     &body  = *one.Data;
     const std::vector<std::string> lines = Plain(body.Value);
     const int attachment = body.Attachment >= 1 && body.Attachment <= 9 ? body.Attachment - 1 : 0;
     const int row        = attachment / Columns;
     const int column     = attachment % Columns;
-    const double pitch   = body.Height * Pitch * body.Factor;
+    const double pitch   = body.Height * Pitch * body.LineSpacingFactor;
     const Axes   plane   = Arbitrary(body.Extrusion);
     const Vector origin  = Seen(body.Position, plane);
     const double angle   = Turned(body, plane);
@@ -166,8 +166,8 @@ namespace DxfIO::Down
       text.Lettering.Rotation   = angle * Degrees;
       text.Lettering.Style      = body.Style;
       text.Lettering.Extrusion  = body.Extrusion;
-      text.Lettering.Horizontal = column;
-      text.Vertical             = Top - row;
+      text.Lettering.Horizontal = static_cast<Entities::HorizontalAlignment>(column);
+      text.Vertical             = static_cast<Entities::VerticalAlignment>(Top - row);
       out.push_back(std::move(text));
     }
     return out;

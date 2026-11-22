@@ -1,6 +1,7 @@
 #ifndef DXFIO_ENTITIES_SHAPES_OLE_HPP
 #define DXFIO_ENTITIES_SHAPES_OLE_HPP
 
+#include "bytes.hpp"
 #include "fields/braced.hpp"
 #include "fields/custom.hpp"
 #include "fields/field.hpp"
@@ -15,7 +16,7 @@
 #include "tags/tag.hpp"
 
 #include "dxfio/entities/ole2frame.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <cstdint>
 #include <expected>
@@ -31,15 +32,15 @@ namespace DxfIO
 
     inline constexpr int Binary = 310;
 
-    inline void Loaded(Frame &one, Fields::Walk &in)
+    inline void Loaded(Ole2FrameData &one, Fields::Walk &in)
     {
       static_cast<void>(Fields::Value<std::int64_t>::Read(in, Sized));
       while (const Tags::Tag *held = in.Take(Binary))
       {
-        const Group part = Fields::Owned(*held, in.With().Text);
+        const Tag part = Fields::Owned(*held, in.With().Text);
         if (const auto *bytes = std::get_if<Chunk>(&part.Value))
         {
-          one.Data += bytes->Bytes;
+          one.Data.insert(one.Data.end(), bytes->Bytes.begin(), bytes->Bytes.end());
         }
         else
         {
@@ -48,7 +49,8 @@ namespace DxfIO
       }
     }
 
-    inline auto Loading(const Frame &one, Fields::Writing &to) -> std::expected<void, Failure>
+    inline auto Loading(const Ole2FrameData &one, Fields::Writing &to)
+        -> std::expected<void, Failure>
     {
       const auto size = static_cast<std::int64_t>(one.Data.size());
       return Fields::Value<std::int64_t>::Write(to, Sized, size)
@@ -61,22 +63,22 @@ namespace DxfIO
                 }
                 return to.To->Put(Tags::Tag{
                     .Code  = Binary,
-                    .Value = Tags::Chunk{std::string_view{one.Data}},
+                    .Value = Tags::Chunk{Viewed(one.Data)},
                 });
               });
     }
   } // namespace Entities
 
   template <>
-  inline constexpr auto Shapes<Entities::Frame> = std::tuple{
+  inline constexpr auto Shapes<Entities::Ole2FrameData> = std::tuple{
       Fields::Sequence{.Marker = "AcDbOle2Frame"},
-      Fields::Field{.Code = 70, .Member = &Entities::Frame::Version},
-      Fields::Field{.Code = 3, .Member = &Entities::Frame::Description},
-      Fields::Field{.Code = 10, .Member = &Entities::Frame::Upper},
-      Fields::Field{.Code = 11, .Member = &Entities::Frame::Lower},
-      Fields::Field{.Code = 71, .Member = &Entities::Frame::Kind},
-      Fields::Field{.Code = 72, .Member = &Entities::Frame::Space},
-      Fields::Custom<Entities::Frame>{
+      Fields::Field{.Code = 70, .Member = &Entities::Ole2FrameData::Version},
+      Fields::Field{.Code = 3, .Member = &Entities::Ole2FrameData::Description},
+      Fields::Field{.Code = 10, .Member = &Entities::Ole2FrameData::Upper},
+      Fields::Field{.Code = 11, .Member = &Entities::Ole2FrameData::Lower},
+      Fields::Field{.Code = 71, .Member = &Entities::Ole2FrameData::Kind},
+      Fields::Field{.Code = 72, .Member = &Entities::Ole2FrameData::Space},
+      Fields::Custom<Entities::Ole2FrameData>{
           .Read  = Entities::Loaded,
           .Write = Entities::Loading,
       },
@@ -87,8 +89,8 @@ namespace DxfIO
   inline constexpr auto Shapes<Entities::Ole2Frame> = std::tuple{
       Entities::Part<Entities::Ole2Frame>,
       Fields::Part{
-          .Member = &Entities::Ole2Frame::Frame,
-          .Fields = Shapes<Entities::Frame>,
+          .Member = &Entities::Ole2Frame::Data,
+          .Fields = Shapes<Entities::Ole2FrameData>,
       },
   };
 

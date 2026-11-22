@@ -60,7 +60,7 @@ namespace DxfIO
             {
               return File::Sections::Header(from.Body).transform(
                   [&into, &with](const std::vector<File::Variable> &parts) -> void
-                  { into.Document.Header = Header::Read(parts, with); });
+                  { into.Drawing.Header = Header::Read(parts, with); });
             },
         },
         Known{
@@ -70,7 +70,7 @@ namespace DxfIO
             {
               return File::Sections::Records(from.Body).transform(
                   [&into, &with](const std::vector<File::Record> &parts) -> void
-                  { into.Document.Classes = Copied(parts, with); });
+                  { into.Drawing.Classes = Copied(parts, with); });
             },
         },
         Known{
@@ -80,7 +80,7 @@ namespace DxfIO
             {
               return File::Sections::Tables(from.Body).transform(
                   [&into, &with](const std::vector<File::Nest> &parts) -> void
-                  { Tables::Read(parts, into.Document, with); });
+                  { Tables::Read(parts, into.Drawing, with); });
             },
         },
         Known{
@@ -90,7 +90,7 @@ namespace DxfIO
             {
               return File::Sections::Blocks(from.Body).transform(
                   [&into, &with](const std::vector<File::Nest> &parts) -> void
-                  { into.Document.Blocks = Blocks::Read(parts, with); });
+                  { into.Drawing.Blocks = Blocks::Read(parts, with); });
             },
         },
         Known{
@@ -100,7 +100,7 @@ namespace DxfIO
             {
               return File::Sections::Records(from.Body).transform(
                   [&into, &with](const std::vector<File::Record> &parts) -> void
-                  { into.Document.Entities = Entities::Read(parts, with); });
+                  { into.Drawing.Entities = Entities::Read(parts, with); });
             },
         },
         Known{
@@ -110,20 +110,20 @@ namespace DxfIO
             {
               return File::Sections::Records(from.Body).transform(
                   [&into, &with](const std::vector<File::Record> &parts) -> void
-                  { into.Document.Objects = Objects::Read(parts, with); });
+                  { into.Drawing.Objects = Objects::Read(parts, with); });
             },
         },
     };
 
     auto Foreign(const File::Section &from, Loaded &into, const Fields::Reading &with) -> Filled
     {
-      Section held{.Name = std::string{from.Name}, .Groups = {}};
-      held.Groups.reserve(from.Body.size());
+      Section held{.Name = std::string{from.Name}, .Tags = {}};
+      held.Tags.reserve(from.Body.size());
       for (const Tags::Tag &one : from.Body)
       {
-        held.Groups.push_back(Fields::Owned(one, with.Text));
+        held.Tags.push_back(Fields::Owned(one, with.Text));
       }
-      into.Document.Sections.push_back(std::move(held));
+      into.Drawing.Sections.push_back(std::move(held));
       return {};
     }
 
@@ -147,19 +147,19 @@ namespace DxfIO
     auto Taken(const File::Section &one, Loaded &into, const Fields::Reading &with) -> Filled
     {
       const std::string name{one.Name};
-      if (std::ranges::contains(into.Document.Order, name))
+      if (std::ranges::contains(into.Drawing.Order, name))
       {
         into.Issues.push_back(Issue{
-            .Line = 0,
+            .Code = IssueCode::Damaged,
             .What = std::format("section {} given again, the first kept", name),
         });
         return {};
       }
-      into.Document.Order.push_back(name);
+      into.Drawing.Order.push_back(name);
       return Filler(one.Name)(one, into, with);
     }
 
-    auto Seeded(Document &drawing) -> Handle *
+    auto Seeded(Drawing &drawing) -> Handle *
     {
       const auto found = std::ranges::find(drawing.Header, "$HANDSEED", &Header::Variable::Name);
       if (found == drawing.Header.end() || found->Values.empty())
@@ -197,31 +197,31 @@ namespace DxfIO
     void Dated(Loaded &into)
     {
       into.Issues.push_back(Issue{
-          .Line = 0,
+          .Code = IssueCode::Damaged,
           .What = "no $ACADVER, read as R2000 for the subclass markers its records carry",
       });
-      into.Document.Header.insert(
-          into.Document.Header.begin(),
+      into.Drawing.Header.insert(
+          into.Drawing.Header.begin(),
           Header::Variable{
               .Name   = std::string{Named},
-              .Values = {Group{.Code = 1, .Value = std::string{Acadver(Version::R2000)}}},
+              .Values = {Tag{.Code = 1, .Value = std::string{AcadverOf(Version::R2000)}}},
           });
     }
 
     void Raised(Loaded &into)
     {
-      Handle *seed = Seeded(into.Document);
+      Handle *seed = Seeded(into.Drawing);
       if (seed == nullptr || !*seed)
       {
         return;
       }
-      const Handle past = Past(into.Document);
+      const Handle past = Past(into.Drawing);
       if (past <= *seed)
       {
         return;
       }
       into.Issues.push_back(Issue{
-          .Line = 0,
+          .Code = IssueCode::Damaged,
           .What = std::format("$HANDSEED {} is not past the handles in use, raised to {}",
                               Hex(*seed), Hex(past)),
       });
@@ -229,7 +229,7 @@ namespace DxfIO
     }
   } // namespace
 
-  auto Load(std::string_view bytes, const Loading &with) -> std::expected<Loaded, Failure>
+  auto Load(std::string_view bytes, const LoadOptions &with) -> std::expected<Loaded, Failure>
   {
     Loaded     out;
     const auto all = Tags::All(bytes, &out.Issues);
@@ -259,7 +259,7 @@ namespace DxfIO
     if (opaque)
     {
       out.Issues.push_back(Issue{
-          .Line = 0,
+          .Code = IssueCode::NotKept,
           .What = "the code page is not carried, text kept as bytes",
       });
     }
@@ -277,24 +277,24 @@ namespace DxfIO
     return out;
   }
 
-  auto Load(std::istream &from, const Loading &with) -> std::expected<Loaded, Failure>
+  auto Load(std::istream &from, const LoadOptions &with) -> std::expected<Loaded, Failure>
   {
     if (from.fail())
     {
-      return std::unexpected{Failure{.Line = 0, .What = "the stream could not be read"}};
+      return std::unexpected{Failure{.Code = FailureCode::Io, .What = "stream not readable"}};
     }
     const std::string bytes{std::istreambuf_iterator<char>{from}, std::istreambuf_iterator<char>{}};
     return Load(bytes, with);
   }
 
-  auto LoadFile(const std::filesystem::path &file, const Loading &with)
+  auto LoadFile(const std::filesystem::path &file, const LoadOptions &with)
       -> std::expected<Loaded, Failure>
   {
     std::ifstream from{file, std::ios::binary};
     if (!from)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = std::format("{} cannot be read", file.string())}};
+          Failure{.Code = FailureCode::Io, .What = std::format("cannot open {}", file.string())}};
     }
     std::error_code      unsized;
     const std::uintmax_t size = std::filesystem::file_size(file, unsized);

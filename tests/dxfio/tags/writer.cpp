@@ -79,7 +79,8 @@ namespace DxfIO::Tags
     Writer      to{out};
     REQUIRE(to.Put(Tag{.Code = 0, .Value = std::string_view{"SECTION"}}));
     CHECK(to.Put(Tag{.Code = 40, .Value = std::numeric_limits<double>::infinity()})
-          == std::unexpected{Failure{4, "group 40 holds no finite number"}});
+          == std::unexpected{Failure{
+              .Code = FailureCode::Refused, .Line = 4, .What = "group 40 holds no finite number"}});
     CHECK(out == "  0\r\nSECTION\r\n");
   }
 

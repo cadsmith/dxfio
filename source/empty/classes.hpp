@@ -1,7 +1,7 @@
 #ifndef DXFIO_EMPTY_CLASSES_HPP
 #define DXFIO_EMPTY_CLASSES_HPP
 
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/object.hpp"
 #include "dxfio/raw.hpp"
 #include "dxfio/version.hpp"
@@ -47,7 +47,7 @@ namespace DxfIO::Empty
    *  The CLASS records a release needs for the kinds the drawing holds, in the order they are first
    *  met, that none of its own declares, each counting that kind's instances.
    */
-  [[nodiscard]] auto Undeclared(const Document &drawing, Version release) -> std::vector<Raw>;
+  [[nodiscard]] auto Undeclared(const Drawing &drawing, Version release) -> std::vector<Raw>;
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_CLASSES_HPP */

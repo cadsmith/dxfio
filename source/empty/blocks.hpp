@@ -5,13 +5,13 @@
 #include "roots.hpp"
 #include "seed.hpp"
 
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 
 #include <vector>
 
 namespace DxfIO::Empty
 {
-  auto Blocks(const Roots &ids, Seed &handles) -> std::vector<Blocks::Block>;
+  auto Blocks(const Roots &ids, Seed &handles) -> std::vector<Blocks::Definition>;
 } // namespace DxfIO::Empty
 
 #endif /* DXFIO_EMPTY_BLOCKS_HPP */

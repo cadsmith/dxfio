@@ -14,19 +14,19 @@ namespace DxfIO
 
   TEST_CASE("handle: read from hex of either case, blanks aside")
   {
-    CHECK(Parsed("1F")     == Handle{0x1f});
-    CHECK(Parsed("1f")     == Handle{0x1f});
-    CHECK(Parsed(" 2C20A") == Handle{0x2c20a});
-    CHECK(Parsed("FFFFFFFFFFFFFFFF") == Handle{0xffffffffffffffff});
-    CHECK(Parsed("0") == Handle{});
+    CHECK(ParseHandle("1F")     == Handle{0x1f});
+    CHECK(ParseHandle("1f")     == Handle{0x1f});
+    CHECK(ParseHandle(" 2C20A") == Handle{0x2c20a});
+    CHECK(ParseHandle("FFFFFFFFFFFFFFFF") == Handle{0xffffffffffffffff});
+    CHECK(ParseHandle("0") == Handle{});
   }
 
   TEST_CASE("handle: what is no hex of sixteen digits at most is none")
   {
-    CHECK_FALSE(Parsed(""));
-    CHECK_FALSE(Parsed("ARROW"));
-    CHECK_FALSE(Parsed("1G"));
-    CHECK_FALSE(Parsed("10000000000000000"));
+    CHECK_FALSE(ParseHandle(""));
+    CHECK_FALSE(ParseHandle("ARROW"));
+    CHECK_FALSE(ParseHandle("1G"));
+    CHECK_FALSE(ParseHandle("10000000000000000"));
   }
 
   TEST_CASE("handle: 0 names none, handles order and hash by value")

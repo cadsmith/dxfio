@@ -52,9 +52,9 @@ namespace DxfIO::Tables
     const View                 taken = Read<View>(text);
     CHECK(taken.Record.Name == "turned");
     CHECK(taken.Associated);
-    CHECK(taken.Axes.Named == Handle{.Value = 0x2D5});
-    CHECK(taken.Axes.Y.X   == -0.5);
-    CHECK(taken.Style      == Handle{.Value = 0xF5});
+    CHECK(taken.Axes.Named  == Handle{.Value = 0x2D5});
+    CHECK(taken.Axes.Y.X    == -0.5);
+    CHECK(taken.VisualStyle == Handle{.Value = 0xF5});
     CHECK(taken.Record.Base.Dictionary == Handle{.Value = 0x2D7});
     CHECK(Written(taken) == text);
   }
@@ -100,8 +100,8 @@ namespace DxfIO::Tables
                                        " 79\r\n     0\r\n"
                                        "146\r\n0.0\r\n";
     const View                 taken = Read<View>(text, Version::R2000);
-    CHECK(taken.Axes  == Axes{});
-    CHECK(taken.Style == Handle{});
+    CHECK(taken.Axes        == Axes{});
+    CHECK(taken.VisualStyle == Handle{});
     CHECK(Written(taken, Version::R2000) == text);
   }
 
@@ -115,7 +115,7 @@ namespace DxfIO::Tables
                                        " 42\r\n50.0\r\n 43\r\n0.0\r\n 44\r\n0.0\r\n 50\r\n0.0\r\n"
                                        " 71\r\n     0\r\n";
     View                       taken = Read<View>(text, Version::R12);
-    CHECK(taken.Height == 2653.730076586097);
+    CHECK(taken.ViewHeight == 2653.730076586097);
     CHECK_FALSE(taken.Associated);
     taken.Associated = true;
     CHECK(Written(taken, Version::R12) == text);

@@ -21,7 +21,14 @@ const compiler = process.env.CXX ?? 'c++'
 // The interpreter for AutoCAD's audit, from the fixed places it stands in rather than wherever PATH leads.
 const python = ['/usr/bin/python3', '/usr/local/bin/python3', '/opt/homebrew/bin/python3'].find((one) => existsSync(one))
 const sample = join(root, 'tests', 'fixtures', 'acad', 'entities-r2018.dxf')
-const flags = ['-std=c++23', '-Wall', '-Wextra', '-Werror', `-I${join(root, 'include')}`]
+const flags = [
+  '-std=c++23',
+  '-Wall',
+  '-Wextra',
+  '-Werror',
+  `-I${join(root, 'include')}`,
+  `-I${join(root, 'build', 'release', 'include')}`,
+]
 
 if (!existsSync(library)) {
   console.error(`${library} is missing: cmake --preset release && cmake --build --preset release --target dxfio`)
@@ -63,16 +70,16 @@ auto main(int count, char **paths) -> int
     const auto loaded = DxfIO::LoadFile(paths[at]);
     if (!loaded)
     {
-      std::println("{}: does not load: line {}: {}", paths[at], loaded.error().Line, loaded.error().What);
+      std::println("{}: does not load: line {}: {}", paths[at], loaded.error().Line.value_or(0), loaded.error().What);
       ++failed;
       continue;
     }
     for (const DxfIO::Issue &issue : loaded->Issues)
     {
-      std::println("{}: issue on line {}: {}", paths[at], issue.Line, issue.What);
+      std::println("{}: issue on line {}: {}", paths[at], issue.Line.value_or(0), issue.What);
       ++failed;
     }
-    const DxfIO::Audit::Report report = DxfIO::Audit::Check(loaded->Document);
+    const DxfIO::Audit::Report report = DxfIO::Audit::Check(loaded->Drawing);
     for (const DxfIO::Audit::Finding &finding : report.Findings)
     {
       std::println("{}: audit: {}", paths[at], finding.What);
@@ -97,6 +104,7 @@ const program = (body: string) =>
     '#include <map>',
     '#include <print>',
     '#include <string>',
+    '#include <utility>',
     '#include <variant>',
     '#include <vector>',
     '',

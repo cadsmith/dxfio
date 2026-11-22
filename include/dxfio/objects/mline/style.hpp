@@ -8,13 +8,8 @@
 #include <string>
 #include <vector>
 
-namespace DxfIO::Objects::Mline
+namespace DxfIO::Objects::MLineStyles
 {
-  /**
-   *  The start and end angle of a new multiline style, in degrees: square to the line.
-   */
-  inline constexpr double Square = 90;
-
   /**
    *  One of the parallel lines a multiline style draws.
    */
@@ -27,7 +22,7 @@ namespace DxfIO::Objects::Mline
     /**
      *  The AutoCAD Color Index of the line: 1 to 255, 0 for ByBlock, 256 for ByLayer. Group 62.
      */
-    int Color{Colors::Bylayer};
+    int Color{Colors::ByLayer};
     /**
      *  The name of the line's linetype. Group 6.
      */
@@ -35,7 +30,7 @@ namespace DxfIO::Objects::Mline
 
     auto operator==(const Element &) const -> bool = default;
   };
-} // namespace DxfIO::Objects::Mline
+} // namespace DxfIO::Objects::MLineStyles
 
 namespace DxfIO::Objects
 {
@@ -64,19 +59,19 @@ namespace DxfIO::Objects
     /**
      *  The AutoCAD Color Index of the fill. Group 62.
      */
-    int Fill{Colors::Bylayer};
+    int Fill{Colors::ByLayer};
     /**
      *  The angle of the start cap, in degrees. Group 51.
      */
-    double Start{Mline::Square};
+    double Start{90};
     /**
      *  The angle of the end cap, in degrees. Group 52.
      */
-    double End{Mline::Square};
+    double End{90};
     /**
      *  The lines, in order; their count is group 71.
      */
-    std::vector<Mline::Element> Elements{};
+    std::vector<MLineStyles::Element> Elements{};
 
     auto operator==(const MLineStyle &) const -> bool = default;
   };

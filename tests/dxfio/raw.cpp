@@ -21,9 +21,9 @@ namespace DxfIO
     const auto   record = in.Take();
     REQUIRE(record);
     const std::vector<Raw> taken = Copied(std::span{&*record, 1}, Fields::Reading{});
-    REQUIRE(taken.size()     == 1);
-    CHECK(taken.front().Type == "CLASS");
-    CHECK(taken.front().Groups.size() == 3);
+    REQUIRE(taken.size()            == 1);
+    CHECK(taken.front().Type        == "CLASS");
+    CHECK(taken.front().Tags.size() == 3);
     Fields::Sheet page;
     REQUIRE(Put(page.To, taken));
     CHECK(page.Out == text);

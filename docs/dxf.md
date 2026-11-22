@@ -15,31 +15,36 @@ if (!loaded)
 }
 DxfIO::Entities::Line line{};
 line.End = DxfIO::Vector{.X = 100, .Y = 50, .Z = 0};
-DxfIO::Edit::Add(loaded->Document, line);
-const auto saved = DxfIO::SaveFile(loaded->Document, "plan-r2010.dxf",
+DxfIO::Edit::Add(loaded->Drawing, line);
+const auto saved = DxfIO::SaveFile(loaded->Drawing, "plan-r2010.dxf",
                                    {.Release = DxfIO::Version::R2010});
 ```
 
 - `Load` reads bytes or a stream and `LoadFile` a file, ASCII or binary, and
-  returns the document with the issues found while reading: a group given
+  returns the drawing with the issues found while reading: a group given
   twice, a record out of its order, a value that does not parse. A file is
   refused only when it cannot be read at all, and the failure says where.
-- `Save` writes the document to bytes or a stream and `SaveFile` to a file,
-  for `Options::Release`, in ASCII or, with `Options::Binary`, in binary.
-  `Options::Codepage` chooses the code page of releases before R2007, which
-  store text in one: ANSI 874 and 1250 to 1258, and the East Asian 932, 936,
-  949, 950 and 1361, two bytes a character. A character the page lacks is
-  written as a `\U+` escape; `\M+` escapes are read as the character they
-  name. A page not carried keeps its text byte for byte. The issues that come
-  back say what the save had to change or leave out.
+- `Save` writes the drawing to bytes or a stream and `SaveFile` to a file,
+  for `SaveOptions::Release`, in ASCII or, with `SaveOptions::Binary`, in
+  binary. `SaveOptions::Codepage` chooses the code page of releases before
+  R2007, which store text in one: ANSI 874 and 1250 to 1258, and the East
+  Asian 932, 936, 949, 950 and 1361, two bytes a character. A character the
+  page lacks is written as a `\U+` escape; `\M+` escapes are read as the
+  character they name. A page not carried keeps its text byte for byte. The
+  issues that come back say what the save had to change or leave out.
 - `Create(release)` gives an empty drawing AutoCAD opens without a finding:
   the tables, blocks, layouts and objects a drawing of that release needs.
 - `Edit::Add` puts an entity in model space, paper space or a block, or a
   record in its table, with a new handle, its owner and `$HANDSEED` moved on;
-  `Edit::AddBlock` makes a block. `Edit::Find`, `FindEntity`, `FindObject`
-  and `FindBlock` look things up, names without case.
+  `Edit::AddBlock` makes a block.
+- `FindEntity` and `FindObject` find a record by its handle, and an `Index`
+  finds many in constant time. `View` finds table records, blocks, layouts and
+  dictionaries by name, without case.
 - `TypeOf` and `BaseOf` give any entity's or object's DXF name and its
   handle, owner and extended data.
+- `AppearanceOf` gives the layer, color, linetype and lineweight an entity is
+  drawn with, its ByLayer and ByBlock resolved; `MethodOf`, `RgbOf`,
+  `TransparencyMethodOf` and `AlphaOf` read its color and transparency.
 - `Audit::Check` lists what AutoCAD would complain about, and
   `Audit::Repair` fixes it in place; see below.
 
@@ -90,7 +95,7 @@ a mesh and the cells of a data table.
 
 ## Saving to another release
 
-A document saves to any release; what that release cannot hold is converted
+A drawing saves to any release; what that release cannot hold is converted
 or left out, and the issues the save returns name each entity changed so.
 
 - Kinds a release does not have are left out: no MESH before R2000, no HATCH
@@ -121,9 +126,9 @@ or left out, and the issues the save returns name each entity changed so.
 
 ## Audit
 
-`Audit::Check(document)` returns a `Report` of findings, each an error
+`Audit::Check(drawing)` returns a `Report` of findings, each an error
 (AutoCAD would refuse or recover the drawing) or a warning (AutoCAD would
-open it). `Audit::Repair(document)` runs the same checks and fixes what
+open it). `Audit::Repair(drawing)` runs the same checks and fixes what
 they find:
 
 - every handle given and none used twice; a duplicate entity takes a new
@@ -140,7 +145,7 @@ they find:
 
 The tests read every file under `tests/fixtures/acad`, written by AutoCAD
 2026 for each release, and require each to read without an issue, and what it saves
-back to read to the same document. `tools/acad/*.scr` are the AutoCAD scripts that made them;
+back to read to the same drawing. `tools/acad/*.scr` are the AutoCAD scripts that made them;
 `tools/acad/verify.py` opens files in AutoCAD's console and runs its audit.
 The `fuzz` preset builds libFuzzer targets that feed broken input to the
 reader and save what it read to every release.

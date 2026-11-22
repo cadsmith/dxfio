@@ -12,44 +12,9 @@
 namespace DxfIO::Objects
 {
   /**
-   *  Black as AutoCAD packs a color into one integer: a true color of 0, 0, 0.
-   */
-  inline constexpr int Black = -1040187392;
-
-  /**
-   *  A map source: the current scene.
-   */
-  inline constexpr int Scene = 0;
-
-  /**
-   *  A map source: an image file.
-   */
-  inline constexpr int Bitmap = 1;
-
-  /**
-   *  A map projection: onto the faces of a box.
-   */
-  inline constexpr int Box = 2;
-
-  /**
-   *  A map tiling: the image repeats.
-   */
-  inline constexpr int Tiled = 1;
-
-  /**
-   *  A map's automatic transform: none.
-   */
-  inline constexpr int Manual = 1;
-
-  /**
-   *  The gloss of a new material.
-   */
-  inline constexpr double Glossy = 0.5;
-
-  /**
    *  One color of a material: its ambient, diffuse or specular color.
    */
-  struct DXFIO_API Shade
+  struct DXFIO_API MaterialColor
   {
     /**
      *  0 to take the color of the object, 1 to override it with Color. Group 70, 71 or 76 by shade.
@@ -62,9 +27,9 @@ namespace DxfIO::Objects
     /**
      *  The color, packed into one integer as AutoCAD does. Group 90, 91 or 92 by shade.
      */
-    int Color{Black};
+    int Color{-1040187392};
 
-    auto operator==(const Shade &) const -> bool = default;
+    auto operator==(const MaterialColor &) const -> bool = default;
   };
 
   /**
@@ -82,7 +47,7 @@ namespace DxfIO::Objects
      *  Where the map comes from: 0 the current scene, 1 an image file. Group 72, 77, 171, 175, 179
      *  or 273.
      */
-    int Source{Bitmap};
+    int Source{1};
     /**
      *  The image file; empty for none. Group 3, 4, 6, 7, 8 or 9.
      */
@@ -91,21 +56,21 @@ namespace DxfIO::Objects
      *  How the map is projected: 1 planar, 2 box, 3 cylinder, 4 sphere. Group 73, 78, 172, 176, 270
      *  or 274.
      */
-    int Projection{Box};
+    int Projection{2};
     /**
      *  How the map fills the surface: 1 tile, 2 crop, 3 clamp. Group 74, 79, 173, 177, 271 or 275.
      */
-    int Tiling{Tiled};
+    int Tiling{1};
     /**
      *  Bits: 1 for no automatic transform, 2 to fit the map to the object's extents, 4 to add the
      *  block's transform. Group 75, 170, 174, 178, 272 or 276.
      */
-    int Automatic{Manual};
+    int Automatic{1};
     /**
      *  The transform of the map's projection, 16 values row by row. Group 43, 47, 49, 142, 144 or
      *  147.
      */
-    DxfIO::Matrix Transform{};
+    DxfIO::Matrix Transform{DxfIO::Identity};
 
     auto operator==(const Map &) const -> bool = default;
   };
@@ -140,11 +105,11 @@ namespace DxfIO::Objects
      */
     Map Refraction{
         .Blend      = 1,
-        .Source     = Scene,
+        .Source     = 0,
         .File       = {},
-        .Projection = Box,
-        .Tiling     = Tiled,
-        .Automatic  = Manual,
+        .Projection = 2,
+        .Tiling     = 1,
+        .Automatic  = 1,
         .Transform  = Identity,
     };
 
@@ -171,19 +136,19 @@ namespace DxfIO::Objects
     /**
      *  The color in ambient light. Groups 70, 40, 90.
      */
-    Shade Ambient{};
+    MaterialColor Ambient{};
     /**
      *  The color under direct light. Groups 71, 41, 91.
      */
-    Shade Diffuse{};
+    MaterialColor Diffuse{};
     /**
      *  How glossy the surface is, from 0 to 1. Group 44.
      */
-    double Gloss{Glossy};
+    double Gloss{0.5};
     /**
      *  The color of highlights. Groups 76, 45, 92.
      */
-    Shade Specular{};
+    MaterialColor Specular{};
     /**
      *  How opaque the material is, from 0 to 1. Group 140.
      */

@@ -100,7 +100,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-Wno-maybe-uninitialized)
+  add_compile_options(-Wno-maybe-uninitialized -Wno-free-nonheap-object)
 endif()
 
 if (MSVC)

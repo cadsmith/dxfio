@@ -15,14 +15,14 @@ namespace DxfIO
 
   auto Kept(const File::Record &one, const Fields::Reading &with) -> Unknown
   {
-    Unknown                          out{.Type = Symbol{one.Name}, .Groups = {}};
+    Unknown                          out{.Type = Symbol{one.Name}, .Tags = {}};
     const std::span<const Tags::Tag> body = one.Tags.subspan(1);
     const std::size_t                at   = Trailing(body);
     const std::vector<Tags::Tag>     rest = Head(body.first(at), Heading{.Into = &out.Base}, with);
-    out.Groups.reserve(rest.size());
+    out.Tags.reserve(rest.size());
     for (const Tags::Tag &held : rest)
     {
-      out.Groups.push_back(Fields::Owned(held, with.Text));
+      out.Tags.push_back(Fields::Owned(held, with.Text));
     }
     Tail(body.subspan(at), out.Base, with);
     return out;
@@ -33,8 +33,7 @@ namespace DxfIO
     return Fields::Word(to, Start, one.Type.View())
         .and_then([&to, &one] -> std::expected<void, Failure>
                   { return Head(to, one.Base, Handled); })
-        .and_then([&to, &one] -> std::expected<void, Failure>
-                  { return Fields::Put(to, one.Groups); })
+        .and_then([&to, &one] -> std::expected<void, Failure> { return Fields::Put(to, one.Tags); })
         .and_then([&to, &one] -> std::expected<void, Failure> { return Tail(to, one.Base); });
   }
 } // namespace DxfIO

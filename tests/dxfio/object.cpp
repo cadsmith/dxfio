@@ -24,16 +24,16 @@ namespace DxfIO
     BaseOf(defaulted).Self = Handle{.Value = 0xd};
     CHECK(std::get<Objects::DictionaryWithDefault>(defaulted).Dictionary.Base.Self
           == Handle{.Value = 0xd});
-    Object kept = Unknown{.Type = Symbol{"ACME_STORE"}, .Base = {}, .Groups = {}};
+    Object kept = Unknown{.Type = Symbol{"ACME_STORE"}, .Base = {}, .Tags = {}};
     CHECK(TypeOf(kept) == "ACME_STORE");
     CHECK_FALSE(BaseOf(kept).Self);
   }
 
   TEST_CASE("object: an unknown object's name outlives the record it was taken from")
   {
-    Object                 kept = Unknown{.Type = Symbol{"ACME_STORE"}, .Base = {}, .Groups = {}};
+    Object                 kept = Unknown{.Type = Symbol{"ACME_STORE"}, .Base = {}, .Tags = {}};
     const std::string_view name = TypeOf(kept);
-    kept                        = Unknown{.Type = Symbol{"ACME_SHELF"}, .Base = {}, .Groups = {}};
+    kept                        = Unknown{.Type = Symbol{"ACME_SHELF"}, .Base = {}, .Tags = {}};
     CHECK(name == "ACME_STORE");
   }
 } // namespace DxfIO

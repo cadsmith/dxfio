@@ -2,7 +2,7 @@
 #include "tags/codes.hpp"
 #include "walk.hpp"
 
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/unknown.hpp"
 
 #include <algorithm>
@@ -14,7 +14,7 @@ namespace DxfIO::Audit
 {
   namespace
   {
-    auto Undefined(const Group &one) -> bool
+    auto Undefined(const Tag &one) -> bool
     {
       return !Tags::Codes::Defined(one.Code);
     }
@@ -22,10 +22,10 @@ namespace DxfIO::Audit
     /**
      *  Reports each group of a code DXF does not define, and leaves it out when the checks fix.
      */
-    template <class DocumentT, class GroupsT>
-    void Checked(Auditor<DocumentT> &with, GroupsT &all, Handle self)
+    template <class DrawingT, class GroupsT>
+    void Checked(Auditor<DrawingT> &with, GroupsT &all, Handle self)
     {
-      for (const Group &one : all)
+      for (const Tag &one : all)
       {
         if (Undefined(one))
         {
@@ -33,18 +33,18 @@ namespace DxfIO::Audit
                     self);
         }
       }
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         std::erase_if(all, Undefined);
       }
     }
 
-    template <class DocumentT, class RecordT>
-    void Loosely(Auditor<DocumentT> &with, RecordT &one)
+    template <class DrawingT, class RecordT>
+    void Loosely(Auditor<DrawingT> &with, RecordT &one)
     {
       if (auto *kept = std::get_if<Unknown>(&one))
       {
-        Checked(with, kept->Groups, kept->Base.Self);
+        Checked(with, kept->Tags, kept->Base.Self);
       }
     }
   } // namespace
@@ -54,8 +54,8 @@ namespace DxfIO::Audit
    *  group code": each is an error, in a record's extra groups, its extended data, or a record kept
    *  whole, and left out when fixed.
    */
-  template <class DocumentT>
-  void Grouped(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Grouped(Auditor<DrawingT> &with)
   {
     Bases(*with.Drawing,
           [&with](auto &base) -> void
@@ -63,14 +63,14 @@ namespace DxfIO::Audit
             Checked(with, base.Extra, base.Self);
             for (auto &data : base.Extended)
             {
-              Checked(with, data.Groups, base.Self);
+              Checked(with, data.Tags, base.Self);
             }
           });
     for (auto &table : with.Drawing->Loose)
     {
       for (auto &one : table.Records)
       {
-        Checked(with, one.Groups, one.Base.Self);
+        Checked(with, one.Tags, one.Base.Self);
       }
     }
     Lists(*with.Drawing,
@@ -87,7 +87,7 @@ namespace DxfIO::Audit
     }
   }
 
-  template void Grouped(Auditor<Document> &with);
+  template void Grouped(Auditor<Drawing> &with);
 
-  template void Grouped(Auditor<const Document> &with);
+  template void Grouped(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

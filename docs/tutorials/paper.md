@@ -9,7 +9,7 @@ Entities drawn on a layout's sheet rather than in the model: in paper space of a
 `Create` makes one paper space layout, Layout1, whose sheet is the `*Paper_Space` block and whose limits run from 0,0 to 12,9. `Space::Paper` adds an entity to it: the entity goes to the ENTITIES section with its `Paper` flag set, owned by the `*Paper_Space` block record.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Entities::LwPolyline border{};
 border.Flags = 1;
@@ -36,10 +36,10 @@ A drawing's other layouts each draw their sheet in a block of their own, and a L
 auto plan = DxfIO::LoadFile("plan.dxf");
 if (!plan)
 {
-  std::println("line {}: {}", plan.error().Line, plan.error().What);
+  std::println("line {}: {}", plan.error().Line.value_or(0), plan.error().What);
   return 1;
 }
-DxfIO::Document &sheets = plan->Document;
+DxfIO::Drawing &sheets = plan->Drawing;
 
 std::string sheet;
 for (const DxfIO::Object &one : sheets.Objects)

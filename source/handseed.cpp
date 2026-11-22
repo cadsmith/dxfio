@@ -13,7 +13,7 @@ namespace DxfIO
     constexpr int              Code     = 5;
   } // namespace
 
-  auto ReadSeed(const Document &drawing) -> Handle
+  auto ReadSeed(const Drawing &drawing) -> Handle
   {
     const auto found = std::ranges::find(drawing.Header, Variable, &Header::Variable::Name);
     if (found == drawing.Header.end() || found->Values.empty())
@@ -24,10 +24,10 @@ namespace DxfIO
     return held == nullptr ? Handle{} : *held;
   }
 
-  void WriteSeed(Document &drawing, Handle next)
+  void WriteSeed(Drawing &drawing, Handle next)
   {
-    const Group value{.Code = Code, .Value = next};
-    const auto  found = std::ranges::find(drawing.Header, Variable, &Header::Variable::Name);
+    const Tag  value{.Code = Code, .Value = next};
+    const auto found = std::ranges::find(drawing.Header, Variable, &Header::Variable::Name);
     if (found == drawing.Header.end())
     {
       drawing.Header.push_back(Header::Variable{.Name = std::string{Variable}, .Values = {value}});

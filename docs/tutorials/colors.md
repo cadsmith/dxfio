@@ -9,11 +9,12 @@ The color, lineweight and visibility every entity carries in its `Record`, set o
 A new entity takes its color and lineweight from its layer, 0 unless it names another: [Layers](/tutorials/layers/) sets them there.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Entities::Line plain{};
 plain.End = {.X = 100, .Y = 0, .Z = 0};
-std::println("layer {}, color {}, lineweight {}", plain.Record.Layer, plain.Record.Color, plain.Record.Lineweight);
+std::println("layer {}, color {}, lineweight {}", plain.Record.Layer, plain.Record.Color,
+             std::to_underlying(plain.Record.Lineweight));
 DxfIO::Edit::Add(drawing, plain);
 ```
 
@@ -23,7 +24,7 @@ layer 0, color 256, lineweight -1
 
 ## Color [#color]
 
-`Color` is an AutoCAD Color Index from 1 to 255, or `Colors::Bylayer` (256) to take the layer's color, or `Colors::Byblock` (0) to take the color of the block insert the entity is drawn in. `Colors::White`, 7, is drawn white on a dark background and black on a light one.
+`Color` is an AutoCAD Color Index from 1 to 255, or `Colors::ByLayer` (256) to take the layer's color, or `Colors::ByBlock` (0) to take the color of the block insert the entity is drawn in. `Colors::White`, 7, is drawn white on a dark background and black on a light one.
 
 ```cpp
 DxfIO::Entities::Line indexed{};
@@ -48,13 +49,13 @@ DxfIO::Edit::Add(drawing, orange);
 
 ## Lineweight [#lineweight]
 
-`Lineweight` is in hundredths of a millimeter, so 50 is 0.50 mm, and is written from R2000 on. `Lineweights::Bylayer` (-1) takes the layer's, `Lineweights::Byblock` (-2) the block insert's, and `Lineweights::Standard` (-3) the drawing's default, which `$LWDEFAULT` gives.
+A `Lineweight` is one of AutoCAD's widths, named in hundredths of a millimeter, so `Mm050` is 0.50 mm, and is written from R2000 on; `MillimetersOf` gives the width. `Lineweight::ByLayer` (-1) takes the layer's, `ByBlock` (-2) the block insert's, and `Default` (-3) the drawing's default, which `$LWDEFAULT` gives.
 
 ```cpp
 DxfIO::Entities::Line heavy{};
 heavy.Start = {.X = 0, .Y = 30, .Z = 0};
 heavy.End = {.X = 100, .Y = 30, .Z = 0};
-heavy.Record.Lineweight = 50;
+heavy.Record.Lineweight = DxfIO::Lineweight::Mm050;
 DxfIO::Edit::Add(drawing, heavy);
 ```
 

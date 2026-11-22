@@ -71,8 +71,8 @@ namespace DxfIO
           .Pick = Entities::Marked,
       },
       Fields::Field{.Code = 10, .Member = &Entities::Vertex::Position},
-      Fields::Field{.Code = 40, .Member = &Entities::Vertex::Start},
-      Fields::Field{.Code = 41, .Member = &Entities::Vertex::End},
+      Fields::Field{.Code = 40, .Member = &Entities::Vertex::StartWidth},
+      Fields::Field{.Code = 41, .Member = &Entities::Vertex::EndWidth},
       Fields::Field{
           .Code     = 42,
           .Member   = &Entities::Vertex::Bulge,

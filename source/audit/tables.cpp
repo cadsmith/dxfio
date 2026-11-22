@@ -25,9 +25,9 @@ namespace DxfIO::Audit
         std::string_view{"Continuous"},
     };
 
-    template <class DocumentT, class RecordT>
-    void Required(Auditor<DocumentT> &with, const Tables::Table<RecordT> &fresh,
-                  Part<DocumentT, Tables::Table<RecordT>> &table)
+    template <class DrawingT, class RecordT>
+    void Required(Auditor<DrawingT> &with, const Tables::Table<RecordT> &fresh,
+                  Part<DrawingT, Tables::Table<RecordT>> &table)
     {
       std::size_t at = 0;
       for (const RecordT &one : fresh.Records)
@@ -39,7 +39,7 @@ namespace DxfIO::Audit
         }
         with.Note(Severity::Error, std::format("{} missing", one.Record.Name),
                   table.Head.Base.Self);
-        if constexpr (Auditor<DocumentT>::Fix)
+        if constexpr (Auditor<DrawingT>::Fix)
         {
           RecordT made           = one;
           made.Record.Base       = {};
@@ -56,7 +56,7 @@ namespace DxfIO::Audit
     }
 
     template <class KindT>
-    auto Found(const Document &drawing, std::string_view name) -> Handle
+    auto Found(const Drawing &drawing, std::string_view name) -> Handle
     {
       for (const Object &one : drawing.Objects)
       {
@@ -69,7 +69,7 @@ namespace DxfIO::Audit
       return {};
     }
 
-    auto Plotted(const Document &drawing) -> Handle
+    auto Plotted(const Drawing &drawing) -> Handle
     {
       for (const Object &one : drawing.Objects)
       {
@@ -81,8 +81,8 @@ namespace DxfIO::Audit
       return {};
     }
 
-    template <class DocumentT>
-    void Unstyled(Auditor<DocumentT> &with)
+    template <class DrawingT>
+    void Unstyled(Auditor<DrawingT> &with)
     {
       const Handle style = Plotted(*with.Drawing);
       if (!style)
@@ -97,7 +97,7 @@ namespace DxfIO::Audit
         }
         with.Note(Severity::Error, std::format("layer {} has no plot style", one.Record.Name),
                   one.Record.Base.Self);
-        if constexpr (Auditor<DocumentT>::Fix)
+        if constexpr (Auditor<DrawingT>::Fix)
         {
           one.Style = style;
         }
@@ -119,14 +119,14 @@ namespace DxfIO::Audit
     }
   } // namespace
 
-  void Localized(Tables::Layer &one, const Document &drawing)
+  void Localized(Tables::Layer &one, const Drawing &drawing)
   {
     one.Material = Found<Objects::Material>(drawing, "Global");
     one.Style    = Plotted(drawing);
-    one.Spare    = {};
+    one.Unknown1 = {};
   }
 
-  void Localized(Tables::Dimstyle &one, const Document &drawing)
+  void Localized(Tables::DimStyle &one, const Drawing &drawing)
   {
     one.Dimtxsty =
         std::ranges::min_element(drawing.Style.Records, {}, [](const Tables::Style &style) -> bool
@@ -141,32 +141,32 @@ namespace DxfIO::Audit
     one.Dimltex2  = {};
   }
 
-  void Localized(Tables::Vport &one, const Document & /*drawing*/)
+  void Localized(Tables::VPort &one, const Drawing & /*drawing*/)
   {
-    one.Style      = {};
-    one.Background = {};
-    one.Shadow     = {};
+    one.VisualStyle     = {};
+    one.Background      = {};
+    one.ShadePlotObject = {};
   }
 
-  template <class DocumentT>
-  void Tabled(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Tabled(Auditor<DrawingT> &with)
   {
-    DocumentT       &drawing = *with.Drawing;
-    const Document   fresh   = Create(Header::Declared(drawing.Header));
+    DrawingT        &drawing = *with.Drawing;
+    const Drawing    fresh   = Create(Header::Declared(drawing.Header));
     const std::array zero{std::string_view{"0"}};
     const std::array standard{std::string_view{"Standard"}};
     const std::array acad{std::string_view{"ACAD"}};
     const std::array active{std::string_view{"*Active"}};
     Required(with, Only(fresh.Layer, zero), drawing.Layer);
-    Required(with, Only(fresh.Ltype, Kinds), drawing.Ltype);
+    Required(with, Only(fresh.LType, Kinds), drawing.LType);
     Required(with, Only(fresh.Style, standard), drawing.Style);
-    Required(with, Only(fresh.Dimstyle, standard), drawing.Dimstyle);
-    Required(with, Only(fresh.Appid, acad), drawing.Appid);
-    Required(with, Only(fresh.Vport, active), drawing.Vport);
+    Required(with, Only(fresh.DimStyle, standard), drawing.DimStyle);
+    Required(with, Only(fresh.AppId, acad), drawing.AppId);
+    Required(with, Only(fresh.VPort, active), drawing.VPort);
     Unstyled(with);
   }
 
-  template void Tabled(Auditor<Document> &with);
+  template void Tabled(Auditor<Drawing> &with);
 
-  template void Tabled(Auditor<const Document> &with);
+  template void Tabled(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

@@ -4,74 +4,44 @@
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/vector.hpp"
 
 #include <string>
 
-namespace DxfIO::Objects::Mleader
+namespace DxfIO::Objects::MLeaderStyles
 {
-  /**
-   *  ByBlock as a packed color, AutoCAD's color in one integer: the color method 0xC1 in the top
-   *  byte and nothing below it. Not Colors::Byblock, the index 0 of group 62.
-   */
-  inline constexpr int PackedByblock = -1056964608;
-
-  /**
-   *  The landing gap of a new multileader style.
-   */
-  inline constexpr double Margin = 2;
-
-  /**
-   *  The dogleg length of a new multileader style.
-   */
-  inline constexpr double Reach = 8;
-
-  /**
-   *  The arrow size and text height of a new multileader style.
-   */
-  inline constexpr double Size = 4;
-
-  /**
-   *  The break gap of a new multileader style.
-   */
-  inline constexpr double Breaking = 3.75;
-
-  /**
-   *  A text attachment above or below: centered on the text.
-   */
-  inline constexpr int Centered = 9;
-
   /**
    *  How the leader lines of a multileader style are drawn.
    */
-  struct DXFIO_API Leader
+  struct DXFIO_API LeaderFormat
   {
     /**
      *  Which end of a leader is drawn first: 0 the head, 1 the tail. Group 172.
      */
-    int Order{};
+    int DrawOrder{};
     /**
      *  The most points a leader line has. Group 90.
      */
-    int Points{2};
+    int MaxPoints{2};
     /**
      *  The angle the first segment snaps to; 0 for any. Group 40.
      */
-    double First{};
+    double FirstSegmentAngle{};
     /**
      *  The angle the second segment snaps to; 0 for any. Group 41.
      */
-    double Second{};
+    double SecondSegmentAngle{};
     /**
      *  The kind of line: 0 invisible, 1 straight, 2 spline. Group 173.
      */
-    int Type{1};
+    int LeaderType{1};
     /**
      *  The color of the lines, packed into one integer as AutoCAD does. Group 91.
      */
-    int Color{PackedByblock};
+    int Color{Colors::PackedByBlock};
     /**
      *  The linetype of the lines. Group 340.
      */
@@ -80,44 +50,44 @@ namespace DxfIO::Objects::Mleader
      *  The lineweight in hundredths of a millimeter, or -1 ByLayer, -2 ByBlock, -3 the default.
      *  Group 92.
      */
-    int Lineweight{Lineweights::Byblock};
+    int Lineweight{-2};
     /**
      *  Whether the leader lands on the content. Group 290.
      */
-    bool Landing{true};
+    bool EnableLanding{true};
     /**
      *  The gap between the landing and the content. Group 42.
      */
-    double Gap{Margin};
+    double LandingGap{2};
     /**
      *  Whether the leader ends in a horizontal dogleg. Group 291.
      */
-    bool Dogleg{true};
+    bool EnableDogleg{true};
     /**
      *  The length of the dogleg. Group 43.
      */
-    double Length{Reach};
+    double DoglegLength{8};
     /**
      *  The block record of the arrowhead; none for the closed filled arrow. Group 341.
      */
-    Handle Arrow{};
+    Handle Arrowhead{};
     /**
      *  The size of the arrowhead. Group 44.
      */
-    double Size{Mleader::Size};
+    double ArrowheadSize{4};
 
-    auto operator==(const Leader &) const -> bool = default;
+    auto operator==(const LeaderFormat &) const -> bool = default;
   };
 
   /**
    *  How the text of a multileader style is drawn.
    */
-  struct DXFIO_API Text
+  struct DXFIO_API TextFormat
   {
     /**
      *  The text a new multileader starts with. Group 300.
      */
-    std::string Content{};
+    std::string DefaultText{};
     /**
      *  The text style. Group 342.
      */
@@ -126,16 +96,16 @@ namespace DxfIO::Objects::Mleader
      *  Where a leader from the left meets the text, such as 1 at the middle of its top line. Group
      *  174.
      */
-    int Left{1};
+    int LeftAttachment{1};
     /**
-     *  Where a leader from the right meets the text, as Left. Group 178.
+     *  Where a leader from the right meets the text, as LeftAttachment. Group 178.
      */
-    int Right{1};
+    int RightAttachment{1};
     /**
      *  How the text is turned: 0 along the leader, 1 horizontal, 2 along the leader but never
      *  upside down. Group 175.
      */
-    int Angle{1};
+    int AngleType{1};
     /**
      *  How the lines of the text are aligned: 0 left, 1 center, 2 right. Group 176.
      */
@@ -143,11 +113,11 @@ namespace DxfIO::Objects::Mleader
     /**
      *  The color of the text, packed into one integer as AutoCAD does. Group 93.
      */
-    int Color{PackedByblock};
+    int Color{Colors::PackedByBlock};
     /**
      *  The height of the text. Group 45.
      */
-    double Height{Size};
+    double Height{4};
     /**
      *  Whether the text is framed. Group 292.
      */
@@ -155,41 +125,41 @@ namespace DxfIO::Objects::Mleader
     /**
      *  Whether the text is always aligned left. Group 297.
      */
-    bool Flush{};
+    bool AlwaysLeft{};
     /**
      *  The space between the text and its alignment. Group 46.
      */
-    double Space{Size};
+    double AlignSpace{4};
     /**
      *  Which way leaders meet the text: 0 from the sides, 1 from above or below. Group 271, from
      *  R2010.
      */
-    int Direction{};
+    int AttachmentDirection{};
     /**
      *  Where a leader from below meets the text. Group 272, from R2010.
      */
-    int Bottom{Centered};
+    int BottomAttachment{9};
     /**
      *  Where a leader from above meets the text. Group 273, from R2010.
      */
-    int Top{Centered};
+    int TopAttachment{9};
 
-    auto operator==(const Text &) const -> bool = default;
+    auto operator==(const TextFormat &) const -> bool = default;
   };
 
   /**
    *  How the block of a multileader style is drawn, when its content is a block.
    */
-  struct DXFIO_API Block
+  struct DXFIO_API BlockFormat
   {
     /**
      *  The block record of the content. Group 343.
      */
-    Handle Record{};
+    Handle Content{};
     /**
      *  The color of the block, packed into one integer as AutoCAD does. Group 94.
      */
-    int Color{PackedByblock};
+    int Color{Colors::PackedByBlock};
     /**
      *  The scale of the block along X, Y and Z. Groups 47, 49, 140.
      */
@@ -197,7 +167,7 @@ namespace DxfIO::Objects::Mleader
     /**
      *  Whether Scale applies. Group 293.
      */
-    bool Scaled{true};
+    bool EnableScale{true};
     /**
      *  The rotation of the block. Group 141.
      */
@@ -205,15 +175,15 @@ namespace DxfIO::Objects::Mleader
     /**
      *  Whether Rotation applies. Group 294.
      */
-    bool Rotated{true};
+    bool EnableRotation{true};
     /**
      *  Where the leader meets the block: 0 its extents, 1 its insertion point. Group 177.
      */
     int Connection{};
 
-    auto operator==(const Block &) const -> bool = default;
+    auto operator==(const BlockFormat &) const -> bool = default;
   };
-} // namespace DxfIO::Objects::Mleader
+} // namespace DxfIO::Objects::MLeaderStyles
 
 namespace DxfIO::Objects
 {
@@ -234,11 +204,11 @@ namespace DxfIO::Objects
     /**
      *  The content at the end of the leader: 0 none, 1 a block, 2 text, 3 a tolerance. Group 170.
      */
-    int Content{2};
+    int ContentType{2};
     /**
      *  What is drawn first: 0 the content, 1 the leader. Group 171.
      */
-    int Order{1};
+    int DrawOrder{1};
     /**
      *  The style's description. Group 3.
      */
@@ -247,15 +217,15 @@ namespace DxfIO::Objects
      *  How the leader lines are drawn, kept on the heap as the text and block are, so every object
      *  stays small.
      */
-    Boxed<Mleader::Leader> Leader{};
+    Boxed<MLeaderStyles::LeaderFormat> Leader{};
     /**
      *  How the text is drawn.
      */
-    Boxed<Mleader::Text> Text{};
+    Boxed<MLeaderStyles::TextFormat> Text{};
     /**
      *  How the block is drawn.
      */
-    Boxed<Mleader::Block> Block{};
+    Boxed<MLeaderStyles::BlockFormat> Block{};
     /**
      *  The factor the whole multileader is scaled by. Group 142.
      */
@@ -263,7 +233,7 @@ namespace DxfIO::Objects
     /**
      *  Whether a property of the style was overridden. Group 295.
      */
-    bool Overwrite{};
+    bool OverwriteProperty{};
     /**
      *  Whether the style is annotative. Group 296.
      */
@@ -271,11 +241,11 @@ namespace DxfIO::Objects
     /**
      *  The gap left where a leader is broken. Group 143.
      */
-    double Breaks{Mleader::Breaking};
+    double BreakGapSize{3.75};
     /**
-     *  A value AutoCAD writes with no published meaning, usually 0. Group 298, from R2013.
+     *  Unnamed in the DXF reference; 0 as AutoCAD writes it. Group 298, from R2013.
      */
-    int Spare{};
+    int Unknown1{};
 
     auto operator==(const MLeaderStyle &) const -> bool = default;
   };

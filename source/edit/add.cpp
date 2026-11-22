@@ -4,7 +4,7 @@
 #include "masked.hpp"
 #include "seeding.hpp"
 
-#include "dxfio/edit/find.hpp"
+#include "dxfio/view.hpp"
 
 #include <algorithm>
 #include <concepts>
@@ -20,9 +20,9 @@ namespace DxfIO::Edit
     constexpr std::string_view Model = "*Model_Space";
     constexpr std::string_view Paper = "*Paper_Space";
 
-    auto Owner(const Document &drawing, std::string_view space) -> Handle
+    auto Owner(const Drawing &drawing, std::string_view space) -> Handle
     {
-      const auto *found = Find(drawing.BlockRecord, space);
+      const auto *found = View::Record(drawing.BlockRecord, space);
       return found == nullptr ? Handle{} : found->Record.Base.Self;
     }
 
@@ -40,7 +40,7 @@ namespace DxfIO::Edit
       }
       Entities::Record record = parent;
       record.Base             = {};
-      chain.Closing           = Boxed{Entities::Seqend{.Record = std::move(record)}};
+      chain.Closing           = Boxed{Entities::SeqEnd{.Record = std::move(record)}};
     }
 
     /**
@@ -80,17 +80,17 @@ namespace DxfIO::Edit
      *  Flags a block that takes an ATTDEF as holding attribute definitions, as AutoCAD does, else
      *  its inserts ignore them.
      */
-    void Tagged(Blocks::Block *block, const Entity &one)
+    void Tagged(Blocks::Definition *block, const Entity &one)
     {
       if (block != nullptr
           && Entities::Attributing(one)
-          && Masked(block->Begin.Flags, Attributed) == 0)
+          && Masked(block->Block.Flags, Attributed) == 0)
       {
-        block->Begin.Flags += Attributed;
+        block->Block.Flags += Attributed;
       }
     }
 
-    auto Owned(Document &drawing, Entity &one, Handle owner) -> std::expected<Handle, Failure>
+    auto Owned(Drawing &drawing, Entity &one, Handle owner) -> std::expected<Handle, Failure>
     {
       return Seeded(drawing).transform(
           [&drawing, &one, owner](Seed handles) -> Handle
@@ -103,21 +103,22 @@ namespace DxfIO::Edit
     }
 
     template <auto Member, class RecordT>
-    auto Listed(Document &drawing, RecordT one, std::string_view kind)
+    auto Listed(Drawing &drawing, RecordT one, std::string_view kind)
         -> std::expected<Handle, Failure>
     {
       auto &table = drawing.*Member;
       if (one.Record.Name.empty())
       {
-        return std::unexpected{Failure{.Line = 0, .What = std::format("a {} needs a name", kind)}};
+        return std::unexpected{Failure{.Code = FailureCode::Refused,
+                                       .What = std::format("{} with no name refused", kind)}};
       }
-      if constexpr (!std::same_as<RecordT, Tables::Vport>)
+      if constexpr (!std::same_as<RecordT, Tables::VPort>)
       {
-        if (Find(table, one.Record.Name) != nullptr)
+        if (View::Record(table, one.Record.Name) != nullptr)
         {
           return std::unexpected{
-              Failure{.Line = 0,
-                      .What = std::format("a record named {} is there already", one.Record.Name)}};
+              Failure{.Code = FailureCode::Exists,
+                      .What = std::format("{} {} exists", kind, one.Record.Name)}};
         }
       }
       return Seeded(drawing).transform(
@@ -138,7 +139,7 @@ namespace DxfIO::Edit
     }
   } // namespace
 
-  auto Add(Document &drawing, Entity one, Space space) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Entity one, Space space) -> std::expected<Handle, Failure>
   {
     const bool   paper = space == Space::Paper;
     const Handle owner = Owner(drawing, paper ? Paper : Model);
@@ -150,34 +151,34 @@ namespace DxfIO::Edit
               {
                 Entities::Claim(one, owner);
               }
-              Tagged(FindBlock(drawing, paper ? Paper : Model), one);
+              Tagged(View::Block(drawing, paper ? Paper : Model), one);
               drawing.Entities.push_back(std::move(one));
               return self;
             });
   }
 
-  auto Add(Document &drawing, Entity one, std::string_view block) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Entity one, std::string_view block) -> std::expected<Handle, Failure>
   {
-    if (Same(block, Model))
+    if (View::Same(block, Model))
     {
       return Add(drawing, std::move(one), Space::Model);
     }
-    if (Same(block, Paper))
+    if (View::Same(block, Paper))
     {
       return Add(drawing, std::move(one), Space::Paper);
     }
-    Blocks::Block *found = FindBlock(drawing, block);
+    Blocks::Definition *found = View::Block(drawing, block);
     if (found == nullptr)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = std::format("there is no block named {}", block)}};
+          Failure{.Code = FailureCode::Missing, .What = std::format("block {} missing", block)}};
     }
-    const Handle owner = found->Begin.Record.Base.Owner;
+    const Handle owner = found->Block.Record.Base.Owner;
     return Owned(drawing, one, owner)
         .transform(
             [found, &one, owner](Handle self) -> Handle
             {
-              if (found->Begin.Record.Paper)
+              if (found->Block.Record.Paper)
               {
                 Entities::Claim(one, owner);
               }
@@ -187,18 +188,19 @@ namespace DxfIO::Edit
             });
   }
 
-  auto AddBlock(Document &drawing, std::string_view name) -> std::expected<Handle, Failure>
+  auto AddBlock(Drawing &drawing, std::string_view name) -> std::expected<Handle, Failure>
   {
     if (name.empty())
     {
-      return std::unexpected{Failure{.Line = 0, .What = "a block needs a name"}};
+      return std::unexpected{
+          Failure{.Code = FailureCode::Refused, .What = "block with no name refused"}};
     }
-    if (FindBlock(drawing, name) != nullptr)
+    if (View::Block(drawing, name) != nullptr)
     {
       return std::unexpected{
-          Failure{.Line = 0, .What = std::format("a block named {} is there already", name)}};
+          Failure{.Code = FailureCode::Exists, .What = std::format("block {} exists", name)}};
     }
-    const bool recorded = Find(drawing.BlockRecord, Model) != nullptr;
+    const bool recorded = View::Record(drawing.BlockRecord, Model) != nullptr;
     return Seeded(drawing).transform(
         [&drawing, name, recorded](Seed handles) -> Handle
         {
@@ -215,61 +217,61 @@ namespace DxfIO::Edit
                 std::max(drawing.BlockRecord.Head.Count,
                          static_cast<int>(drawing.BlockRecord.Records.size()));
           }
-          Blocks::Block block{};
-          block.Begin.Record.Base.Self  = handles.Take();
-          block.Begin.Record.Base.Owner = owner;
-          block.Begin.Name              = std::string{name};
-          block.End.Record.Base.Self    = handles.Take();
-          block.End.Record.Base.Owner   = owner;
-          const Handle out              = block.Begin.Record.Base.Self;
+          Blocks::Definition block{};
+          block.Block.Record.Base.Self   = handles.Take();
+          block.Block.Record.Base.Owner  = owner;
+          block.Block.Name               = std::string{name};
+          block.EndBlk.Record.Base.Self  = handles.Take();
+          block.EndBlk.Record.Base.Owner = owner;
+          const Handle out               = block.Block.Record.Base.Self;
           drawing.Blocks.push_back(std::move(block));
           Moved(drawing, handles.Next());
           return out;
         });
   }
 
-  auto Add(Document &drawing, Tables::Vport one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::VPort one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Vport>(drawing, std::move(one), "viewport");
+    return Listed<&Drawing::VPort>(drawing, std::move(one), "viewport");
   }
 
-  auto Add(Document &drawing, Tables::Ltype one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::LType one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Ltype>(drawing, std::move(one), "linetype");
+    return Listed<&Drawing::LType>(drawing, std::move(one), "linetype");
   }
 
-  auto Add(Document &drawing, Tables::Layer one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::Layer one) -> std::expected<Handle, Failure>
   {
-    if (const Tables::Layer *zero = Find(drawing.Layer, "0"))
+    if (const Tables::Layer *zero = View::Record(drawing.Layer, "0"))
     {
       one.Style    = one.Style ? one.Style : zero->Style;
       one.Material = one.Material ? one.Material : zero->Material;
     }
-    return Listed<&Document::Layer>(drawing, std::move(one), "layer");
+    return Listed<&Drawing::Layer>(drawing, std::move(one), "layer");
   }
 
-  auto Add(Document &drawing, Tables::Style one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::Style one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Style>(drawing, std::move(one), "text style");
+    return Listed<&Drawing::Style>(drawing, std::move(one), "text style");
   }
 
-  auto Add(Document &drawing, Tables::View one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::View one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::View>(drawing, std::move(one), "view");
+    return Listed<&Drawing::View>(drawing, std::move(one), "view");
   }
 
-  auto Add(Document &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Ucs>(drawing, std::move(one), "ucs");
+    return Listed<&Drawing::Ucs>(drawing, std::move(one), "ucs");
   }
 
-  auto Add(Document &drawing, Tables::Appid one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::AppId one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Appid>(drawing, std::move(one), "application");
+    return Listed<&Drawing::AppId>(drawing, std::move(one), "application");
   }
 
-  auto Add(Document &drawing, Tables::Dimstyle one) -> std::expected<Handle, Failure>
+  auto Add(Drawing &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>
   {
-    return Listed<&Document::Dimstyle>(drawing, std::move(one), "dimension style");
+    return Listed<&Drawing::DimStyle>(drawing, std::move(one), "dimension style");
   }
 } // namespace DxfIO::Edit

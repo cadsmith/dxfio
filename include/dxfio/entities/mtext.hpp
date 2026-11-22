@@ -79,15 +79,10 @@ namespace DxfIO::Entities
   };
 
   /**
-   *  The drawing direction that takes the text style's own.
-   */
-  inline constexpr int Styled = 5;
-
-  /**
    *  The AcDbMText subclass of an MTEXT: its text with its formatting codes, its frame and its
    *  background.
    */
-  struct DXFIO_API Paragraph
+  struct DXFIO_API MTextData
   {
     /**
      *  The insertion point, in world coordinates. Groups 10, 20, 30.
@@ -114,7 +109,7 @@ namespace DxfIO::Entities
      *  The drawing direction: 1 left to right, 3 top to bottom, 5 as the text style has it. Group
      *  72.
      */
-    int Flow{Styled};
+    int Flow{5};
     /**
      *  What the text says, with its formatting codes. Group 3 for each 250 characters but the last,
      *  then group 1.
@@ -140,11 +135,11 @@ namespace DxfIO::Entities
     /**
      *  The line spacing style: 1 at least, 2 exactly. Group 73.
      */
-    int Spacing{1};
+    int LineSpacingStyle{1};
     /**
      *  The line spacing, as a factor of the default. Group 44.
      */
-    double Factor{1};
+    double LineSpacingFactor{1};
     /**
      *  The background: 0 none, 1 a color, 2 the drawing window's color, and 16 a frame from R2018.
      *  Group 90, from R2004.
@@ -177,7 +172,7 @@ namespace DxfIO::Entities
      */
     std::optional<Entities::Columns> Columns{};
 
-    auto operator==(const Paragraph &) const -> bool = default;
+    auto operator==(const MTextData &) const -> bool = default;
   };
 
   /**
@@ -192,7 +187,7 @@ namespace DxfIO::Entities
     /**
      *  The text, its frame and its background, from the AcDbMText subclass.
      */
-    Boxed<Entities::Paragraph> Paragraph{};
+    Boxed<Entities::MTextData> Data{};
 
     auto operator==(const MText &) const -> bool = default;
   };

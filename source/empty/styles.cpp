@@ -27,10 +27,10 @@ namespace DxfIO::Empty
 
     auto Global(Handle self) -> Objects::Material
     {
-      Objects::Material out = Named("Global", self);
-      DxfIO::Matrix     placed{};
-      placed.Cells.front()           = Texture;
-      placed.Cells.at(Across)        = Texture;
+      Objects::Material out          = Named("Global", self);
+      DxfIO::Matrix     placed       = Identity;
+      placed.front()                 = Texture;
+      placed.at(Across)              = Texture;
       out.Maps->Diffuse.Transform    = placed;
       out.Maps->Reflection.Transform = placed;
       out.Maps->Opacity.Transform    = placed;
@@ -38,16 +38,16 @@ namespace DxfIO::Empty
       return out;
     }
 
-    auto Line(double offset) -> Objects::Mline::Element
+    auto Line(double offset) -> Objects::MLineStyles::Element
     {
-      Objects::Mline::Element out{};
+      Objects::MLineStyles::Element out{};
       out.Offset = offset;
       return out;
     }
 
-    auto Cell(double height, int alignment) -> Objects::Table::Cell
+    auto Cell(double height, int alignment) -> Objects::TableStyles::RowStyle
     {
-      Objects::Table::Cell out{};
+      Objects::TableStyles::RowStyle out{};
       out.Style     = "Standard";
       out.Height    = height;
       out.Alignment = alignment;
@@ -89,9 +89,9 @@ namespace DxfIO::Empty
     out.Base.Self   = handles.Take();
     out.Description = "Standard";
     out.Cells       = {
-        Cell(Objects::Table::Height, Centered),
+        Cell(4.5, Centered),
         Cell(Title, Middle),
-        Cell(Objects::Table::Height, Middle),
+        Cell(4.5, Middle),
     };
     return out;
   }

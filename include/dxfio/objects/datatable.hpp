@@ -3,7 +3,7 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <cstdint>
 #include <string>
@@ -27,7 +27,7 @@ namespace DxfIO::Objects
     /**
      *  The cells of the column, top to bottom, as groups whose code tells the type of each value.
      */
-    std::vector<DxfIO::Group> Cells{};
+    std::vector<DxfIO::Tag> Cells{};
 
     auto operator==(const Column &) const -> bool = default;
   };

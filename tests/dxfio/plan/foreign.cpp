@@ -53,7 +53,7 @@ namespace DxfIO::Plan
   TEST_CASE("foreign: an unknown object with no handle takes no entry with it")
   {
     std::vector<Object> all = Drawn();
-    all.emplace_back(Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Groups = {}});
+    all.emplace_back(Unknown{.Type = Symbol{"FOO"}, .Base = {}, .Tags = {}});
     const std::vector<Object> out = Foreign(std::move(all));
     REQUIRE(out.size() == 2);
     const auto &names = std::get<Objects::Dictionary>(out.front());

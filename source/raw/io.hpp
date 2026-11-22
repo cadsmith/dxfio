@@ -6,8 +6,8 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/failure.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/raw.hpp"
+#include "dxfio/tag.hpp"
 
 #include <expected>
 #include <span>

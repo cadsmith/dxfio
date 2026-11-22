@@ -9,7 +9,7 @@ A solid fill and a pattern, each over a closed polyline whose outline the hatch 
 A hatch holds its boundary itself, as paths. Path flag 2 makes a polyline path, whose `Vertices` carry their bulges in `Weight` when `Bulged` is 1; flag 1 marks it external, and `Closed` 1 closes it.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 const auto traced = [](const DxfIO::Entities::LwPolyline &outline) -> DxfIO::Entities::Path
 {
@@ -27,7 +27,7 @@ const auto traced = [](const DxfIO::Entities::LwPolyline &outline) -> DxfIO::Ent
 
 ## A solid fill [#solid]
 
-A new hatch is a solid fill: the pattern named SOLID, with `Solid` 1 and, as AutoCAD writes it, `Kind` 1 for a predefined pattern. The hatch's fields are in `Fill`, kept on the heap and reached with `->`. `Associative` stays 0: the hatch keeps its own boundary and does not follow the polyline.
+A new hatch is a solid fill: the pattern named SOLID, with `Solid` 1 and, as AutoCAD writes it, `Kind` 1 for a predefined pattern. The hatch's fields are in `Data`, a `HatchData` kept on the heap and reached with `->`. `Associative` stays 0: the hatch keeps its own boundary and does not follow the polyline.
 
 ```cpp
 DxfIO::Entities::LwPolyline square{};
@@ -41,13 +41,13 @@ square.Vertices = {
 DxfIO::Edit::Add(drawing, square);
 
 DxfIO::Entities::Hatch solid{};
-solid.Fill->Paths = {traced(square)};
+solid.Data->Paths = {traced(square)};
 DxfIO::Edit::Add(drawing, solid);
 ```
 
 ## A pattern [#pattern]
 
-A pattern sets `Solid` to 0. A predefined pattern, `Kind` 1, is named in `Name` and drawn at `Angle` degrees and `Scale`. `Stripes` lists its families of lines as drawn: for ANSI31 at 45 degrees and scale 2, AutoCAD writes one family of lines at 90 degrees, each 6.35 from the next.
+A pattern sets `Solid` to 0. A predefined pattern, `Kind` 1, is named in `Name` and drawn at `Angle` degrees and `Scale`. `PatternLines` lists its families of lines as drawn: for ANSI31 at 45 degrees and scale 2, AutoCAD writes one family of lines at 90 degrees, each 6.35 from the next.
 
 ```cpp
 DxfIO::Entities::LwPolyline arch{};
@@ -61,13 +61,13 @@ arch.Vertices = {
 DxfIO::Edit::Add(drawing, arch);
 
 DxfIO::Entities::Hatch pattern{};
-pattern.Fill->Name = "ANSI31";
-pattern.Fill->Solid = 0;
-pattern.Fill->Kind = 1;
-pattern.Fill->Angle = 45;
-pattern.Fill->Scale = 2;
-pattern.Fill->Stripes = {{.Angle = 90, .X = 0, .Y = 0, .Run = -6.35, .Rise = 0, .Dashes = {}}};
-pattern.Fill->Paths = {traced(arch)};
+pattern.Data->Name = "ANSI31";
+pattern.Data->Solid = 0;
+pattern.Data->Kind = 1;
+pattern.Data->Angle = 45;
+pattern.Data->Scale = 2;
+pattern.Data->PatternLines = {{.Angle = 90, .X = 0, .Y = 0, .Run = -6.35, .Rise = 0, .Dashes = {}}};
+pattern.Data->Paths = {traced(arch)};
 DxfIO::Edit::Add(drawing, pattern);
 ```
 

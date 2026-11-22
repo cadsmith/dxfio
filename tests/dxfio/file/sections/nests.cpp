@@ -36,8 +36,12 @@ namespace DxfIO::File::Sections
   {
     const auto block = Tags::All("  0\nBLOCK\n  2\nbolt\n");
     REQUIRE(block);
-    CHECK(Tables(*block) == std::unexpected{Failure{1, "TABLE expected, found BLOCK"}});
-    CHECK(Blocks(*block) == std::unexpected{Failure{3, "ENDBLK missing"}});
+    CHECK(Tables(*block)
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 1, .What = "TABLE expected, found BLOCK"}});
+    CHECK(Blocks(*block)
+          == std::unexpected{
+              Failure{.Code = FailureCode::Damaged, .Line = 3, .What = "ENDBLK missing"}});
   }
 
   TEST_CASE("nests: an end record keeps the groups after its name")

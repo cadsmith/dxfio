@@ -30,66 +30,66 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Entities::Stripe> = std::tuple{
-      Fields::Field{.Code = 53, .Member = &Entities::Stripe::Angle},
-      Fields::Field{.Code = 43, .Member = &Entities::Stripe::X},
-      Fields::Field{.Code = 44, .Member = &Entities::Stripe::Y},
-      Fields::Field{.Code = 45, .Member = &Entities::Stripe::Run},
-      Fields::Field{.Code = 46, .Member = &Entities::Stripe::Rise},
-      Fields::Tally{.Code = 79, .Member = &Entities::Stripe::Dashes},
-      Fields::Many{.Code = 49, .Member = &Entities::Stripe::Dashes},
+  inline constexpr auto Shapes<Entities::PatternLine> = std::tuple{
+      Fields::Field{.Code = 53, .Member = &Entities::PatternLine::Angle},
+      Fields::Field{.Code = 43, .Member = &Entities::PatternLine::X},
+      Fields::Field{.Code = 44, .Member = &Entities::PatternLine::Y},
+      Fields::Field{.Code = 45, .Member = &Entities::PatternLine::Run},
+      Fields::Field{.Code = 46, .Member = &Entities::PatternLine::Rise},
+      Fields::Tally{.Code = 79, .Member = &Entities::PatternLine::Dashes},
+      Fields::Many{.Code = 49, .Member = &Entities::PatternLine::Dashes},
   };
 
   namespace Entities
   {
-    inline auto Patterned(const Fill &one) -> bool
+    inline auto Patterned(const HatchData &one) -> bool
     {
       return one.Solid == 0;
     }
 
     inline constexpr std::tuple Design{
-        Fields::Field{.Code = 52, .Member = &Fill::Angle},
-        Fields::Field{.Code = 41, .Member = &Fill::Scale},
-        Fields::Field{.Code = 77, .Member = &Fill::Doubled},
-        Fields::Count{.Code = 78, .Member = &Fill::Stripes},
+        Fields::Field{.Code = 52, .Member = &HatchData::Angle},
+        Fields::Field{.Code = 41, .Member = &HatchData::Scale},
+        Fields::Field{.Code = 77, .Member = &HatchData::Doubled},
+        Fields::Count{.Code = 78, .Member = &HatchData::PatternLines},
         Fields::Each{
             .Opener = 53,
-            .Member = &Fill::Stripes,
-            .Fields = Shapes<Stripe>,
+            .Member = &HatchData::PatternLines,
+            .Fields = Shapes<PatternLine>,
         },
     };
 
     inline constexpr std::tuple Shading{
         Fields::Maybe{
             .Opener = 450,
-            .Member = &Fill::Gradient,
+            .Member = &HatchData::Gradient,
             .Fields = Shapes<Gradient>,
         },
     };
   } // namespace Entities
 
   template <>
-  inline constexpr auto Shapes<Entities::Fill> = std::tuple{
+  inline constexpr auto Shapes<Entities::HatchData> = std::tuple{
       Fields::Sequence{.Marker = "AcDbHatch"},
-      Fields::Field{.Code = 10, .Member = &Entities::Fill::Elevation},
-      Fields::Field{.Code = 210, .Member = &Entities::Fill::Normal},
-      Fields::Field{.Code = 2, .Member = &Entities::Fill::Name},
-      Fields::Field{.Code = 70, .Member = &Entities::Fill::Solid},
-      Fields::Field{.Code = 71, .Member = &Entities::Fill::Associative},
-      Fields::Count{.Code = 91, .Member = &Entities::Fill::Paths},
+      Fields::Field{.Code = 10, .Member = &Entities::HatchData::Elevation},
+      Fields::Field{.Code = 210, .Member = &Entities::HatchData::Normal},
+      Fields::Field{.Code = 2, .Member = &Entities::HatchData::Name},
+      Fields::Field{.Code = 70, .Member = &Entities::HatchData::Solid},
+      Fields::Field{.Code = 71, .Member = &Entities::HatchData::Associative},
+      Fields::Count{.Code = 91, .Member = &Entities::HatchData::Paths},
       Fields::Each{
           .Opener = 92,
-          .Member = &Entities::Fill::Paths,
+          .Member = &Entities::HatchData::Paths,
           .Fields = Shapes<Entities::Path>,
       },
-      Fields::Field{.Code = 75, .Member = &Entities::Fill::Style},
-      Fields::Field{.Code = 76, .Member = &Entities::Fill::Kind},
+      Fields::Field{.Code = 75, .Member = &Entities::HatchData::Style},
+      Fields::Field{.Code = 76, .Member = &Entities::HatchData::Kind},
       Fields::When{.Test = Entities::Patterned, .Fields = Entities::Design},
-      Fields::Field{.Code = 47, .Member = &Entities::Fill::Pixel},
-      Fields::Count{.Code = 98, .Member = &Entities::Fill::Seeds},
+      Fields::Field{.Code = 47, .Member = &Entities::HatchData::Pixel},
+      Fields::Count{.Code = 98, .Member = &Entities::HatchData::Seeds},
       Fields::Each{
           .Opener = 10,
-          .Member = &Entities::Fill::Seeds,
+          .Member = &Entities::HatchData::Seeds,
           .Fields = Shapes<Entities::Edges::Place>,
       },
       Fields::Since{.Release = Version::R2004, .Fields = Entities::Shading},
@@ -99,8 +99,8 @@ namespace DxfIO
   inline constexpr auto Shapes<Entities::Hatch> = std::tuple{
       Entities::Part<Entities::Hatch>,
       Fields::Part{
-          .Member = &Entities::Hatch::Fill,
-          .Fields = Shapes<Entities::Fill>,
+          .Member = &Entities::Hatch::Data,
+          .Fields = Shapes<Entities::HatchData>,
       },
   };
 

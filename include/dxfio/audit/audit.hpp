@@ -2,7 +2,7 @@
 #define DXFIO_AUDIT_AUDIT_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/handle.hpp"
 
 #include <cstddef>
@@ -84,7 +84,7 @@ namespace DxfIO::Audit
   /**
    *  Lists what AutoCAD would complain about in a drawing, leaving it unchanged.
    */
-  [[nodiscard]] DXFIO_API auto Check(const Document &drawing) -> Report;
+  [[nodiscard]] DXFIO_API auto Check(const Drawing &drawing) -> Report;
 
   /**
    *  Runs the checks of Check and fixes what they find, in place: a missing or duplicate handle is
@@ -102,7 +102,7 @@ namespace DxfIO::Audit
    *  there is, is the lowest one no record holds. It then moves $HANDSEED past the handles in use,
    *  adding it when the header has none.
    */
-  DXFIO_API auto Repair(Document &drawing) -> Report;
+  DXFIO_API auto Repair(Drawing &drawing) -> Report;
 } // namespace DxfIO::Audit
 
 #endif /* DXFIO_AUDIT_AUDIT_HPP */

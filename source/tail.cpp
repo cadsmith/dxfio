@@ -3,6 +3,7 @@
 #include "chained.hpp"
 #include "fields/owned.hpp"
 #include "fields/text.hpp"
+#include "located.hpp"
 
 #include <algorithm>
 #include <format>
@@ -35,14 +36,15 @@ namespace DxfIO
         if (!dropped && into.Extended.empty())
         {
           with.Tell(Issue{
-              .Line = one.Line,
+              .Code = IssueCode::Damaged,
+              .Line = Located(one.Line),
               .What = std::format("group {} before its application, left out", one.Code),
           });
           continue;
         }
         if (!dropped)
         {
-          into.Extended.back().Groups.push_back(Fields::Owned(one, with.Text));
+          into.Extended.back().Tags.push_back(Fields::Owned(one, with.Text));
         }
         continue;
       }
@@ -51,12 +53,13 @@ namespace DxfIO
       if (dropped)
       {
         with.Tell(Issue{
-            .Line = one.Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(one.Line),
             .What = std::format("extended data of {} given again, the first kept", name),
         });
         continue;
       }
-      into.Extended.push_back(Xdata{.Application = std::move(name), .Groups = {}});
+      into.Extended.push_back(Xdata{.Application = std::move(name), .Tags = {}});
     }
   }
 
@@ -67,7 +70,7 @@ namespace DxfIO
                    {
                      return Fields::Value<std::string>::Write(to, Application, one.Application)
                          .and_then([&to, &one] -> std::expected<void, Failure>
-                                   { return Fields::Put(to, one.Groups); });
+                                   { return Fields::Put(to, one.Tags); });
                    });
   }
 } // namespace DxfIO

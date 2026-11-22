@@ -43,7 +43,7 @@ namespace DxfIO::Header
     {
       const auto read = Load(Acad(one.File));
       REQUIRE(read);
-      return read->Document.Header;
+      return read->Drawing.Header;
     }
 
     auto Kept(const Variable &one, Version release) -> bool

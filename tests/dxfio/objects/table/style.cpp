@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-namespace DxfIO::Objects::Table
+namespace DxfIO::Objects::TableStyles
 {
   TEST_CASE("style: AutoCAD's Standard read whole from R2018, its three cells")
   {
@@ -110,10 +110,10 @@ namespace DxfIO::Objects::Table
     const TableStyle           taken = Read<TableStyle>(text);
     CHECK(taken.Description == "Standard");
     CHECK(taken.Revision    == 0);
-    CHECK(taken.Horizontal  == Margin);
-    CHECK_FALSE(taken.Untitled);
+    CHECK(taken.Horizontal  == 1.5);
+    CHECK_FALSE(taken.TitleSuppressed);
     REQUIRE(taken.Cells.size()        == 3);
-    CHECK(taken.Cells.at(0).Height    == Height);
+    CHECK(taken.Cells.at(0).Height    == 4.5);
     CHECK(taken.Cells.at(0).Alignment == 2);
     CHECK(taken.Cells.at(1).Height    == 6.0);
     CHECK(taken.Cells.at(2).Alignment == 5);
@@ -216,7 +216,7 @@ namespace DxfIO::Objects::Table
     const TableStyle           taken = Read<TableStyle>(text, Version::R2000);
     REQUIRE(taken.Cells.size()           == 3);
     CHECK(taken.Cells.at(1).Style        == "Standard");
-    CHECK(taken.Cells.at(1).Type         == General);
+    CHECK(taken.Cells.at(1).Type         == 512);
     CHECK(Written(taken, Version::R2000) == text);
   }
 
@@ -233,8 +233,8 @@ namespace DxfIO::Objects::Table
                                       "280\r\n     1\r\n"
                                       "281\r\n     0\r\n";
     const Objects::TableStyle taken = Read<Objects::TableStyle>(text);
-    CHECK(taken.Revision == 0);
-    CHECK(taken.Untitled == 1);
-    CHECK(Written(taken) == text);
+    CHECK(taken.Revision        == 0);
+    CHECK(taken.TitleSuppressed == 1);
+    CHECK(Written(taken)        == text);
   }
-} // namespace DxfIO::Objects::Table
+} // namespace DxfIO::Objects::TableStyles

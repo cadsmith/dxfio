@@ -16,6 +16,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace DxfIO::Entities
@@ -71,7 +72,7 @@ namespace DxfIO::Entities
     CHECK(taken.Lettering.Height   == 2);
     CHECK(taken.Lettering.Value    == "left");
     CHECK_FALSE(taken.Lettering.Alignment);
-    CHECK(taken.Vertical == 0);
+    CHECK(taken.Vertical == Entities::VerticalAlignment::Baseline);
   }
 
   TEST_CASE("text: every alignment, 11 given but for the plain one")
@@ -96,8 +97,8 @@ namespace DxfIO::Entities
     {
       CAPTURE(one.Self);
       const Text taken = Alikened(Marked(one.Self));
-      CHECK(taken.Lettering.Horizontal == one.Horizontal);
-      CHECK(taken.Vertical             == one.Vertical);
+      CHECK(std::to_underlying(taken.Lettering.Horizontal) == one.Horizontal);
+      CHECK(std::to_underlying(taken.Vertical)             == one.Vertical);
       CHECK(taken.Lettering.Alignment);
     }
   }
@@ -140,11 +141,11 @@ namespace DxfIO::Entities
   TEST_CASE("text: a side of its own given without the other")
   {
     const Text up = Alikened(Marked("2E9"));
-    CHECK(up.Lettering.Horizontal == 0);
-    CHECK(up.Vertical             == 2);
+    CHECK(up.Lettering.Horizontal == Entities::HorizontalAlignment::Left);
+    CHECK(up.Vertical             == Entities::VerticalAlignment::Middle);
     const Text across = Alikened(Marked("2EA"));
-    CHECK(across.Lettering.Horizontal == 1);
-    CHECK(across.Vertical             == 0);
+    CHECK(across.Lettering.Horizontal == Entities::HorizontalAlignment::Center);
+    CHECK(across.Vertical             == Entities::VerticalAlignment::Baseline);
   }
 
   TEST_CASE("text: on another plane, 210 before the second marker")
@@ -152,7 +153,7 @@ namespace DxfIO::Entities
     const Text behind = Alikened(Marked("2EB"));
     CHECK(behind.Lettering.Extrusion.Z == -1);
     CHECK(behind.Lettering.Alignment   == Vector{.X = 4, .Y = 5, .Z = 3});
-    CHECK(behind.Vertical == 1);
+    CHECK(behind.Vertical == Entities::VerticalAlignment::Bottom);
   }
 
   TEST_CASE("text: empty, longer than a group once was, escaped as written")
@@ -173,11 +174,12 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened(Marked("2DB", release), release).Vertical == 2);
+      CHECK(Alikened(Marked("2DB", release), release).Vertical
+            == Entities::VerticalAlignment::Middle);
     }
     const Text old = Alikened(Marked("2DB", Version::R12), Version::R12);
-    CHECK(old.Vertical             == 2);
-    CHECK(old.Lettering.Horizontal == 1);
+    CHECK(old.Vertical             == Entities::VerticalAlignment::Middle);
+    CHECK(old.Lettering.Horizontal == Entities::HorizontalAlignment::Center);
   }
 
   TEST_CASE("text: its two markers read as one, as every codec reads them")
@@ -194,14 +196,15 @@ namespace DxfIO::Entities
     const std::string_view one = "100\r\nAcDbText\r\n";
     const std::string      both =
         std::string{one} + std::string{word} + std::string{one} + " 72\r\n     1\r\n";
-    CHECK(joined(one, " 73\r\n     2\r\n").Vertical == 2);
-    CHECK(joined({}, std::string{one} + " 73\r\n     3\r\n").Vertical         == 3);
+    CHECK(joined(one, " 73\r\n     2\r\n").Vertical == Entities::VerticalAlignment::Middle);
+    CHECK(joined({}, std::string{one} + " 73\r\n     3\r\n").Vertical
+          == Entities::VerticalAlignment::Top);
     CHECK(joined({}, std::string{one} + " 73\r\n     3\r\n").Lettering.Height == 2);
     const Text past = DxfIO::Read<Text>(std::string{head} + both);
-    CHECK(past.Lettering.Horizontal == 1);
+    CHECK(past.Lettering.Horizontal == Entities::HorizontalAlignment::Center);
     CHECK(past.Lettering.Value      == "x");
     const Text three = joined(one, std::string{one} + std::string{one} + " 73\r\n     1\r\n");
-    CHECK(three.Vertical == 1);
+    CHECK(three.Vertical == Entities::VerticalAlignment::Bottom);
     CHECK(three.Record.Base.Extra.empty());
   }
 
@@ -210,15 +213,15 @@ namespace DxfIO::Entities
     const Text between = Settled("100\nAcDbText\n 40\n2.0\n  1\nx\n100\nAcDbEntity\n  8\n0\n"
                                  "100\nAcDbText\n 73\n     1\n 40\n9.0\n");
     CHECK(between.Lettering.Height == 9);
-    CHECK(between.Vertical         == 1);
+    CHECK(between.Vertical         == Entities::VerticalAlignment::Bottom);
     const Text stray = Settled("100\nAcDbEntity\n  8\n0\n100\nAcDbText\n 40\n2.0\n  1\nx\n"
                                "100\nAcDbText\n 73\n     1\n100\nAcDbThing\n100\nAcDbText\n");
-    CHECK(stray.Vertical == 1);
+    CHECK(stray.Vertical == Entities::VerticalAlignment::Bottom);
     CHECK(stray.Record.Base.Extra.size() == 1);
     const Text scattered = Settled("100\nAcDbEntity\n  8\n0\n100\nAcDbText\n 40\n2.0\n  1\nx\n"
                                    "100\nAcDbThing\n100\nAcDbText\n 73\n     1\n100\nAcDbThing\n"
                                    "100\nAcDbText\n 39\n3.0\n");
-    CHECK(scattered.Vertical            == 1);
+    CHECK(scattered.Vertical            == Entities::VerticalAlignment::Bottom);
     CHECK(scattered.Lettering.Thickness == 3);
     const Text rotated = Settled("100\nAcDbText\n 40\n2.0\n  1\nx\n100\nAcDbEntity\n  8\n0\n"
                                  "100\nAcDbText\n 50\n30.0\n");
@@ -244,7 +247,7 @@ namespace DxfIO::Entities
     Fields::Read(taken, in, Shapes<Text>);
     CHECK(in.Kept().empty());
     CHECK(issues.size() == 2);
-    CHECK(taken.Lettering.Horizontal == 0);
+    CHECK(taken.Lettering.Horizontal == Entities::HorizontalAlignment::Left);
   }
 
   TEST_CASE("text: another class's marker ends it, what follows kept")
@@ -254,7 +257,7 @@ namespace DxfIO::Entities
                           "100\r\nAcDbText\r\n 40\r\n2.0\r\n  1\r\nx\r\n100\r\nAcDbText\r\n"
                           " 73\r\n     1\r\n100\r\nAcDbThing\r\n 40\r\n9.0\r\n");
     CHECK(kept.Lettering.Height == 2);
-    CHECK(kept.Vertical         == 1);
+    CHECK(kept.Vertical         == Entities::VerticalAlignment::Bottom);
     CHECK(kept.Record.Base.Extra.size() == 2);
   }
 
@@ -263,11 +266,11 @@ namespace DxfIO::Entities
     const auto theirs = Load(Acad(Fixture("texts", Version::R12)));
     REQUIRE(theirs);
     CHECK(theirs->Issues.empty());
-    const auto ours = Tests::Written(theirs->Document, Options{.Release = Version::R12});
+    const auto ours = Tests::Written(theirs->Drawing, SaveOptions{.Release = Version::R12});
     REQUIRE(ours);
     const auto again = Load(*ours);
     REQUIRE(again);
-    CHECK(again->Document.Entities == theirs->Document.Entities);
-    CHECK(again->Document.Blocks   == theirs->Document.Blocks);
+    CHECK(again->Drawing.Entities == theirs->Drawing.Entities);
+    CHECK(again->Drawing.Blocks   == theirs->Drawing.Blocks);
   }
 } // namespace DxfIO::Entities

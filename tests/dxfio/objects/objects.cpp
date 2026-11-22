@@ -57,7 +57,7 @@ namespace DxfIO::Objects
   {
     CHECK(Type(Object{Scale{}})      == "SCALE");
     CHECK(Type(Object{MLineStyle{}}) == "MLINESTYLE");
-    CHECK(Type(Object{Unknown{.Type = Symbol{"ACDBNOTHING"}, .Base = {}, .Groups = {}}})
+    CHECK(Type(Object{Unknown{.Type = Symbol{"ACDBNOTHING"}, .Base = {}, .Tags = {}}})
           == "ACDBNOTHING");
   }
 

@@ -6,6 +6,7 @@
 #include "fields/scratch.hpp"
 #include "file/record.hpp"
 #include "filing.hpp"
+#include "located.hpp"
 #include "parallel.hpp"
 #include "seek.hpp"
 #include "shapes.hpp"
@@ -80,7 +81,8 @@ namespace DxfIO::Family
     if (!whole)
     {
       with.Tell(Issue{
-          .Line = one.Tags.front().Line,
+          .Code = IssueCode::Damaged,
+          .Line = Located(one.Tags.front().Line),
           .What = "a record out of its order, kept as it came",
       });
       return Taken<Unknown>(one, with);
@@ -265,8 +267,9 @@ namespace DxfIO::Family
     {
       if (!done.at(at))
       {
-        Failure failed  = done.at(at).error();
-        failed.Line    += to.To->Lines();
+        Failure failed = done.at(at).error();
+        failed.Line    = failed.Line.transform([&to](std::size_t line) -> std::size_t
+                                               { return line + to.To->Lines(); });
         return std::unexpected{std::move(failed)};
       }
       to.To->Append(texts.at(at), lines.at(at));

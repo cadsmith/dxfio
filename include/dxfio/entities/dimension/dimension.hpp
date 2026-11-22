@@ -7,8 +7,9 @@
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
 
-#include <string>
+#include <cstddef>
 #include <variant>
+#include <vector>
 
 namespace DxfIO::Entities
 {
@@ -59,27 +60,27 @@ namespace DxfIO::Entities
     /**
      *  An angular dimension between two lines.
      */
-    struct DXFIO_API Angular
+    struct DXFIO_API Angular2Line
     {
       /**
        *  The start of the first line, in world coordinates. Groups 13, 23, 33.
        */
-      Vector Start{};
+      Vector FirstStart{};
       /**
        *  The end of the first line, in world coordinates. Groups 14, 24, 34.
        */
-      Vector End{};
+      Vector FirstEnd{};
       /**
        *  The start of the second line, which the definition point ends, in world coordinates.
        *  Groups 15, 25, 35.
        */
-      Vector From{};
+      Vector SecondStart{};
       /**
        *  A point on the dimension arc, in the entity's own coordinate system. Groups 16, 26, 36.
        */
-      Vector To{};
+      Vector ArcPoint{};
 
-      auto operator==(const Angular &) const -> bool = default;
+      auto operator==(const Angular2Line &) const -> bool = default;
     };
 
     /**
@@ -121,7 +122,7 @@ namespace DxfIO::Entities
     /**
      *  An angular dimension by three points: the vertex of the angle and a point on each side.
      */
-    struct DXFIO_API Points
+    struct DXFIO_API Angular3Point
     {
       /**
        *  A point on the first side, in world coordinates. Groups 13, 23, 33.
@@ -136,7 +137,7 @@ namespace DxfIO::Entities
        */
       Vector Vertex{};
 
-      auto operator==(const Points &) const -> bool = default;
+      auto operator==(const Angular3Point &) const -> bool = default;
     };
 
     /**
@@ -160,13 +161,14 @@ namespace DxfIO::Entities
      *  The kind of a DIMENSION, as the low three bits of group 70 give it, with the points that
      *  kind adds. It is what those bits are written from.
      */
-    using Form = std::variant<Linear, Aligned, Angular, Diameter, Radial, Points, Ordinate>;
+    using Form =
+        std::variant<Linear, Aligned, Angular2Line, Diameter, Radial, Angular3Point, Ordinate>;
   } // namespace Forms
 
   /**
    *  What a DIMENSION draws: what every dimension shares, and the points of its kind.
    */
-  struct DXFIO_API Figure
+  struct DXFIO_API DimensionData
   {
     /**
      *  The block, the text and the plane, from the AcDbDimension subclass.
@@ -177,7 +179,7 @@ namespace DxfIO::Entities
      */
     Forms::Form Form{};
 
-    auto operator==(const Figure &) const -> bool = default;
+    auto operator==(const DimensionData &) const -> bool = default;
   };
 
   /**
@@ -192,7 +194,7 @@ namespace DxfIO::Entities
     /**
      *  What the dimension measures and how it is drawn.
      */
-    Boxed<Entities::Figure> Figure{};
+    Boxed<Entities::DimensionData> Data{};
 
     auto operator==(const Dimension &) const -> bool = default;
   };
@@ -200,7 +202,7 @@ namespace DxfIO::Entities
   /**
    *  What an ARC_DIMENSION draws: what every dimension shares, and the arc it measures.
    */
-  struct DXFIO_API Bend
+  struct DXFIO_API ArcDimensionData
   {
     /**
      *  The block, the text and the plane, from the AcDbDimension subclass.
@@ -225,25 +227,25 @@ namespace DxfIO::Entities
     /**
      *  The angle the measured part starts at. Group 40.
      */
-    double From{};
+    double StartAngle{};
     /**
      *  The angle the measured part ends at. Group 41.
      */
-    double To{};
+    double EndAngle{};
     /**
      *  1 when the dimension has a leader. Group 71.
      */
-    int Led{};
+    int HasLeader{};
     /**
      *  The first point of the leader, in world coordinates. Groups 16, 26, 36.
      */
-    Vector Near{};
+    Vector FirstLeaderPoint{};
     /**
      *  The second point of the leader, in world coordinates. Groups 17, 27, 37.
      */
-    Vector Far{};
+    Vector SecondLeaderPoint{};
 
-    auto operator==(const Bend &) const -> bool = default;
+    auto operator==(const ArcDimensionData &) const -> bool = default;
   };
 
   /**
@@ -259,11 +261,11 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The arc measured and how the dimension is drawn, from the AcDbArcDimension subclass.
      */
-    Boxed<Entities::Bend> Bend{};
+    Boxed<Entities::ArcDimensionData> Data{};
 
     auto operator==(const ArcDimension &) const -> bool = default;
   };
@@ -272,7 +274,7 @@ namespace DxfIO::Entities
    *  What a LARGE_RADIAL_DIMENSION draws: what every dimension shares, and the jog it is drawn
    *  with.
    */
-  struct DXFIO_API Jog
+  struct DXFIO_API LargeRadialDimensionData
   {
     /**
      *  The block, the text and the plane, from the AcDbDimension subclass.
@@ -290,13 +292,13 @@ namespace DxfIO::Entities
     /**
      *  The point of the jog, in world coordinates. Groups 14, 24, 34.
      */
-    Vector Turn{};
+    Vector JogPoint{};
     /**
      *  The angle of the jog. Group 40.
      */
-    double Angle{};
+    double JogAngle{};
 
-    auto operator==(const Jog &) const -> bool = default;
+    auto operator==(const LargeRadialDimensionData &) const -> bool = default;
   };
 
   /**
@@ -312,11 +314,11 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  The curve measured and the jog, from the AcDbRadialDimensionLarge subclass.
      */
-    Boxed<Entities::Jog> Jog{};
+    Boxed<Entities::LargeRadialDimensionData> Data{};
 
     auto operator==(const LargeRadialDimension &) const -> bool = default;
   };

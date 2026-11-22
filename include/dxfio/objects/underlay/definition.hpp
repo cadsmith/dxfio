@@ -11,7 +11,7 @@ namespace DxfIO::Objects
   /**
    *  An underlay definition: the PDF, DWF or DGN file the drawing's underlays of that kind show.
    */
-  template <Entities::Overlay KindV>
+  template <Entities::UnderlayKind KindV>
   struct UnderlayDefinition
   {
     /**
@@ -33,15 +33,15 @@ namespace DxfIO::Objects
   /**
    *  A PDFDEFINITION: a PDF file and the page shown.
    */
-  using PdfDefinition = UnderlayDefinition<Entities::Overlay::Pdf>;
+  using PdfDefinition = UnderlayDefinition<Entities::UnderlayKind::Pdf>;
   /**
    *  A DWFDEFINITION: a DWF file and the sheet shown.
    */
-  using DwfDefinition = UnderlayDefinition<Entities::Overlay::Dwf>;
+  using DwfDefinition = UnderlayDefinition<Entities::UnderlayKind::Dwf>;
   /**
    *  A DGNDEFINITION: a DGN file and the model shown.
    */
-  using DgnDefinition = UnderlayDefinition<Entities::Overlay::Dgn>;
+  using DgnDefinition = UnderlayDefinition<Entities::UnderlayKind::Dgn>;
 } // namespace DxfIO::Objects
 
 #endif /* DXFIO_OBJECTS_UNDERLAY_DEFINITION_HPP */

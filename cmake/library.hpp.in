@@ -1,0 +1,20 @@
+#ifndef DXFIO_LIBRARY_HPP
+#define DXFIO_LIBRARY_HPP
+
+#include <string_view>
+
+#define DXFIO_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define DXFIO_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define DXFIO_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define DXFIO_VERSION_STRING "@PROJECT_VERSION@"
+
+namespace DxfIO
+{
+  /**
+   *  The version of dxfio itself, such as "0.1.0": DXFIO_VERSION_STRING, for code that would rather
+   *  not use the macros.
+   */
+  inline constexpr std::string_view LibraryVersion = DXFIO_VERSION_STRING;
+} // namespace DxfIO
+
+#endif /* DXFIO_LIBRARY_HPP */

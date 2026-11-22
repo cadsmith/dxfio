@@ -9,7 +9,7 @@ Lightweight polylines with widths, arcs and a closed outline, and a 3D polyline 
 An LWPOLYLINE holds its vertices itself, in its own coordinate system. Only the X and Y of a vertex are written, groups 10 and 20; `Elevation` places all of them along the normal.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Entities::LwPolyline path{};
 path.Vertices = {

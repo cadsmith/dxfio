@@ -2,7 +2,7 @@
 #define DXFIO_SECTION_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <string>
 #include <vector>
@@ -21,7 +21,7 @@ namespace DxfIO
     /**
      *  The groups between its name and its ENDSEC, in their order.
      */
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Section &) const -> bool = default;
   };

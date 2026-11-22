@@ -38,9 +38,9 @@ namespace DxfIO::Entities
      */
     int Length{};
     /**
-     *  The vertical justification: 0 baseline, 1 bottom, 2 middle, 3 top. Group 74.
+     *  Group 74.
      */
-    int Vertical{};
+    VerticalAlignment Vertical{};
     /**
      *  Whether the attribute is locked to its place in the block. The last group 280, from R2007.
      */

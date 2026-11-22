@@ -32,9 +32,9 @@ namespace DxfIO::Entities
     template <class KindT>
     auto Edge(const Hatch &one, std::size_t at = 0) -> const KindT &
     {
-      REQUIRE(!one.Fill->Paths.empty());
-      REQUIRE(at < one.Fill->Paths.front().Edges.size());
-      const auto *held = std::get_if<KindT>(&one.Fill->Paths.front().Edges.at(at));
+      REQUIRE(!one.Data->Paths.empty());
+      REQUIRE(at < one.Data->Paths.front().Edges.size());
+      const auto *held = std::get_if<KindT>(&one.Data->Paths.front().Edges.at(at));
       REQUIRE(held != nullptr);
       return *held;
     }
@@ -43,34 +43,34 @@ namespace DxfIO::Entities
   TEST_CASE("hatch: a pattern over a polyline's edges, each level its codes")
   {
     const Hatch one = Alikened(Marked("2D0"));
-    CHECK(one.Fill->Elevation      == Vector{});
-    CHECK(one.Fill->Normal         == Up);
-    CHECK(one.Fill->Name           == "ANSI31");
-    CHECK(one.Fill->Solid          == 0);
-    CHECK(one.Fill->Associative    == 0);
-    REQUIRE(one.Fill->Paths.size() == 1);
-    CHECK(one.Fill->Paths.front().Flags        == 1);
-    CHECK(one.Fill->Paths.front().Edges.size() == 4);
-    CHECK(one.Fill->Style            == 1);
-    CHECK(one.Fill->Kind             == 1);
-    CHECK(one.Fill->Angle            == 45);
-    CHECK(one.Fill->Scale            == 2);
-    REQUIRE(one.Fill->Stripes.size() == 1);
-    CHECK(one.Fill->Stripes.front().Angle == 90);
-    CHECK(one.Fill->Seeds.size()          == 1);
-    CHECK_FALSE(one.Fill->Gradient);
+    CHECK(one.Data->Elevation      == Vector{});
+    CHECK(one.Data->Normal         == Up);
+    CHECK(one.Data->Name           == "ANSI31");
+    CHECK(one.Data->Solid          == 0);
+    CHECK(one.Data->Associative    == 0);
+    REQUIRE(one.Data->Paths.size() == 1);
+    CHECK(one.Data->Paths.front().Flags        == 1);
+    CHECK(one.Data->Paths.front().Edges.size() == 4);
+    CHECK(one.Data->Style == 1);
+    CHECK(one.Data->Kind  == 1);
+    CHECK(one.Data->Angle == 45);
+    CHECK(one.Data->Scale == 2);
+    REQUIRE(one.Data->PatternLines.size()      == 1);
+    CHECK(one.Data->PatternLines.front().Angle == 90);
+    CHECK(one.Data->Seeds.size() == 1);
+    CHECK_FALSE(one.Data->Gradient);
   }
 
   TEST_CASE("hatch: every edge a kind of its own")
   {
     CHECK(Edge<Edges::Line>(Alikened(Marked("2D0"))).End.X != 0);
     const Edges::Arc round = Edge<Edges::Arc>(Alikened(Marked("2D3")));
-    CHECK(round.Radius  == 10);
-    CHECK(round.Counter == 1);
+    CHECK(round.Radius           == 10);
+    CHECK(round.CounterClockwise == 1);
     CHECK(Edge<Edges::Ellipse>(Alikened(Marked("2D5"))).Ratio == 0.5);
     const Hatch mixed = Alikened(Marked("2D9"));
-    CHECK(std::holds_alternative<Edges::Line>(mixed.Fill->Paths.front().Edges.at(0)));
-    CHECK(std::holds_alternative<Edges::Arc>(mixed.Fill->Paths.front().Edges.at(1)));
+    CHECK(std::holds_alternative<Edges::Line>(mixed.Data->Paths.front().Edges.at(0)));
+    CHECK(std::holds_alternative<Edges::Arc>(mixed.Data->Paths.front().Edges.at(1)));
   }
 
   TEST_CASE("hatch: a spline edge, its fit points and tangents from R2010")
@@ -79,25 +79,25 @@ namespace DxfIO::Entities
     const Edges::Spline &curve = *Edge<Boxed<Edges::Spline>>(one);
     CHECK(curve.Degree       == 3);
     CHECK(curve.Knots.size() == 11);
-    CHECK(curve.Poles.size() == 7);
-    CHECK(curve.Fits.size()  == 5);
-    CHECK(curve.Start.Y != 0);
+    CHECK(curve.ControlPoints.size() == 7);
+    CHECK(curve.FitPoints.size()     == 5);
+    CHECK(curve.StartTangent.Y != 0);
     const Hatch old = Alikened(Marked("2D7", Version::R2007), Version::R2007);
-    CHECK(Edge<Boxed<Edges::Spline>>(old)->Fits.empty());
-    CHECK(Edge<Boxed<Edges::Spline>>(old)->Poles.size() == 7);
+    CHECK(Edge<Boxed<Edges::Spline>>(old)->FitPoints.empty());
+    CHECK(Edge<Boxed<Edges::Spline>>(old)->ControlPoints.size() == 7);
   }
 
   TEST_CASE("hatch: a polyline boundary, its bulges given")
   {
     const Hatch one  = Alikened(Marked("2E2"));
-    const Path &loop = one.Fill->Paths.front();
+    const Path &loop = one.Data->Paths.front();
     CHECK((loop.Flags & 2) != 0);
     CHECK(loop.Bulged            == 1);
     CHECK(loop.Closed            == 1);
     REQUIRE(loop.Vertices.size() == 4);
     CHECK(loop.Vertices.at(1).Weight == doctest::Approx(0.5));
     CHECK(loop.Edges.empty());
-    CHECK(one.Fill->Pixel);
+    CHECK(one.Data->Pixel);
   }
 
   TEST_CASE("hatch: a path's polyline flag written from what the path holds")
@@ -114,55 +114,55 @@ namespace DxfIO::Entities
     Path edged{};
     edged.Flags     = 18;
     edged.Edges     = {Edges::Line{.Start = Vector{}, .End = Vector{.X = 1}}};
-    one.Fill->Paths = {straight, edged, Path{.Flags = 2}};
+    one.Data->Paths = {straight, edged, Path{.Flags = 2}};
     const auto back = DxfIO::Read<Hatch>(Written(one));
-    REQUIRE(back.Fill->Paths.size()       == 3);
-    CHECK(back.Fill->Paths.at(0).Flags    == 3);
-    CHECK(back.Fill->Paths.at(0).Vertices == straight.Vertices);
-    CHECK(back.Fill->Paths.at(1).Flags    == 16);
-    CHECK(back.Fill->Paths.at(1).Edges    == edged.Edges);
-    CHECK(back.Fill->Paths.at(2).Flags    == 2);
+    REQUIRE(back.Data->Paths.size()       == 3);
+    CHECK(back.Data->Paths.at(0).Flags    == 3);
+    CHECK(back.Data->Paths.at(0).Vertices == straight.Vertices);
+    CHECK(back.Data->Paths.at(1).Flags    == 16);
+    CHECK(back.Data->Paths.at(1).Edges    == edged.Edges);
+    CHECK(back.Data->Paths.at(2).Flags    == 2);
   }
 
   TEST_CASE("hatch: islands, a loop each and a seed each")
   {
     const Hatch one = Alikened(Marked("2F4"));
-    CHECK(one.Fill->Paths.size() == 3);
-    CHECK(one.Fill->Seeds.size() == 3);
-    CHECK(one.Fill->Style        == 1);
-    CHECK(Alikened(Marked("30F")).Fill->Style == 2);
+    CHECK(one.Data->Paths.size() == 3);
+    CHECK(one.Data->Seeds.size() == 3);
+    CHECK(one.Data->Style        == 1);
+    CHECK(Alikened(Marked("30F")).Data->Style == 2);
   }
 
   TEST_CASE("hatch: associative, its sources by handle")
   {
     const Hatch one = Alikened(Marked("311"));
-    CHECK(one.Fill->Associative == 1);
-    REQUIRE(one.Fill->Paths.front().Sources.size() == 1);
-    CHECK(one.Fill->Paths.front().Sources.front() != Handle{});
+    CHECK(one.Data->Associative == 1);
+    REQUIRE(one.Data->Paths.front().Sources.size() == 1);
+    CHECK(one.Data->Paths.front().Sources.front() != Handle{});
   }
 
   TEST_CASE("hatch: patterns of several lines, doubled, dashed")
   {
     const Hatch user = Alikened(Marked("318"));
-    CHECK(user.Fill->Name           == "_U");
-    CHECK(user.Fill->Kind           == 0);
-    CHECK(user.Fill->Doubled        == 1);
-    CHECK(user.Fill->Stripes.size() == 2);
+    CHECK(user.Data->Name    == "_U");
+    CHECK(user.Data->Kind    == 0);
+    CHECK(user.Data->Doubled == 1);
+    CHECK(user.Data->PatternLines.size() == 2);
     const Hatch brick = Alikened(Marked("31C"));
-    CHECK(brick.Fill->Stripes.at(1).Dashes.size() == 2);
+    CHECK(brick.Data->PatternLines.at(1).Dashes.size() == 2);
   }
 
   TEST_CASE("hatch: a gradient from R2004, none on a pattern, none before")
   {
     const Hatch one = Alikened(Marked("321"));
-    REQUIRE(one.Fill->Gradient);
-    CHECK(one.Fill->Gradient->Shown          == 1);
-    CHECK(one.Fill->Gradient->Name           == "LINEAR");
-    REQUIRE(one.Fill->Gradient->Stops.size() == 2);
-    CHECK(one.Fill->Gradient->Stops.at(1).Place          == 1);
-    CHECK(Alikened(Marked("325")).Fill->Gradient->Single == 1);
-    CHECK(Alikened(Marked("2D3")).Fill->Gradient->Shown  == 0);
-    CHECK_FALSE(Alikened(Marked("2D3", Version::R2000), Version::R2000).Fill->Gradient);
+    REQUIRE(one.Data->Gradient);
+    CHECK(one.Data->Gradient->Shown           == 1);
+    CHECK(one.Data->Gradient->Name            == "LINEAR");
+    REQUIRE(one.Data->Gradient->Colors.size() == 2);
+    CHECK(one.Data->Gradient->Colors.at(1).Place         == 1);
+    CHECK(Alikened(Marked("325")).Data->Gradient->Single == 1);
+    CHECK(Alikened(Marked("2D3")).Data->Gradient->Shown  == 0);
+    CHECK_FALSE(Alikened(Marked("2D3", Version::R2000), Version::R2000).Data->Gradient);
   }
 
   TEST_CASE("hatch: every release from R2000 alike")
@@ -170,8 +170,8 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened(Marked("2F4", release), release).Fill->Paths.size() == 3);
-      CHECK(Alikened(Marked("2D9", release), release).Fill->Solid        == 1);
+      CHECK(Alikened(Marked("2F4", release), release).Data->Paths.size() == 3);
+      CHECK(Alikened(Marked("2D9", release), release).Data->Solid        == 1);
     }
   }
 
@@ -186,7 +186,7 @@ namespace DxfIO::Entities
     const Hatch       stray = DxfIO::Read<Hatch>(with);
     REQUIRE(stray.Record.Base.Extra.size()     == 1);
     CHECK(stray.Record.Base.Extra.front().Code == 39);
-    CHECK(stray.Fill->Seeds.size()             == 1);
+    CHECK(stray.Data->Seeds.size()             == 1);
   }
 
   TEST_CASE("hatch: a record out of its order stays as it came, and is told")
@@ -215,10 +215,10 @@ namespace DxfIO::Entities
   TEST_CASE("hatch: a new one a solid fill, as AutoCAD writes one, its spline edges cubic")
   {
     const Hatch one{};
-    CHECK(one.Fill->Name  == "SOLID");
-    CHECK(one.Fill->Solid == 1);
-    CHECK(one.Fill->Kind  == 1);
-    CHECK(one.Fill->Scale == 1);
+    CHECK(one.Data->Name  == "SOLID");
+    CHECK(one.Data->Solid == 1);
+    CHECK(one.Data->Kind  == 1);
+    CHECK(one.Data->Scale == 1);
     CHECK(Written(one).contains("  2\r\nSOLID\r\n 70\r\n     1\r\n"));
     CHECK(Edges::Spline{}.Degree == 3);
   }
@@ -226,10 +226,10 @@ namespace DxfIO::Entities
   TEST_CASE("hatch: a copy is its own, its box deep")
   {
     Hatch one{};
-    one.Fill->Style = 1;
+    one.Data->Style = 1;
     Hatch two       = one;
-    two.Fill->Style = 2;
-    CHECK(one.Fill->Style == 1);
+    two.Data->Style = 2;
+    CHECK(one.Data->Style == 1);
   }
 
   TEST_CASE("hatch: an entity stays the size of the small kinds")

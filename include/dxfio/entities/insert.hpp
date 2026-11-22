@@ -53,11 +53,11 @@ namespace DxfIO::Entities
     /**
      *  The spacing of the grid's columns. Group 44.
      */
-    double Across{};
+    double ColumnSpacing{};
     /**
      *  The spacing of the grid's rows. Group 45.
      */
-    double Down{};
+    double RowSpacing{};
     /**
      *  The normal of the plane the entity is drawn in. Groups 210, 220, 230.
      */

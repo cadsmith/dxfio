@@ -228,28 +228,28 @@ namespace DxfIO::Empty
      */
     auto Declares(const Raw &one, std::string_view name) -> bool
     {
-      const auto  named = std::ranges::find(one.Groups, Named, &Group::Code);
+      const auto  named = std::ranges::find(one.Tags, Named, &Tag::Code);
       const auto *held =
-          named == one.Groups.end() ? nullptr : std::get_if<std::string>(&named->Value);
+          named == one.Tags.end() ? nullptr : std::get_if<std::string>(&named->Value);
       return held != nullptr && *held == name;
     }
   } // namespace
 
   auto Declared(const Class &one, Version release, std::int64_t count) -> Raw
   {
-    Raw out{.Type = "CLASS", .Groups = {}};
-    out.Groups = {
-        Group{.Code = Named, .Value = std::string{one.Name}},
-        Group{.Code = Program, .Value = std::string{one.Program}},
-        Group{.Code = Application, .Value = std::string{one.Application}},
-        Group{.Code = Proxy, .Value = one.Flags},
+    Raw out{.Type = "CLASS", .Tags = {}};
+    out.Tags = {
+        Tag{.Code = Named, .Value = std::string{one.Name}},
+        Tag{.Code = Program, .Value = std::string{one.Program}},
+        Tag{.Code = Application, .Value = std::string{one.Application}},
+        Tag{.Code = Proxy, .Value = one.Flags},
     };
     if (release >= Version::R2004)
     {
-      out.Groups.push_back(Group{.Code = Instances, .Value = count});
+      out.Tags.push_back(Tag{.Code = Instances, .Value = count});
     }
-    out.Groups.push_back(Group{.Code = Proxied, .Value = std::int64_t{}});
-    out.Groups.push_back(Group{.Code = Entity, .Value = std::int64_t{one.Entity ? 1 : 0}});
+    out.Tags.push_back(Tag{.Code = Proxied, .Value = std::int64_t{}});
+    out.Tags.push_back(Tag{.Code = Entity, .Value = std::int64_t{one.Entity ? 1 : 0}});
     return out;
   }
 
@@ -275,14 +275,14 @@ namespace DxfIO::Empty
     return out;
   }
 
-  auto Undeclared(const Document &drawing, Version release) -> std::vector<Raw>
+  auto Undeclared(const Drawing &drawing, Version release) -> std::vector<Raw>
   {
     std::vector<Counted> kinds;
     for (const DxfIO::Entity &one : drawing.Entities)
     {
       Count(kinds, Entities::Named(one));
     }
-    for (const Blocks::Block &block : drawing.Blocks)
+    for (const Blocks::Definition &block : drawing.Blocks)
     {
       for (const DxfIO::Entity &one : block.Entities)
       {

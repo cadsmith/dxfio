@@ -6,20 +6,17 @@
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstddef>
 #include <string>
+#include <vector>
 
 namespace DxfIO::Entities
 {
   /**
-   *  The object type of an embedded OLE object, as against a linked or a static one.
-   */
-  inline constexpr int Embedded = 2;
-
-  /**
    *  The AcDbOle2Frame subclass of an OLE2FRAME: the corners of the frame and the bytes of the OLE
    *  object.
    */
-  struct DXFIO_API Frame
+  struct DXFIO_API Ole2FrameData
   {
     /**
      *  The OLE version. Group 70.
@@ -40,7 +37,7 @@ namespace DxfIO::Entities
     /**
      *  1 linked, 2 embedded, 3 static. Group 71.
      */
-    int Kind{Embedded};
+    int Kind{2};
     /**
      *  0 in model space, 1 in paper space. Group 72.
      */
@@ -48,9 +45,9 @@ namespace DxfIO::Entities
     /**
      *  The bytes of the OLE object. Groups 90 and 310.
      */
-    std::string Data{};
+    std::vector<std::byte> Data{};
 
-    auto operator==(const Frame &) const -> bool = default;
+    auto operator==(const Ole2FrameData &) const -> bool = default;
   };
 
   /**
@@ -65,7 +62,7 @@ namespace DxfIO::Entities
     /**
      *  The frame and the object, from the AcDbOle2Frame subclass.
      */
-    Boxed<Entities::Frame> Frame{};
+    Boxed<Entities::Ole2FrameData> Data{};
 
     auto operator==(const Ole2Frame &) const -> bool = default;
   };

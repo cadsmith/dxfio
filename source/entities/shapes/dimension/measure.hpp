@@ -25,15 +25,15 @@ namespace DxfIO
   {
     inline constexpr std::tuple Settings{
         Fields::Field{.Code = 71, .Member = &Measure::Attachment},
-        Fields::Field{.Code = 72, .Member = &Measure::Spacing},
-        Fields::Field{.Code = 41, .Member = &Measure::Factor},
+        Fields::Field{.Code = 72, .Member = &Measure::LineSpacingStyle},
+        Fields::Field{.Code = 41, .Member = &Measure::LineSpacingFactor},
         Fields::Field{.Code = 42, .Member = &Measure::Measured},
     };
 
     inline constexpr std::tuple Bits{
-        Fields::Field{.Code = 73, .Member = &Measure::Above},
-        Fields::Field{.Code = 74, .Member = &Measure::First},
-        Fields::Field{.Code = 75, .Member = &Measure::Second},
+        Fields::Field{.Code = 73, .Member = &Measure::Unknown1},
+        Fields::Field{.Code = 74, .Member = &Measure::FlipFirst},
+        Fields::Field{.Code = 75, .Member = &Measure::FlipSecond},
     };
   } // namespace Entities
 
@@ -50,9 +50,9 @@ namespace DxfIO
           .Member   = &Entities::Measure::Block,
           .Fallback = std::string_view{},
       },
-      Fields::Field{.Code = 10, .Member = &Entities::Measure::Point},
-      Fields::Field{.Code = 11, .Member = &Entities::Measure::Middle},
-      Fields::Field{.Code = 12, .Member = &Entities::Measure::Clone},
+      Fields::Field{.Code = 10, .Member = &Entities::Measure::DefinitionPoint},
+      Fields::Field{.Code = 11, .Member = &Entities::Measure::TextMiddle},
+      Fields::Field{.Code = 12, .Member = &Entities::Measure::CloneInsertion},
       Fields::First{
           .Code   = 70,
           .Fields = std::tuple{Fields::Field{
@@ -69,9 +69,9 @@ namespace DxfIO
       Fields::Since{.Release = Version::R2000, .Fields = Entities::Settings},
       Fields::Since{.Release = Version::R2007, .Fields = Entities::Bits},
       Fields::Field{.Code = 52, .Member = &Entities::Measure::Oblique},
-      Fields::Field{.Code = 53, .Member = &Entities::Measure::Rotation},
-      Fields::Field{.Code = 54, .Member = &Entities::Measure::Turned},
-      Fields::Field{.Code = 51, .Member = &Entities::Measure::Horizontal},
+      Fields::Field{.Code = 53, .Member = &Entities::Measure::TextRotation},
+      Fields::Field{.Code = 54, .Member = &Entities::Measure::BlockRotation},
+      Fields::Field{.Code = 51, .Member = &Entities::Measure::HorizontalDirection},
       Fields::Field{
           .Code     = 210,
           .Member   = &Entities::Measure::Normal,

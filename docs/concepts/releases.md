@@ -6,7 +6,7 @@ The ten releases dxfio reads and writes, and what happens to a drawing saved to 
 
 ## Every release [#releases]
 
-Every release from R10 to R2018 reads and writes, ASCII or binary. A document saves to any of them; what the release cannot hold is converted, as AutoCAD converts it, or left out, and `Saved::Issues` names each entity changed so.
+Every release from R10 to R2018 reads and writes, ASCII or binary. A drawing saves to any of them; what the release cannot hold is converted, as AutoCAD converts it, or left out, and `Saved::Issues` names each entity changed so.
 
 | Release | AutoCAD | `$ACADVER` | Text |
 | :--- | :--- | :--- | :--- |

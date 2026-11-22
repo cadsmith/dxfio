@@ -51,7 +51,7 @@ namespace DxfIO
       Fields::Field{.Code = 40, .Member = &Entities::Edges::Arc::Radius},
       Fields::Field{.Code = 50, .Member = &Entities::Edges::Arc::Start},
       Fields::Field{.Code = 51, .Member = &Entities::Edges::Arc::End},
-      Fields::Field{.Code = 73, .Member = &Entities::Edges::Arc::Counter},
+      Fields::Field{.Code = 73, .Member = &Entities::Edges::Arc::CounterClockwise},
   };
 
   template <>
@@ -61,7 +61,7 @@ namespace DxfIO
       Fields::Field{.Code = 40, .Member = &Entities::Edges::Ellipse::Ratio},
       Fields::Field{.Code = 50, .Member = &Entities::Edges::Ellipse::Start},
       Fields::Field{.Code = 51, .Member = &Entities::Edges::Ellipse::End},
-      Fields::Field{.Code = 73, .Member = &Entities::Edges::Ellipse::Counter},
+      Fields::Field{.Code = 73, .Member = &Entities::Edges::Ellipse::CounterClockwise},
   };
 
   namespace Entities::Edges
@@ -72,17 +72,17 @@ namespace DxfIO
 
     inline auto Fitted(const Spline &one) -> bool
     {
-      return !one.Fits.empty();
+      return !one.FitPoints.empty();
     }
 
     inline constexpr std::tuple Ends{
-        Fields::Flat{.Code = 12, .Member = &Spline::Start},
-        Fields::Flat{.Code = 13, .Member = &Spline::End},
+        Fields::Flat{.Code = 12, .Member = &Spline::StartTangent},
+        Fields::Flat{.Code = 13, .Member = &Spline::EndTangent},
     };
 
     inline constexpr std::tuple Later{
-        Fields::Count{.Code = 97, .Member = &Spline::Fits},
-        Fields::Each{.Opener = 11, .Member = &Spline::Fits, .Fields = Fit},
+        Fields::Count{.Code = 97, .Member = &Spline::FitPoints},
+        Fields::Each{.Opener = 11, .Member = &Spline::FitPoints, .Fields = Fit},
         Fields::When{.Test = Fitted, .Fields = Ends},
     };
   } // namespace Entities::Edges
@@ -93,11 +93,11 @@ namespace DxfIO
       Fields::Field{.Code = 73, .Member = &Entities::Edges::Spline::Rational},
       Fields::Field{.Code = 74, .Member = &Entities::Edges::Spline::Periodic},
       Fields::Tally{.Code = 95, .Member = &Entities::Edges::Spline::Knots},
-      Fields::Count{.Code = 96, .Member = &Entities::Edges::Spline::Poles},
+      Fields::Count{.Code = 96, .Member = &Entities::Edges::Spline::ControlPoints},
       Fields::Many{.Code = 40, .Member = &Entities::Edges::Spline::Knots},
       Fields::Each{
           .Opener = 10,
-          .Member = &Entities::Edges::Spline::Poles,
+          .Member = &Entities::Edges::Spline::ControlPoints,
           .Fields = Shapes<Entities::Edges::Node>,
       },
       Fields::Since{.Release = Version::R2010, .Fields = Entities::Edges::Later},

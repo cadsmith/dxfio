@@ -64,12 +64,12 @@ namespace DxfIO
       Fields::Field{.Code = 71, .Member = &Entities::Insert::Rows},
       Fields::Field{
           .Code     = 44,
-          .Member   = &Entities::Insert::Across,
+          .Member   = &Entities::Insert::ColumnSpacing,
           .Fallback = 0.0,
       },
       Fields::Field{
           .Code     = 45,
-          .Member   = &Entities::Insert::Down,
+          .Member   = &Entities::Insert::RowSpacing,
           .Fallback = 0.0,
       },
       Fields::Field{
@@ -93,7 +93,9 @@ namespace DxfIO
     Entities::Gather(one.Attributes, rest, with);
     if (!one.Attributes.Closing)
     {
-      with.Tell(Issue{.Record = one.Record.Base.Self, .What = "INSERT has no SEQEND"});
+      with.Tell(Issue{.Code    = IssueCode::Damaged,
+                      .Subject = one.Record.Base.Self,
+                      .What    = "INSERT has no SEQEND"});
     }
   }
 

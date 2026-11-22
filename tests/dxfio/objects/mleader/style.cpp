@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-namespace DxfIO::Objects::Mleader
+namespace DxfIO::Objects::MLeaderStyles
 {
   TEST_CASE("style: AutoCAD's Standard read whole from R2018")
   {
@@ -60,11 +60,11 @@ namespace DxfIO::Objects::Mleader
                                        "273\r\n     9\r\n"
                                        "298\r\n     0\r\n";
     const MLeaderStyle         taken = Read<MLeaderStyle>(text);
-    CHECK(taken.Description  == "Standard");
-    CHECK(*taken.Leader      == Leader{.Linetype = Handle{.Value = 0x14}});
-    CHECK(taken.Text->Style  == Handle{.Value = 0x11});
-    CHECK(taken.Text->Bottom == Centered);
-    CHECK(*taken.Block       == Block{});
+    CHECK(taken.Description == "Standard");
+    CHECK(*taken.Leader     == LeaderFormat{.Linetype = Handle{.Value = 0x14}});
+    CHECK(taken.Text->Style == Handle{.Value = 0x11});
+    CHECK(taken.Text->BottomAttachment == 9);
+    CHECK(*taken.Block == BlockFormat{});
     CHECK_FALSE(taken.Annotative);
     CHECK(Written(taken) == text);
   }
@@ -121,8 +121,8 @@ namespace DxfIO::Objects::Mleader
                                        "1070\r\n     2\r\n";
     const MLeaderStyle         taken = Read<MLeaderStyle>(text, Version::R2000);
     CHECK(taken.Annotative);
-    CHECK(taken.Base.Extended.size()     == 1);
-    CHECK(taken.Text->Direction          == 0);
-    CHECK(Written(taken, Version::R2000) == text);
+    CHECK(taken.Base.Extended.size()      == 1);
+    CHECK(taken.Text->AttachmentDirection == 0);
+    CHECK(Written(taken, Version::R2000)  == text);
   }
-} // namespace DxfIO::Objects::Mleader
+} // namespace DxfIO::Objects::MLeaderStyles

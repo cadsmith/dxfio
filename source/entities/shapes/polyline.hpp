@@ -68,12 +68,12 @@ namespace DxfIO
       },
       Fields::Field{
           .Code     = 40,
-          .Member   = &Entities::Polyline::Start,
+          .Member   = &Entities::Polyline::StartWidth,
           .Fallback = 0.0,
       },
       Fields::Field{
           .Code     = 41,
-          .Member   = &Entities::Polyline::End,
+          .Member   = &Entities::Polyline::EndWidth,
           .Fallback = 0.0,
       },
       Fields::Field{
@@ -119,8 +119,9 @@ namespace DxfIO
     if (!one.Vertices.Closing)
     {
       with.Tell(Issue{
-          .Record = one.Record.Base.Self,
-          .What   = "POLYLINE has no SEQEND",
+          .Code    = IssueCode::Damaged,
+          .Subject = one.Record.Base.Self,
+          .What    = "POLYLINE has no SEQEND",
       });
     }
   }

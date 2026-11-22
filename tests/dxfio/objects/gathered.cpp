@@ -45,8 +45,8 @@ namespace DxfIO::Objects
                        " 30\r\n3.0\r\n330\r\nC\r\n300\r\ntail\r\n290\r\n     1\r\n"));
     CHECK(one.Cloning       == 2);
     REQUIRE(one.Data.size() == 9);
-    CHECK(one.Data.front()  == DxfIO::Group{.Code = 1, .Value = std::string{"text"}});
-    CHECK(one.Data.at(1)    == DxfIO::Group{.Code = 70, .Value = std::int64_t{7}});
+    CHECK(one.Data.front()  == DxfIO::Tag{.Code = 1, .Value = std::string{"text"}});
+    CHECK(one.Data.at(1)    == DxfIO::Tag{.Code = 70, .Value = std::int64_t{7}});
   }
 
   TEST_CASE("xrecord: a 280 of its data stays its data")
@@ -64,7 +64,7 @@ namespace DxfIO::Objects
         Row("XRECORD", "100\r\nAcDbXrecord\r\n  1\r\nx\r\n280\r\n     5\r\n  1\r\ny\r\n"));
     CHECK(one.Cloning       == 1);
     REQUIRE(one.Data.size() == 3);
-    CHECK(one.Data.at(1)    == DxfIO::Group{.Code = 280, .Value = std::int64_t{5}});
+    CHECK(one.Data.at(1)    == DxfIO::Tag{.Code = 280, .Value = std::int64_t{5}});
     CHECK(Written(one)
           == Row("XRECORD", "100\r\nAcDbXrecord\r\n280\r\n     1\r\n"
                             "  1\r\nx\r\n280\r\n     5\r\n  1\r\ny\r\n"));
@@ -76,7 +76,7 @@ namespace DxfIO::Objects
     const XRecord     one  = Read<XRecord>(text, Version::R14);
     CHECK(one.Cloning       == 1);
     REQUIRE(one.Data.size() == 2);
-    CHECK(one.Data.front()  == DxfIO::Group{.Code = 280, .Value = std::int64_t{5}});
+    CHECK(one.Data.front()  == DxfIO::Tag{.Code = 280, .Value = std::int64_t{5}});
     CHECK(Written(one, Version::R14) == text);
   }
 
@@ -96,9 +96,9 @@ namespace DxfIO::Objects
 
   TEST_CASE("xrecord: a first 280 holding no whole number is no flag")
   {
-    const std::vector<DxfIO::Group> worded{DxfIO::Group{.Code = 280, .Value = std::string{"x"}}};
+    const std::vector<DxfIO::Tag> worded{DxfIO::Tag{.Code = 280, .Value = std::string{"x"}}};
     CHECK_FALSE(Flagged(worded, Version::R2018));
-    const std::vector<DxfIO::Group> numbered{DxfIO::Group{.Code = 280, .Value = std::int64_t{3}}};
+    const std::vector<DxfIO::Tag> numbered{DxfIO::Tag{.Code = 280, .Value = std::int64_t{3}}};
     CHECK(Flagged(numbered, Version::R2018) == 3);
   }
 

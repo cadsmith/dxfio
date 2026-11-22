@@ -59,7 +59,7 @@ namespace DxfIO::Entities
   /**
    *  The AcDbMline subclass of an MLINE: its style, its justification and its vertices.
    */
-  struct DXFIO_API Web
+  struct DXFIO_API MLineData
   {
     /**
      *  The name of the multiline style. Group 2.
@@ -98,7 +98,7 @@ namespace DxfIO::Entities
      */
     std::vector<Joint> Joints{};
 
-    auto operator==(const Web &) const -> bool = default;
+    auto operator==(const MLineData &) const -> bool = default;
   };
 
   /**
@@ -113,7 +113,7 @@ namespace DxfIO::Entities
     /**
      *  The style, justification and vertices, from the AcDbMline subclass.
      */
-    Boxed<Entities::Web> Web{};
+    Boxed<Entities::MLineData> Data{};
 
     auto operator==(const MLine &) const -> bool = default;
   };

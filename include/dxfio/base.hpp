@@ -3,8 +3,8 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/brace.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/handle.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/xdata.hpp"
 
 #include <vector>
@@ -47,7 +47,7 @@ namespace DxfIO
      *  The groups its kind does not name, written back after its own fields when saved to the
      *  release they came in.
      */
-    std::vector<Group> Extra{};
+    std::vector<Tag> Extra{};
 
     auto operator==(const Base &) const -> bool = default;
   };

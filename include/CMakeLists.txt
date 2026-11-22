@@ -1,19 +1,20 @@
 set(DXFIO_HEADERS
   dxfio/api.hpp
+  dxfio/appearance.hpp
   dxfio/audit/audit.hpp
   dxfio/base.hpp
-  dxfio/blocks/begin.hpp
-  dxfio/blocks/blocks.hpp
-  dxfio/blocks/end.hpp
+  dxfio/blocks/block.hpp
+  dxfio/blocks/definition.hpp
+  dxfio/blocks/endblk.hpp
   dxfio/boxed.hpp
   dxfio/brace.hpp
+  dxfio/color.hpp
   dxfio/colors.hpp
   dxfio/corners.hpp
   dxfio/create.hpp
-  dxfio/document.hpp
+  dxfio/drawing.hpp
   dxfio/dxfio.hpp
   dxfio/edit/add.hpp
-  dxfio/edit/find.hpp
   dxfio/edit/handles.hpp
   dxfio/edit/space.hpp
   dxfio/entities/arc.hpp
@@ -63,11 +64,14 @@ set(DXFIO_HEADERS
   dxfio/entities/xline.hpp
   dxfio/entity.hpp
   dxfio/failure.hpp
-  dxfio/group.hpp
+  dxfio/flags.hpp
+  dxfio/geometry/coordinates.hpp
+  dxfio/geometry/transform.hpp
   dxfio/handle.hpp
   dxfio/header/header.hpp
+  dxfio/index.hpp
   dxfio/issue.hpp
-  dxfio/lineweights.hpp
+  dxfio/lineweight.hpp
   dxfio/load.hpp
   dxfio/matrix.hpp
   dxfio/object.hpp
@@ -109,18 +113,23 @@ set(DXFIO_HEADERS
   dxfio/tables/ucs.hpp
   dxfio/tables/view.hpp
   dxfio/tables/vport.hpp
+  dxfio/tag.hpp
   dxfio/unknown.hpp
   dxfio/vector.hpp
   dxfio/version.hpp
+  dxfio/view.hpp
   dxfio/widths.hpp
   dxfio/xdata.hpp
 )
 
+configure_file(${PROJECT_SOURCE_DIR}/cmake/library.hpp.in
+  ${PROJECT_BINARY_DIR}/include/dxfio/library.hpp @ONLY)
+
 target_sources(dxfio
   PUBLIC
     FILE_SET HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-    FILES ${DXFIO_HEADERS}
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include
+    FILES ${DXFIO_HEADERS} ${PROJECT_BINARY_DIR}/include/dxfio/library.hpp
 )
 
 file(GLOB_RECURSE found RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}

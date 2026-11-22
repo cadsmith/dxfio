@@ -51,7 +51,7 @@ namespace DxfIO::Down
         child.Flags    = Pointed;
         out.Vertices.Children.push_back(std::move(child));
       }
-      out.Vertices.Closing = Boxed{Entities::Seqend{.Record = Child(record, handles)}};
+      out.Vertices.Closing = Boxed{Entities::SeqEnd{.Record = Child(record, handles)}};
       return out;
     }
 
@@ -66,7 +66,7 @@ namespace DxfIO::Down
       const auto degree = static_cast<std::size_t>(one.Degree);
       const auto above =
           static_cast<std::size_t>(std::ranges::upper_bound(one.Knots, at) - one.Knots.begin());
-      std::size_t span = std::min(std::max(above, degree + 1) - 1, one.Poles.size() - 1);
+      std::size_t span = std::min(std::max(above, degree + 1) - 1, one.ControlPoints.size() - 1);
       while (one.Knots.at(span) == one.Knots.at(span + 1))
       {
         --span;
@@ -83,7 +83,8 @@ namespace DxfIO::Down
       {
         const std::size_t pole   = span - degree + index;
         const double      weight = pole < one.Weights.size() ? one.Weights.at(pole) : 1.0;
-        local.push_back(Homogeneous{.Point = Times(one.Poles.at(pole), weight), .Weight = weight});
+        local.push_back(
+            Homogeneous{.Point = Times(one.ControlPoints.at(pole), weight), .Weight = weight});
       }
       for (std::size_t level = 1; level <= degree; ++level)
       {
@@ -106,26 +107,27 @@ namespace DxfIO::Down
     auto Valid(const Entities::Curve &one) -> bool
     {
       return one.Degree >= 1
-          && one.Poles.size() > static_cast<std::size_t>(one.Degree)
-          && one.Knots.size() == one.Poles.size() + static_cast<std::size_t>(one.Degree) + 1
+          && one.ControlPoints.size() > static_cast<std::size_t>(one.Degree)
+          && one.Knots.size() == one.ControlPoints.size() + static_cast<std::size_t>(one.Degree) + 1
           && std::ranges::is_sorted(one.Knots)
-          && one.Knots.at(static_cast<std::size_t>(one.Degree)) < one.Knots.at(one.Poles.size());
+          && one.Knots.at(static_cast<std::size_t>(one.Degree))
+                 < one.Knots.at(one.ControlPoints.size());
     }
 
     auto Sampled(const Entities::Curve &one) -> std::vector<Vector>
     {
-      if (one.Poles.empty())
+      if (one.ControlPoints.empty())
       {
-        return one.Fits;
+        return one.FitPoints;
       }
       if (!Valid(one))
       {
-        return one.Poles;
+        return one.ControlPoints;
       }
       const auto          degree = static_cast<std::size_t>(one.Degree);
       const double        first  = one.Knots.at(degree);
-      const double        last   = one.Knots.at(one.Poles.size());
-      const std::size_t   steps  = std::max(Around, Spanned * (one.Poles.size() - degree));
+      const double        last   = one.Knots.at(one.ControlPoints.size());
+      const std::size_t   steps  = std::max(Around, Spanned * (one.ControlPoints.size() - degree));
       std::vector<Vector> out;
       out.reserve(steps + 1);
       std::vector<Homogeneous> local;

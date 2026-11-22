@@ -8,21 +8,11 @@
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
 
-#include <string>
+#include <cstddef>
 #include <vector>
 
 namespace DxfIO::Entities
 {
-  /**
-   *  The display flags of a new underlay: on, unclipped, in color.
-   */
-  inline constexpr int Visible = 2;
-
-  /**
-   *  The full contrast a new underlay takes.
-   */
-  inline constexpr int Whole = 100;
-
   /**
    *  A vertex of an underlay's clipping boundary.
    */
@@ -40,7 +30,7 @@ namespace DxfIO::Entities
    *  The AcDbUnderlayReference subclass: where an underlay lies, how it is shown and how it is
    *  clipped.
    */
-  struct DXFIO_API Overlaid
+  struct DXFIO_API UnderlayData
   {
     /**
      *  The definition object that names the file. Group 340.
@@ -65,11 +55,11 @@ namespace DxfIO::Entities
     /**
      *  1 clipped, 2 on, 4 monochrome, 8 adjusted for the background. Group 280.
      */
-    int Flags{Visible};
+    int Flags{2};
     /**
      *  The contrast, 20 to 100. Group 281.
      */
-    int Contrast{Whole};
+    int Contrast{100};
     /**
      *  The fade, 0 to 80. Group 282.
      */
@@ -79,13 +69,13 @@ namespace DxfIO::Entities
      */
     std::vector<Bound> Clip{};
 
-    auto operator==(const Overlaid &) const -> bool = default;
+    auto operator==(const UnderlayData &) const -> bool = default;
   };
 
   /**
    *  An underlay of the kind given: a PDF, DWF or DGN file shown under the drawing.
    */
-  template <Overlay KindV>
+  template <UnderlayKind KindV>
   struct UnderlayOf
   {
     /**
@@ -96,11 +86,11 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  Where the underlay lies and how it is shown, from the AcDbUnderlayReference subclass.
      */
-    Boxed<Entities::Overlaid> Overlaid{};
+    Boxed<Entities::UnderlayData> Data{};
 
     auto operator==(const UnderlayOf &) const -> bool = default;
   };
@@ -108,15 +98,15 @@ namespace DxfIO::Entities
   /**
    *  A PDFUNDERLAY: a page of a PDF file shown under the drawing.
    */
-  using PdfUnderlay = UnderlayOf<Overlay::Pdf>;
+  using PdfUnderlay = UnderlayOf<UnderlayKind::Pdf>;
   /**
    *  A DWFUNDERLAY: a sheet of a DWF file shown under the drawing.
    */
-  using DwfUnderlay = UnderlayOf<Overlay::Dwf>;
+  using DwfUnderlay = UnderlayOf<UnderlayKind::Dwf>;
   /**
    *  A DGNUNDERLAY: a model of a MicroStation DGN file shown under the drawing.
    */
-  using DgnUnderlay = UnderlayOf<Overlay::Dgn>;
+  using DgnUnderlay = UnderlayOf<UnderlayKind::Dgn>;
 } // namespace DxfIO::Entities
 
 #endif /* DXFIO_ENTITIES_UNDERLAY_HPP */

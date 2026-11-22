@@ -1,17 +1,22 @@
 target_sources(dxfio_tests
   PRIVATE
+    appearance.cpp
     ascii.cpp
     base.cpp
     boxed.cpp
     brace.cpp
     chained.cpp
+    color.cpp
     create.cpp
+    drawing.cpp
     entity.cpp
     family.cpp
-    group.cpp
+    tag.cpp
     handle.cpp
     handseed.cpp
+    lineweight.cpp
     head.cpp
+    index.cpp
     load.cpp
     match.cpp
     object.cpp
@@ -26,6 +31,7 @@ target_sources(dxfio_tests
     unknown.cpp
     vector.cpp
     version.cpp
+    view.cpp
     xdata.cpp
 )
 
@@ -37,6 +43,7 @@ add_subdirectory(empty)
 add_subdirectory(encoding)
 add_subdirectory(entities)
 add_subdirectory(fields)
+add_subdirectory(geometry)
 add_subdirectory(file)
 add_subdirectory(header)
 add_subdirectory(objects)

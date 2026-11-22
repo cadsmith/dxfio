@@ -14,11 +14,6 @@
 namespace DxfIO::Objects
 {
   /**
-   *  The upper right limits of a new layout: 12 by 9.
-   */
-  inline constexpr Vector Limits{.X = 12, .Y = 9, .Z = 0};
-
-  /**
    *  A LAYOUT: the model space tab or a paper space sheet, with how it plots.
    */
   struct DXFIO_API Layout
@@ -52,7 +47,7 @@ namespace DxfIO::Objects
     /**
      *  The upper right limits. Groups 11, 21.
      */
-    Vector Limmax{Limits};
+    Vector Limmax{.X = 12, .Y = 9, .Z = 0};
     /**
      *  The base point blocks are inserted by. Groups 12, 22, 32.
      */

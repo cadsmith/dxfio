@@ -50,7 +50,7 @@ namespace DxfIO
    *  kept as it came.
    */
   using Entity = std::variant<
-      Entities::Arc, Entities::Attdef, Entities::Body, Entities::Circle, Entities::ArcDimension,
+      Entities::Arc, Entities::AttDef, Entities::Body, Entities::Circle, Entities::ArcDimension,
       Entities::DgnUnderlay, Entities::Dimension, Entities::DwfUnderlay, Entities::Ellipse,
       Entities::ExtrudedSurface, Entities::Face3d, Entities::Hatch, Entities::Helix,
       Entities::Image, Entities::Insert, Entities::LargeRadialDimension, Entities::Leader,

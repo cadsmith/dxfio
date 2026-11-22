@@ -15,32 +15,10 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The circle zoom percent a new viewport takes, which sets how smoothly it draws circles and
-   *  arcs.
-   */
-  inline constexpr int Roundness = 100;
-
-  /**
-   *  The status bits of a new viewport: only 32768, which AutoCAD always sets.
-   */
-  inline constexpr int Unflagged = 32768;
-
-  /**
-   *  How often a new viewport draws a major grid line, as $GRIDMAJOR and a VPORT's
-   *  Tables::Gridmajor: every fifth line.
-   */
-  inline constexpr int Gridmajor = 5;
-
-  /**
-   *  The ambient light color of a new viewport, as an AutoCAD Color Index: a dark gray.
-   */
-  inline constexpr int Ambience = 250;
-
-  /**
    *  The AcDbViewport subclass of a VIEWPORT: the window on the paper and the view of model space
    *  it shows.
    */
-  struct DXFIO_API Port
+  struct DXFIO_API ViewportData
   {
     /**
      *  The center of the window, in paper space coordinates. Groups 10, 20, 30.
@@ -66,11 +44,11 @@ namespace DxfIO::Entities
     /**
      *  The center of the view, in display coordinates. Groups 12, 22, from R2000.
      */
-    Vector View{};
+    Vector ViewCenter{};
     /**
      *  The base point of the snap. Groups 13, 23, from R2000.
      */
-    Vector Base{};
+    Vector SnapBase{};
     /**
      *  The spacing of the snap. Groups 14, 24, from R2000.
      */
@@ -91,7 +69,7 @@ namespace DxfIO::Entities
     /**
      *  The lens length of a perspective view. Group 42, from R2000.
      */
-    double Lens{};
+    double LensLength{};
     /**
      *  The offset of the front clipping plane from the target. Group 43, from R2000.
      */
@@ -103,11 +81,11 @@ namespace DxfIO::Entities
     /**
      *  The height of the view, in model space units. Group 45, from R2000.
      */
-    double Extent{-1};
+    double ViewHeight{-1};
     /**
      *  The snap angle. Group 50, from R2000.
      */
-    double Angle{};
+    double SnapAngle{};
     /**
      *  The twist of the view. Group 51, from R2000.
      */
@@ -115,7 +93,7 @@ namespace DxfIO::Entities
     /**
      *  The circle zoom percent. Group 72, from R2000.
      */
-    int Zoom{Roundness};
+    int Zoom{100};
     /**
      *  The layers frozen in this viewport alone. Group 341 before R2004, 331 from it.
      */
@@ -125,7 +103,7 @@ namespace DxfIO::Entities
      *  locked, 65536 clipped by an entity, 131072 off, among others; 32768 always set. Group 90,
      *  from R2000.
      */
-    int Flags{Unflagged};
+    int Flags{32768};
     /**
      *  The entity that clips the viewport when it is not rectangular. Group 340, from R2000.
      */
@@ -142,11 +120,11 @@ namespace DxfIO::Entities
     /**
      *  1 when the viewport keeps its own UCS, made current when it is active. Group 71, from R2000.
      */
-    int Follows{1};
+    int UcsPerViewport{1};
     /**
      *  1 when the UCS icon is drawn at the UCS origin. Group 74, from R2000.
      */
-    int Icon{};
+    int UcsIconAtOrigin{};
     /**
      *  The viewport's own UCS. Groups 110, 111, 112, 345, 346, 79 and 146, from R2000.
      */
@@ -155,11 +133,11 @@ namespace DxfIO::Entities
      *  How the viewport is plotted: 0 as displayed, 1 wireframe, 2 hidden, 3 rendered. Group 170,
      *  from R2004.
      */
-    int Shade{};
+    int ShadePlotMode{};
     /**
      *  How often a major grid line is drawn, in grid lines. Group 61, from R2007.
      */
-    int Major{Gridmajor};
+    int GridMajor{5};
     /**
      *  The background drawn behind the view. Group 332, from R2007.
      */
@@ -167,19 +145,19 @@ namespace DxfIO::Entities
     /**
      *  The visual style or render preset the viewport is shade plotted with. Group 333, from R2007.
      */
-    Handle Plot{};
+    Handle ShadePlotObject{};
     /**
      *  The visual style the view is drawn in. Group 348, from R2007.
      */
-    Handle Style{};
+    Handle VisualStyle{};
     /**
      *  Whether the default lighting is on. Group 292, from R2007.
      */
-    bool Lit{true};
+    bool DefaultLighting{true};
     /**
      *  The default lighting: 1 one distant light, 2 two distant lights. Group 282, from R2007.
      */
-    int Lighting{1};
+    int DefaultLightingType{1};
     /**
      *  The brightness of the view. Group 141, from R2007.
      */
@@ -191,7 +169,7 @@ namespace DxfIO::Entities
     /**
      *  The ambient light color, as an AutoCAD Color Index. Group 63, from R2007.
      */
-    int Ambient{Ambience};
+    int Ambient{250};
     /**
      *  The ambient light's true color, as 0xRRGGBB. Group 421, from R2007.
      */
@@ -206,7 +184,7 @@ namespace DxfIO::Entities
      */
     Handle Sun{};
 
-    auto operator==(const Port &) const -> bool = default;
+    auto operator==(const ViewportData &) const -> bool = default;
   };
 
   /**
@@ -221,7 +199,7 @@ namespace DxfIO::Entities
     /**
      *  The window and the view, from the AcDbViewport subclass.
      */
-    Boxed<Entities::Port> Port{};
+    Boxed<Entities::ViewportData> Data{};
 
     auto operator==(const Viewport &) const -> bool = default;
   };

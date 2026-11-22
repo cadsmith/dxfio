@@ -67,7 +67,7 @@ namespace DxfIO
                      [&to](const Brace &one) -> std::expected<void, Failure>
                      {
                        return Enclosed(to, one.Name, [&to, &one] -> std::expected<void, Failure>
-                                       { return Fields::Put(to, one.Groups); });
+                                       { return Fields::Put(to, one.Tags); });
                      });
     }
   } // namespace

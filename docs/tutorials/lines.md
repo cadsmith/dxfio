@@ -9,7 +9,7 @@ Points, lines, circles, arcs, ellipses and filled solids, drawn in model space o
 `Create` gives a drawing AutoCAD opens without a finding: the tables, the two space blocks, the layouts and the objects a release needs. `Edit::Add` puts an entity in model space unless told otherwise.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 ```
 
 ## Points and lines [#lines]

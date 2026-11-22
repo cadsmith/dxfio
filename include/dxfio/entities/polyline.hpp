@@ -5,10 +5,37 @@
 #include "dxfio/entities/record.hpp"
 #include "dxfio/entities/sequence.hpp"
 #include "dxfio/entities/vertex.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
+
+#include <cstdint>
 
 namespace DxfIO::Entities
 {
+  /**
+   *  The bits of a POLYLINE's flags, group 70, to test with `Has`.
+   */
+  enum class PolylineFlags : std::uint8_t
+  {
+    /**
+     *  A mesh closed along M.
+     */
+    Closed      =  1,
+    CurveFit    =  2,
+    SplineFit   =  4,
+    Polyline3d  =  8,
+    PolygonMesh = 16,
+    /**
+     *  A polygon mesh closed along N.
+     */
+    ClosedN      = 32,
+    PolyfaceMesh = 64,
+    /**
+     *  The linetype drawn continuously around the vertices.
+     */
+    ContinuousLinetype = 128,
+  };
+
   /**
    *  A POLYLINE: a 2D or 3D polyline, a polygon mesh or a polyface mesh, its vertices following it
    *  in the file.
@@ -38,14 +65,13 @@ namespace DxfIO::Entities
     /**
      *  The width segments start with when their vertex gives none. Group 40.
      */
-    double Start{};
+    double StartWidth{};
     /**
      *  The width segments end with when their vertex gives none. Group 41.
      */
-    double End{};
+    double EndWidth{};
     /**
-     *  1 closed, 2 curve-fit, 4 spline-fit, 8 3D polyline, 16 polygon mesh, 32 mesh closed along N,
-     *  64 polyface mesh, 128 linetype drawn continuously around the vertices. Group 70.
+     *  The bits of PolylineFlags. Group 70.
      */
     int Flags{};
     /**

@@ -48,9 +48,9 @@ namespace DxfIO::Header
     CHECK(Declared(*variables) == Version::R12);
     CHECK(Declared(kept)       == Version::R12);
     REQUIRE(kept.size()        == 2);
-    CHECK(kept.front().Values.front() == Group{.Code = 1, .Value = std::string{"\\U+0041C1032"}});
+    CHECK(kept.front().Values.front() == Tag{.Code = 1, .Value = std::string{"\\U+0041C1032"}});
     CHECK(kept.back().Name            == "$\\U+0041BC");
-    CHECK(kept.back().Values.front()  == Group{.Code = 1, .Value = std::string{"ABC"}});
+    CHECK(kept.back().Values.front()  == Tag{.Code = 1, .Value = std::string{"ABC"}});
   }
 
   TEST_CASE("header: a page name that is no page written as it was read")
@@ -83,9 +83,9 @@ namespace DxfIO::Header
   TEST_CASE("header: written with the release and the page written")
   {
     const std::vector<Variable> all{
-        Variable{.Name = "$ACADVER", .Values = {Group{.Code = 1, .Value = std::string{"AC1032"}}}},
+        Variable{.Name = "$ACADVER", .Values = {Tag{.Code = 1, .Value = std::string{"AC1032"}}}},
         Variable{.Name   = "$DWGCODEPAGE",
-                 .Values = {Group{.Code = 3, .Value = std::string{"ANSI_1252"}}}},
+                 .Values = {Tag{.Code = 3, .Value = std::string{"ANSI_1252"}}}},
     };
     const Encoding::Codepage *cyrillic = Encoding::Find("ANSI_1251");
     REQUIRE(cyrillic != nullptr);
@@ -104,7 +104,7 @@ namespace DxfIO::Header
   TEST_CASE("header: saved down to R13 or R14, the page its text is in is named")
   {
     const std::vector<Variable> all{
-        Variable{.Name = "$ACADVER", .Values = {Group{.Code = 1, .Value = std::string{"AC1032"}}}},
+        Variable{.Name = "$ACADVER", .Values = {Tag{.Code = 1, .Value = std::string{"AC1032"}}}},
     };
     const Encoding::Codepage *cyrillic = Encoding::Find("ANSI_1251");
     REQUIRE(cyrillic != nullptr);
@@ -125,7 +125,7 @@ namespace DxfIO::Header
   {
     Fields::Sheet               page{Version::R2018};
     const std::vector<Variable> all{
-        Variable{.Name = "$DWGCODEPAGE", .Values = {Group{.Code = 3, .Value = std::int64_t{5}}}}};
+        Variable{.Name = "$DWGCODEPAGE", .Values = {Tag{.Code = 3, .Value = std::int64_t{5}}}}};
     REQUIRE(Write(page.To, all));
     const std::size_t at = page.Out.find("$DWGCODEPAGE");
     REQUIRE(at != std::string::npos);
@@ -135,8 +135,8 @@ namespace DxfIO::Header
   TEST_CASE("header: a release or a page held as no text names none")
   {
     const std::vector<Variable> all{
-        Variable{.Name = "$ACADVER", .Values = {Group{.Code = 1, .Value = std::int64_t{1}}}},
-        Variable{.Name = "$DWGCODEPAGE", .Values = {Group{.Code = 3, .Value = std::int64_t{5}}}},
+        Variable{.Name = "$ACADVER", .Values = {Tag{.Code = 1, .Value = std::int64_t{1}}}},
+        Variable{.Name = "$DWGCODEPAGE", .Values = {Tag{.Code = 3, .Value = std::int64_t{5}}}},
     };
     CHECK(Declared(all)   == Version::R12);
     CHECK(Named(all).Name == "ANSI_1252");

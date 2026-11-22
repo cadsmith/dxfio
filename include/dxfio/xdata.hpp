@@ -2,7 +2,7 @@
 #define DXFIO_XDATA_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <string>
 #include <vector>
@@ -22,7 +22,7 @@ namespace DxfIO
     /**
      *  The groups after the 1001, in their order.
      */
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Xdata &) const -> bool = default;
   };

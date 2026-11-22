@@ -3,12 +3,46 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstdint>
 #include <optional>
 
 namespace DxfIO::Entities
 {
+  /**
+   *  The bits of a VERTEX's flags, group 70, to test with `Has`.
+   */
+  enum class VertexFlags : std::uint8_t
+  {
+    /**
+     *  Added by curve fitting.
+     */
+    CurveFitExtra = 1,
+    /**
+     *  Has a curve-fit tangent.
+     */
+    Tangent = 2,
+    /**
+     *  Added by spline fitting.
+     */
+    SplineFit = 8,
+    /**
+     *  A point of the spline frame.
+     */
+    ControlPoint = 16,
+    Polyline3d   = 32,
+    /**
+     *  Of a polygon mesh; with PolyfaceMesh, a polyface mesh's vertex.
+     */
+    PolygonMesh = 64,
+    /**
+     *  Alone, a face of a polyface mesh.
+     */
+    PolyfaceMesh = 128,
+  };
+
   /**
    *  A VERTEX: a point of a POLYLINE, or a face of a polyface mesh.
    */
@@ -26,11 +60,11 @@ namespace DxfIO::Entities
     /**
      *  The width the segment from this vertex starts with, when it has its own. Group 40.
      */
-    std::optional<double> Start{};
+    std::optional<double> StartWidth{};
     /**
      *  The width the segment from this vertex ends with, when it has its own. Group 41.
      */
-    std::optional<double> End{};
+    std::optional<double> EndWidth{};
     /**
      *  The bulge of the segment to the next vertex: the tangent of a quarter of its arc's angle, 0
      *  when straight. Group 42.
@@ -42,8 +76,7 @@ namespace DxfIO::Entities
      */
     int Id{};
     /**
-     *  1 added by curve fitting, 2 has a curve-fit tangent, 8 added by spline fitting, 16 spline
-     *  frame point, 32 of a 3D polyline, 64 of a polygon mesh, 128 of a polyface mesh. Group 70.
+     *  The bits of VertexFlags. Group 70.
      */
     int Flags{};
     /**

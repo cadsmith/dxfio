@@ -78,7 +78,7 @@ namespace DxfIO::Family
   inline constexpr bool Ancient<Entities::Face3d> = true;
 
   template <>
-  inline constexpr bool Ancient<Entities::Attdef> = true;
+  inline constexpr bool Ancient<Entities::AttDef> = true;
 
   template <>
   inline constexpr bool Ancient<Entities::Insert> = true;
@@ -100,7 +100,7 @@ namespace DxfIO::Family
   {
     return name == DxfIO::Type<Entities::Attrib>
         || name == DxfIO::Type<Entities::Vertex>
-        || name == DxfIO::Type<Entities::Seqend>;
+        || name == DxfIO::Type<Entities::SeqEnd>;
   }
 } // namespace DxfIO::Family
 
@@ -111,7 +111,7 @@ namespace DxfIO::Entities
     constexpr int              Sheet  = 67;
     constexpr std::string_view Common = "AcDbEntity";
 
-    auto Opens(const Group &one) -> bool
+    auto Opens(const Tag &one) -> bool
     {
       return one.Code == Tags::Codes::Marker && one.Value == Content{std::string{Common}};
     }
@@ -121,20 +121,20 @@ namespace DxfIO::Entities
     {
       const auto marker = std::ranges::find_if(all, Opens);
       const auto first  = marker == all.end() ? all.begin() : std::next(marker);
-      const auto last   = std::ranges::find(first, all.end(), Tags::Codes::Marker, &Group::Code);
+      const auto last   = std::ranges::find(first, all.end(), Tags::Codes::Marker, &Tag::Code);
       return std::ranges::subrange(first, last);
     }
 
-    auto Flagged(const Group &one) -> bool
+    auto Flagged(const Tag &one) -> bool
     {
       return one.Code == Sheet && one.Value != Content{std::int64_t{0}};
     }
 
-    void Flag(std::vector<Group> &all)
+    void Flag(std::vector<Tag> &all)
     {
-      const Group raised{.Code = Sheet, .Value = std::int64_t{1}};
-      auto held = Fence(all)
-                | std::views::filter([](const Group &one) -> bool { return one.Code == Sheet; });
+      const Tag raised{.Code = Sheet, .Value = std::int64_t{1}};
+      auto      held =
+          Fence(all) | std::views::filter([](const Tag &one) -> bool { return one.Code == Sheet; });
       if (std::ranges::empty(held))
       {
         all.insert(Fence(all).begin(), raised);
@@ -198,7 +198,7 @@ namespace DxfIO::Entities
     return std::visit(
         DxfIO::Match{
             [](const Unknown &kept) -> bool
-            { return std::ranges::any_of(Fence(kept.Groups), Flagged); },
+            { return std::ranges::any_of(Fence(kept.Tags), Flagged); },
             [](const auto &kind) -> auto { return kind.Record.Paper; },
         },
         one);
@@ -239,7 +239,7 @@ namespace DxfIO::Entities
   auto Attributing(const Entity &one) -> bool
   {
     constexpr int Constant   = 2;
-    const auto   *definition = std::get_if<Attdef>(&one);
+    const auto   *definition = std::get_if<AttDef>(&one);
     return definition != nullptr && Masked(definition->Flags, Constant) == 0;
   }
 
@@ -250,7 +250,7 @@ namespace DxfIO::Entities
             [owner](Unknown &kept) -> void
             {
               kept.Base.Owner = owner;
-              Flag(kept.Groups);
+              Flag(kept.Tags);
             },
             [owner](auto &kind) -> auto
             {

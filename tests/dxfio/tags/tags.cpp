@@ -49,8 +49,9 @@ namespace DxfIO::Tags
     REQUIRE(tags->size()   == 2);
     CHECK(tags->at(1).Line == 5);
     CHECK(issues
-          == std::vector{
-              Issue{.Line = 4, .What = "number expected for group 40, found \"nope\", left out"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .Line = 4,
+                               .What = "number expected for group 40, found \"nope\", left out"}});
     CHECK(All("  0\nSECTION\n 40\nnope\n")->size() == 1);
   }
 
@@ -60,7 +61,9 @@ namespace DxfIO::Tags
     const auto         tags = All("  0\nSECTION\n  0\nEOF\ngarbage\n  0\nSECTION\n", &issues);
     REQUIRE(tags);
     CHECK(tags->size() == 2);
-    CHECK(issues       == std::vector{Issue{.Line = 5, .What = "what follows EOF, left out"}});
+    CHECK(issues
+          == std::vector{
+              Issue{.Code = IssueCode::Damaged, .Line = 5, .What = "what follows EOF, left out"}});
     CHECK(All("  0\nEOF\ngarbage\n")->size() == 1);
     std::vector<Issue> none;
     CHECK(All("  0\nEOF\n\n   \n", &none)->size() == 1);
@@ -72,12 +75,15 @@ namespace DxfIO::Tags
                                   16});
     std::vector<Issue> binary;
     CHECK(All(bytes, &binary)->size() == 1);
-    CHECK(binary == std::vector{Issue{.Line = 0, .What = "what follows EOF, left out"}});
+    CHECK(binary
+          == std::vector{Issue{.Code = IssueCode::Damaged, .What = "what follows EOF, left out"}});
   }
 
   TEST_CASE("tags: the failure that stops the file is handed back")
   {
     CHECK(All("  0\nSECTION\nabc\n")
-          == std::unexpected{Failure{3, "group code expected, found \"abc\""}});
+          == std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                     .Line = 3,
+                                     .What = "group code expected, found \"abc\""}});
   }
 } // namespace DxfIO::Tags

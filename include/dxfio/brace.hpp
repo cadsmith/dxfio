@@ -2,7 +2,7 @@
 #define DXFIO_BRACE_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <string>
 #include <vector>
@@ -23,7 +23,7 @@ namespace DxfIO
     /**
      *  The groups between the opening and the closing 102, in their order.
      */
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Brace &) const -> bool = default;
   };

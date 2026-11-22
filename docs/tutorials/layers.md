@@ -9,11 +9,11 @@ Add layers with their own color and lineweight, put entities on them, and turn a
 A new drawing has one layer, 0, and a new entity is on it.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 for (const DxfIO::Tables::Layer &layer : drawing.Layer.Records)
 {
   std::println("{}: color {}, linetype {}, lineweight {}", layer.Record.Name, layer.Color, layer.Linetype,
-               layer.Lineweight);
+               std::to_underlying(layer.Lineweight));
 }
 ```
 
@@ -23,13 +23,13 @@ for (const DxfIO::Tables::Layer &layer : drawing.Layer.Records)
 
 ## Add a layer [#add]
 
-A `Tables::Layer` starts as layer 0 is: white (color 7), Continuous, plotted, at the drawing's default lineweight (-3). `Color` is an AutoCAD Color Index from 1 to 255 and `Lineweight` is in hundredths of a millimeter. To give a layer a linetype other than Continuous, add the linetype to the LTYPE table: see [Linetypes](/tutorials/linetypes/).
+A `Tables::Layer` starts as layer 0 is: white (color 7), Continuous, plotted, at the drawing's default lineweight (`Lineweight::Default`, -3). `Color` is an AutoCAD Color Index from 1 to 255 and `Lineweight` is in hundredths of a millimeter. To give a layer a linetype other than Continuous, add the linetype to the LTYPE table: see [Linetypes](/tutorials/linetypes/).
 
 ```cpp
 DxfIO::Tables::Layer walls{};
 walls.Record.Name = "Walls";
 walls.Color = 1;
-walls.Lineweight = 50;
+walls.Lineweight = DxfIO::Lineweight::Mm050;
 DxfIO::Edit::Add(drawing, walls);
 
 DxfIO::Tables::Layer doors{};
@@ -53,7 +53,7 @@ if (!added)
 ```
 
 ```text title="Output"
-a record named WALLS is there already
+layer WALLS exists
 ```
 
 ## Entities on a layer [#entities]
@@ -94,10 +94,10 @@ DxfIO::Edit::Add(drawing, survey);
 
 ## Find and change [#find]
 
-`Edit::Find` gives a pointer to the layer of that name, found without case, or null.
+`View::Record` gives a pointer to the layer of that name, found without case, or null.
 
 ```cpp
-if (DxfIO::Tables::Layer *found = DxfIO::Edit::Find(drawing.Layer, "grid"))
+if (DxfIO::Tables::Layer *found = DxfIO::View::Record(drawing.Layer, "grid"))
 {
   found->Color = -found->Color;
   std::println("{} is on, color {}", found->Record.Name, found->Color);

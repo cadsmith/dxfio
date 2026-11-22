@@ -37,7 +37,7 @@ namespace DxfIO
         Fields::Field{.Code = 73, .Member = &View::Plottable},
         Fields::Field{.Code = 332, .Member = &View::Background, .Fallback = Handle{}},
         Fields::Field{.Code = 334, .Member = &View::Section, .Fallback = Handle{}},
-        Fields::Field{.Code = 348, .Member = &View::Style, .Fallback = Handle{}},
+        Fields::Field{.Code = 348, .Member = &View::VisualStyle, .Fallback = Handle{}},
     };
   } // namespace Tables
 
@@ -49,12 +49,12 @@ namespace DxfIO
           .Member = &Tables::View::Record,
           .Fields = Shapes<Tables::Record>,
       },
-      Fields::Field{.Code = 40, .Member = &Tables::View::Height},
-      Fields::Flat{.Code = 10, .Member = &Tables::View::Center},
-      Fields::Field{.Code = 41, .Member = &Tables::View::Width},
+      Fields::Field{.Code = 40, .Member = &Tables::View::ViewHeight},
+      Fields::Flat{.Code = 10, .Member = &Tables::View::ViewCenter},
+      Fields::Field{.Code = 41, .Member = &Tables::View::ViewWidth},
       Fields::Field{.Code = 11, .Member = &Tables::View::Direction},
       Fields::Field{.Code = 12, .Member = &Tables::View::Target},
-      Fields::Field{.Code = 42, .Member = &Tables::View::Focal},
+      Fields::Field{.Code = 42, .Member = &Tables::View::LensLength},
       Fields::Field{.Code = 43, .Member = &Tables::View::Front},
       Fields::Field{.Code = 44, .Member = &Tables::View::Back},
       Fields::Field{.Code = 50, .Member = &Tables::View::Twist},

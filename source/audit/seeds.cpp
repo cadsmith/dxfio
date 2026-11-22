@@ -19,7 +19,7 @@ namespace DxfIO::Audit
     /**
      *  Whether any record of the drawing holds a handle.
      */
-    auto Holding(const Document &drawing) -> bool
+    auto Holding(const Drawing &drawing) -> bool
     {
       bool any = false;
       Held(drawing, [&any](Handle one) -> void { any = any || one; });
@@ -27,8 +27,8 @@ namespace DxfIO::Audit
     }
   } // namespace
 
-  template <class DocumentT>
-  void Seeded(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Seeded(Auditor<DrawingT> &with)
   {
     if (!Holding(*with.Drawing))
     {
@@ -48,7 +48,7 @@ namespace DxfIO::Audit
     }
   }
 
-  template void Seeded(Auditor<Document> &with);
+  template void Seeded(Auditor<Drawing> &with);
 
-  template void Seeded(Auditor<const Document> &with);
+  template void Seeded(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

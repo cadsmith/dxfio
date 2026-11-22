@@ -3,7 +3,7 @@
 #include "tables/io.hpp"
 #include "tags/tags.hpp"
 
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 
 #include <doctest/doctest.h>
 
@@ -26,13 +26,13 @@ namespace DxfIO::Tables
         "  0\nTABLE\n  2\nVPORT\n  5\n8\n330\n0\n100\nAcDbSymbolTable\n 70\n0\n"
         "  0\nENDTAB\n";
 
-    auto Read(std::string_view all) -> Document
+    auto Read(std::string_view all) -> Drawing
     {
       const auto found = Tags::All(all);
       REQUIRE(found);
       const auto nests = File::Sections::Tables(*found);
       REQUIRE(nests);
-      Document           drawing{};
+      Drawing            drawing{};
       std::vector<Issue> issues;
       Tables::Read(*nests, drawing, Fields::Reading{.Issues = &issues});
       return drawing;
@@ -41,13 +41,13 @@ namespace DxfIO::Tables
 
   TEST_CASE("tables: a kind's table into its member, others kept unknown")
   {
-    const Document drawing = Read(Text);
+    const Drawing drawing = Read(Text);
     CHECK(drawing.Layer.Head.Name        == "LAYER");
     CHECK(drawing.Layer.Head.Count       == 9);
     REQUIRE(drawing.Layer.Records.size() == 1);
     CHECK(drawing.Layer.Records.front().Record.Name == "0");
-    CHECK(drawing.Vport.Head.Name    == "VPORT");
-    CHECK(drawing.Dimstyle.Head.Name == "DIMSTYLE");
+    CHECK(drawing.VPort.Head.Name    == "VPORT");
+    CHECK(drawing.DimStyle.Head.Name == "DIMSTYLE");
     CHECK(drawing.Loose.size()       == 1);
     CHECK(drawing.Style.Head.Name.empty());
   }
@@ -59,7 +59,7 @@ namespace DxfIO::Tables
     REQUIRE(found);
     const auto nests = File::Sections::Tables(*found);
     REQUIRE(nests);
-    Document           drawing{};
+    Drawing            drawing{};
     std::vector<Issue> issues;
     Tables::Read(*nests, drawing, Fields::Reading{.Issues = &issues});
     CHECK(drawing.Layer.Head.Count == 1);
@@ -78,7 +78,7 @@ namespace DxfIO::Tables
     REQUIRE(found);
     const auto nests = File::Sections::Tables(*found);
     REQUIRE(nests);
-    Document           drawing{};
+    Drawing            drawing{};
     std::vector<Issue> issues;
     Tables::Read(*nests, drawing, Fields::Reading{.Release = Version::R12, .Issues = &issues});
     REQUIRE(drawing.Layer.Records.size()            == 1);
@@ -106,7 +106,7 @@ namespace DxfIO::Tables
 
   TEST_CASE("tables: a stray table named as a kind is not written twice")
   {
-    Document drawing = Read(Text);
+    Drawing drawing = Read(Text);
     drawing.Loose.push_back(Table<Unknown>{
         .Head    = Tables::Head{.Name = "LAYER"},
         .Records = {},

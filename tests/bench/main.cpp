@@ -102,9 +102,9 @@ auto main(int argc, char **argv) -> int
     std::fprintf(stderr, "%s: not read\n", argv[1]);
     return 2;
   }
-  const int            runs    = argc > 2 ? Count(argv[2], Runs) : Runs;
-  const int            threads = argc > 3 ? Count(argv[3], 0) : 0;
-  const DxfIO::Loading loading{.Threads = threads};
+  const int                runs    = argc > 2 ? Count(argv[2], Runs) : Runs;
+  const int                threads = argc > 3 ? Count(argv[3], 0) : 0;
+  const DxfIO::LoadOptions loading{.Threads = threads};
   std::printf("%s: %.1f MB, best of %d runs, %u thread(s)\n", argv[1],
               static_cast<double>(bytes.size()) / Mega, runs,
               threads > 0 ? static_cast<unsigned>(threads) : std::thread::hardware_concurrency());
@@ -115,11 +115,11 @@ auto main(int argc, char **argv) -> int
     std::fprintf(stderr, "load: %s\n", loaded.error().What.c_str());
     return 1;
   }
-  std::printf("  %zu entities, %zu objects, %zu issues\n", loaded->Document.Entities.size(),
-              loaded->Document.Objects.size(), loaded->Issues.size());
+  std::printf("  %zu entities, %zu objects, %zu issues\n", loaded->Drawing.Entities.size(),
+              loaded->Drawing.Objects.size(), loaded->Issues.size());
   std::expected<DxfIO::Saved, DxfIO::Failure> ascii;
-  Timed("save", bytes.size(), runs,
-        [&] -> void { ascii = DxfIO::Save(loaded->Document, DxfIO::Options{.Threads = threads}); });
+  Timed("save", bytes.size(), runs, [&] -> void
+        { ascii = DxfIO::Save(loaded->Drawing, DxfIO::SaveOptions{.Threads = threads}); });
   if (!ascii)
   {
     std::fprintf(stderr, "save: %s\n", ascii.error().What.c_str());
@@ -130,7 +130,7 @@ auto main(int argc, char **argv) -> int
         [&] -> void
         {
           binary =
-              DxfIO::Save(loaded->Document, DxfIO::Options{.Binary = true, .Threads = threads});
+              DxfIO::Save(loaded->Drawing, DxfIO::SaveOptions{.Binary = true, .Threads = threads});
         });
   if (!binary)
   {

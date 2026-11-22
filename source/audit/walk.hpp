@@ -6,7 +6,7 @@
 #include "ascii.hpp"
 #include "entities/io.hpp"
 
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 
 #include <algorithm>
 #include <string_view>
@@ -14,8 +14,8 @@
 
 namespace DxfIO::Audit
 {
-  template <class DocumentT, class VisitT>
-  void Lists(DocumentT &drawing, const VisitT &visit)
+  template <class DrawingT, class VisitT>
+  void Lists(DrawingT &drawing, const VisitT &visit)
   {
     visit(drawing.Entities);
     for (auto &one : drawing.Blocks)
@@ -75,17 +75,17 @@ namespace DxfIO::Audit
    *  blocks and their entities, the entities of model and paper space, and its objects, in that
    *  order.
    */
-  template <class DocumentT, class VisitT>
-  void Bases(DocumentT &drawing, const VisitT &visit)
+  template <class DrawingT, class VisitT>
+  void Bases(DrawingT &drawing, const VisitT &visit)
   {
-    Tabled(drawing.Vport, visit);
-    Tabled(drawing.Ltype, visit);
+    Tabled(drawing.VPort, visit);
+    Tabled(drawing.LType, visit);
     Tabled(drawing.Layer, visit);
     Tabled(drawing.Style, visit);
     Tabled(drawing.View, visit);
     Tabled(drawing.Ucs, visit);
-    Tabled(drawing.Appid, visit);
-    Tabled(drawing.Dimstyle, visit);
+    Tabled(drawing.AppId, visit);
+    Tabled(drawing.DimStyle, visit);
     Tabled(drawing.BlockRecord, visit);
     for (auto &one : drawing.Loose)
     {
@@ -93,8 +93,8 @@ namespace DxfIO::Audit
     }
     for (auto &one : drawing.Blocks)
     {
-      visit(one.Begin.Record.Base);
-      visit(one.End.Record.Base);
+      visit(one.Block.Record.Base);
+      visit(one.EndBlk.Record.Base);
       for (auto &held : one.Entities)
       {
         Carried(held, visit);

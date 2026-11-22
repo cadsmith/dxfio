@@ -24,10 +24,10 @@ namespace DxfIO
     REQUIRE(record);
     std::vector<Issue> issues;
     const Unknown      taken = Kept(*record, Fields::Reading{.Issues = &issues});
-    CHECK(taken.Type          == "LINE");
-    CHECK(taken.Base.Self     == Handle{0x2a});
-    CHECK(taken.Base.Owner    == Handle{0x1f});
-    CHECK(taken.Groups.size() == 4);
+    CHECK(taken.Type        == "LINE");
+    CHECK(taken.Base.Self   == Handle{0x2a});
+    CHECK(taken.Base.Owner  == Handle{0x1f});
+    CHECK(taken.Tags.size() == 4);
     CHECK(taken.Base.Extended.size() == 1);
     Fields::Sheet page;
     REQUIRE(Put(page.To, taken));

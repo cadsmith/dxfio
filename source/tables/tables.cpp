@@ -1,6 +1,7 @@
 #include "../filing.hpp"
 #include "chained.hpp"
 #include "heading.hpp"
+#include "located.hpp"
 #include "seek.hpp"
 #include "shapes/appid.hpp"
 #include "shapes/block.hpp"
@@ -13,7 +14,7 @@
 #include "shapes/viewport.hpp"
 #include "tables/io.hpp"
 
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 
 #include <algorithm>
 #include <array>
@@ -29,7 +30,7 @@ namespace DxfIO::Tables
   {
     struct Filling
     {
-      Document              *Drawing{nullptr};
+      DxfIO::Drawing        *Drawing{nullptr};
       const Fields::Reading *With{nullptr};
     };
 
@@ -37,7 +38,7 @@ namespace DxfIO::Tables
     {
       std::string_view Name;
       void (*Read)(const File::Nest &one, const Tables::Head &head, const Filling &into){nullptr};
-      std::expected<void, Failure> (*Write)(Fields::Writing &to, const Document &from){nullptr};
+      std::expected<void, Failure> (*Write)(Fields::Writing &to, const Drawing &from){nullptr};
     };
 
     template <class KindT>
@@ -67,7 +68,8 @@ namespace DxfIO::Tables
           return true;
         }
         into.With->Tell(Issue{
-            .Line = record.Tags.front().Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(record.Tags.front().Line),
             .What = std::format("record {} in table {}, left out", record.Name, head.Name),
         });
         return false;
@@ -90,7 +92,7 @@ namespace DxfIO::Tables
       return out;
     }
 
-    template <class KindT, Table<KindT> Document::*Member>
+    template <class KindT, Table<KindT> Drawing::*Member>
     void Filled(const File::Nest &one, const Tables::Head &head, const Filling &into)
     {
       into.Drawing->*Member = Tabled<KindT>(one, head, into);
@@ -99,8 +101,8 @@ namespace DxfIO::Tables
     /**
      *  Writes a table whose head is named, or whose records need it, then named for its kind.
      */
-    template <class KindT, Table<KindT> Document::*Member>
-    auto Written(Fields::Writing &to, const Document &from) -> std::expected<void, Failure>
+    template <class KindT, Table<KindT> Drawing::*Member>
+    auto Written(Fields::Writing &to, const Drawing &from) -> std::expected<void, Failure>
     {
       const Table<KindT> &one = from.*Member;
       if (!one.Head.Name.empty())
@@ -125,7 +127,7 @@ namespace DxfIO::Tables
     struct Listed;
 
     template <class KindT>
-    struct Listed<Table<KindT> Document::*>
+    struct Listed<Table<KindT> Drawing::*>
     {
       using Type = KindT;
     };
@@ -141,9 +143,9 @@ namespace DxfIO::Tables
     };
 
     constexpr std::array Kinds{
-        Entry<&Document::Vport>, Entry<&Document::Ltype>,    Entry<&Document::Layer>,
-        Entry<&Document::Style>, Entry<&Document::View>,     Entry<&Document::Ucs>,
-        Entry<&Document::Appid>, Entry<&Document::Dimstyle>, Entry<&Document::BlockRecord>,
+        Entry<&Drawing::VPort>, Entry<&Drawing::LType>,    Entry<&Drawing::Layer>,
+        Entry<&Drawing::Style>, Entry<&Drawing::View>,     Entry<&Drawing::Ucs>,
+        Entry<&Drawing::AppId>, Entry<&Drawing::DimStyle>, Entry<&Drawing::BlockRecord>,
     };
 
     auto Named(std::string_view name) -> const Kind *
@@ -151,7 +153,7 @@ namespace DxfIO::Tables
       return Seek(Kinds, name, &Kind::Name);
     }
 
-    auto Strangers(Fields::Writing &to, const Document &drawing) -> std::expected<void, Failure>
+    auto Strangers(Fields::Writing &to, const Drawing &drawing) -> std::expected<void, Failure>
     {
       return Chained(drawing.Loose,
                      [&](const Table<Unknown> &one) -> std::expected<void, Failure>
@@ -162,7 +164,7 @@ namespace DxfIO::Tables
     }
   } // namespace
 
-  void Read(std::span<const File::Nest> all, Document &drawing, const Fields::Reading &with)
+  void Read(std::span<const File::Nest> all, Drawing &drawing, const Fields::Reading &with)
   {
     const Filling            into{.Drawing = &drawing, .With = &with};
     std::vector<std::string> seen;
@@ -172,7 +174,8 @@ namespace DxfIO::Tables
       if (std::ranges::contains(seen, head.Name))
       {
         with.Tell(Issue{
-            .Line = one.Head.Tags.front().Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(one.Head.Tags.front().Line),
             .What = std::format("table {} given again, the first kept", head.Name),
         });
         continue;
@@ -184,7 +187,7 @@ namespace DxfIO::Tables
     }
   }
 
-  auto Write(Fields::Writing &to, const Document &drawing) -> std::expected<void, Failure>
+  auto Write(Fields::Writing &to, const Drawing &drawing) -> std::expected<void, Failure>
   {
     return Chained(Kinds, [&to, &drawing](const Kind &one) -> std::expected<void, Failure>
                    { return one.Write(to, drawing); })

@@ -9,14 +9,14 @@ namespace DxfIO::Tables
   /**
    *  An APPID table record: an application registered to attach extended data, named after it.
    */
-  struct DXFIO_API Appid
+  struct DXFIO_API AppId
   {
     /**
      *  The name, flags and handles every table record carries.
      */
     Tables::Record Record{};
 
-    auto operator==(const Appid &) const -> bool = default;
+    auto operator==(const AppId &) const -> bool = default;
   };
 } // namespace DxfIO::Tables
 

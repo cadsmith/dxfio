@@ -23,7 +23,7 @@ namespace DxfIO::Entities
     /**
      *  The SEQEND that closes them, or none when the file had none.
      */
-    std::optional<Boxed<Entities::Seqend>> Closing{};
+    std::optional<Boxed<Entities::SeqEnd>> Closing{};
 
     auto operator==(const Sequence &) const -> bool = default;
   };

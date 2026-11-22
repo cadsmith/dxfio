@@ -15,7 +15,7 @@ namespace DxfIO::Down
   {
     constexpr double Reach = 1000;
 
-    auto Point(const Document &from, std::string_view name) -> std::optional<Vector>
+    auto Point(const Drawing &from, std::string_view name) -> std::optional<Vector>
     {
       const auto found = std::ranges::find(from.Header, name, &Header::Variable::Name);
       if (found == from.Header.end())
@@ -24,7 +24,7 @@ namespace DxfIO::Down
       }
       std::array<double, 3> axes{};
       std::size_t           read = 0;
-      for (const Group &one : found->Values)
+      for (const Tag &one : found->Values)
       {
         const auto *held = std::get_if<double>(&one.Value);
         if (held != nullptr && read < axes.size())
@@ -121,7 +121,7 @@ namespace DxfIO::Down
     }
   } // namespace
 
-  auto Bounded(const Document &from) -> Extents
+  auto Bounded(const Drawing &from) -> Extents
   {
     const std::optional<Vector> low  = Point(from, "$EXTMIN");
     const std::optional<Vector> high = Point(from, "$EXTMAX");

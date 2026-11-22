@@ -1,5 +1,7 @@
 #include "file/cursor.hpp"
 
+#include "located.hpp"
+
 #include <algorithm>
 #include <format>
 
@@ -17,12 +19,15 @@ namespace DxfIO::File
     const std::span<const Tags::Tag> here = Rest();
     if (here.empty())
     {
-      return std::unexpected{Failure{.Line = Line(), .What = "group 0 expected, found none"}};
+      return std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                     .Line = Located(Line()),
+                                     .What = "group 0 expected, found none"}};
     }
     if (here.front().Code != 0)
     {
       return std::unexpected{Failure{
-          .Line = Line(),
+          .Code = FailureCode::Damaged,
+          .Line = Located(Line()),
           .What = std::format("group 0 expected, found group {}", here.front().Code),
       }};
     }
@@ -40,7 +45,9 @@ namespace DxfIO::File
     if (one && one->Name != name)
     {
       return std::unexpected{
-          Failure{.Line = at, .What = std::format("{} expected, found {}", name, one->Name)}};
+          Failure{.Code = FailureCode::Damaged,
+                  .Line = Located(at),
+                  .What = std::format("{} expected, found {}", name, one->Name)}};
     }
     return one;
   }
@@ -59,7 +66,9 @@ namespace DxfIO::File
     }
     if (Done())
     {
-      return std::unexpected{Failure{.Line = Line(), .What = std::format("{} missing", end)}};
+      return std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                     .Line = Located(Line()),
+                                     .What = std::format("{} missing", end)}};
     }
     return out;
   }

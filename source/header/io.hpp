@@ -7,8 +7,8 @@
 
 #include "dxfio/api.hpp"
 #include "dxfio/failure.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/header/header.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/version.hpp"
 
 #include <expected>

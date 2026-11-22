@@ -10,11 +10,6 @@
 namespace DxfIO::Tables
 {
   /**
-   *  The lens length, in millimeters, of a new view or viewport.
-   */
-  inline constexpr double Lens = 50;
-
-  /**
    *  A VIEW table record: a named view of the drawing, with the camera it is seen through.
    */
   struct DXFIO_API View
@@ -26,15 +21,15 @@ namespace DxfIO::Tables
     /**
      *  How tall the view is, in display coordinates. Group 40.
      */
-    double Height{1};
+    double ViewHeight{1};
     /**
      *  The center of the view, in display coordinates. Groups 10, 20.
      */
-    Vector Center{};
+    Vector ViewCenter{};
     /**
      *  How wide the view is, in display coordinates. Group 41.
      */
-    double Width{1};
+    double ViewWidth{1};
     /**
      *  The direction the view looks from, toward the target, in world coordinates. Groups 11, 21,
      *  31.
@@ -47,7 +42,7 @@ namespace DxfIO::Tables
     /**
      *  The lens length, in millimeters, of a perspective view. Group 42.
      */
-    double Focal{Lens};
+    double LensLength{50};
     /**
      *  The front clipping plane, as an offset from the target. Group 43.
      */
@@ -93,7 +88,7 @@ namespace DxfIO::Tables
     /**
      *  The visual style. Group 348, from R2007.
      */
-    Handle Style{};
+    Handle VisualStyle{};
 
     auto operator==(const View &) const -> bool = default;
   };

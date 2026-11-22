@@ -19,18 +19,18 @@
 namespace DxfIO
 {
   template <>
-  inline constexpr auto Shapes<Entities::Coil> = std::tuple{
+  inline constexpr auto Shapes<Entities::HelixData> = std::tuple{
       Fields::Subclass{.Marker = "AcDbHelix"},
-      Fields::Field{.Code = 90, .Member = &Entities::Coil::Major},
-      Fields::Field{.Code = 91, .Member = &Entities::Coil::Minor},
-      Fields::Field{.Code = 10, .Member = &Entities::Coil::Base},
-      Fields::Field{.Code = 11, .Member = &Entities::Coil::Start},
-      Fields::Field{.Code = 12, .Member = &Entities::Coil::Axis},
-      Fields::Field{.Code = 40, .Member = &Entities::Coil::Radius},
-      Fields::Field{.Code = 41, .Member = &Entities::Coil::Turns},
-      Fields::Field{.Code = 42, .Member = &Entities::Coil::Rise},
-      Fields::Field{.Code = 290, .Member = &Entities::Coil::Right},
-      Fields::Field{.Code = 280, .Member = &Entities::Coil::Constraint},
+      Fields::Field{.Code = 90, .Member = &Entities::HelixData::Major},
+      Fields::Field{.Code = 91, .Member = &Entities::HelixData::Minor},
+      Fields::Field{.Code = 10, .Member = &Entities::HelixData::BasePoint},
+      Fields::Field{.Code = 11, .Member = &Entities::HelixData::Start},
+      Fields::Field{.Code = 12, .Member = &Entities::HelixData::Axis},
+      Fields::Field{.Code = 40, .Member = &Entities::HelixData::Radius},
+      Fields::Field{.Code = 41, .Member = &Entities::HelixData::Turns},
+      Fields::Field{.Code = 42, .Member = &Entities::HelixData::Rise},
+      Fields::Field{.Code = 290, .Member = &Entities::HelixData::RightHanded},
+      Fields::Field{.Code = 280, .Member = &Entities::HelixData::Constraint},
   };
 
   template <>
@@ -42,8 +42,8 @@ namespace DxfIO
           .Fields = Shapes<Entities::Curve>,
       },
       Fields::Part{
-          .Member = &Entities::Helix::Coil,
-          .Fields = Shapes<Entities::Coil>,
+          .Member = &Entities::Helix::Data,
+          .Fields = Shapes<Entities::HelixData>,
       },
   };
 

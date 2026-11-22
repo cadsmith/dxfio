@@ -16,9 +16,31 @@
 #    endif
 #  endif
 #endif
+== dxfio/appearance.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/colors.hpp"
+#include "dxfio/drawing.hpp"
+#include "dxfio/entities/record.hpp"
+#include "dxfio/lineweight.hpp"
+#include "dxfio/symbol.hpp"
+#include <optional>
+namespace DxfIO
+{
+  struct DXFIO_API Appearance
+  {
+    Symbol Layer{"0"};
+    int Color{Colors::White};
+    std::optional<int> Rgb{};
+    Symbol             Linetype{"Continuous"};
+    DxfIO::Lineweight  Lineweight{DxfIO::Lineweight::Default};
+    auto operator==(const Appearance &) const -> bool = default;
+  };
+  [[nodiscard]] DXFIO_API auto AppearanceOf(const Drawing &drawing, const Entities::Record &record,
+                                            const Appearance *outer) -> Appearance;
+}
 == dxfio/audit/audit.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/handle.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -46,14 +68,14 @@ namespace DxfIO::Audit
     [[nodiscard]] auto Errors() const -> std::size_t;
     [[nodiscard]] auto Warnings() const -> std::size_t;
   };
-  [[nodiscard]] DXFIO_API auto Check(const Document &drawing) -> Report;
-  DXFIO_API auto Repair(Document &drawing) -> Report;
+  [[nodiscard]] DXFIO_API auto Check(const Drawing &drawing) -> Report;
+  DXFIO_API auto Repair(Drawing &drawing) -> Report;
 }
 == dxfio/base.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/brace.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/handle.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/xdata.hpp"
 #include <vector>
 namespace DxfIO
@@ -66,18 +88,18 @@ namespace DxfIO
     std::vector<Handle> Reactors{};
     std::vector<Brace> Braces{};
     std::vector<Xdata> Extended{};
-    std::vector<Group> Extra{};
+    std::vector<Tag> Extra{};
     auto operator==(const Base &) const -> bool = default;
   };
 }
-== dxfio/blocks/begin.hpp
+== dxfio/blocks/block.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
 #include <string>
 namespace DxfIO::Blocks
 {
-  struct DXFIO_API Begin
+  struct DXFIO_API Block
   {
     Entities::Record Record{};
     std::string Name{};
@@ -85,33 +107,33 @@ namespace DxfIO::Blocks
     Vector Origin{};
     std::string Path{};
     std::string Description{};
-    auto operator==(const Begin &) const -> bool = default;
-  };
-}
-== dxfio/blocks/blocks.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/blocks/begin.hpp"
-#include "dxfio/blocks/end.hpp"
-#include "dxfio/entity.hpp"
-namespace DxfIO::Blocks
-{
-  struct DXFIO_API Block
-  {
-    Blocks::Begin Begin{};
-    DxfIO::Entities::List Entities{};
-    Blocks::End End{};
     auto operator==(const Block &) const -> bool = default;
   };
 }
-== dxfio/blocks/end.hpp
+== dxfio/blocks/definition.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/blocks/block.hpp"
+#include "dxfio/blocks/endblk.hpp"
+#include "dxfio/entity.hpp"
+namespace DxfIO::Blocks
+{
+  struct DXFIO_API Definition
+  {
+    Blocks::Block Block{};
+    DxfIO::Entities::List Entities{};
+    Blocks::EndBlk EndBlk{};
+    auto operator==(const Definition &) const -> bool = default;
+  };
+}
+== dxfio/blocks/endblk.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
 namespace DxfIO::Blocks
 {
-  struct DXFIO_API End
+  struct DXFIO_API EndBlk
   {
     Entities::Record Record{};
-    auto operator==(const End &) const -> bool = default;
+    auto operator==(const EndBlk &) const -> bool = default;
   };
 }
 == dxfio/boxed.hpp
@@ -199,7 +221,7 @@ namespace DxfIO
 }
 == dxfio/brace.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO
@@ -207,16 +229,46 @@ namespace DxfIO
   struct DXFIO_API Brace
   {
     std::string Name{};
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Brace &) const -> bool = default;
   };
+}
+== dxfio/color.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/entities/record.hpp"
+#include <cstdint>
+#include <optional>
+namespace DxfIO
+{
+  enum class ColorMethod : std::uint8_t
+  {
+    ByLayer = 0xC0,
+    ByBlock = 0xC1,
+    Rgb     = 0xC2,
+    Index   = 0xC3,
+  };
+  enum class TransparencyMethod : std::uint8_t
+  {
+    ByLayer = 0,
+    ByBlock = 1,
+    Alpha   = 2,
+  };
+  [[nodiscard]] DXFIO_API auto MethodOf(const Entities::Record &record) -> ColorMethod;
+  [[nodiscard]] DXFIO_API auto RgbOf(const Entities::Record &record)
+      -> std::optional<std::uint32_t>;
+  [[nodiscard]] DXFIO_API auto TransparencyMethodOf(const Entities::Record &record)
+      -> std::optional<TransparencyMethod>;
+  [[nodiscard]] DXFIO_API auto AlphaOf(const Entities::Record &record)
+      -> std::optional<std::uint8_t>;
 }
 == dxfio/colors.hpp
 namespace DxfIO::Colors
 {
   inline constexpr int White = 7;
-  inline constexpr int Byblock = 0;
-  inline constexpr int Bylayer = 256;
+  inline constexpr int ByBlock = 0;
+  inline constexpr int ByLayer = 256;
+  inline constexpr int PackedByLayer = -1073741824;
+  inline constexpr int PackedByBlock = -1056964608;
 }
 == dxfio/corners.hpp
 #include "dxfio/vector.hpp"
@@ -227,16 +279,17 @@ namespace DxfIO
 }
 == dxfio/create.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/version.hpp"
 namespace DxfIO
 {
-  [[nodiscard]] DXFIO_API auto Create(Version release = Version::R2018) -> Document;
+  [[nodiscard]] DXFIO_API auto Create(Version release = Version::R2018) -> Drawing;
 }
-== dxfio/document.hpp
+== dxfio/drawing.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 #include "dxfio/entity.hpp"
+#include "dxfio/handle.hpp"
 #include "dxfio/header/header.hpp"
 #include "dxfio/object.hpp"
 #include "dxfio/raw.hpp"
@@ -256,43 +309,55 @@ namespace DxfIO
 #include <vector>
 namespace DxfIO
 {
-  struct DXFIO_API Document
+  struct DXFIO_API Drawing
   {
     std::vector<std::string> Order{};
     std::vector<Header::Variable> Header{};
     std::vector<Raw> Classes{};
-    Tables::Table<Tables::Vport> Vport{};
-    Tables::Table<Tables::Ltype> Ltype{};
+    Tables::Table<Tables::VPort> VPort{};
+    Tables::Table<Tables::LType> LType{};
     Tables::Table<Tables::Layer> Layer{};
     Tables::Table<Tables::Style> Style{};
     Tables::Table<Tables::View> View{};
     Tables::Table<Tables::Ucs> Ucs{};
-    Tables::Table<Tables::Appid> Appid{};
-    Tables::Table<Tables::Dimstyle> Dimstyle{};
+    Tables::Table<Tables::AppId> AppId{};
+    Tables::Table<Tables::DimStyle> DimStyle{};
     Tables::Table<Tables::BlockRecord> BlockRecord{};
     std::vector<Tables::Table<Unknown>> Loose{};
-    std::vector<Blocks::Block> Blocks{};
+    std::vector<Blocks::Definition> Blocks{};
     DxfIO::Entities::List Entities{};
     std::vector<Object> Objects{};
     std::vector<Section> Sections{};
-    auto operator==(const Document &) const -> bool = default;
+    auto operator==(const Drawing &) const -> bool = default;
   };
+  [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
+  [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
+  [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
+  [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
 }
 == dxfio/dxfio.hpp
+#include "dxfio/appearance.hpp"
 #include "dxfio/audit/audit.hpp"
+#include "dxfio/color.hpp"
 #include "dxfio/create.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/edit/add.hpp"
-#include "dxfio/edit/find.hpp"
 #include "dxfio/edit/handles.hpp"
 #include "dxfio/edit/space.hpp"
+#include "dxfio/flags.hpp"
+#include "dxfio/geometry/coordinates.hpp"
+#include "dxfio/geometry/transform.hpp"
+#include "dxfio/index.hpp"
+#include "dxfio/library.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/load.hpp"
 #include "dxfio/save.hpp"
 #include "dxfio/tables/face.hpp"
 #include "dxfio/version.hpp"
+#include "dxfio/view.hpp"
 == dxfio/edit/add.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/edit/space.hpp"
 #include "dxfio/entity.hpp"
 #include "dxfio/failure.hpp"
@@ -301,69 +366,30 @@ namespace DxfIO
 #include <string_view>
 namespace DxfIO::Edit
 {
-  DXFIO_API auto Add(Document &drawing, Entity one, Space space = Space::Model)
+  DXFIO_API auto Add(Drawing &drawing, Entity one, Space space = Space::Model)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Entity one, std::string_view block)
+  DXFIO_API auto Add(Drawing &drawing, Entity one, std::string_view block)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto AddBlock(Document &drawing, std::string_view name)
+  DXFIO_API auto AddBlock(Drawing &drawing, std::string_view name)
       -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Vport one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Ltype one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Layer one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Style one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::View one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Appid one) -> std::expected<Handle, Failure>;
-  DXFIO_API auto Add(Document &drawing, Tables::Dimstyle one) -> std::expected<Handle, Failure>;
-}
-== dxfio/edit/find.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/blocks/blocks.hpp"
-#include "dxfio/document.hpp"
-#include "dxfio/entity.hpp"
-#include "dxfio/handle.hpp"
-#include "dxfio/object.hpp"
-#include "dxfio/tables/table.hpp"
-#include <algorithm>
-#include <string_view>
-namespace DxfIO::Edit
-{
-  [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
-  [[nodiscard]] DXFIO_API auto FindEntity(Document &drawing, Handle self) -> Entity *;
-  [[nodiscard]] DXFIO_API auto FindEntity(const Document &drawing, Handle self) -> const Entity *;
-  [[nodiscard]] DXFIO_API auto FindObject(Document &drawing, Handle self) -> Object *;
-  [[nodiscard]] DXFIO_API auto FindObject(const Document &drawing, Handle self) -> const Object *;
-  [[nodiscard]] DXFIO_API auto FindBlock(Document &drawing, std::string_view name)
-      -> Blocks::Block *;
-  [[nodiscard]] DXFIO_API auto FindBlock(const Document &drawing, std::string_view name)
-      -> const Blocks::Block *;
-  template <class RecordT>
-    requires requires(const RecordT &record) { record.Record.Name; }
-  [[nodiscard]] auto Find(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
-  {
-    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
-    return found == table.Records.end() ? nullptr : &*found;
-  }
-  template <class RecordT>
-    requires requires(const RecordT &record) { record.Record.Name; }
-  [[nodiscard]] auto Find(const Tables::Table<RecordT> &table, std::string_view name)
-      -> const RecordT *
-  {
-    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
-                                            { return Same(record.Record.Name, name); });
-    return found == table.Records.end() ? nullptr : &*found;
-  }
+  DXFIO_API auto Add(Drawing &drawing, Tables::VPort one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::LType one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::Layer one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::Style one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::View one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::AppId one) -> std::expected<Handle, Failure>;
+  DXFIO_API auto Add(Drawing &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>;
 }
 == dxfio/edit/handles.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/handle.hpp"
 #include <expected>
 namespace DxfIO::Edit
 {
-  [[nodiscard]] DXFIO_API auto NewHandle(Document &drawing) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto NewHandle(Drawing &drawing) -> std::expected<Handle, Failure>;
 }
 == dxfio/edit/space.hpp
 #include <cstdint>
@@ -402,7 +428,7 @@ namespace DxfIO::Entities
 #include <string>
 namespace DxfIO::Entities
 {
-  struct DXFIO_API Attdef
+  struct DXFIO_API AttDef
   {
     Entities::Record Record{};
     Boxed<Entities::Lettering> Lettering{};
@@ -411,9 +437,9 @@ namespace DxfIO::Entities
     Symbol Tag{};
     int Flags{};
     int Length{};
-    int Vertical{};
+    VerticalAlignment Vertical{};
     bool Locked{};
-    auto operator==(const Attdef &) const -> bool = default;
+    auto operator==(const AttDef &) const -> bool = default;
   };
 }
 == dxfio/entities/attrib.hpp
@@ -431,7 +457,7 @@ namespace DxfIO::Entities
     Symbol Tag{};
     int Flags{};
     int Length{};
-    int Vertical{};
+    VerticalAlignment Vertical{};
     bool Locked{};
     auto operator==(const Attrib &) const -> bool = default;
   };
@@ -458,8 +484,9 @@ namespace DxfIO::Entities
 #include "dxfio/entities/dimension/measure.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
-#include <string>
+#include <cstddef>
 #include <variant>
+#include <vector>
 namespace DxfIO::Entities
 {
   namespace Forms
@@ -478,13 +505,13 @@ namespace DxfIO::Entities
       double Angle{};
       auto operator==(const Aligned &) const -> bool = default;
     };
-    struct DXFIO_API Angular
+    struct DXFIO_API Angular2Line
     {
-      Vector Start{};
-      Vector End{};
-      Vector From{};
-      Vector To{};
-      auto operator==(const Angular &) const -> bool = default;
+      Vector FirstStart{};
+      Vector FirstEnd{};
+      Vector SecondStart{};
+      Vector ArcPoint{};
+      auto operator==(const Angular2Line &) const -> bool = default;
     };
     struct DXFIO_API Diameter
     {
@@ -498,12 +525,12 @@ namespace DxfIO::Entities
       double Leader{};
       auto operator==(const Radial &) const -> bool = default;
     };
-    struct DXFIO_API Points
+    struct DXFIO_API Angular3Point
     {
       Vector Start{};
       Vector End{};
       Vector Vertex{};
-      auto operator==(const Points &) const -> bool = default;
+      auto operator==(const Angular3Point &) const -> bool = default;
     };
     struct DXFIO_API Ordinate
     {
@@ -511,55 +538,56 @@ namespace DxfIO::Entities
       Vector Leader{};
       auto operator==(const Ordinate &) const -> bool = default;
     };
-    using Form = std::variant<Linear, Aligned, Angular, Diameter, Radial, Points, Ordinate>;
+    using Form =
+        std::variant<Linear, Aligned, Angular2Line, Diameter, Radial, Angular3Point, Ordinate>;
   }
-  struct DXFIO_API Figure
+  struct DXFIO_API DimensionData
   {
     Entities::Measure Measure{};
     Forms::Form Form{};
-    auto operator==(const Figure &) const -> bool = default;
+    auto operator==(const DimensionData &) const -> bool = default;
   };
   struct DXFIO_API Dimension
   {
     Entities::Record Record{};
-    Boxed<Entities::Figure> Figure{};
+    Boxed<Entities::DimensionData> Data{};
     auto operator==(const Dimension &) const -> bool = default;
   };
-  struct DXFIO_API Bend
+  struct DXFIO_API ArcDimensionData
   {
     Entities::Measure Measure{};
     Vector Start{};
     Vector End{};
     Vector Center{};
     int Partial{};
-    double From{};
-    double To{};
-    int Led{};
-    Vector Near{};
-    Vector Far{};
-    auto operator==(const Bend &) const -> bool = default;
+    double StartAngle{};
+    double EndAngle{};
+    int HasLeader{};
+    Vector FirstLeaderPoint{};
+    Vector SecondLeaderPoint{};
+    auto operator==(const ArcDimensionData &) const -> bool = default;
   };
   struct DXFIO_API ArcDimension
   {
     Entities::Record Record{};
-    std::string Picture{};
-    Boxed<Entities::Bend> Bend{};
+    std::vector<std::byte> Picture{};
+    Boxed<Entities::ArcDimensionData> Data{};
     auto operator==(const ArcDimension &) const -> bool = default;
   };
-  struct DXFIO_API Jog
+  struct DXFIO_API LargeRadialDimensionData
   {
     Entities::Measure Measure{};
     Vector Chord{};
     Vector Center{};
-    Vector Turn{};
-    double Angle{};
-    auto operator==(const Jog &) const -> bool = default;
+    Vector JogPoint{};
+    double JogAngle{};
+    auto operator==(const LargeRadialDimensionData &) const -> bool = default;
   };
   struct DXFIO_API LargeRadialDimension
   {
     Entities::Record Record{};
-    std::string Picture{};
-    Boxed<Entities::Jog> Jog{};
+    std::vector<std::byte> Picture{};
+    Boxed<Entities::LargeRadialDimensionData> Data{};
     auto operator==(const LargeRadialDimension &) const -> bool = default;
   };
 }
@@ -571,28 +599,26 @@ namespace DxfIO::Entities
 #include <string>
 namespace DxfIO::Entities
 {
-  inline constexpr int MiddleCenter = 5;
-  inline constexpr double Unmeasured = -1;
   struct DXFIO_API Measure
   {
     int Version{};
     Symbol Block{};
-    Vector Point{};
-    Vector Middle{};
-    std::optional<Vector> Clone{};
+    Vector DefinitionPoint{};
+    Vector TextMiddle{};
+    std::optional<Vector> CloneInsertion{};
     int Flags{};
     std::string Text{};
-    int Attachment{MiddleCenter};
-    std::optional<int> Spacing{};
-    std::optional<double> Factor{};
-    double Measured{Unmeasured};
-    int Above{};
-    int First{};
-    int Second{};
+    int Attachment{5};
+    std::optional<int> LineSpacingStyle{};
+    std::optional<double> LineSpacingFactor{};
+    double Measured{-1};
+    int Unknown1{};
+    int FlipFirst{};
+    int FlipSecond{};
     std::optional<double> Oblique{};
-    std::optional<double> Rotation{};
-    std::optional<double> Turned{};
-    std::optional<double> Horizontal{};
+    std::optional<double> TextRotation{};
+    std::optional<double> BlockRotation{};
+    std::optional<double> HorizontalDirection{};
     Vector Normal{Up};
     Symbol Style{};
     auto operator==(const Measure &) const -> bool = default;
@@ -602,10 +628,8 @@ namespace DxfIO::Entities
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
-#include <numbers>
 namespace DxfIO::Entities
 {
-  inline constexpr double Turn = 2 * std::numbers::pi;
   struct DXFIO_API Ellipse
   {
     Entities::Record Record{};
@@ -664,7 +688,7 @@ namespace DxfIO::Entities::Edges
     double Radius{};
     double Start{};
     double End{};
-    int Counter{};
+    int CounterClockwise{};
     auto operator==(const Arc &) const -> bool = default;
   };
   struct DXFIO_API Ellipse
@@ -674,7 +698,7 @@ namespace DxfIO::Entities::Edges
     double Ratio{};
     double Start{};
     double End{};
-    int Counter{};
+    int CounterClockwise{};
     auto operator==(const Ellipse &) const -> bool = default;
   };
   struct DXFIO_API Spline
@@ -683,10 +707,10 @@ namespace DxfIO::Entities::Edges
     int Rational{};
     int Periodic{};
     std::vector<double> Knots{};
-    std::vector<Node> Poles{};
-    std::vector<Place> Fits{};
-    Vector Start{};
-    Vector End{};
+    std::vector<Node> ControlPoints{};
+    std::vector<Place> FitPoints{};
+    Vector StartTangent{};
+    Vector EndTangent{};
     auto operator==(const Spline &) const -> bool = default;
   };
   using Edge = std::variant<Line, Arc, Ellipse, Boxed<Spline>>;
@@ -698,22 +722,22 @@ namespace DxfIO::Entities::Edges
 #include <vector>
 namespace DxfIO::Entities
 {
-  struct DXFIO_API Stop
+  struct DXFIO_API GradientColor
   {
     double Place{};
     std::optional<int> Color{};
     std::optional<int> Rgb{};
-    auto operator==(const Stop &) const -> bool = default;
+    auto operator==(const GradientColor &) const -> bool = default;
   };
   struct DXFIO_API Gradient
   {
     int Shown{};
-    int Reserved{};
+    int Unknown1{};
     double Angle{};
     double Shift{};
     int Single{};
     double Tint{};
-    std::vector<Stop> Stops{};
+    std::vector<GradientColor> Colors{};
     std::string Name{};
     auto operator==(const Gradient &) const -> bool = default;
   };
@@ -731,7 +755,7 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  struct DXFIO_API Stripe
+  struct DXFIO_API PatternLine
   {
     double Angle{};
     double X{};
@@ -739,9 +763,9 @@ namespace DxfIO::Entities
     double Run{};
     double Rise{};
     std::vector<double> Dashes{};
-    auto operator==(const Stripe &) const -> bool = default;
+    auto operator==(const PatternLine &) const -> bool = default;
   };
-  struct DXFIO_API Fill
+  struct DXFIO_API HatchData
   {
     Vector Elevation{};
     Vector Normal{Up};
@@ -754,16 +778,16 @@ namespace DxfIO::Entities
     double Angle{};
     double Scale{1};
     int Doubled{};
-    std::vector<Stripe> Stripes{};
+    std::vector<PatternLine> PatternLines{};
     std::optional<double> Pixel{};
     std::vector<Edges::Place> Seeds{};
     std::optional<Entities::Gradient> Gradient{};
-    auto operator==(const Fill &) const -> bool = default;
+    auto operator==(const HatchData &) const -> bool = default;
   };
   struct DXFIO_API Hatch
   {
     Entities::Record Record{};
-    Boxed<Entities::Fill> Fill{};
+    Boxed<Entities::HatchData> Data{};
     auto operator==(const Hatch &) const -> bool = default;
   };
 }
@@ -791,29 +815,30 @@ namespace DxfIO::Entities
 #include "dxfio/entities/record.hpp"
 #include "dxfio/entities/spline.hpp"
 #include "dxfio/vector.hpp"
-#include <string>
+#include <cstddef>
+#include <vector>
 namespace DxfIO::Entities
 {
-  struct DXFIO_API Coil
+  struct DXFIO_API HelixData
   {
     int Major{};
     int Minor{};
-    Vector Base{};
+    Vector BasePoint{};
     Vector Start{};
     Vector Axis{Up};
     double Radius{1};
     double Turns{1};
     double Rise{1};
-    bool Right{true};
+    bool RightHanded{true};
     int Constraint{};
-    auto operator==(const Coil &) const -> bool = default;
+    auto operator==(const HelixData &) const -> bool = default;
   };
   struct DXFIO_API Helix
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Boxed<Entities::Curve> Curve{};
-    Entities::Coil Coil{};
+    Entities::HelixData Data{};
     auto operator==(const Helix &) const -> bool = default;
   };
 }
@@ -837,8 +862,8 @@ namespace DxfIO::Entities
     double Rotation{};
     std::optional<int> Columns{};
     std::optional<int> Rows{};
-    double Across{};
-    double Down{};
+    double ColumnSpacing{};
+    double RowSpacing{};
     Vector Extrusion{Up};
     Sequence<Attrib> Attributes{};
     auto operator==(const Insert &) const -> bool = default;
@@ -856,13 +881,12 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Unannotated = 3;
-  struct DXFIO_API Lead
+  struct DXFIO_API LeaderData
   {
     Symbol Style{};
     int Arrow{1};
     int Path{};
-    int Annotation{Unannotated};
+    int Annotation{3};
     int Direction{1};
     int Hook{};
     std::optional<double> Height{};
@@ -874,12 +898,12 @@ namespace DxfIO::Entities
     Vector Horizontal{.X = 1};
     Vector Block{};
     Vector Offset{};
-    auto operator==(const Lead &) const -> bool = default;
+    auto operator==(const LeaderData &) const -> bool = default;
   };
   struct DXFIO_API Leader
   {
     Entities::Record Record{};
-    Boxed<Entities::Lead> Lead{};
+    Boxed<Entities::LeaderData> Data{};
     auto operator==(const Leader &) const -> bool = default;
   };
 }
@@ -887,10 +911,27 @@ namespace DxfIO::Entities
 #include "dxfio/api.hpp"
 #include "dxfio/symbol.hpp"
 #include "dxfio/vector.hpp"
+#include <cstdint>
 #include <optional>
 #include <string>
 namespace DxfIO::Entities
 {
+  enum class HorizontalAlignment : std::int16_t
+  {
+    Left,
+    Center,
+    Right,
+    Aligned,
+    Middle,
+    Fit,
+  };
+  enum class VerticalAlignment : std::int16_t
+  {
+    Baseline,
+    Bottom,
+    Middle,
+    Top,
+  };
   struct DXFIO_API Lettering
   {
     double Thickness{};
@@ -902,7 +943,7 @@ namespace DxfIO::Entities
     double Oblique{};
     Symbol Style{"Standard"};
     int Generation{};
-    int Horizontal{};
+    HorizontalAlignment Horizontal{};
     std::optional<Vector> Alignment{};
     Vector Extrusion{Up};
     auto operator==(const Lettering &) const -> bool = default;
@@ -913,39 +954,40 @@ namespace DxfIO::Entities
 #include "dxfio/boxed.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
+#include <cstddef>
 #include <string>
+#include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Lamplight = 0xFFFFFF;
-  struct DXFIO_API Lamp
+  struct DXFIO_API LightData
   {
     int Version{1};
     std::string Name{};
     int Kind{2};
     bool Lit{true};
     int Color{7};
-    int Rgb{Lamplight};
+    int Rgb{0xFFFFFF};
     bool Glyph{};
     double Intensity{1};
     Vector Position{};
     Vector Target{};
     int Fading{};
     bool Limited{};
-    double Start{1};
-    double End{10};
+    double AttenuationStart{1};
+    double AttenuationEnd{10};
     double Hotspot{45};
     double Falloff{50};
-    bool Casting{true};
+    bool CastShadows{true};
     int Shading{};
     int Size{256};
     int Softness{1};
-    auto operator==(const Lamp &) const -> bool = default;
+    auto operator==(const LightData &) const -> bool = default;
   };
   struct DXFIO_API Light
   {
     Entities::Record Record{};
-    std::string Picture{};
-    Boxed<Entities::Lamp> Lamp{};
+    std::vector<std::byte> Picture{};
+    Boxed<Entities::LightData> Data{};
     auto operator==(const Light &) const -> bool = default;
   };
 }
@@ -968,12 +1010,19 @@ namespace DxfIO::Entities
 == dxfio/entities/lwpolyline.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
 #include "dxfio/widths.hpp"
+#include <cstdint>
 #include <optional>
 #include <vector>
 namespace DxfIO::Entities
 {
+  enum class LwPolylineFlags : std::uint8_t
+  {
+    Closed = 1,
+    ContinuousLinetype = 128,
+  };
   struct DXFIO_API LwPolyline
   {
     struct Vertex
@@ -998,13 +1047,13 @@ namespace DxfIO::Entities
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
 #include "dxfio/entities/record.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/vector.hpp"
-#include <string>
+#include <cstddef>
 #include <vector>
 namespace DxfIO::Entities
 {
-  struct DXFIO_API Net
+  struct DXFIO_API MeshData
   {
     int Version{2};
     int Blend{};
@@ -1014,14 +1063,14 @@ namespace DxfIO::Entities
     std::vector<int> Edges{};
     std::vector<double> Creases{};
     int Overridden{};
-    std::vector<Group> Overrides{};
-    auto operator==(const Net &) const -> bool = default;
+    std::vector<Tag> Overrides{};
+    auto operator==(const MeshData &) const -> bool = default;
   };
   struct DXFIO_API Mesh
   {
     Entities::Record Record{};
-    std::string Picture{};
-    Boxed<Entities::Net> Net{};
+    std::vector<std::byte> Picture{};
+    Boxed<Entities::MeshData> Data{};
     auto operator==(const Mesh &) const -> bool = default;
   };
 }
@@ -1050,7 +1099,7 @@ namespace DxfIO::Entities
     std::vector<Strand> Strands{};
     auto operator==(const Joint &) const -> bool = default;
   };
-  struct DXFIO_API Web
+  struct DXFIO_API MLineData
   {
     Symbol Style{};
     Handle Styled{};
@@ -1061,12 +1110,12 @@ namespace DxfIO::Entities
     Vector Start{};
     Vector Normal{Up};
     std::vector<Joint> Joints{};
-    auto operator==(const Web &) const -> bool = default;
+    auto operator==(const MLineData &) const -> bool = default;
   };
   struct DXFIO_API MLine
   {
     Entities::Record Record{};
-    Boxed<Entities::Web> Web{};
+    Boxed<Entities::MLineData> Data{};
     auto operator==(const MLine &) const -> bool = default;
   };
 }
@@ -1074,8 +1123,9 @@ namespace DxfIO::Entities
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
 #include "dxfio/entities/record.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/handle.hpp"
+#include "dxfio/tag.hpp"
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -1085,7 +1135,7 @@ namespace DxfIO::Entities
   struct DXFIO_API Geometry
   {
     std::optional<int> Version{};
-    std::vector<Group> Lines{};
+    std::vector<Tag> Lines{};
     std::optional<bool> Stored{};
     std::optional<std::string> Guid{};
     auto operator==(const Geometry &) const -> bool = default;
@@ -1093,28 +1143,28 @@ namespace DxfIO::Entities
   struct DXFIO_API Region
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Boxed<Entities::Geometry> Geometry{};
     auto operator==(const Region &) const -> bool = default;
   };
   struct DXFIO_API Body
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Boxed<Entities::Geometry> Geometry{};
     auto operator==(const Body &) const -> bool = default;
   };
   struct DXFIO_API Solid3d
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Boxed<Entities::Geometry> Geometry{};
     Handle History{};
     auto operator==(const Solid3d &) const -> bool = default;
   };
-  enum class Sheet : std::uint8_t
+  enum class SurfaceKind : std::uint8_t
   {
-    Plain,
+    Generic,
     Planar,
     Nurbs,
     Extruded,
@@ -1122,24 +1172,24 @@ namespace DxfIO::Entities
     Revolved,
     Swept,
   };
-  template <Sheet KindV>
+  template <SurfaceKind KindV>
   struct SurfaceOf
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Boxed<Entities::Geometry> Geometry{};
-    int Across{6};
-    int Along{6};
-    std::vector<Group> Tail{};
+    int UIsolines{6};
+    int VIsolines{6};
+    std::vector<Tag> Data{};
     auto operator==(const SurfaceOf &) const -> bool = default;
   };
-  using Surface = SurfaceOf<Sheet::Plain>;
-  using PlaneSurface = SurfaceOf<Sheet::Planar>;
-  using NurbSurface = SurfaceOf<Sheet::Nurbs>;
-  using ExtrudedSurface = SurfaceOf<Sheet::Extruded>;
-  using LoftedSurface = SurfaceOf<Sheet::Lofted>;
-  using RevolvedSurface = SurfaceOf<Sheet::Revolved>;
-  using SweptSurface = SurfaceOf<Sheet::Swept>;
+  using Surface = SurfaceOf<SurfaceKind::Generic>;
+  using PlaneSurface = SurfaceOf<SurfaceKind::Planar>;
+  using NurbSurface = SurfaceOf<SurfaceKind::Nurbs>;
+  using ExtrudedSurface = SurfaceOf<SurfaceKind::Extruded>;
+  using LoftedSurface = SurfaceOf<SurfaceKind::Lofted>;
+  using RevolvedSurface = SurfaceOf<SurfaceKind::Revolved>;
+  using SweptSurface = SurfaceOf<SurfaceKind::Swept>;
 }
 == dxfio/entities/mtext.hpp
 #include "dxfio/api.hpp"
@@ -1170,22 +1220,21 @@ namespace DxfIO::Entities
     std::vector<double> Heights{};
     auto operator==(const Columns &) const -> bool = default;
   };
-  inline constexpr int Styled = 5;
-  struct DXFIO_API Paragraph
+  struct DXFIO_API MTextData
   {
     Vector Position{};
     double Height{};
     double Width{};
     double Defined{};
     int Attachment{1};
-    int Flow{Styled};
+    int Flow{5};
     std::string Value{};
     Symbol Style{"Standard"};
     Vector Extrusion{Up};
     std::optional<Vector> Direction{};
     std::optional<double> Rotation{};
-    int Spacing{1};
-    double Factor{1};
+    int LineSpacingStyle{1};
+    double LineSpacingFactor{1};
     int Fill{};
     std::optional<int> Color{};
     std::optional<int> Rgb{};
@@ -1193,182 +1242,186 @@ namespace DxfIO::Entities
     std::optional<double> Margin{};
     std::optional<int> Transparency{};
     std::optional<Entities::Columns> Columns{};
-    auto operator==(const Paragraph &) const -> bool = default;
+    auto operator==(const MTextData &) const -> bool = default;
   };
   struct DXFIO_API MText
   {
     Entities::Record Record{};
-    Boxed<Entities::Paragraph> Paragraph{};
+    Boxed<Entities::MTextData> Data{};
     auto operator==(const MText &) const -> bool = default;
   };
 }
 == dxfio/entities/multileader.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/matrix.hpp"
 #include "dxfio/vector.hpp"
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
-namespace DxfIO::Entities
+namespace DxfIO::Entities::MultiLeaders
 {
-  inline constexpr int Inherited = -1073741824;
-  struct DXFIO_API Gap
+  struct DXFIO_API LineBreak
   {
     int Index{};
     Vector Start{};
     Vector End{};
-    auto operator==(const Gap &) const -> bool = default;
+    auto operator==(const LineBreak &) const -> bool = default;
   };
-  struct DXFIO_API Stem
+  struct DXFIO_API LeaderLine
   {
-    std::vector<Vector> Points{};
-    std::vector<Gap> Gaps{};
+    std::vector<Vector> Vertices{};
+    std::vector<LineBreak> Breaks{};
     int Index{};
     std::optional<int> Color{};
-    std::optional<int> Kind{};
+    std::optional<int> LeaderType{};
     Handle Linetype{};
     std::optional<int> Lineweight{};
-    std::optional<double> Arrow{};
-    Handle Head{};
+    std::optional<double> ArrowheadSize{};
+    Handle Arrowhead{};
     std::optional<int> Overrides{};
-    auto operator==(const Stem &) const -> bool = default;
+    auto operator==(const LeaderLine &) const -> bool = default;
   };
-  struct DXFIO_API Span
+  struct DXFIO_API DoglegBreak
   {
     Vector Start{};
     Vector End{};
-    auto operator==(const Span &) const -> bool = default;
+    auto operator==(const DoglegBreak &) const -> bool = default;
   };
-  struct DXFIO_API Branch
+  struct DXFIO_API LeaderRoot
   {
-    bool Lasting{true};
-    bool Bent{true};
-    Vector Last{};
-    Vector Dogleg{.X = 1};
-    std::vector<Span> Spans{};
+    bool HasLastPoint{true};
+    bool HasDoglegVector{true};
+    Vector LastPoint{};
+    Vector DoglegVector{.X = 1};
+    std::vector<DoglegBreak> Breaks{};
     int Index{};
-    double Length{};
-    std::vector<Stem> Stems{};
-    int Attachment{};
-    auto operator==(const Branch &) const -> bool = default;
+    double DoglegLength{};
+    std::vector<LeaderLine> Lines{};
+    int AttachmentDirection{};
+    auto operator==(const LeaderRoot &) const -> bool = default;
   };
-  struct DXFIO_API Note
+  struct DXFIO_API ContextData
   {
-    double Scale{1};
-    Vector Base{};
-    double Height{};
-    double Arrow{};
-    double Landing{};
-    int Left{1};
-    int Right{1};
-    int Align{};
-    int Attach{};
-    bool Texted{};
+    double ContentScale{1};
+    Vector ContentBasePoint{};
+    double TextHeight{};
+    double ArrowheadSize{};
+    double LandingGap{};
+    int TextLeftAttachment{1};
+    int TextRightAttachment{1};
+    int TextAlignment{};
+    int AttachmentType{};
+    bool HasMText{};
     std::string Text{};
-    Vector Normal{Up};
-    Handle Style{};
-    Vector Location{};
-    Vector Direction{.X = 1};
-    double Rotation{};
-    double Width{};
-    double Tall{};
-    double Spacing{1};
-    int Spaced{1};
-    int Color{Inherited};
-    int Attachment{1};
-    int Flow{5};
-    int Background{Inherited};
-    double Margin{};
-    int Transparency{};
-    bool Backed{};
-    bool Filled{};
-    int Columns{};
-    bool Grows{};
-    double Column{};
-    double Gutter{};
-    bool Reversed{};
-    std::vector<double> Heights{};
-    bool Breaks{};
-    bool Blocked{};
-    Handle Block{};
-    Vector Facing{Up};
-    Vector Placed{};
-    Vector Sized{.X = 1, .Y = 1, .Z = 1};
-    double Turned{};
-    int Tint{Inherited};
-    Matrix Frame{};
-    Vector Origin{};
-    Vector Across{.X = 1};
-    Vector Along{.Y = 1};
-    bool Flipped{};
-    std::vector<Branch> Branches{};
-    int Bottom{9};
-    int Top{9};
-    auto operator==(const Note &) const -> bool = default;
+    Vector TextNormal{Up};
+    Handle TextStyle{};
+    Vector TextLocation{};
+    Vector TextDirection{.X = 1};
+    double TextRotation{};
+    double BoundaryWidth{};
+    double BoundaryHeight{};
+    double LineSpacingFactor{1};
+    int LineSpacingStyle{1};
+    int TextColor{Colors::PackedByLayer};
+    int TextAttachment{1};
+    int FlowDirection{5};
+    int BackgroundColor{Colors::PackedByLayer};
+    double BackgroundScale{};
+    int BackgroundTransparency{};
+    bool BackgroundFill{};
+    bool BackgroundMask{};
+    int ColumnType{};
+    bool AutoHeight{};
+    double ColumnWidth{};
+    double ColumnGutter{};
+    bool ColumnFlowReversed{};
+    std::vector<double> ColumnHeights{};
+    bool WordBreak{};
+    bool HasBlock{};
+    Handle BlockContent{};
+    Vector BlockNormal{Up};
+    Vector BlockPosition{};
+    Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
+    double BlockRotation{};
+    int BlockColor{Colors::PackedByLayer};
+    Matrix BlockTransform{DxfIO::Identity};
+    Vector PlaneOrigin{};
+    Vector PlaneXAxis{.X = 1};
+    Vector PlaneYAxis{.Y = 1};
+    bool PlaneNormalReversed{};
+    std::vector<LeaderRoot> Leaders{};
+    int TextBottomAttachment{9};
+    int TextTopAttachment{9};
+    auto operator==(const ContextData &) const -> bool = default;
   };
-  struct DXFIO_API Tip
+  struct DXFIO_API Arrowhead
   {
     int Index{};
     Handle Block{};
-    auto operator==(const Tip &) const -> bool = default;
+    auto operator==(const Arrowhead &) const -> bool = default;
   };
-  struct DXFIO_API Label
+  struct DXFIO_API BlockAttribute
   {
     Handle Definition{};
     int Index{};
     double Width{};
     std::string Text{};
-    auto operator==(const Label &) const -> bool = default;
+    auto operator==(const BlockAttribute &) const -> bool = default;
   };
-  struct DXFIO_API Callout
+  struct DXFIO_API MLeader
   {
     int Version{2};
-    Note Context{};
+    ContextData Context{};
     Handle Style{};
     int Overrides{};
-    int Line{1};
-    int Color{Inherited};
+    int LeaderType{1};
+    int LineColor{Colors::PackedByLayer};
     Handle Linetype{};
     int Lineweight{-2};
-    bool Landing{true};
-    bool Bent{true};
-    double Length{};
-    Handle Arrow{};
-    double Size{};
-    int Content{2};
-    Handle Lettering{};
-    int Left{1};
-    int Right{1};
-    int Angle{1};
-    int Align{};
-    int Tint{Inherited};
-    bool Framed{};
-    Handle Block{};
-    int Shade{Inherited};
-    Vector Sized{.X = 1, .Y = 1, .Z = 1};
-    double Turned{};
-    int Connection{};
+    bool EnableLanding{true};
+    bool EnableDogleg{true};
+    double DoglegLength{};
+    Handle Arrowhead{};
+    double ArrowheadSize{};
+    int ContentType{2};
+    Handle TextStyle{};
+    int TextLeftAttachment{1};
+    int TextRightAttachment{1};
+    int TextAngleType{1};
+    int TextAlignment{};
+    int TextColor{Colors::PackedByLayer};
+    bool TextFrame{};
+    Handle BlockContent{};
+    int BlockColor{Colors::PackedByLayer};
+    Vector BlockScale{.X = 1, .Y = 1, .Z = 1};
+    double BlockRotation{};
+    int BlockConnection{};
     bool Annotative{};
-    std::vector<Tip> Tips{};
-    std::vector<Label> Labels{};
-    bool Negative{};
-    int Pinned{};
-    int Point{1};
-    double Factor{1};
-    int Attachment{};
-    int Bottom{9};
-    int Top{9};
-    bool Extended{};
-    auto operator==(const Callout &) const -> bool = default;
+    std::vector<MultiLeaders::Arrowhead> Arrowheads{};
+    std::vector<BlockAttribute> BlockAttributes{};
+    bool TextDirectionNegative{};
+    int IpeAlignment{};
+    int TextAttachmentPoint{1};
+    double OverallScale{1};
+    int TextAttachmentDirection{};
+    int TextBottomAttachment{9};
+    int TextTopAttachment{9};
+    bool ExtendToText{};
+    auto operator==(const MLeader &) const -> bool = default;
   };
+}
+namespace DxfIO::Entities
+{
   struct DXFIO_API MultiLeader
   {
     Entities::Record Record{};
-    std::string Picture{};
-    Boxed<Entities::Callout> Callout{};
+    std::vector<std::byte> Picture{};
+    Boxed<MultiLeaders::MLeader> MLeader{};
     auto operator==(const MultiLeader &) const -> bool = default;
   };
 }
@@ -1377,25 +1430,26 @@ namespace DxfIO::Entities
 #include "dxfio/boxed.hpp"
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
+#include <cstddef>
 #include <string>
+#include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Embedded = 2;
-  struct DXFIO_API Frame
+  struct DXFIO_API Ole2FrameData
   {
     int Version{2};
     std::string Description{};
     Vector Upper{};
     Vector Lower{};
-    int Kind{Embedded};
+    int Kind{2};
     int Space{};
-    std::string Data{};
-    auto operator==(const Frame &) const -> bool = default;
+    std::vector<std::byte> Data{};
+    auto operator==(const Ole2FrameData &) const -> bool = default;
   };
   struct DXFIO_API Ole2Frame
   {
     Entities::Record Record{};
-    Boxed<Entities::Frame> Frame{};
+    Boxed<Entities::Ole2FrameData> Data{};
     auto operator==(const Ole2Frame &) const -> bool = default;
   };
 }
@@ -1403,7 +1457,7 @@ namespace DxfIO::Entities
 #include <cstdint>
 namespace DxfIO::Entities
 {
-  enum class Overlay : std::uint8_t
+  enum class UnderlayKind : std::uint8_t
   {
     Pdf,
     Dwf,
@@ -1431,9 +1485,22 @@ namespace DxfIO::Entities
 #include "dxfio/entities/record.hpp"
 #include "dxfio/entities/sequence.hpp"
 #include "dxfio/entities/vertex.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
+#include <cstdint>
 namespace DxfIO::Entities
 {
+  enum class PolylineFlags : std::uint8_t
+  {
+    Closed      =  1,
+    CurveFit    =  2,
+    SplineFit   =  4,
+    Polyline3d  =  8,
+    PolygonMesh = 16,
+    ClosedN      = 32,
+    PolyfaceMesh = 64,
+    ContinuousLinetype = 128,
+  };
   struct DXFIO_API Polyline
   {
     Entities::Record Record{};
@@ -1441,8 +1508,8 @@ namespace DxfIO::Entities
     Vector Extrusion{Up};
     Sequence<Vertex> Vertices{};
     double Thickness{};
-    double Start{};
-    double End{};
+    double StartWidth{};
+    double EndWidth{};
     int Flags{};
     int Rows{};
     int Columns{};
@@ -1459,12 +1526,10 @@ namespace DxfIO::Entities
 #include "dxfio/entities/record.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
-#include <string>
+#include <cstddef>
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Displayed = 7;
-  inline constexpr int Halfway = 50;
   struct DXFIO_API Pixel
   {
     Vector Position{};
@@ -1474,32 +1539,32 @@ namespace DxfIO::Entities
   {
     int Version{};
     Vector Origin{};
-    Vector Across{};
-    Vector Down{};
+    Vector UVector{};
+    Vector VVector{};
     Vector Size{};
     Handle Definition{};
-    int Flags{Displayed};
+    int Flags{7};
     int Clipped{};
-    int Brightness{Halfway};
-    int Contrast{Halfway};
+    int Brightness{50};
+    int Contrast{50};
     int Fade{};
     bool Outside{};
     Handle Reactor{};
-    int Kind{1};
+    int ClipShape{1};
     std::vector<Pixel> Corners{};
     auto operator==(const Raster &) const -> bool = default;
   };
   struct DXFIO_API Image
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Boxed<Entities::Raster> Raster{};
     auto operator==(const Image &) const -> bool = default;
   };
   struct DXFIO_API Wipeout
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Boxed<Entities::Raster> Raster{};
     auto operator==(const Wipeout &) const -> bool = default;
   };
@@ -1523,7 +1588,7 @@ namespace DxfIO::Entities
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/symbol.hpp"
 #include <optional>
 #include <string>
@@ -1540,8 +1605,8 @@ namespace DxfIO::Entities
     std::optional<std::string> Book{};
     std::optional<int> Rgb{};
     std::optional<int> Transparency{};
-    int Color{Colors::Bylayer};
-    int Lineweight{Lineweights::Bylayer};
+    int Color{Colors::ByLayer};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::ByLayer};
     int Shadow{};
     bool Paper{};
     bool Hidden{};
@@ -1554,12 +1619,13 @@ namespace DxfIO::Entities
 #include "dxfio/entities/record.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
 namespace DxfIO::Entities
 {
-  struct DXFIO_API Cut
+  struct DXFIO_API SectionObjectData
   {
     int State{1};
     int Flags{};
@@ -1573,13 +1639,13 @@ namespace DxfIO::Entities
     std::vector<Vector> Vertices{};
     std::vector<Vector> Back{};
     Handle Settings{};
-    auto operator==(const Cut &) const -> bool = default;
+    auto operator==(const SectionObjectData &) const -> bool = default;
   };
   struct DXFIO_API SectionObject
   {
     Entities::Record Record{};
-    std::string Picture{};
-    Boxed<Entities::Cut> Cut{};
+    std::vector<std::byte> Picture{};
+    Boxed<Entities::SectionObjectData> Data{};
     auto operator==(const SectionObject &) const -> bool = default;
   };
 }
@@ -1588,10 +1654,10 @@ namespace DxfIO::Entities
 #include "dxfio/entities/record.hpp"
 namespace DxfIO::Entities
 {
-  struct DXFIO_API Seqend
+  struct DXFIO_API SeqEnd
   {
     Entities::Record Record{};
-    auto operator==(const Seqend &) const -> bool = default;
+    auto operator==(const SeqEnd &) const -> bool = default;
   };
 }
 == dxfio/entities/sequence.hpp
@@ -1605,7 +1671,7 @@ namespace DxfIO::Entities
   struct Sequence
   {
     std::vector<ChildT> Children{};
-    std::optional<Boxed<Entities::Seqend>> Closing{};
+    std::optional<Boxed<Entities::SeqEnd>> Closing{};
     auto operator==(const Sequence &) const -> bool = default;
   };
 }
@@ -1655,22 +1721,20 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr double Knotting = 1e-9;
-  inline constexpr double Framing = 1e-10;
   struct DXFIO_API Curve
   {
     std::optional<Vector> Normal{};
     int Flags{};
     int Degree{3};
-    double Knotted{Knotting};
-    double Framed{Framing};
-    std::optional<double> Fitted{};
-    std::optional<Vector> Start{};
-    std::optional<Vector> End{};
+    double KnotTolerance{1e-9};
+    double ControlTolerance{1e-10};
+    std::optional<double> FitTolerance{};
+    std::optional<Vector> StartTangent{};
+    std::optional<Vector> EndTangent{};
     std::vector<double> Knots{};
-    std::vector<Vector> Poles{};
+    std::vector<Vector> ControlPoints{};
     std::vector<double> Weights{};
-    std::vector<Vector> Fits{};
+    std::vector<Vector> FitPoints{};
     auto operator==(const Curve &) const -> bool = default;
   };
   struct DXFIO_API Spline
@@ -1683,23 +1747,23 @@ namespace DxfIO::Entities
 == dxfio/entities/table.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/symbol.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/vector.hpp"
-#include <string>
+#include <cstddef>
 #include <vector>
 namespace DxfIO::Entities
 {
   struct DXFIO_API AcadTable
   {
     Entities::Record Record{};
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     Symbol Block{""};
     Vector Position{};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
     double Rotation{};
     Vector Extrusion{Up};
-    std::vector<Group> Body{};
+    std::vector<Tag> Body{};
     auto operator==(const AcadTable &) const -> bool = default;
   };
 }
@@ -1713,7 +1777,7 @@ namespace DxfIO::Entities
   {
     Entities::Record Record{};
     Entities::Lettering Lettering{};
-    int Vertical{};
+    VerticalAlignment Vertical{};
     auto operator==(const Text &) const -> bool = default;
   };
 }
@@ -1760,55 +1824,65 @@ namespace DxfIO::Entities
 #include "dxfio/entities/record.hpp"
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
-#include <string>
+#include <cstddef>
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Visible = 2;
-  inline constexpr int Whole = 100;
   struct DXFIO_API Bound
   {
     Vector Position{};
     auto operator==(const Bound &) const -> bool = default;
   };
-  struct DXFIO_API Overlaid
+  struct DXFIO_API UnderlayData
   {
     Handle Definition{};
     Vector Position{};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
     double Rotation{};
     Vector Extrusion{Up};
-    int Flags{Visible};
-    int Contrast{Whole};
+    int Flags{2};
+    int Contrast{100};
     int Fade{};
     std::vector<Bound> Clip{};
-    auto operator==(const Overlaid &) const -> bool = default;
+    auto operator==(const UnderlayData &) const -> bool = default;
   };
-  template <Overlay KindV>
+  template <UnderlayKind KindV>
   struct UnderlayOf
   {
     Entities::Record Record{};
-    std::string Picture{};
-    Boxed<Entities::Overlaid> Overlaid{};
+    std::vector<std::byte> Picture{};
+    Boxed<Entities::UnderlayData> Data{};
     auto operator==(const UnderlayOf &) const -> bool = default;
   };
-  using PdfUnderlay = UnderlayOf<Overlay::Pdf>;
-  using DwfUnderlay = UnderlayOf<Overlay::Dwf>;
-  using DgnUnderlay = UnderlayOf<Overlay::Dgn>;
+  using PdfUnderlay = UnderlayOf<UnderlayKind::Pdf>;
+  using DwfUnderlay = UnderlayOf<UnderlayKind::Dwf>;
+  using DgnUnderlay = UnderlayOf<UnderlayKind::Dgn>;
 }
 == dxfio/entities/vertex.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/entities/record.hpp"
+#include "dxfio/flags.hpp"
 #include "dxfio/vector.hpp"
+#include <cstdint>
 #include <optional>
 namespace DxfIO::Entities
 {
+  enum class VertexFlags : std::uint8_t
+  {
+    CurveFitExtra = 1,
+    Tangent = 2,
+    SplineFit = 8,
+    ControlPoint = 16,
+    Polyline3d   = 32,
+    PolygonMesh = 64,
+    PolyfaceMesh = 128,
+  };
   struct DXFIO_API Vertex
   {
     Entities::Record Record{};
     Vector Position{};
-    std::optional<double> Start{};
-    std::optional<double> End{};
+    std::optional<double> StartWidth{};
+    std::optional<double> EndWidth{};
     double Bulge{};
     int Id{};
     int Flags{};
@@ -1832,57 +1906,53 @@ namespace DxfIO::Entities
 #include <vector>
 namespace DxfIO::Entities
 {
-  inline constexpr int Roundness = 100;
-  inline constexpr int Unflagged = 32768;
-  inline constexpr int Gridmajor = 5;
-  inline constexpr int Ambience = 250;
-  struct DXFIO_API Port
+  struct DXFIO_API ViewportData
   {
     Vector Center{};
     double Width{};
     double Height{};
     int Status{};
     int Id{};
-    Vector View{};
-    Vector Base{};
+    Vector ViewCenter{};
+    Vector SnapBase{};
     Vector Snap{};
     Vector Grid{};
     Vector Direction{Up};
     Vector Target{};
-    double Lens{};
+    double LensLength{};
     double Front{};
     double Back{};
-    double Extent{-1};
-    double Angle{};
+    double ViewHeight{-1};
+    double SnapAngle{};
     double Twist{};
-    int Zoom{Roundness};
+    int Zoom{100};
     std::vector<Handle> Frozen{};
-    int Flags{Unflagged};
+    int Flags{32768};
     Handle Clip{};
     std::string Sheet{};
     int Render{};
-    int Follows{1};
-    int Icon{};
+    int UcsPerViewport{1};
+    int UcsIconAtOrigin{};
     Tables::Axes Axes{};
-    int Shade{};
-    int Major{Gridmajor};
+    int ShadePlotMode{};
+    int GridMajor{5};
     Handle Background{};
-    Handle Plot{};
-    Handle Style{};
-    bool Lit{true};
-    int Lighting{1};
+    Handle ShadePlotObject{};
+    Handle VisualStyle{};
+    bool DefaultLighting{true};
+    int DefaultLightingType{1};
     double Brightness{};
     double Contrast{};
-    int Ambient{Ambience};
+    int Ambient{250};
     std::optional<int> Rgb{};
     std::string Book{};
     Handle Sun{};
-    auto operator==(const Port &) const -> bool = default;
+    auto operator==(const ViewportData &) const -> bool = default;
   };
   struct DXFIO_API Viewport
   {
     Entities::Record Record{};
-    Boxed<Entities::Port> Port{};
+    Boxed<Entities::ViewportData> Data{};
     auto operator==(const Viewport &) const -> bool = default;
   };
 }
@@ -1944,7 +2014,7 @@ namespace DxfIO::Entities
 namespace DxfIO
 {
   using Entity = std::variant<
-      Entities::Arc, Entities::Attdef, Entities::Body, Entities::Circle, Entities::ArcDimension,
+      Entities::Arc, Entities::AttDef, Entities::Body, Entities::Circle, Entities::ArcDimension,
       Entities::DgnUnderlay, Entities::Dimension, Entities::DwfUnderlay, Entities::Ellipse,
       Entities::ExtrudedSurface, Entities::Face3d, Entities::Hatch, Entities::Helix,
       Entities::Image, Entities::Insert, Entities::LargeRadialDimension, Entities::Leader,
@@ -1967,36 +2037,60 @@ namespace DxfIO
 == dxfio/failure.hpp
 #include "dxfio/api.hpp"
 #include <cstddef>
+#include <cstdint>
+#include <optional>
 #include <string>
 namespace DxfIO
 {
+  enum class FailureCode : std::uint8_t
+  {
+    Io,
+    Damaged,
+    Missing,
+    Exists,
+    Refused,
+  };
   struct DXFIO_API Failure
   {
-    std::size_t Line{};
+    FailureCode Code{};
+    std::optional<std::size_t> Line{};
     std::string What{};
     auto operator==(const Failure &) const -> bool = default;
   };
 }
-== dxfio/group.hpp
-#include "dxfio/api.hpp"
-#include "dxfio/handle.hpp"
-#include <cstdint>
-#include <string>
-#include <variant>
+== dxfio/flags.hpp
+#include <type_traits>
+#include <utility>
 namespace DxfIO
 {
-  struct DXFIO_API Chunk
+  template <class FlagT>
+    requires std::is_enum_v<FlagT>
+  [[nodiscard]] constexpr auto Has(int flags, FlagT flag) -> bool
   {
-    std::string Bytes{};
-    auto operator==(const Chunk &) const -> bool = default;
-  };
-  using Content = std::variant<std::string, std::int64_t, double, bool, Handle, Chunk>;
-  struct DXFIO_API Group
-  {
-    int Code{};
-    Content Value{};
-    auto operator==(const Group &) const -> bool = default;
-  };
+    const auto bits = static_cast<unsigned>(std::to_underlying(flag));
+    return (static_cast<unsigned>(flags) & bits) == bits;
+  }
+}
+== dxfio/geometry/coordinates.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/vector.hpp"
+namespace DxfIO::Geometry
+{
+  [[nodiscard]] DXFIO_API auto ToWorld(Vector point, Vector extrusion) -> Vector;
+  [[nodiscard]] DXFIO_API auto ToObject(Vector point, Vector extrusion) -> Vector;
+}
+== dxfio/geometry/transform.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/blocks/definition.hpp"
+#include "dxfio/entities/insert.hpp"
+#include "dxfio/matrix.hpp"
+#include "dxfio/vector.hpp"
+namespace DxfIO::Geometry
+{
+  [[nodiscard]] DXFIO_API auto TransformOf(const Entities::Insert   &insert,
+                                           const Blocks::Definition &block) -> Matrix;
+  [[nodiscard]] DXFIO_API auto Transform(const Matrix &transform, Vector point) -> Vector;
+  [[nodiscard]] DXFIO_API auto Compose(const Matrix &outer, const Matrix &inner) -> Matrix;
 }
 == dxfio/handle.hpp
 #include "dxfio/api.hpp"
@@ -2016,7 +2110,7 @@ namespace DxfIO
     constexpr auto operator<=>(const Handle &) const = default;
   };
   [[nodiscard]] DXFIO_API auto Hex(Handle one) -> std::string;
-  [[nodiscard]] DXFIO_API auto Parsed(std::string_view text) -> std::optional<Handle>;
+  [[nodiscard]] DXFIO_API auto ParseHandle(std::string_view text) -> std::optional<Handle>;
 }
 template <>
 struct std::hash<DxfIO::Handle>
@@ -2028,7 +2122,7 @@ struct std::hash<DxfIO::Handle>
 };
 == dxfio/header/header.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO::Header
@@ -2036,35 +2130,99 @@ namespace DxfIO::Header
   struct DXFIO_API Variable
   {
     std::string Name{};
-    std::vector<Group> Values{};
+    std::vector<Tag> Values{};
     auto operator==(const Variable &) const -> bool = default;
+  };
+}
+== dxfio/index.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/drawing.hpp"
+#include "dxfio/entity.hpp"
+#include "dxfio/handle.hpp"
+#include "dxfio/object.hpp"
+#include <cstdint>
+#include <unordered_map>
+namespace DxfIO
+{
+  class DXFIO_API Index
+  {
+  public:
+    explicit Index(const Drawing &drawing);
+    [[nodiscard]] auto Drawn() const -> const Drawing &;
+    [[nodiscard]] auto FindEntity(Handle self) const -> const Entity *;
+    [[nodiscard]] auto FindObject(Handle self) const -> const Object *;
+  private:
+    const Drawing                                    *m_Drawing;
+    std::unordered_map<std::uint64_t, const Entity *> m_Entities;
+    std::unordered_map<std::uint64_t, const Object *> m_Objects;
   };
 }
 == dxfio/issue.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/handle.hpp"
 #include <cstddef>
+#include <cstdint>
+#include <optional>
 #include <string>
 namespace DxfIO
 {
+  enum class IssueCode : std::uint8_t
+  {
+    Damaged,
+    Unknown,
+    OutOfRange,
+    NotKept,
+  };
   struct DXFIO_API Issue
   {
-    std::size_t Line{};
-    Handle Record{};
+    IssueCode Code{};
+    std::optional<std::size_t> Line{};
+    Handle Subject{};
     std::string What{};
     auto operator==(const Issue &) const -> bool = default;
   };
 }
-== dxfio/lineweights.hpp
-namespace DxfIO::Lineweights
+== dxfio/lineweight.hpp
+#include "dxfio/api.hpp"
+#include <cstdint>
+#include <optional>
+namespace DxfIO
 {
-  inline constexpr int Bylayer = -1;
-  inline constexpr int Byblock = -2;
-  inline constexpr int Standard = -3;
+  enum class Lineweight : std::int16_t
+  {
+    ByLayer = -1,
+    ByBlock = -2,
+    Default =  -3,
+    Mm000   =   0,
+    Mm005   =   5,
+    Mm009   =   9,
+    Mm013   =  13,
+    Mm015   =  15,
+    Mm018   =  18,
+    Mm020   =  20,
+    Mm025   =  25,
+    Mm030   =  30,
+    Mm035   =  35,
+    Mm040   =  40,
+    Mm050   =  50,
+    Mm053   =  53,
+    Mm060   =  60,
+    Mm070   =  70,
+    Mm080   =  80,
+    Mm090   =  90,
+    Mm100   = 100,
+    Mm106   = 106,
+    Mm120   = 120,
+    Mm140   = 140,
+    Mm158   = 158,
+    Mm200   = 200,
+    Mm211   = 211,
+  };
+  [[nodiscard]] DXFIO_API auto MillimetersOf(Lineweight lineweight) -> std::optional<double>;
 }
 == dxfio/load.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 #include <expected>
@@ -2076,35 +2234,27 @@ namespace DxfIO
 {
   struct DXFIO_API Loaded
   {
-    DxfIO::Document Document{};
+    DxfIO::Drawing Drawing{};
     std::vector<Issue> Issues{};
   };
-  struct DXFIO_API Loading
+  struct DXFIO_API LoadOptions
   {
     int Threads{0};
   };
-  [[nodiscard]] DXFIO_API auto Load(std::string_view bytes, const Loading &with = {})
+  [[nodiscard]] DXFIO_API auto Load(std::string_view bytes, const LoadOptions &with = {})
       -> std::expected<Loaded, Failure>;
-  [[nodiscard]] DXFIO_API auto Load(std::istream &from, const Loading &with = {})
+  [[nodiscard]] DXFIO_API auto Load(std::istream &from, const LoadOptions &with = {})
       -> std::expected<Loaded, Failure>;
-  [[nodiscard]] DXFIO_API auto LoadFile(const std::filesystem::path &file, const Loading &with = {})
+  [[nodiscard]] DXFIO_API auto LoadFile(const std::filesystem::path &file,
+                                        const LoadOptions           &with = {})
       -> std::expected<Loaded, Failure>;
 }
 == dxfio/matrix.hpp
-#include "dxfio/api.hpp"
 #include <array>
-#include <cstddef>
 namespace DxfIO
 {
-  inline constexpr std::size_t Side = 4;
-  struct DXFIO_API Matrix
-  {
-    std::array<double, Side * Side> Cells{
-        1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
-    };
-    auto operator==(const Matrix &) const -> bool = default;
-  };
-  inline constexpr Matrix Identity{};
+  using Matrix = std::array<double, 16>;
+  inline constexpr Matrix Identity{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 }
 == dxfio/object.hpp
 #include "dxfio/api.hpp"
@@ -2149,7 +2299,7 @@ namespace DxfIO
 == dxfio/objects/datatable.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -2159,7 +2309,7 @@ namespace DxfIO::Objects
   {
     int Kind{};
     std::string Name{};
-    std::vector<DxfIO::Group> Cells{};
+    std::vector<DxfIO::Tag> Cells{};
     auto operator==(const Column &) const -> bool = default;
   };
   enum class Edition : std::uint8_t
@@ -2211,7 +2361,7 @@ namespace DxfIO::Objects
   struct DXFIO_API Dictionary
   {
     DxfIO::Base Base{};
-    bool Hard{};
+    bool HardOwner{};
     int Cloning{1};
     std::vector<Objects::Entry> Entries{};
     auto operator==(const Dictionary &) const -> bool = default;
@@ -2295,7 +2445,6 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects
 {
-  inline constexpr Vector Limits{.X = 12, .Y = 9, .Z = 0};
   struct DXFIO_API Layout
   {
     DxfIO::Base Base{};
@@ -2304,7 +2453,7 @@ namespace DxfIO::Objects
     int Flags{1};
     int Order{};
     Vector Limmin{};
-    Vector Limmax{Limits};
+    Vector Limmax{.X = 12, .Y = 9, .Z = 0};
     Vector Insbase{};
     Vector Extmin{};
     Vector Extmax{};
@@ -2323,29 +2472,22 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects
 {
-  inline constexpr int Black = -1040187392;
-  inline constexpr int Scene = 0;
-  inline constexpr int Bitmap = 1;
-  inline constexpr int Box = 2;
-  inline constexpr int Tiled = 1;
-  inline constexpr int Manual = 1;
-  inline constexpr double Glossy = 0.5;
-  struct DXFIO_API Shade
+  struct DXFIO_API MaterialColor
   {
     int Method{};
     double Factor{1};
-    int Color{Black};
-    auto operator==(const Shade &) const -> bool = default;
+    int Color{-1040187392};
+    auto operator==(const MaterialColor &) const -> bool = default;
   };
   struct DXFIO_API Map
   {
     double Blend{1};
-    int Source{Bitmap};
+    int Source{1};
     std::string File{};
-    int Projection{Box};
-    int Tiling{Tiled};
-    int Automatic{Manual};
-    DxfIO::Matrix Transform{};
+    int Projection{2};
+    int Tiling{1};
+    int Automatic{1};
+    DxfIO::Matrix Transform{DxfIO::Identity};
     auto operator==(const Map &) const -> bool = default;
   };
   struct DXFIO_API Maps
@@ -2357,11 +2499,11 @@ namespace DxfIO::Objects
     Map Bump{};
     Map Refraction{
         .Blend      = 1,
-        .Source     = Scene,
+        .Source     = 0,
         .File       = {},
-        .Projection = Box,
-        .Tiling     = Tiled,
-        .Automatic  = Manual,
+        .Projection = 2,
+        .Tiling     = 1,
+        .Automatic  = 1,
         .Transform  = Identity,
     };
     auto operator==(const Maps &) const -> bool = default;
@@ -2371,10 +2513,10 @@ namespace DxfIO::Objects
     DxfIO::Base Base{};
     std::string Name{};
     std::string Description{};
-    Shade Ambient{};
-    Shade Diffuse{};
-    double Gloss{Glossy};
-    Shade Specular{};
+    MaterialColor Ambient{};
+    MaterialColor Diffuse{};
+    double Gloss{0.5};
+    MaterialColor Specular{};
     double Opacity{1};
     double Refraction{1};
     Boxed<Objects::Maps> Maps{};
@@ -2391,64 +2533,59 @@ namespace DxfIO::Objects
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/boxed.hpp"
+#include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/vector.hpp"
 #include <string>
-namespace DxfIO::Objects::Mleader
+namespace DxfIO::Objects::MLeaderStyles
 {
-  inline constexpr int PackedByblock = -1056964608;
-  inline constexpr double Margin = 2;
-  inline constexpr double Reach = 8;
-  inline constexpr double Size = 4;
-  inline constexpr double Breaking = 3.75;
-  inline constexpr int Centered = 9;
-  struct DXFIO_API Leader
+  struct DXFIO_API LeaderFormat
   {
-    int Order{};
-    int Points{2};
-    double First{};
-    double Second{};
-    int Type{1};
-    int Color{PackedByblock};
+    int DrawOrder{};
+    int MaxPoints{2};
+    double FirstSegmentAngle{};
+    double SecondSegmentAngle{};
+    int LeaderType{1};
+    int Color{Colors::PackedByBlock};
     Handle Linetype{};
-    int Lineweight{Lineweights::Byblock};
-    bool Landing{true};
-    double Gap{Margin};
-    bool Dogleg{true};
-    double Length{Reach};
-    Handle Arrow{};
-    double Size{Mleader::Size};
-    auto operator==(const Leader &) const -> bool = default;
+    int Lineweight{-2};
+    bool EnableLanding{true};
+    double LandingGap{2};
+    bool EnableDogleg{true};
+    double DoglegLength{8};
+    Handle Arrowhead{};
+    double ArrowheadSize{4};
+    auto operator==(const LeaderFormat &) const -> bool = default;
   };
-  struct DXFIO_API Text
+  struct DXFIO_API TextFormat
   {
-    std::string Content{};
+    std::string DefaultText{};
     Handle Style{};
-    int Left{1};
-    int Right{1};
-    int Angle{1};
+    int LeftAttachment{1};
+    int RightAttachment{1};
+    int AngleType{1};
     int Alignment{};
-    int Color{PackedByblock};
-    double Height{Size};
+    int Color{Colors::PackedByBlock};
+    double Height{4};
     bool Frame{};
-    bool Flush{};
-    double Space{Size};
-    int Direction{};
-    int Bottom{Centered};
-    int Top{Centered};
-    auto operator==(const Text &) const -> bool = default;
+    bool AlwaysLeft{};
+    double AlignSpace{4};
+    int AttachmentDirection{};
+    int BottomAttachment{9};
+    int TopAttachment{9};
+    auto operator==(const TextFormat &) const -> bool = default;
   };
-  struct DXFIO_API Block
+  struct DXFIO_API BlockFormat
   {
-    Handle Record{};
-    int Color{PackedByblock};
+    Handle Content{};
+    int Color{Colors::PackedByBlock};
     Vector Scale{.X = 1, .Y = 1, .Z = 1};
-    bool Scaled{true};
+    bool EnableScale{true};
     double Rotation{};
-    bool Rotated{true};
+    bool EnableRotation{true};
     int Connection{};
-    auto operator==(const Block &) const -> bool = default;
+    auto operator==(const BlockFormat &) const -> bool = default;
   };
 }
 namespace DxfIO::Objects
@@ -2457,17 +2594,17 @@ namespace DxfIO::Objects
   {
     DxfIO::Base Base{};
     int Revision{2};
-    int Content{2};
-    int Order{1};
+    int ContentType{2};
+    int DrawOrder{1};
     std::string Description{};
-    Boxed<Mleader::Leader> Leader{};
-    Boxed<Mleader::Text> Text{};
-    Boxed<Mleader::Block> Block{};
+    Boxed<MLeaderStyles::LeaderFormat> Leader{};
+    Boxed<MLeaderStyles::TextFormat> Text{};
+    Boxed<MLeaderStyles::BlockFormat> Block{};
     double Scale{1};
-    bool Overwrite{};
+    bool OverwriteProperty{};
     bool Annotative{};
-    double Breaks{Mleader::Breaking};
-    int Spare{};
+    double BreakGapSize{3.75};
+    int Unknown1{};
     auto operator==(const MLeaderStyle &) const -> bool = default;
   };
 }
@@ -2477,13 +2614,12 @@ namespace DxfIO::Objects
 #include "dxfio/colors.hpp"
 #include <string>
 #include <vector>
-namespace DxfIO::Objects::Mline
+namespace DxfIO::Objects::MLineStyles
 {
-  inline constexpr double Square = 90;
   struct DXFIO_API Element
   {
     double Offset{};
-    int Color{Colors::Bylayer};
+    int Color{Colors::ByLayer};
     std::string Linetype{"BYLAYER"};
     auto operator==(const Element &) const -> bool = default;
   };
@@ -2496,10 +2632,10 @@ namespace DxfIO::Objects
     std::string Name{};
     int Flags{};
     std::string Description{};
-    int Fill{Colors::Bylayer};
-    double Start{Mline::Square};
-    double End{Mline::Square};
-    std::vector<Mline::Element> Elements{};
+    int Fill{Colors::ByLayer};
+    double Start{90};
+    double End{90};
+    std::vector<MLineStyles::Element> Elements{};
     auto operator==(const MLineStyle &) const -> bool = default;
   };
 }
@@ -2520,11 +2656,6 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects
 {
-  inline constexpr int Plotted = 688;
-  inline constexpr int PlotLayout = 5;
-  inline constexpr int Actual = 16;
-  inline constexpr int Normal = 2;
-  inline constexpr int Dpi = 300;
   struct DXFIO_API Plot
   {
     std::string Name{};
@@ -2540,18 +2671,18 @@ namespace DxfIO::Objects
     Vector Origin{};
     Vector Lower{};
     Vector Upper{};
-    double Paper{1};
-    double Drawing{1};
-    int Flags{Plotted};
+    double PaperUnits{1};
+    double DrawingUnits{1};
+    int Flags{688};
     int Units{};
     int Rotation{};
-    int Type{PlotLayout};
+    int Type{5};
     std::string Style{};
-    int Standard{Actual};
+    int Standard{16};
     double Factor{1};
     int Shading{};
-    int Resolution{Normal};
-    int Dots{Dpi};
+    int Resolution{2};
+    int Dots{300};
     Vector Image{};
     auto operator==(const Plot &) const -> bool = default;
   };
@@ -2593,7 +2724,7 @@ namespace DxfIO::Objects
 #include "dxfio/handle.hpp"
 #include <optional>
 #include <vector>
-namespace DxfIO::Objects::Sortents
+namespace DxfIO::Objects::SortEntsTables
 {
   struct DXFIO_API Entry
   {
@@ -2608,7 +2739,7 @@ namespace DxfIO::Objects
   {
     DxfIO::Base Base{};
     Handle Block{};
-    std::vector<Sortents::Entry> Entries{};
+    std::vector<SortEntsTables::Entry> Entries{};
     auto operator==(const SortEntsTable &) const -> bool = default;
   };
 }
@@ -2616,30 +2747,27 @@ namespace DxfIO::Objects
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include <string>
 #include <vector>
-namespace DxfIO::Objects::Table
+namespace DxfIO::Objects::TableStyles
 {
-  inline constexpr int General = 512;
-  inline constexpr double Height = 4.5;
-  inline constexpr double Margin = 1.5;
   struct DXFIO_API Border
   {
-    int Lineweight{Lineweights::Byblock};
+    int Lineweight{-2};
     bool Visible{true};
     int Color{};
     auto operator==(const Border &) const -> bool = default;
   };
-  struct DXFIO_API Cell
+  struct DXFIO_API RowStyle
   {
     std::string Style{};
-    double Height{Table::Height};
+    double Height{4.5};
     int Alignment{1};
     int Color{};
     int Fill{Colors::White};
     bool Filled{};
-    int Type{General};
+    int Type{512};
     int Unit{};
     std::string Format{};
     Border Top{};
@@ -2648,7 +2776,7 @@ namespace DxfIO::Objects::Table
     Border Left{};
     Border Center{};
     Border Right{};
-    auto operator==(const Cell &) const -> bool = default;
+    auto operator==(const RowStyle &) const -> bool = default;
   };
 }
 namespace DxfIO::Objects
@@ -2660,11 +2788,11 @@ namespace DxfIO::Objects
     std::string Description{};
     int Flow{};
     int Flags{};
-    double Horizontal{Table::Margin};
-    double Vertical{Table::Margin};
-    bool Untitled{};
-    bool Headless{};
-    std::vector<Table::Cell> Cells{};
+    double Horizontal{1.5};
+    double Vertical{1.5};
+    bool TitleSuppressed{};
+    bool HeaderSuppressed{};
+    std::vector<TableStyles::RowStyle> Cells{};
     auto operator==(const TableStyle &) const -> bool = default;
   };
 }
@@ -2674,7 +2802,7 @@ namespace DxfIO::Objects
 #include <string>
 namespace DxfIO::Objects
 {
-  template <Entities::Overlay KindV>
+  template <Entities::UnderlayKind KindV>
   struct UnderlayDefinition
   {
     DxfIO::Base Base{};
@@ -2682,14 +2810,14 @@ namespace DxfIO::Objects
     std::string Name{};
     auto operator==(const UnderlayDefinition &) const -> bool = default;
   };
-  using PdfDefinition = UnderlayDefinition<Entities::Overlay::Pdf>;
-  using DwfDefinition = UnderlayDefinition<Entities::Overlay::Dwf>;
-  using DgnDefinition = UnderlayDefinition<Entities::Overlay::Dgn>;
+  using PdfDefinition = UnderlayDefinition<Entities::UnderlayKind::Pdf>;
+  using DwfDefinition = UnderlayDefinition<Entities::UnderlayKind::Dwf>;
+  using DgnDefinition = UnderlayDefinition<Entities::UnderlayKind::Dgn>;
 }
 == dxfio/objects/visualstyle.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <optional>
 #include <string>
 #include <vector>
@@ -2702,7 +2830,7 @@ namespace DxfIO::Objects
     int Kind{};
     std::optional<int> Version{};
     std::optional<bool> Internal{};
-    std::vector<DxfIO::Group> Properties{};
+    std::vector<DxfIO::Tag> Properties{};
     auto operator==(const VisualStyle &) const -> bool = default;
   };
 }
@@ -2721,7 +2849,7 @@ namespace DxfIO::Objects
 == dxfio/objects/xrecord.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <vector>
 namespace DxfIO::Objects
 {
@@ -2729,13 +2857,13 @@ namespace DxfIO::Objects
   {
     DxfIO::Base Base{};
     int Cloning{1};
-    std::vector<DxfIO::Group> Data{};
+    std::vector<DxfIO::Tag> Data{};
     auto operator==(const XRecord &) const -> bool = default;
   };
 }
 == dxfio/raw.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO
@@ -2743,13 +2871,13 @@ namespace DxfIO
   struct DXFIO_API Raw
   {
     std::string Type{};
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Raw &) const -> bool = default;
   };
 }
 == dxfio/save.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 #include "dxfio/version.hpp"
@@ -2760,7 +2888,7 @@ namespace DxfIO
 #include <vector>
 namespace DxfIO
 {
-  struct DXFIO_API Options
+  struct DXFIO_API SaveOptions
   {
     Version Release{Version::R2018};
     std::string Codepage{};
@@ -2772,18 +2900,18 @@ namespace DxfIO
     std::string Bytes{};
     std::vector<Issue> Issues{};
   };
-  [[nodiscard]] DXFIO_API auto Save(const Document &drawing, const Options &with = {})
+  [[nodiscard]] DXFIO_API auto Save(const Drawing &drawing, const SaveOptions &with = {})
       -> std::expected<Saved, Failure>;
-  [[nodiscard]] DXFIO_API auto Save(const Document &drawing, std::ostream &to,
-                                    const Options &with = {})
+  [[nodiscard]] DXFIO_API auto Save(const Drawing &drawing, std::ostream &to,
+                                    const SaveOptions &with = {})
       -> std::expected<std::vector<Issue>, Failure>;
-  [[nodiscard]] DXFIO_API auto SaveFile(const Document &drawing, const std::filesystem::path &file,
-                                        const Options &with = {})
+  [[nodiscard]] DXFIO_API auto SaveFile(const Drawing &drawing, const std::filesystem::path &file,
+                                        const SaveOptions &with = {})
       -> std::expected<std::vector<Issue>, Failure>;
 }
 == dxfio/section.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO
@@ -2791,7 +2919,7 @@ namespace DxfIO
   struct DXFIO_API Section
   {
     std::string Name{};
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Section &) const -> bool = default;
   };
 }
@@ -2842,10 +2970,10 @@ struct std::formatter<DxfIO::Symbol> : std::formatter<std::string_view>
 #include "dxfio/tables/record.hpp"
 namespace DxfIO::Tables
 {
-  struct DXFIO_API Appid
+  struct DXFIO_API AppId
   {
     Tables::Record Record{};
-    auto operator==(const Appid &) const -> bool = default;
+    auto operator==(const AppId &) const -> bool = default;
   };
 }
 == dxfio/tables/axes.hpp
@@ -2891,12 +3019,6 @@ namespace DxfIO::Tables
 #include <string>
 namespace DxfIO::Tables
 {
-  inline constexpr double Size = 0.18;
-  inline constexpr double Offset = 0.0625;
-  inline constexpr double Increment = 0.38;
-  inline constexpr double Mark = 0.09;
-  inline constexpr double Inch = 25.4;
-  inline constexpr double Jog = 45;
   struct DXFIO_API Arrows
   {
     std::string Dimblk{};
@@ -2904,23 +3026,23 @@ namespace DxfIO::Tables
     std::string Dimblk2{};
     auto operator==(const Arrows &) const -> bool = default;
   };
-  struct DXFIO_API Dimstyle
+  struct DXFIO_API DimStyle
   {
     Tables::Record Record{};
     Tables::Arrows Arrows{};
     std::string Dimpost{};
     std::string Dimapost{};
     double Dimscale{1};
-    double Dimasz{Size};
-    double Dimexo{Offset};
-    double Dimdli{Increment};
-    double Dimexe{Size};
+    double Dimasz{0.18};
+    double Dimexo{0.0625};
+    double Dimdli{0.38};
+    double Dimexe{0.18};
     double Dimrnd{};
     double Dimdle{};
     double Dimtp{};
     double Dimtm{};
     double Dimfxl{1};
-    double Dimjogang{Jog};
+    double Dimjogang{45};
     int Dimtfill{};
     int Dimtfillclr{};
     int Dimtol{};
@@ -2933,14 +3055,14 @@ namespace DxfIO::Tables
     int Dimzin{};
     int Dimazin{};
     int Dimarcsym{};
-    double Dimtxt{Size};
-    double Dimcen{Mark};
+    double Dimtxt{0.18};
+    double Dimcen{0.09};
     double Dimtsz{};
-    double Dimaltf{Inch};
+    double Dimaltf{25.4};
     double Dimlfac{1};
     double Dimtvp{};
     double Dimtfac{1};
-    double Dimgap{Mark};
+    double Dimgap{0.09};
     double Dimaltrnd{};
     int Dimalt{};
     int Dimaltd{2};
@@ -2981,7 +3103,7 @@ namespace DxfIO::Tables
     Handle Dimltex2{};
     int Dimlwd{-2};
     int Dimlwe{-2};
-    auto operator==(const Dimstyle &) const -> bool = default;
+    auto operator==(const DimStyle &) const -> bool = default;
   };
 }
 == dxfio/tables/face.hpp
@@ -3018,26 +3140,25 @@ namespace DxfIO::Tables
 #include "dxfio/api.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/symbol.hpp"
 #include "dxfio/tables/record.hpp"
 #include <optional>
 #include <string>
 namespace DxfIO::Tables
 {
-  inline constexpr int White = Colors::White;
   struct DXFIO_API Layer
   {
     Tables::Record Record{};
-    int Color{White};
+    int Color{Colors::White};
     Symbol Linetype{"Continuous"};
     bool Plot{true};
-    int Lineweight{Lineweights::Standard};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::Default};
     Handle Style{};
     Handle Material{};
     std::optional<int> Rgb{};
     std::optional<std::string> Book{};
-    Handle Spare{};
+    Handle Unknown1{};
     auto operator==(const Layer &) const -> bool = default;
   };
 }
@@ -3049,7 +3170,6 @@ namespace DxfIO::Tables
 #include <vector>
 namespace DxfIO::Tables
 {
-  inline constexpr int Aligned = 'A';
   struct DXFIO_API Dash
   {
     double Length{};
@@ -3063,14 +3183,14 @@ namespace DxfIO::Tables
     std::string Text{};
     auto operator==(const Dash &) const -> bool = default;
   };
-  struct DXFIO_API Ltype
+  struct DXFIO_API LType
   {
     Tables::Record Record{};
     std::string Description{};
-    int Alignment{Aligned};
+    int Alignment{'A'};
     double Length{};
     std::vector<Tables::Dash> Dashes{};
-    auto operator==(const Ltype &) const -> bool = default;
+    auto operator==(const LType &) const -> bool = default;
   };
 }
 == dxfio/tables/record.hpp
@@ -3093,7 +3213,6 @@ namespace DxfIO::Tables
 #include <string>
 namespace DxfIO::Tables
 {
-  inline constexpr double Last = 2.5;
   struct DXFIO_API Style
   {
     Tables::Record Record{};
@@ -3101,7 +3220,7 @@ namespace DxfIO::Tables
     double Width{1};
     double Oblique{};
     int Generation{};
-    double Previous{Last};
+    double LastHeight{2.5};
     std::string Font{"txt"};
     std::string Bigfont{};
     auto operator==(const Style &) const -> bool = default;
@@ -3147,16 +3266,15 @@ namespace DxfIO::Tables
 #include "dxfio/vector.hpp"
 namespace DxfIO::Tables
 {
-  inline constexpr double Lens = 50;
   struct DXFIO_API View
   {
     Tables::Record Record{};
-    double Height{1};
-    Vector Center{};
-    double Width{1};
+    double ViewHeight{1};
+    Vector ViewCenter{};
+    double ViewWidth{1};
     Vector Direction{.X = 0, .Y = 0, .Z = 1};
     Vector Target{};
-    double Focal{Lens};
+    double LensLength{50};
     double Front{};
     double Back{};
     double Twist{};
@@ -3167,7 +3285,7 @@ namespace DxfIO::Tables
     bool Plottable{};
     Handle Background{};
     Handle Section{};
-    Handle Style{};
+    Handle VisualStyle{};
     auto operator==(const View &) const -> bool = default;
   };
 }
@@ -3181,59 +3299,77 @@ namespace DxfIO::Tables
 #include <optional>
 namespace DxfIO::Tables
 {
-  inline constexpr double Snapunit = 10;
-  inline constexpr double Gridunit = 10;
-  inline constexpr int Viewres = 1000;
-  inline constexpr int Gridmajor = 5;
-  inline constexpr int Ambience = 250;
-  struct DXFIO_API Vport
+  struct DXFIO_API VPort
   {
     Tables::Record Record{};
     Vector Lower{};
     Vector Upper{.X = 1, .Y = 1, .Z = 0};
-    Vector Center{};
-    Vector Base{};
-    Vector Snap{.X = Snapunit, .Y = Snapunit, .Z = 0};
-    Vector Grid{.X = Gridunit, .Y = Gridunit, .Z = 0};
+    Vector ViewCenter{};
+    Vector SnapBase{};
+    Vector Snap{.X = 10, .Y = 10, .Z = 0};
+    Vector Grid{.X = 10, .Y = 10, .Z = 0};
     Vector Direction{.X = 0, .Y = 0, .Z = 1};
     Vector Target{};
-    double Height{1};
+    double ViewHeight{1};
     double Aspect{1};
-    double Focal{Lens};
+    double LensLength{50};
     double Front{};
     double Back{};
-    double Rotation{};
+    double SnapAngle{};
     double Twist{};
     int Mode{};
-    int Zoom{Viewres};
-    bool Fast{true};
-    int Icon{3};
-    bool Snapped{};
-    bool Gridded{true};
+    int Zoom{1000};
+    bool FastZoom{true};
+    int UcsIcon{3};
+    bool SnapOn{};
+    bool GridOn{true};
     bool Isometric{};
     int Isoplane{};
     int Render{};
-    bool Ucsvp{true};
+    bool UcsPerViewport{true};
     Tables::Axes Axes{};
-    Handle Style{};
-    int Display{3};
-    int Major{Gridmajor};
-    bool Lit{true};
-    int Lighting{1};
+    Handle VisualStyle{};
+    int GridDisplay{3};
+    int GridMajor{5};
+    bool DefaultLighting{true};
+    int DefaultLightingType{1};
     double Brightness{};
     double Contrast{};
-    int Ambient{Ambience};
+    int Ambient{250};
     std::optional<int> Rgb{};
     Handle Background{};
-    Handle Shadow{};
-    auto operator==(const Vport &) const -> bool = default;
+    Handle ShadePlotObject{};
+    auto operator==(const VPort &) const -> bool = default;
+  };
+}
+== dxfio/tag.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/handle.hpp"
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <variant>
+#include <vector>
+namespace DxfIO
+{
+  struct DXFIO_API Chunk
+  {
+    std::vector<std::byte> Bytes{};
+    auto operator==(const Chunk &) const -> bool = default;
+  };
+  using Content = std::variant<std::string, std::int64_t, double, bool, Handle, Chunk>;
+  struct DXFIO_API Tag
+  {
+    int Code{};
+    Content Value{};
+    auto operator==(const Tag &) const -> bool = default;
   };
 }
 == dxfio/unknown.hpp
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/symbol.hpp"
+#include "dxfio/tag.hpp"
 #include <vector>
 namespace DxfIO
 {
@@ -3241,12 +3377,13 @@ namespace DxfIO
   {
     Symbol Type{};
     DxfIO::Base Base{};
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Unknown &) const -> bool = default;
   };
 }
 == dxfio/vector.hpp
 #include "dxfio/api.hpp"
+#include <numbers>
 namespace DxfIO
 {
   struct DXFIO_API Vector
@@ -3258,6 +3395,7 @@ namespace DxfIO
   };
   inline constexpr Vector Right{.X = 1, .Y = 0, .Z = 0};
   inline constexpr Vector Up{.X = 0, .Y = 0, .Z = 1};
+  inline constexpr double Turn = 2.0 * std::numbers::pi;
 }
 == dxfio/version.hpp
 #include "dxfio/api.hpp"
@@ -3279,9 +3417,111 @@ namespace DxfIO
     R2013,
     R2018,
   };
-  [[nodiscard]] DXFIO_API auto Acadver(Version release) -> std::string_view;
-  [[nodiscard]] DXFIO_API auto Name(Version release) -> std::string_view;
-  [[nodiscard]] DXFIO_API auto Release(std::string_view code) -> std::optional<Version>;
+  [[nodiscard]] DXFIO_API auto AcadverOf(Version release) -> std::string_view;
+  [[nodiscard]] DXFIO_API auto NameOf(Version release) -> std::string_view;
+  [[nodiscard]] DXFIO_API auto ReleaseOf(std::string_view code) -> std::optional<Version>;
+}
+== dxfio/view.hpp
+#include "dxfio/api.hpp"
+#include "dxfio/blocks/definition.hpp"
+#include "dxfio/drawing.hpp"
+#include "dxfio/object.hpp"
+#include "dxfio/objects/dictionary.hpp"
+#include "dxfio/objects/layout.hpp"
+#include "dxfio/tables/block.hpp"
+#include "dxfio/tables/table.hpp"
+#include <algorithm>
+#include <concepts>
+#include <string_view>
+#include <type_traits>
+#include <vector>
+namespace DxfIO::View
+{
+  [[nodiscard]] DXFIO_API auto Same(std::string_view one, std::string_view other) -> bool;
+  [[nodiscard]] DXFIO_API auto Block(Drawing &drawing, std::string_view name)
+      -> Blocks::Definition *;
+  [[nodiscard]] DXFIO_API auto Block(const Drawing &drawing, std::string_view name)
+      -> const Blocks::Definition *;
+  template <class RecordT>
+    requires requires(const RecordT &record) { record.Record.Name; }
+  [[nodiscard]] auto Record(Tables::Table<RecordT> &table, std::string_view name) -> RecordT *
+  {
+    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
+                                            { return Same(record.Record.Name, name); });
+    return found == table.Records.end() ? nullptr : &*found;
+  }
+  template <class RecordT>
+    requires requires(const RecordT &record) { record.Record.Name; }
+  [[nodiscard]] auto Record(const Tables::Table<RecordT> &table, std::string_view name)
+      -> const RecordT *
+  {
+    const auto found = std::ranges::find_if(table.Records, [name](const RecordT &record) -> bool
+                                            { return Same(record.Record.Name, name); });
+    return found == table.Records.end() ? nullptr : &*found;
+  }
+  template <class RecordT, class DrawingT>
+    requires std::same_as<std::remove_const_t<DrawingT>, Drawing>
+  [[nodiscard]] auto TableOf(DrawingT &drawing) -> auto &
+  {
+    if constexpr (std::same_as<RecordT, Tables::VPort>)
+    {
+      return drawing.VPort;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::LType>)
+    {
+      return drawing.LType;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::Layer>)
+    {
+      return drawing.Layer;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::Style>)
+    {
+      return drawing.Style;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::View>)
+    {
+      return drawing.View;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::Ucs>)
+    {
+      return drawing.Ucs;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::AppId>)
+    {
+      return drawing.AppId;
+    }
+    else if constexpr (std::same_as<RecordT, Tables::DimStyle>)
+    {
+      return drawing.DimStyle;
+    }
+    else
+    {
+      static_assert(std::same_as<RecordT, Tables::BlockRecord>, "a kind of table record");
+      return drawing.BlockRecord;
+    }
+  }
+  template <class RecordT>
+  [[nodiscard]] auto Record(Drawing &drawing, std::string_view name) -> RecordT *
+  {
+    return Record(TableOf<RecordT>(drawing), name);
+  }
+  template <class RecordT>
+  [[nodiscard]] auto Record(const Drawing &drawing, std::string_view name) -> const RecordT *
+  {
+    return Record(TableOf<RecordT>(drawing), name);
+  }
+  [[nodiscard]] DXFIO_API auto ModelSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
+  [[nodiscard]] DXFIO_API auto PaperSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
+  [[nodiscard]] DXFIO_API auto Layouts(const Drawing &drawing)
+      -> std::vector<const Objects::Layout *>;
+  [[nodiscard]] DXFIO_API auto Layout(const Drawing &drawing, std::string_view name)
+      -> const Objects::Layout *;
+  [[nodiscard]] DXFIO_API auto Root(const Drawing &drawing) -> const Objects::Dictionary *;
+  [[nodiscard]] DXFIO_API auto Entry(const Drawing &drawing, const Objects::Dictionary &dictionary,
+                                     std::string_view name) -> const Object *;
+  [[nodiscard]] DXFIO_API auto Dictionary(const Drawing &drawing, std::string_view name)
+      -> const Objects::Dictionary *;
 }
 == dxfio/widths.hpp
 #include "dxfio/api.hpp"
@@ -3296,7 +3536,7 @@ namespace DxfIO
 }
 == dxfio/xdata.hpp
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 #include <string>
 #include <vector>
 namespace DxfIO
@@ -3304,7 +3544,7 @@ namespace DxfIO
   struct DXFIO_API Xdata
   {
     std::string Application{};
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
     auto operator==(const Xdata &) const -> bool = default;
   };
 }

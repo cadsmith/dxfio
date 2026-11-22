@@ -61,26 +61,26 @@ namespace DxfIO
   };
 
   template <>
-  inline constexpr auto Shapes<Tables::Ltype> = std::tuple{
+  inline constexpr auto Shapes<Tables::LType> = std::tuple{
       Tables::Opening,
       Fields::Subclass{.Marker = "AcDbLinetypeTableRecord"},
       Fields::Part{
-          .Member = &Tables::Ltype::Record,
+          .Member = &Tables::LType::Record,
           .Fields = Shapes<Tables::Record>,
       },
-      Fields::Field{.Code = 3, .Member = &Tables::Ltype::Description},
-      Fields::Field{.Code = 72, .Member = &Tables::Ltype::Alignment},
-      Fields::Count{.Code = 73, .Member = &Tables::Ltype::Dashes},
-      Fields::Field{.Code = 40, .Member = &Tables::Ltype::Length},
+      Fields::Field{.Code = 3, .Member = &Tables::LType::Description},
+      Fields::Field{.Code = 72, .Member = &Tables::LType::Alignment},
+      Fields::Count{.Code = 73, .Member = &Tables::LType::Dashes},
+      Fields::Field{.Code = 40, .Member = &Tables::LType::Length},
       Fields::Each{
           .Opener = 49,
-          .Member = &Tables::Ltype::Dashes,
+          .Member = &Tables::LType::Dashes,
           .Fields = Shapes<Tables::Dash>,
       },
   };
 
   template <>
-  inline constexpr std::string_view Type<Tables::Ltype> = "LTYPE";
+  inline constexpr std::string_view Type<Tables::LType> = "LTYPE";
 } // namespace DxfIO
 
 #endif /* DXFIO_TABLES_SHAPES_LINETYPE_HPP */

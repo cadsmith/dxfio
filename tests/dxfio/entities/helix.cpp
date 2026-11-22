@@ -32,16 +32,16 @@ namespace DxfIO::Entities
     const Helix one = Alikened(Sampled());
     CHECK(one.Curve->Degree       == 3);
     CHECK(one.Curve->Knots.size() == 58);
-    CHECK(one.Curve->Poles.size() == 54);
-    CHECK(one.Coil.Major          == 33);
-    CHECK(one.Coil.Base           == Vector{.X = 80});
-    CHECK(one.Coil.Start          == Vector{.X = 85});
-    CHECK(one.Coil.Axis           == Up);
-    CHECK(one.Coil.Radius         == 3);
-    CHECK(one.Coil.Turns          == 3);
-    CHECK(one.Coil.Rise           == doctest::Approx(10.0 / 3));
-    CHECK(one.Coil.Right);
-    CHECK(one.Coil.Constraint == 1);
+    CHECK(one.Curve->ControlPoints.size() == 54);
+    CHECK(one.Data.Major     == 33);
+    CHECK(one.Data.BasePoint == Vector{.X = 80});
+    CHECK(one.Data.Start     == Vector{.X = 85});
+    CHECK(one.Data.Axis      == Up);
+    CHECK(one.Data.Radius    == 3);
+    CHECK(one.Data.Turns     == 3);
+    CHECK(one.Data.Rise      == doctest::Approx(10.0 / 3));
+    CHECK(one.Data.RightHanded);
+    CHECK(one.Data.Constraint == 1);
     CHECK_FALSE(one.Picture.empty());
   }
 
@@ -50,16 +50,16 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened(Sampled(release), release).Coil.Turns == 3);
+      CHECK(Alikened(Sampled(release), release).Data.Turns == 3);
     }
   }
 
   TEST_CASE("helix: a fresh one stands up, one turn around z")
   {
     const Helix one{};
-    CHECK(one.Coil.Axis == Up);
-    CHECK(one.Coil.Right);
-    CHECK(one.Coil.Turns == 1);
+    CHECK(one.Data.Axis == Up);
+    CHECK(one.Data.RightHanded);
+    CHECK(one.Data.Turns == 1);
   }
 
   TEST_CASE("helix: named as DXF names it")

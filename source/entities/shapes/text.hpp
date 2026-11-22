@@ -23,7 +23,7 @@ namespace DxfIO
       Fields::Field{
           .Code     = 73,
           .Member   = &Entities::Text::Vertical,
-          .Fallback = 0,
+          .Fallback = Entities::VerticalAlignment::Baseline,
       },
   };
 

@@ -30,25 +30,25 @@ namespace DxfIO::Entities
 
     constexpr Handle Owner{.Value = 0x1f};
 
-    auto Marked(std::string name) -> Group
+    auto Marked(std::string name) -> Tag
     {
-      return Group{.Code = 100, .Value = std::move(name)};
+      return Tag{.Code = 100, .Value = std::move(name)};
     }
 
-    auto Flag(std::int64_t value) -> Group
+    auto Flag(std::int64_t value) -> Tag
     {
-      return Group{.Code = 67, .Value = value};
+      return Tag{.Code = 67, .Value = value};
     }
 
-    auto Layered() -> Group
+    auto Layered() -> Tag
     {
-      return Group{.Code = 8, .Value = std::string{"0"}};
+      return Tag{.Code = 8, .Value = std::string{"0"}};
     }
 
-    auto Claimed(std::vector<Group> groups) -> Unknown
+    auto Claimed(std::vector<Tag> groups) -> Unknown
     {
       Unknown out{};
-      out.Groups = std::move(groups);
+      out.Tags = std::move(groups);
       Entity one{out};
       Claim(one, Owner);
       REQUIRE(Paper(one));
@@ -92,18 +92,18 @@ namespace DxfIO::Entities
     sheet.Record.Paper = true;
     CHECK(Paper(Entity{sheet}));
     Unknown kept{};
-    kept.Groups.push_back(Group{.Code = 70, .Value = std::int64_t{1}});
+    kept.Tags.push_back(Tag{.Code = 70, .Value = std::int64_t{1}});
     CHECK_FALSE(Paper(Entity{kept}));
-    kept.Groups.push_back(Group{.Code = 67, .Value = std::int64_t{0}});
+    kept.Tags.push_back(Tag{.Code = 67, .Value = std::int64_t{0}});
     CHECK_FALSE(Paper(Entity{kept}));
-    kept.Groups.back().Value = std::int64_t{1};
+    kept.Tags.back().Value = std::int64_t{1};
     CHECK(Paper(Entity{kept}));
   }
 
   TEST_CASE("paper: a kept entity's 67 of its AcDbEntity part alone")
   {
     Unknown kept{};
-    kept.Groups = {Marked("AcDbEntity"), Layered(), Marked("AcDbThing"), Flag(1)};
+    kept.Tags = {Marked("AcDbEntity"), Layered(), Marked("AcDbThing"), Flag(1)};
     CHECK_FALSE(Paper(Entity{kept}));
   }
 
@@ -116,9 +116,9 @@ namespace DxfIO::Entities
     chain.Vertices.Children.front().Record.Base.Self = Handle{0x40};
     chain.Vertices.Children.back().Record.Base.Self  = Handle{0x30};
     CHECK(Top(Entity{chain}) == Handle{0x40});
-    Seqend closing{};
+    SeqEnd closing{};
     closing.Record.Base.Self = Handle{0x50};
-    chain.Vertices.Closing   = Boxed<Seqend>{closing};
+    chain.Vertices.Closing   = Boxed<SeqEnd>{closing};
     CHECK(Top(Entity{chain}) == Handle{0x50});
     Insert reference{};
     reference.Record.Base.Self = Handle{0x20};
@@ -146,9 +146,9 @@ namespace DxfIO::Entities
     {
       child.Record.Base.Owner = parent;
     }
-    Seqend closing{};
+    SeqEnd closing{};
     closing.Record.Base.Owner = parent;
-    chain.Vertices.Closing    = Boxed<Seqend>{closing};
+    chain.Vertices.Closing    = Boxed<SeqEnd>{closing};
     Entity whole{chain};
     Claim(whole, Owner);
     const auto &moved = std::get<Polyline>(whole);
@@ -163,7 +163,7 @@ namespace DxfIO::Entities
 
     Insert reference{};
     reference.Attributes.Children.resize(1);
-    reference.Attributes.Closing = Boxed<Seqend>{};
+    reference.Attributes.Closing = Boxed<SeqEnd>{};
     Entity tagged{reference};
     Claim(tagged, Owner);
     const auto &carried = std::get<Insert>(tagged);
@@ -173,19 +173,19 @@ namespace DxfIO::Entities
 
   TEST_CASE("claim: a kept entity's 67 first in its part, or raised there")
   {
-    CHECK(Claimed({Marked("AcDbEntity"), Layered(), Marked("AcDbThing")}).Groups
+    CHECK(Claimed({Marked("AcDbEntity"), Layered(), Marked("AcDbThing")}).Tags
           == std::vector{Marked("AcDbEntity"), Flag(1), Layered(), Marked("AcDbThing")});
-    CHECK(Claimed({Marked("AcDbEntity"), Flag(0), Layered()}).Groups
+    CHECK(Claimed({Marked("AcDbEntity"), Flag(0), Layered()}).Tags
           == std::vector{Marked("AcDbEntity"), Flag(1), Layered()});
-    CHECK(Claimed({Marked("AcDbEntity"), Flag(0), Flag(0)}).Groups
+    CHECK(Claimed({Marked("AcDbEntity"), Flag(0), Flag(0)}).Tags
           == std::vector{Marked("AcDbEntity"), Flag(1), Flag(1)});
-    CHECK(Claimed({Layered()}).Groups == std::vector{Flag(1), Layered()});
-    CHECK(Claimed({}).Groups          == std::vector{Flag(1)});
+    CHECK(Claimed({Layered()}).Tags == std::vector{Flag(1), Layered()});
+    CHECK(Claimed({}).Tags          == std::vector{Flag(1)});
   }
 
   TEST_CASE("claim: another subclass's 67 is not the flag")
   {
-    CHECK(Claimed({Marked("AcDbEntity"), Marked("AcDbThing"), Flag(0)}).Groups
+    CHECK(Claimed({Marked("AcDbEntity"), Marked("AcDbThing"), Flag(0)}).Tags
           == std::vector{Marked("AcDbEntity"), Flag(1), Marked("AcDbThing"), Flag(0)});
   }
 
@@ -230,7 +230,7 @@ namespace DxfIO::Entities
         const auto        read   = Load(theirs);
         REQUIRE(read);
         CHECK(read->Issues.empty());
-        const auto ours = Tests::Written(read->Document, Options{.Release = release});
+        const auto ours = Tests::Written(read->Drawing, SaveOptions{.Release = release});
         REQUIRE(ours);
         CHECK(Section(*ours) == Section(theirs));
       }
@@ -249,7 +249,7 @@ namespace DxfIO::Entities
         const auto        read   = Load(theirs);
         REQUIRE(read);
         CHECK(read->Issues.empty());
-        const auto ours = Tests::Written(read->Document, Options{.Release = release});
+        const auto ours = Tests::Written(read->Drawing, SaveOptions{.Release = release});
         REQUIRE(ours);
         CHECK(Alike(Section(*ours), Section(theirs)));
         CHECK(Alike(Section(*ours, "BLOCKS"), Section(theirs, "BLOCKS")));
@@ -262,22 +262,22 @@ namespace DxfIO::Entities
     const auto read = Load(Acad(Fixture("entities", Version::R12)));
     REQUIRE(read);
     CHECK(read->Issues.empty());
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     REQUIRE(all.size() == 29);
     CHECK(std::get<Line>(all.front()).End    == Vector{.X = 100, .Y = 50, .Z = 0});
     CHECK(std::get<Circle>(all.at(2)).Radius == 25);
-    const auto ours = Tests::Written(read->Document, Options{.Release = Version::R12});
+    const auto ours = Tests::Written(read->Drawing, SaveOptions{.Release = Version::R12});
     REQUIRE(ours);
     const auto again = Load(*ours);
     REQUIRE(again);
-    CHECK(again->Document.Entities == all);
+    CHECK(again->Drawing.Entities == all);
   }
 
   TEST_CASE("entities: each of a kind, none left unknown")
   {
     const auto read = Load(Acad(Fixture("entities", Version::R2018)));
     REQUIRE(read);
-    const List &all = read->Document.Entities;
+    const List &all = read->Drawing.Entities;
     REQUIRE(all.size() == 29);
     const auto loose = std::ranges::count_if(all, [](const Entity &one) -> bool
                                              { return std::holds_alternative<Unknown>(one); });
@@ -290,7 +290,7 @@ namespace DxfIO::Entities
     Seed     handles{Handle{0x40}};
     Polyline polyline{};
     polyline.Vertices.Children.emplace_back();
-    polyline.Vertices.Closing = Boxed<Seqend>{Seqend{}};
+    polyline.Vertices.Closing = Boxed<SeqEnd>{SeqEnd{}};
     Entity one{polyline};
     Own(one, handles, Handle{0x1F});
     const auto &held = std::get<Polyline>(one);
@@ -322,8 +322,8 @@ namespace DxfIO::Entities
     Polyline polyline{};
     polyline.Record.Base.Self  = Handle{0x40};
     polyline.Record.Base.Owner = Handle{0x1F};
-    polyline.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Groups = {}});
-    polyline.Record.Base.Extra.push_back(Group{.Code = 90, .Value = std::int64_t{1}});
+    polyline.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Tags = {}});
+    polyline.Record.Base.Extra.push_back(Tag{.Code = 90, .Value = std::int64_t{1}});
     polyline.Vertices.Children.emplace_back();
     polyline.Vertices.Children[0].Record.Base.Owner = Handle{0x40};
     Entity one{polyline};
@@ -345,7 +345,7 @@ namespace DxfIO::Entities
   TEST_CASE("entities: bare, its extended data goes when asked")
   {
     Line line{};
-    line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Groups = {}});
+    line.Record.Base.Extended.push_back(Xdata{.Application = "ACAD", .Tags = {}});
     Entity one{line};
     Bare(one, false);
     CHECK(Based(one).Extended.empty());
@@ -417,7 +417,7 @@ namespace DxfIO::Entities
     REQUIRE(std::holds_alternative<Unknown>(read.front()));
     const auto &kept = std::get<Unknown>(read.front());
     CHECK(kept.Type == "LINE");
-    CHECK(std::ranges::count(kept.Groups, 11, &Group::Code) == 1);
+    CHECK(std::ranges::count(kept.Tags, 11, &Tag::Code) == 1);
     REQUIRE(issues.size()     == 1);
     CHECK(issues.front().Line == 1);
     CHECK(issues.front().What == "a record out of its order, kept as it came");
@@ -428,15 +428,15 @@ namespace DxfIO::Entities
 {
   TEST_CASE("entities: paper space read from an unknown kind's own groups")
   {
-    const Unknown other{.Type   = Symbol{"THING"},
-                        .Base   = {},
-                        .Groups = {Group{.Code = 100, .Value = std::string{"AcDbThing"}},
-                                   Group{.Code = 67, .Value = std::int64_t{1}}}};
+    const Unknown other{.Type = Symbol{"THING"},
+                        .Base = {},
+                        .Tags = {Tag{.Code = 100, .Value = std::string{"AcDbThing"}},
+                                 Tag{.Code = 67, .Value = std::int64_t{1}}}};
     CHECK_FALSE(Paper(Entity{other}));
-    const Unknown model{.Type   = Symbol{"THING"},
-                        .Base   = {},
-                        .Groups = {Group{.Code = 100, .Value = std::string{"AcDbEntity"}},
-                                   Group{.Code = 67, .Value = std::int64_t{0}}}};
+    const Unknown model{.Type = Symbol{"THING"},
+                        .Base = {},
+                        .Tags = {Tag{.Code = 100, .Value = std::string{"AcDbEntity"}},
+                                 Tag{.Code = 67, .Value = std::int64_t{0}}}};
     CHECK_FALSE(Paper(Entity{model}));
   }
 } // namespace DxfIO::Entities

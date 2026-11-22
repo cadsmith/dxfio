@@ -13,7 +13,7 @@ namespace DxfIO::Tests
   /**
    *  Saves a drawing to its bytes, handing what the writer noted to notes when asked.
    */
-  inline auto Written(const Document &drawing, const Options &with = {},
+  inline auto Written(const Drawing &drawing, const SaveOptions &with = {},
                       std::vector<Issue> *notes = nullptr) -> std::expected<std::string, Failure>
   {
     return Save(drawing, with)

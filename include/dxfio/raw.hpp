@@ -2,7 +2,7 @@
 #define DXFIO_RAW_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <string>
 #include <vector>
@@ -21,7 +21,7 @@ namespace DxfIO
     /**
      *  The groups after the 0, in their order.
      */
-    std::vector<Group> Groups{};
+    std::vector<Tag> Tags{};
 
     auto operator==(const Raw &) const -> bool = default;
   };

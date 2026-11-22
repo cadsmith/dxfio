@@ -1,9 +1,10 @@
-#ifndef DXFIO_DOCUMENT_HPP
-#define DXFIO_DOCUMENT_HPP
+#ifndef DXFIO_DRAWING_HPP
+#define DXFIO_DRAWING_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/blocks/blocks.hpp"
+#include "dxfio/blocks/definition.hpp"
 #include "dxfio/entity.hpp"
+#include "dxfio/handle.hpp"
 #include "dxfio/header/header.hpp"
 #include "dxfio/object.hpp"
 #include "dxfio/raw.hpp"
@@ -29,7 +30,7 @@ namespace DxfIO
    *  A DXF drawing: one member for each section, and one for each table of the TABLES section. A
    *  table whose head has no name, as when the file had no such table, is not written.
    */
-  struct DXFIO_API Document
+  struct DXFIO_API Drawing
   {
     /**
      *  The names of the sections, such as "HEADER", in the order the file gave them. Save writes
@@ -48,11 +49,11 @@ namespace DxfIO
     /**
      *  The VPORT table: the tiled viewport configurations of model space.
      */
-    Tables::Table<Tables::Vport> Vport{};
+    Tables::Table<Tables::VPort> VPort{};
     /**
      *  The LTYPE table: the linetypes.
      */
-    Tables::Table<Tables::Ltype> Ltype{};
+    Tables::Table<Tables::LType> LType{};
     /**
      *  The LAYER table.
      */
@@ -72,11 +73,11 @@ namespace DxfIO
     /**
      *  The APPID table: the applications registered to attach extended data.
      */
-    Tables::Table<Tables::Appid> Appid{};
+    Tables::Table<Tables::AppId> AppId{};
     /**
      *  The DIMSTYLE table: the dimension styles.
      */
-    Tables::Table<Tables::Dimstyle> Dimstyle{};
+    Tables::Table<Tables::DimStyle> DimStyle{};
     /**
      *  The BLOCK_RECORD table, from R13: one record for each block.
      */
@@ -89,7 +90,7 @@ namespace DxfIO
     /**
      *  The BLOCKS section: each block with its entities.
      */
-    std::vector<Blocks::Block> Blocks{};
+    std::vector<Blocks::Definition> Blocks{};
     /**
      *  The ENTITIES section: the entities of model space and of the active paper space layout.
      */
@@ -105,8 +106,33 @@ namespace DxfIO
      */
     std::vector<Section> Sections{};
 
-    auto operator==(const Document &) const -> bool = default;
+    auto operator==(const Drawing &) const -> bool = default;
   };
+
+  /**
+   *  Finds the entity of that handle in the ENTITIES section or in a block, or null. It looks at
+   *  the entities of those lists only: the handle of a VERTEX, ATTRIB or SEQEND, which a POLYLINE
+   *  or an INSERT carries in its Vertices or Attributes, finds null, and so does the null handle.
+   *  The pointer holds until the list it points into changes, as Edit::Add and Audit::Repair change
+   *  it.
+   */
+  [[nodiscard]] DXFIO_API auto FindEntity(Drawing &drawing, Handle self) -> Entity *;
+
+  /**
+   *  Finds the entity of that handle in the ENTITIES section or in a block, or null, as the other
+   *  FindEntity does.
+   */
+  [[nodiscard]] DXFIO_API auto FindEntity(const Drawing &drawing, Handle self) -> const Entity *;
+
+  /**
+   *  Finds the object of that handle in the OBJECTS section, or null; the null handle finds null.
+   */
+  [[nodiscard]] DXFIO_API auto FindObject(Drawing &drawing, Handle self) -> Object *;
+
+  /**
+   *  Finds the object of that handle in the OBJECTS section, or null; the null handle finds null.
+   */
+  [[nodiscard]] DXFIO_API auto FindObject(const Drawing &drawing, Handle self) -> const Object *;
 } // namespace DxfIO
 
-#endif /* DXFIO_DOCUMENT_HPP */
+#endif /* DXFIO_DRAWING_HPP */

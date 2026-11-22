@@ -127,8 +127,8 @@ namespace DxfIO
     Base               taken{};
     std::vector<Issue> issues;
     const auto rest = Head(*all, Heading{.Into = &taken}, Fields::Reading{.Issues = &issues});
-    REQUIRE(taken.Braces.size() == 1);
-    CHECK(taken.Braces.front().Groups.size() == 1);
+    REQUIRE(taken.Braces.size()            == 1);
+    CHECK(taken.Braces.front().Tags.size() == 1);
     CHECK(rest.size()   == 1);
     CHECK(issues.size() == 1);
   }
@@ -193,9 +193,9 @@ namespace DxfIO
     REQUIRE(all);
     Base       taken{};
     const auto rest = Headed(*all, taken);
-    REQUIRE(taken.Braces.size()     == 1);
-    CHECK(taken.Braces.front().Name == "A");
-    CHECK(taken.Braces.front().Groups.size() == 4);
+    REQUIRE(taken.Braces.size()            == 1);
+    CHECK(taken.Braces.front().Name        == "A");
+    CHECK(taken.Braces.front().Tags.size() == 4);
     CHECK(taken.Owner == Handle{0x1f});
     CHECK(rest.empty());
   }
@@ -208,10 +208,10 @@ namespace DxfIO
     Base               taken{};
     std::vector<Issue> issues;
     const auto rest = Head(*all, Heading{.Into = &taken}, Fields::Reading{.Issues = &issues});
-    REQUIRE(taken.Braces.size()            == 2);
-    CHECK(taken.Braces.at(0).Name          == "A");
-    CHECK(taken.Braces.at(0).Groups.size() == 1);
-    CHECK(taken.Braces.at(1).Name          == "B");
+    REQUIRE(taken.Braces.size()          == 2);
+    CHECK(taken.Braces.at(0).Name        == "A");
+    CHECK(taken.Braces.at(0).Tags.size() == 1);
+    CHECK(taken.Braces.at(1).Name        == "B");
     CHECK(taken.Owner == Handle{0x1f});
     CHECK(rest.empty());
     CHECK(issues.size() == 1);

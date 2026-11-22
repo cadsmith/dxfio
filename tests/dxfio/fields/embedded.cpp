@@ -39,8 +39,8 @@ namespace DxfIO::Fields
 
     struct Outcome
     {
-      Outer              Taken{};
-      std::vector<Group> Kept;
+      Outer            Taken{};
+      std::vector<Tag> Kept;
     };
 
     auto Read(std::string_view text) -> Outcome

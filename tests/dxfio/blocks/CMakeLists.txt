@@ -1,6 +1,6 @@
 target_sources(dxfio_tests
   PRIVATE
-    begin.cpp
+    block.cpp
     blocks.cpp
-    end.cpp
+    endblk.cpp
 )

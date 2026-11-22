@@ -45,20 +45,20 @@ namespace DxfIO
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Web> = std::tuple{
+  inline constexpr auto Shapes<Entities::MLineData> = std::tuple{
       Fields::Subclass{.Marker = "AcDbMline"},
-      Fields::Field{.Code = 2, .Member = &Entities::Web::Style},
-      Fields::Field{.Code = 340, .Member = &Entities::Web::Styled},
-      Fields::Field{.Code = 40, .Member = &Entities::Web::Scale},
-      Fields::Field{.Code = 70, .Member = &Entities::Web::Justification},
-      Fields::Field{.Code = 71, .Member = &Entities::Web::Flags},
-      Fields::Count{.Code = 72, .Member = &Entities::Web::Joints},
-      Fields::Field{.Code = 73, .Member = &Entities::Web::Lines},
-      Fields::Field{.Code = 10, .Member = &Entities::Web::Start},
-      Fields::Field{.Code = 210, .Member = &Entities::Web::Normal},
+      Fields::Field{.Code = 2, .Member = &Entities::MLineData::Style},
+      Fields::Field{.Code = 340, .Member = &Entities::MLineData::Styled},
+      Fields::Field{.Code = 40, .Member = &Entities::MLineData::Scale},
+      Fields::Field{.Code = 70, .Member = &Entities::MLineData::Justification},
+      Fields::Field{.Code = 71, .Member = &Entities::MLineData::Flags},
+      Fields::Count{.Code = 72, .Member = &Entities::MLineData::Joints},
+      Fields::Field{.Code = 73, .Member = &Entities::MLineData::Lines},
+      Fields::Field{.Code = 10, .Member = &Entities::MLineData::Start},
+      Fields::Field{.Code = 210, .Member = &Entities::MLineData::Normal},
       Fields::Each{
           .Opener = 11,
-          .Member = &Entities::Web::Joints,
+          .Member = &Entities::MLineData::Joints,
           .Fields = Shapes<Entities::Joint>,
       },
   };
@@ -67,8 +67,8 @@ namespace DxfIO
   inline constexpr auto Shapes<Entities::MLine> = std::tuple{
       Entities::Part<Entities::MLine>,
       Fields::Part{
-          .Member = &Entities::MLine::Web,
-          .Fields = Shapes<Entities::Web>,
+          .Member = &Entities::MLine::Data,
+          .Fields = Shapes<Entities::MLineData>,
       },
   };
 

@@ -14,7 +14,7 @@ namespace DxfIO::Entities
   /**
    *  An ATTDEF: an attribute a block defines, which each INSERT of the block gives a value.
    */
-  struct DXFIO_API Attdef
+  struct DXFIO_API AttDef
   {
     /**
      *  The layer, linetype, color and the rest every entity carries.
@@ -46,15 +46,15 @@ namespace DxfIO::Entities
      */
     int Length{};
     /**
-     *  The vertical justification: 0 baseline, 1 bottom, 2 middle, 3 top. Group 74.
+     *  Group 74.
      */
-    int Vertical{};
+    VerticalAlignment Vertical{};
     /**
      *  Whether the attribute is locked to its place in the block. The last group 280, from R2007.
      */
     bool Locked{};
 
-    auto operator==(const Attdef &) const -> bool = default;
+    auto operator==(const AttDef &) const -> bool = default;
   };
 } // namespace DxfIO::Entities
 

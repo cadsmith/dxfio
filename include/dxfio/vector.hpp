@@ -3,6 +3,8 @@
 
 #include "dxfio/api.hpp"
 
+#include <numbers>
+
 namespace DxfIO
 {
   /**
@@ -37,6 +39,11 @@ namespace DxfIO
    *  The unit z axis: the extrusion, or normal, of an entity whose file gives none.
    */
   inline constexpr Vector Up{.X = 0, .Y = 0, .Z = 1};
+
+  /**
+   *  A full turn: every angle of the library is in radians.
+   */
+  inline constexpr double Turn = 2.0 * std::numbers::pi;
 } // namespace DxfIO
 
 #endif /* DXFIO_VECTOR_HPP */

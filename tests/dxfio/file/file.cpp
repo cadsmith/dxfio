@@ -41,10 +41,15 @@ namespace DxfIO::File
 
   TEST_CASE("file: what stands outside a section is a failure")
   {
-    CHECK(Framed("  0\nLINE\n") == std::unexpected{Failure{1, "SECTION expected, found group 0"}});
+    CHECK(Framed("  0\nLINE\n")
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 1, .What = "SECTION expected, found group 0"}});
     CHECK(Framed("  0\nSECTION\n  0\nENDSEC\n")
-          == std::unexpected{Failure{1, "section without a name"}});
-    CHECK(Framed("  0\nSECTION\n") == std::unexpected{Failure{1, "section without a name"}});
+          == std::unexpected{
+              Failure{.Code = FailureCode::Damaged, .Line = 1, .What = "section without a name"}});
+    CHECK(Framed("  0\nSECTION\n")
+          == std::unexpected{
+              Failure{.Code = FailureCode::Damaged, .Line = 1, .What = "section without a name"}});
   }
 
   TEST_CASE("file: the last section cut before its ENDSEC closes at the end of the file, told")
@@ -55,9 +60,11 @@ namespace DxfIO::File
     REQUIRE(sections->size()            == 1);
     CHECK(sections->front().Name        == "ENTITIES");
     CHECK(sections->front().Body.size() == 1);
-    CHECK(issues
-          == std::vector{Issue{
-              .Line = 1, .What = "ENDSEC of ENTITIES missing, closed at the end of the file"}});
+    CHECK(
+        issues
+        == std::vector{Issue{.Code = IssueCode::Damaged,
+                             .Line = 1,
+                             .What = "ENDSEC of ENTITIES missing, closed at the end of the file"}});
     CHECK(Framed("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n")->size() == 1);
   }
 
@@ -75,7 +82,9 @@ namespace DxfIO::File
     CHECK(sections->at(1).Body.size() == 7);
     CHECK(sections->at(2).Name        == "ENTITIES");
     CHECK(issues
-          == std::vector{Issue{.Line = 7, .What = "TABLE outside a TABLES section, taken as one"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .Line = 7,
+                               .What = "TABLE outside a TABLES section, taken as one"}});
     const auto last = Framed("  0\nTABLE\n  2\nLAYER\n  0\nENDTAB\n  0\nEOF\n");
     REQUIRE(last);
     REQUIRE(last->size()            == 1);

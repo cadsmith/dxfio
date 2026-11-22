@@ -59,19 +59,19 @@ namespace DxfIO
   /**
    *  The $ACADVER code of a release, such as "AC1015" for R2000.
    */
-  [[nodiscard]] DXFIO_API auto Acadver(Version release) -> std::string_view;
+  [[nodiscard]] DXFIO_API auto AcadverOf(Version release) -> std::string_view;
 
   /**
    *  The short name of a release, such as "R2000".
    */
-  [[nodiscard]] DXFIO_API auto Name(Version release) -> std::string_view;
+  [[nodiscard]] DXFIO_API auto NameOf(Version release) -> std::string_view;
 
   /**
    *  The release an $ACADVER code such as "AC1015" stands for: the newest at or below it, or R10
    *  below AC1006. Empty unless the code, blanks around it trimmed, is "AC" in either case and four
    *  digits.
    */
-  [[nodiscard]] DXFIO_API auto Release(std::string_view code) -> std::optional<Version>;
+  [[nodiscard]] DXFIO_API auto ReleaseOf(std::string_view code) -> std::optional<Version>;
 } // namespace DxfIO
 
 #endif /* DXFIO_VERSION_HPP */

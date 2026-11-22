@@ -18,7 +18,7 @@ namespace DxfIO
 
   inline auto Fixture(std::string_view stem, Version release) -> std::string
   {
-    std::string tag{Name(release)};
+    std::string tag{NameOf(release)};
     std::ranges::transform(tag, tag.begin(), [](unsigned char one) -> char
                            { return static_cast<char>(std::tolower(one)); });
     return std::string{stem} + "-" + tag + ".dxf";
@@ -30,7 +30,7 @@ struct doctest::StringMaker<DxfIO::Version>
 {
   static auto Convert(DxfIO::Version release) -> String
   {
-    return String{std::string{DxfIO::Name(release)}.c_str()};
+    return String{std::string{DxfIO::NameOf(release)}.c_str()};
   }
 };
 

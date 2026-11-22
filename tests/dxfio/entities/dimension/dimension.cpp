@@ -37,7 +37,7 @@ namespace DxfIO::Entities
     auto Formed(std::string_view self) -> FormT
     {
       const Dimension one  = Alikened<Dimension>(Marked(self));
-      const auto     *held = std::get_if<FormT>(&one.Figure->Form);
+      const auto     *held = std::get_if<FormT>(&one.Data->Form);
       REQUIRE(held != nullptr);
       return *held;
     }
@@ -46,14 +46,14 @@ namespace DxfIO::Entities
   TEST_CASE("dimension: what every kind holds")
   {
     const Dimension one = Alikened<Dimension>(Marked("2CD"));
-    const Measure  &all = one.Figure->Measure;
-    CHECK(all.Block      == "*D1");
-    CHECK(all.Point      == Vector{.X = 100, .Y = -20});
-    CHECK(all.Flags      == 32);
-    CHECK(all.Attachment == 5);
-    CHECK(all.Measured   == 100);
-    CHECK(all.Style      == "ISO-25");
-    CHECK(all.Normal     == Up);
+    const Measure  &all = one.Data->Measure;
+    CHECK(all.Block           == "*D1");
+    CHECK(all.DefinitionPoint == Vector{.X = 100, .Y = -20});
+    CHECK(all.Flags           == 32);
+    CHECK(all.Attachment      == 5);
+    CHECK(all.Measured        == 100);
+    CHECK(all.Style           == "ISO-25");
+    CHECK(all.Normal          == Up);
     CHECK(all.Text.empty());
   }
 
@@ -62,8 +62,8 @@ namespace DxfIO::Entities
     CHECK(Formed<Forms::Linear>("2CD").End   == Vector{.X = 100, .Y = 30});
     CHECK(Formed<Forms::Linear>("2DC").Angle == 90);
     CHECK(Formed<Forms::Aligned>("311").End  == Vector{.X = 100, .Y = 30});
-    CHECK(Formed<Forms::Angular>("32D").Start != Vector{});
-    CHECK(Formed<Forms::Points>("345").Vertex != Vector{});
+    CHECK(Formed<Forms::Angular2Line>("32D").FirstStart != Vector{});
+    CHECK(Formed<Forms::Angular3Point>("345").Vertex != Vector{});
     CHECK(Formed<Forms::Diameter>("355").Leader == 0);
     CHECK(Formed<Forms::Radial>("36B").Chord != Vector{});
     CHECK(Formed<Forms::Ordinate>("390").Leader != Vector{});
@@ -72,8 +72,8 @@ namespace DxfIO::Entities
 
   TEST_CASE("dimension: its text, given or none")
   {
-    CHECK(Alikened<Dimension>(Marked("2F6")).Figure->Measure.Text == "20 mm");
-    CHECK(Alikened<Dimension>(Marked("31E")).Figure->Measure.Text == "<> mm");
+    CHECK(Alikened<Dimension>(Marked("2F6")).Data->Measure.Text == "20 mm");
+    CHECK(Alikened<Dimension>(Marked("31E")).Data->Measure.Text == "<> mm");
   }
 
   TEST_CASE("dimension: on paper, associative, kept as it came")
@@ -86,7 +86,7 @@ namespace DxfIO::Entities
   {
     const std::string older = Marked("2CD", Version::R2004);
     CHECK_FALSE(older.contains(" 73\r\n"));
-    CHECK(Alikened<Dimension>(older, Version::R2004).Figure->Measure.Version == 0);
+    CHECK(Alikened<Dimension>(older, Version::R2004).Data->Measure.Version == 0);
     CHECK(Written(DxfIO::Read<Dimension>(Marked("2CD")), Version::R2004).find("280\r\n")
           == std::string::npos);
   }
@@ -96,17 +96,17 @@ namespace DxfIO::Entities
     for (const Version release : Releases)
     {
       CAPTURE(release);
-      CHECK(Alikened<Dimension>(Marked("2CD", release), release).Figure->Measure.Block == "*D1");
-      CHECK(Alikened<Dimension>(Marked("355", release), release).Figure->Measure.Flags == 163);
+      CHECK(Alikened<Dimension>(Marked("2CD", release), release).Data->Measure.Block == "*D1");
+      CHECK(Alikened<Dimension>(Marked("355", release), release).Data->Measure.Flags == 163);
     }
   }
 
   TEST_CASE("dimension: R12 holds no marker, its flags alone say the form")
   {
     const Dimension one = Alikened<Dimension>(Marked("2CD", Version::R12), Version::R12);
-    CHECK(std::holds_alternative<Forms::Linear>(one.Figure->Form));
+    CHECK(std::holds_alternative<Forms::Linear>(one.Data->Form));
     const Dimension round = Alikened<Dimension>(Marked("355", Version::R12), Version::R12);
-    CHECK(std::holds_alternative<Forms::Diameter>(round.Figure->Form));
+    CHECK(std::holds_alternative<Forms::Diameter>(round.Data->Form));
   }
 
   TEST_CASE("dimension: a form no flag names reads as a linear one")
@@ -116,20 +116,20 @@ namespace DxfIO::Entities
     const std::string seven = text.substr(0, text.find(" 70\r\n"))
                             + " 70\r\n    39\r\n"
                             + text.substr(text.find(" 71\r\n"));
-    CHECK(std::holds_alternative<Forms::Linear>(DxfIO::Read<Dimension>(seven).Figure->Form));
+    CHECK(std::holds_alternative<Forms::Linear>(DxfIO::Read<Dimension>(seven).Data->Form));
   }
 
   TEST_CASE("dimension: its kind bits written from its form, whatever its flags say")
   {
     Dimension one{};
-    one.Figure->Measure.Flags = 32 + 3;
-    one.Figure->Form          = Forms::Radial{.Chord = Vector{.X = 5}, .Leader = 2};
-    const auto back           = DxfIO::Read<Dimension>(Written(one));
-    CHECK(back.Figure->Measure.Flags == 32 + 4);
-    REQUIRE(std::holds_alternative<Forms::Radial>(back.Figure->Form));
-    CHECK(std::get<Forms::Radial>(back.Figure->Form) == std::get<Forms::Radial>(one.Figure->Form));
-    one.Figure->Form = Forms::Linear{};
-    CHECK(DxfIO::Read<Dimension>(Written(one)).Figure->Measure.Flags == 32);
+    one.Data->Measure.Flags = 32 + 3;
+    one.Data->Form          = Forms::Radial{.Chord = Vector{.X = 5}, .Leader = 2};
+    const auto back         = DxfIO::Read<Dimension>(Written(one));
+    CHECK(back.Data->Measure.Flags == 32 + 4);
+    REQUIRE(std::holds_alternative<Forms::Radial>(back.Data->Form));
+    CHECK(std::get<Forms::Radial>(back.Data->Form) == std::get<Forms::Radial>(one.Data->Form));
+    one.Data->Form = Forms::Linear{};
+    CHECK(DxfIO::Read<Dimension>(Written(one)).Data->Measure.Flags == 32);
   }
 
   TEST_CASE("dimension: of two 70s the first, as AutoCAD reads them")
@@ -146,8 +146,8 @@ namespace DxfIO::Entities
     std::vector<Issue> issues;
     const Dimension    held =
         Taken<Dimension>(*one, Fields::Reading{.Text = Encoding::Utf8(), .Issues = &issues});
-    CHECK(held.Figure->Measure.Flags == 32);
-    CHECK(std::holds_alternative<Forms::Linear>(held.Figure->Form));
+    CHECK(held.Data->Measure.Flags == 32);
+    CHECK(std::holds_alternative<Forms::Linear>(held.Data->Form));
     CHECK(held.Record.Base.Extra.empty());
     CHECK(issues.empty());
   }
@@ -155,14 +155,14 @@ namespace DxfIO::Entities
   TEST_CASE("dimension: what a file leaves out, as AutoCAD takes it")
   {
     const Dimension one{};
-    CHECK(one.Figure->Measure.Attachment == MiddleCenter);
-    CHECK(one.Figure->Measure.Measured   == Unmeasured);
+    CHECK(one.Data->Measure.Attachment == 5);
+    CHECK(one.Data->Measure.Measured   == -1);
   }
 
   TEST_CASE("dimension: its text's attachment hides no multileader's")
   {
-    using namespace DxfIO::Objects::Mleader;
-    CHECK(Objects::Mleader::Text{}.Top == Centered);
+    using namespace DxfIO::Objects::MLeaderStyles;
+    CHECK(Objects::MLeaderStyles::TextFormat{}.TopAttachment == 9);
   }
 
   TEST_CASE("dimension: its block and style symbols, as a layer is")
@@ -177,10 +177,10 @@ namespace DxfIO::Entities
     {
       CAPTURE(release);
       Dimension one{};
-      one.Figure->Measure.Style = Symbol{"ISO-25"};
-      const std::string text    = Written(one, release);
+      one.Data->Measure.Style = Symbol{"ISO-25"};
+      const std::string text  = Written(one, release);
       CHECK(text.contains("  3\r\nISO-25\r\n"));
-      CHECK(DxfIO::Read<Dimension>(text, release).Figure->Measure.Style == "ISO-25");
+      CHECK(DxfIO::Read<Dimension>(text, release).Data->Measure.Style == "ISO-25");
     }
   }
 
@@ -205,8 +205,8 @@ namespace DxfIO::Entities
   TEST_CASE("dimension: an arc's, a type of its own, its picture kept")
   {
     const ArcDimension one = Alikened<ArcDimension>(Marked("3B1"));
-    CHECK(one.Bend->Measure.Block == "*D16");
-    CHECK(one.Bend->Center != Vector{});
+    CHECK(one.Data->Measure.Block == "*D16");
+    CHECK(one.Data->Center != Vector{});
     CHECK(one.Picture.size() == 2092);
     const ArcDimension old = Alikened<ArcDimension>(Marked("3B1", Version::R2004), Version::R2004);
     CHECK(old.Picture.size() == 2064);
@@ -219,7 +219,7 @@ namespace DxfIO::Entities
   TEST_CASE("dimension: a jogged radius, a type of its own")
   {
     const LargeRadialDimension one = Alikened<LargeRadialDimension>(Marked("3CD"));
-    CHECK(one.Jog->Chord != Vector{});
+    CHECK(one.Data->Chord != Vector{});
     CHECK_FALSE(one.Picture.empty());
   }
 
@@ -234,15 +234,15 @@ namespace DxfIO::Entities
       CAPTURE(release);
       const LargeRadialDimension one =
           Alikened<LargeRadialDimension>(Marked("3CD", release), release);
-      const Vector &center = one.Jog->Measure.Point;
-      CHECK(std::hypot(one.Jog->Chord.X - center.X, one.Jog->Chord.Y - center.Y)
+      const Vector &center = one.Data->Measure.DefinitionPoint;
+      CHECK(std::hypot(one.Data->Chord.X - center.X, one.Data->Chord.Y - center.Y)
             == doctest::Approx(30.0));
-      CHECK(one.Jog->Chord.X  == doctest::Approx(411.1417202906233));
-      CHECK(one.Jog->Chord.Y  == doctest::Approx(-27.85430072655778));
-      CHECK(one.Jog->Center.X == doctest::Approx(380.0));
-      CHECK(one.Jog->Center.Y == doctest::Approx(-60.0));
-      CHECK(one.Jog->Turn.X   == doctest::Approx(393.375880569281));
-      CHECK(one.Jog->Turn.Y   == doctest::Approx(-38.43970142320205));
+      CHECK(one.Data->Chord.X    == doctest::Approx(411.1417202906233));
+      CHECK(one.Data->Chord.Y    == doctest::Approx(-27.85430072655778));
+      CHECK(one.Data->Center.X   == doctest::Approx(380.0));
+      CHECK(one.Data->Center.Y   == doctest::Approx(-60.0));
+      CHECK(one.Data->JogPoint.X == doctest::Approx(393.375880569281));
+      CHECK(one.Data->JogPoint.Y == doctest::Approx(-38.43970142320205));
     }
   }
 
@@ -256,10 +256,10 @@ namespace DxfIO::Entities
   TEST_CASE("dimension: a copy is its own, an entity stays small")
   {
     Dimension one{};
-    one.Figure->Measure.Flags = 1;
-    Dimension two             = one;
-    two.Figure->Measure.Flags = 2;
-    CHECK(one.Figure->Measure.Flags == 1);
+    one.Data->Measure.Flags = 1;
+    Dimension two           = one;
+    two.Data->Measure.Flags = 2;
+    CHECK(one.Data->Measure.Flags == 1);
     CHECK(sizeof(ArcDimension) < 2 * sizeof(Record));
   }
 } // namespace DxfIO::Entities

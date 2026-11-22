@@ -9,11 +9,6 @@
 namespace DxfIO::Tables
 {
   /**
-   *  The last height a new text style was used at.
-   */
-  inline constexpr double Last = 2.5;
-
-  /**
    *  A STYLE table record: the font and proportions text is drawn with. Its flags are 1 for a shape
    *  file rather than a text style and 4 for vertical text.
    */
@@ -42,7 +37,7 @@ namespace DxfIO::Tables
     /**
      *  The height the style was last used at. Group 42.
      */
-    double Previous{Last};
+    double LastHeight{2.5};
     /**
      *  The font file, such as "txt" or "arial.ttf". Group 3.
      */

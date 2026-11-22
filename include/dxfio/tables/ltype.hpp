@@ -11,11 +11,6 @@
 namespace DxfIO::Tables
 {
   /**
-   *  The alignment every linetype has: 'A', the pattern fitted to the ends of the line.
-   */
-  inline constexpr int Aligned = 'A';
-
-  /**
    *  One element of a linetype's pattern: a dash, a dot or a space, with the shape or text it may
    *  carry.
    */
@@ -66,7 +61,7 @@ namespace DxfIO::Tables
   /**
    *  An LTYPE table record: the pattern of dashes, dots and spaces a line is drawn with.
    */
-  struct DXFIO_API Ltype
+  struct DXFIO_API LType
   {
     /**
      *  The name, flags and handles every table record carries.
@@ -79,7 +74,7 @@ namespace DxfIO::Tables
     /**
      *  How the pattern fits the line; always 'A'. Group 72.
      */
-    int Alignment{Aligned};
+    int Alignment{'A'};
     /**
      *  The length of the whole pattern. Group 40.
      */
@@ -89,7 +84,7 @@ namespace DxfIO::Tables
      */
     std::vector<Tables::Dash> Dashes{};
 
-    auto operator==(const Ltype &) const -> bool = default;
+    auto operator==(const LType &) const -> bool = default;
   };
 } // namespace DxfIO::Tables
 

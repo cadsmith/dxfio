@@ -14,14 +14,14 @@ Load a DXF file, tell which release wrote it, and see what its tables and entiti
 const auto loaded = DxfIO::LoadFile("plan.dxf");
 if (!loaded)
 {
-  std::println("line {}: {}", loaded.error().Line, loaded.error().What);
+  std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
   return 1;
 }
 for (const DxfIO::Issue &issue : loaded->Issues)
 {
-  std::println("line {}: {}", issue.Line, issue.What);
+  std::println("line {}: {}", issue.Line.value_or(0), issue.What);
 }
-const DxfIO::Document &drawing = loaded->Document;
+const DxfIO::Drawing &drawing = loaded->Drawing;
 ```
 
 ## The release [#release]
@@ -36,9 +36,9 @@ for (const DxfIO::Header::Variable &variable : drawing.Header)
     continue;
   }
   const std::string &code = std::get<std::string>(variable.Values.front().Value);
-  if (const auto release = DxfIO::Release(code))
+  if (const auto release = DxfIO::ReleaseOf(code))
   {
-    std::println("{}, {}", code, DxfIO::Name(*release));
+    std::println("{}, {}", code, DxfIO::NameOf(*release));
   }
 }
 ```
@@ -49,7 +49,7 @@ AC1032, R2018
 
 ## Tables [#tables]
 
-Each table is a member of the document: its `Head`, and its `Records` in the order the file gave them. A layer's `Color` is an AutoCAD Color Index and its `Linetype` the name of a linetype; [Layers](/tutorials/layers/) has the rest.
+Each table is a member of the drawing: its `Head`, and its `Records` in the order the file gave them. A layer's `Color` is an AutoCAD Color Index and its `Linetype` the name of a linetype; [Layers](/tutorials/layers/) has the rest.
 
 ```cpp
 for (const DxfIO::Tables::Layer &layer : drawing.Layer.Records)

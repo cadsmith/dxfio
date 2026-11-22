@@ -132,11 +132,13 @@ namespace DxfIO::Tags::Binary
     std::vector<Issue> issues;
     CHECK(Read(bytes, &issues).size() == 9);
     CHECK(issues
-          == std::vector{Issue{.Line = 0, .What = "group 0 cut short, the file ends there"}});
+          == std::vector{
+              Issue{.Code = IssueCode::Damaged, .What = "group 0 cut short, the file ends there"}});
     std::vector<Issue> code;
     CHECK(Read(std::string_view{"\xff", 1}, &code).empty());
     CHECK(code
-          == std::vector{Issue{.Line = 0, .What = "group code cut short, the file ends there"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .What = "group code cut short, the file ends there"}});
   }
 
   TEST_CASE("binary: a real that is not finite is left out and told, the rest read on")
@@ -156,7 +158,8 @@ namespace DxfIO::Tags::Binary
       REQUIRE(tags.size() == 2);
       CHECK(tags.at(1)    == Tag{.Code = 70, .Value = std::int64_t{3}});
       CHECK(issues
-            == std::vector{Issue{.Line = 0, .What = "group 40 is no finite number, left out"}});
+            == std::vector{Issue{.Code = IssueCode::Damaged,
+                                 .What = "group 40 is no finite number, left out"}});
       CHECK(Read(bytes).size() == 2);
     }
   }
@@ -170,7 +173,9 @@ namespace DxfIO::Tags::Binary
     Put(bytes, std::string_view{"2"});
     std::vector<Issue> issues;
     CHECK(Read(bytes, &issues).size() == 2);
-    CHECK(issues == std::vector{Issue{.Line = 0, .What = "group 250 is no DXF group, kept"}});
+    CHECK(issues
+          == std::vector{
+              Issue{.Code = IssueCode::Unknown, .What = "group 250 is no DXF group, kept"}});
   }
 
   TEST_CASE("binary: a group 0 with blanks around it is trimmed and told")
@@ -183,8 +188,8 @@ namespace DxfIO::Tags::Binary
     REQUIRE(tags.size() == 1);
     CHECK(tags.at(0)    == Tag{.Code = 0, .Value = std::string_view{"SECTION"}});
     CHECK(issues
-          == std::vector{
-              Issue{.Line = 0, .What = "group 0 holds \"  SECTION  \" with blanks, trimmed"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .What = "group 0 holds \"  SECTION  \" with blanks, trimmed"}});
   }
 
   TEST_CASE("binary: a code past the last there is is a failure")
@@ -193,7 +198,8 @@ namespace DxfIO::Tags::Binary
     Code(bytes, true, 0);
     Put(bytes, std::string_view{"SECTION"});
     Code(bytes, true, 4000);
-    CHECK(Refused(bytes) == Failure{0, "group code expected, found 4000"});
+    CHECK(Refused(bytes)
+          == Failure{.Code = FailureCode::Damaged, .What = "group code expected, found 4000"});
   }
 
   TEST_CASE("binary: a value cut short ends the file there, whatever its type")
@@ -219,6 +225,7 @@ namespace DxfIO::Tags::Binary
     std::vector<Issue> issues;
     CHECK(Read(chunk, &issues).size() == 1);
     CHECK(issues
-          == std::vector{Issue{.Line = 0, .What = "group 310 cut short, the file ends there"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .What = "group 310 cut short, the file ends there"}});
   }
 } // namespace DxfIO::Tags::Binary

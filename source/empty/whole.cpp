@@ -25,9 +25,9 @@ namespace DxfIO::Empty
       }
     }
 
-    void Pruned(Document &drawing)
+    void Pruned(Drawing &drawing)
     {
-      drawing.Dimstyle.Head.Base.Extra.clear();
+      drawing.DimStyle.Head.Base.Extra.clear();
       for (Tables::BlockRecord &one : drawing.BlockRecord.Records)
       {
         one.Layout = {};
@@ -39,14 +39,14 @@ namespace DxfIO::Empty
 
   } // namespace
 
-  auto Whole(Version release, Seed &handles) -> Document
+  auto Whole(Version release, Seed &handles) -> Drawing
   {
     const Empty::Roots ids = Empty::Taken(handles);
-    Document           out{};
+    Drawing            out{};
     out.Order = {"HEADER", "CLASSES", "TABLES", "BLOCKS", "ENTITIES", "OBJECTS"};
     Empty::Tables(out, ids, handles);
     out.Blocks          = Empty::Blocks(ids, handles);
-    const Handle active = out.Vport.Records.front().Record.Base.Self;
+    const Handle active = out.VPort.Records.front().Record.Base.Self;
     out.Objects         = release >= Version::R2000 ? Empty::Objects(ids, active, handles)
                                                     : Empty::Early(ids, handles);
     out.Classes         = Empty::Classes(release, out.Objects);

@@ -53,10 +53,10 @@ namespace DxfIO::Entities
     const Attrib taken = Alikened(Marked("2E4"));
     CHECK(taken.Lettering.Style      == "tall");
     CHECK(taken.Lettering.Width      == 0.8);
-    CHECK(taken.Lettering.Horizontal == 1);
+    CHECK(taken.Lettering.Horizontal == Entities::HorizontalAlignment::Center);
     CHECK(taken.Lettering.Alignment  == Vector{.X = 1, .Y = 22, .Z = 0});
     CHECK(taken.Flags    == 8);
-    CHECK(taken.Vertical == 2);
+    CHECK(taken.Vertical == Entities::VerticalAlignment::Middle);
   }
 
   TEST_CASE("attrib: thick and mirrored, on another plane")

@@ -58,7 +58,7 @@ namespace DxfIO
       Fields::Field{
           .Code     = 72,
           .Member   = &Entities::Lettering::Horizontal,
-          .Fallback = 0,
+          .Fallback = Entities::HorizontalAlignment::Left,
       },
       Fields::Field{.Code = 11, .Member = &Entities::Lettering::Alignment},
       Fields::Field{

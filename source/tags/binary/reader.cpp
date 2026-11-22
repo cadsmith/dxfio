@@ -151,7 +151,8 @@ namespace DxfIO::Tags::Binary
     }
     if (*group > Codes::Last)
     {
-      return std::unexpected{Failure{.What = std::format("group code expected, found {}", *group)}};
+      return std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                     .What = std::format("group code expected, found {}", *group)}};
     }
     const Decoding decode = Decodings.at(std::to_underlying(Codes::Of(*group)));
     const Decoded  value  = decode(m_Rest);
@@ -161,12 +162,14 @@ namespace DxfIO::Tags::Binary
     }
     if (Endless(*value))
     {
-      Tell(Issue{.Line = 0, .What = std::format("group {} is no finite number, left out", *group)});
+      Tell(Issue{.Code = IssueCode::Damaged,
+                 .What = std::format("group {} is no finite number, left out", *group)});
       return std::optional<Tag>{};
     }
     if (!Codes::Defined(*group))
     {
-      Tell(Issue{.Line = 0, .What = std::format("group {} is no DXF group, kept", *group)});
+      Tell(Issue{.Code = IssueCode::Unknown,
+                 .What = std::format("group {} is no DXF group, kept", *group)});
     }
     return std::optional{Tag{.Code = *group, .Value = *group == 0 ? Bare(*value) : *value}};
   }
@@ -180,7 +183,7 @@ namespace DxfIO::Tags::Binary
     const std::string_view word = Trimmed(text);
     if (word.size() != text.size())
     {
-      Tell(Issue{.Line = 0,
+      Tell(Issue{.Code = IssueCode::Damaged,
                  .What = std::format("group 0 holds \"{}\" with blanks, trimmed", Glimpse(text))});
     }
     return word;
@@ -191,7 +194,7 @@ namespace DxfIO::Tags::Binary
    */
   auto Reader::Ended(std::string what) -> std::expected<std::optional<Tag>, Failure>
   {
-    Tell(Issue{.Line = 0, .What = std::move(what)});
+    Tell(Issue{.Code = IssueCode::Damaged, .What = std::move(what)});
     m_Rest = {};
     return std::optional<Tag>{};
   }

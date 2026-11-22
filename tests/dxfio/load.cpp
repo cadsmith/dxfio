@@ -37,7 +37,7 @@ namespace DxfIO
       return text;
     }
 
-    auto Seed(const Document &drawing) -> std::vector<Group>
+    auto Seed(const Drawing &drawing) -> std::vector<Tag>
     {
       const auto found = std::ranges::find(drawing.Header, "$HANDSEED", &Header::Variable::Name);
       REQUIRE(found != drawing.Header.end());
@@ -49,13 +49,13 @@ namespace DxfIO
   {
     auto read = Load(Reseeded("  5\r\n2\r\n"));
     REQUIRE(read);
-    const Handle past = Past(read->Document);
+    const Handle past = Past(read->Drawing);
     CHECK(past > Handle{2});
-    CHECK(Seed(read->Document)  == std::vector{Group{.Code = 5, .Value = past}});
+    CHECK(Seed(read->Drawing)   == std::vector{Tag{.Code = 5, .Value = past}});
     REQUIRE(read->Issues.size() == 1);
     CHECK(read->Issues.front().What
           == std::format("$HANDSEED 2 is not past the handles in use, raised to {}", Hex(past)));
-    const auto added = Edit::Add(read->Document, Entities::Line{});
+    const auto added = Edit::Add(read->Drawing, Entities::Line{});
     REQUIRE(added);
     CHECK(*added == past);
   }
@@ -71,7 +71,7 @@ namespace DxfIO
       const auto read = Load(Reseeded(value));
       REQUIRE(read);
       CHECK(read->Issues.empty());
-      CHECK(Seed(read->Document).size() == (value.empty() ? 0U : 1U));
+      CHECK(Seed(read->Drawing).size() == (value.empty() ? 0U : 1U));
     }
   }
 
@@ -80,14 +80,14 @@ namespace DxfIO
     const auto read =
         Load(Bytes(std::filesystem::path{DXFIO_FUZZ_DIR} / "corpus" / "sample-r2018.dxf"));
     REQUIRE(read);
-    const Document &drawing = read->Document;
+    const Drawing &drawing = read->Drawing;
     CHECK(drawing.Order
           == std::vector<std::string>{"HEADER", "CLASSES", "TABLES", "BLOCKS", "ENTITIES",
                                       "OBJECTS"});
     CHECK(Header::Declared(drawing.Header) == Version::R2018);
     CHECK(drawing.Layer.Records.size() > 0);
-    CHECK(drawing.Appid.Head.Name == "APPID");
-    CHECK(drawing.Ltype.Records.size() > 0);
+    CHECK(drawing.AppId.Head.Name == "APPID");
+    CHECK(drawing.LType.Records.size() > 0);
     CHECK(drawing.Loose.empty());
     CHECK_FALSE(drawing.Entities.empty());
     CHECK_FALSE(drawing.Objects.empty());
@@ -100,8 +100,8 @@ namespace DxfIO
                            "  0\nENDSEC\n  0\nSECTION\n  2\nENTITIES\n"
                            "  0\nTEXT\n  1\ncaf\xe9\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(std::get<Entities::Text>(read->Document.Entities.front()).Lettering.Value
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(std::get<Entities::Text>(read->Drawing.Entities.front()).Lettering.Value
           == "caf\xc3\xa9");
   }
 
@@ -110,10 +110,10 @@ namespace DxfIO
     const auto read = Load("  0\nSECTION\n  2\n\\U+0045NTITIES\n  0\nLINE\n"
                            "  5\n2A\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    CHECK(read->Document.Entities.empty());
-    REQUIRE(read->Document.Sections.size() == 1);
-    CHECK(read->Document.Sections.front().Groups.size() == 2);
-    const auto saved = Tests::Written(read->Document, Options{});
+    CHECK(read->Drawing.Entities.empty());
+    REQUIRE(read->Drawing.Sections.size()            == 1);
+    CHECK(read->Drawing.Sections.front().Tags.size() == 2);
+    const auto saved = Tests::Written(read->Drawing, SaveOptions{});
     REQUIRE(saved);
     CHECK(saved->contains("\\U+0045NTITIES"));
     CHECK(saved->contains("2A"));
@@ -125,9 +125,9 @@ namespace DxfIO
                            "  0\nSECTION\n  2\nENTITIES\n  0\nCIRCLE\n"
                            "  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    CHECK(read->Document.Order             == std::vector<std::string>{"ENTITIES"});
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(std::holds_alternative<Entities::Line>(read->Document.Entities.front()));
+    CHECK(read->Drawing.Order             == std::vector<std::string>{"ENTITIES"});
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(std::holds_alternative<Entities::Line>(read->Drawing.Entities.front()));
     REQUIRE(read->Issues.size()     == 1);
     CHECK(read->Issues.front().What == "section ENTITIES given again, the first kept");
   }
@@ -138,7 +138,9 @@ namespace DxfIO
                            "1001\nACAD\n1001\nACAD\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
     CHECK(read->Issues.size() == 1);
-    CHECK(Load("  0\nLINE\n") == std::unexpected{Failure{1, "SECTION expected, found group 0"}});
+    CHECK(Load("  0\nLINE\n")
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 1, .What = "SECTION expected, found group 0"}});
   }
 
   TEST_CASE("load: a value that does not parse is left out and told, the record read without it")
@@ -146,13 +148,14 @@ namespace DxfIO
     const auto read =
         Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n 39\nabc\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 1);
-    const auto *line = std::get_if<Entities::Line>(&read->Document.Entities.front());
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    const auto *line = std::get_if<Entities::Line>(&read->Drawing.Entities.front());
     REQUIRE(line != nullptr);
     CHECK(line->Thickness == 0.0);
     CHECK(read->Issues
-          == std::vector{
-              Issue{.Line = 8, .What = "number expected for group 39, found \"abc\", left out"}});
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .Line = 8,
+                               .What = "number expected for group 39, found \"abc\", left out"}});
   }
 
   TEST_CASE(
@@ -161,15 +164,16 @@ namespace DxfIO
     const auto read =
         Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n 62\n70000\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 1);
-    const auto *line = std::get_if<Entities::Line>(&read->Document.Entities.front());
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    const auto *line = std::get_if<Entities::Line>(&read->Drawing.Entities.front());
     REQUIRE(line != nullptr);
     CHECK(line->Record.Color == 256);
     CHECK(read->Issues
           == std::vector{Issue{
+              .Code = IssueCode::Damaged,
               .Line = 8,
               .What = "integer of 16 bits expected for group 62, found \"70000\", left out"}});
-    CHECK(Tests::Written(read->Document, {.Release = Version::R12}));
+    CHECK(Tests::Written(read->Drawing, {.Release = Version::R12}));
   }
 
   TEST_CASE("load: a chunk that is not hex is left out and told, so what loads saves in binary too")
@@ -177,44 +181,53 @@ namespace DxfIO
     const auto read = Load(
         "  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n1001\nACAD\n1004\nzz\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(BaseOf(read->Document.Entities.front()).Extended.front().Groups.empty());
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(BaseOf(read->Drawing.Entities.front()).Extended.front().Tags.empty());
     CHECK(read->Issues
-          == std::vector{
-              Issue{.Line = 10, .What = "hex expected for group 1004, found \"zz\", left out"}});
-    CHECK(Tests::Written(read->Document, {.Release = Version::R2000, .Binary = true}));
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .Line = 10,
+                               .What = "hex expected for group 1004, found \"zz\", left out"}});
+    CHECK(Tests::Written(read->Drawing, {.Release = Version::R2000, .Binary = true}));
   }
 
   TEST_CASE("load: a blank after a section word or a record name is trimmed and told")
   {
     const auto read = Load("  0\nSECTION \n  2\nENTITIES\n  0\nLINE \n  0\nENDSEC \n  0\nEOF \n");
     REQUIRE(read);
-    CHECK(read->Document.Order             == std::vector<std::string>{"ENTITIES"});
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(std::holds_alternative<Entities::Line>(read->Document.Entities.front()));
+    CHECK(read->Drawing.Order             == std::vector<std::string>{"ENTITIES"});
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(std::holds_alternative<Entities::Line>(read->Drawing.Entities.front()));
     CHECK(read->Issues.size() == 4);
     CHECK(read->Issues.front()
-          == Issue{.Line = 2, .What = "group 0 holds \"SECTION \" with blanks, trimmed"});
+          == Issue{.Code = IssueCode::Damaged,
+                   .Line = 2,
+                   .What = "group 0 holds \"SECTION \" with blanks, trimmed"});
   }
 
   TEST_CASE("load: text after EOF is left out and told")
   {
     const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n  0\nEOF\ngarbage\n");
     REQUIRE(read);
-    CHECK(read->Document.Order == std::vector<std::string>{"ENTITIES"});
-    CHECK(read->Issues == std::vector{Issue{.Line = 9, .What = "what follows EOF, left out"}});
+    CHECK(read->Drawing.Order == std::vector<std::string>{"ENTITIES"});
+    CHECK(read->Issues
+          == std::vector{
+              Issue{.Code = IssueCode::Damaged, .Line = 9, .What = "what follows EOF, left out"}});
   }
 
   TEST_CASE("load: a file cut short keeps what it read, its last section closed at the end, told")
   {
     const auto read = Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n 62\n");
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(std::holds_alternative<Entities::Line>(read->Document.Entities.front()));
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(std::holds_alternative<Entities::Line>(read->Drawing.Entities.front()));
     CHECK(read->Issues
           == std::vector{
-              Issue{.Line = 7, .What = "group 62 at the end of the file has no value, left out"},
-              Issue{.Line = 1, .What = "ENDSEC of ENTITIES missing, closed at the end of the file"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 7,
+                    .What = "group 62 at the end of the file has no value, left out"},
+              Issue{.Code = IssueCode::Damaged,
+                    .Line = 1,
+                    .What = "ENDSEC of ENTITIES missing, closed at the end of the file"},
           });
   }
 
@@ -226,13 +239,14 @@ namespace DxfIO
              " 62\n     1\n  6\nCONTINUOUS\n  0\nENDTAB\n"
              "  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    CHECK(read->Document.Order == std::vector<std::string>{"HEADER", "TABLES", "ENTITIES"});
-    REQUIRE(read->Document.Layer.Records.size()            == 1);
-    CHECK(read->Document.Layer.Records.front().Record.Name == "WALLS");
-    CHECK(
-        read->Issues
-        == std::vector{Issue{.Line = 11, .What = "TABLE outside a TABLES section, taken as one"}});
-    const auto saved = Tests::Written(read->Document, {.Release = Version::R12});
+    CHECK(read->Drawing.Order == std::vector<std::string>{"HEADER", "TABLES", "ENTITIES"});
+    REQUIRE(read->Drawing.Layer.Records.size()            == 1);
+    CHECK(read->Drawing.Layer.Records.front().Record.Name == "WALLS");
+    CHECK(read->Issues
+          == std::vector{Issue{.Code = IssueCode::Damaged,
+                               .Line = 11,
+                               .What = "TABLE outside a TABLES section, taken as one"}});
+    const auto saved = Tests::Written(read->Drawing, {.Release = Version::R12});
     REQUIRE(saved);
     CHECK(saved->contains("SECTION\r\n  2\r\nTABLES\r\n  0\r\nTABLE\r\n"));
   }
@@ -244,24 +258,24 @@ namespace DxfIO
         "100\nAcDbPolyline\n 90\n        2\n 70\n     0\n 10\n0.0\n 20\n0.0\n 10\n1.0\n 20\n0.0\n"
         "  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(std::holds_alternative<Entities::LwPolyline>(read->Document.Entities.front()));
-    CHECK(Header::Declared(read->Document.Header) == Version::R2000);
-    CHECK(read->Document.Header.front()
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(std::holds_alternative<Entities::LwPolyline>(read->Drawing.Entities.front()));
+    CHECK(Header::Declared(read->Drawing.Header) == Version::R2000);
+    CHECK(read->Drawing.Header.front()
           == Header::Variable{.Name   = "$ACADVER",
-                              .Values = {Group{.Code = 1, .Value = std::string{"AC1015"}}}});
+                              .Values = {Tag{.Code = 1, .Value = std::string{"AC1015"}}}});
     CHECK(read->Issues
           == std::vector{Issue{
-              .Line = 0,
+              .Code = IssueCode::Damaged,
               .What = "no $ACADVER, read as R2000 for the subclass markers its records carry"}});
     const auto headed =
         Load("  0\nSECTION\n  2\nHEADER\n  9\n$INSUNITS\n 70\n     4\n  0\nENDSEC\n"
              "  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n100\nAcDbEntity\n  8\n0\n100\nAcDbLine\n"
              "  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(headed);
-    REQUIRE(headed->Document.Header.size()     == 2);
-    CHECK(headed->Document.Header.front().Name == "$ACADVER");
-    CHECK(headed->Document.Header.back().Name  == "$INSUNITS");
+    REQUIRE(headed->Drawing.Header.size()     == 2);
+    CHECK(headed->Drawing.Header.front().Name == "$ACADVER");
+    CHECK(headed->Drawing.Header.back().Name  == "$INSUNITS");
   }
 
   TEST_CASE(
@@ -271,11 +285,11 @@ namespace DxfIO
     text.replace(text.find("AC1032"), 6, "AC1009");
     const auto read = Load(text);
     REQUIRE(read);
-    CHECK(std::ranges::all_of(read->Document.Objects, [](const Object &one) -> bool
+    CHECK(std::ranges::all_of(read->Drawing.Objects, [](const Object &one) -> bool
                               { return std::holds_alternative<Unknown>(one); }));
-    CHECK(std::ranges::any_of(read->Document.Entities, [](const Entity &one) -> bool
+    CHECK(std::ranges::any_of(read->Drawing.Entities, [](const Entity &one) -> bool
                               { return std::holds_alternative<Unknown>(one); }));
-    CHECK(std::ranges::any_of(read->Document.Entities, [](const Entity &one) -> bool
+    CHECK(std::ranges::any_of(read->Drawing.Entities, [](const Entity &one) -> bool
                               { return std::holds_alternative<Entities::Line>(one); }));
   }
 
@@ -284,8 +298,8 @@ namespace DxfIO
     const auto read =
         Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n  8\n0\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    CHECK(Header::Declared(read->Document.Header) == Version::R12);
-    CHECK(read->Document.Header.empty());
+    CHECK(Header::Declared(read->Drawing.Header) == Version::R12);
+    CHECK(read->Drawing.Header.empty());
     CHECK(read->Issues.empty());
   }
 
@@ -297,8 +311,8 @@ namespace DxfIO
         "100\nAcDbText\n  1\n\xb0\xa1\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
     CHECK(read->Issues.empty());
-    REQUIRE(read->Document.Entities.size() == 1);
-    const auto *text = std::get_if<Entities::Text>(&read->Document.Entities.front());
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    const auto *text = std::get_if<Entities::Text>(&read->Drawing.Entities.front());
     REQUIRE(text != nullptr);
     CHECK(text->Lettering.Value == "\xea\xb0\x80");
   }
@@ -308,19 +322,24 @@ namespace DxfIO
     const auto read =
         Load("  0\nSECTION\n  2\nENTITIES\n  0\nLINE\n250\n2\n  0\nENDSEC\n  0\nEOF\n");
     REQUIRE(read);
-    REQUIRE(read->Document.Entities.size() == 1);
-    CHECK(BaseOf(read->Document.Entities.front()).Extra
-          == std::vector{Group{.Code = 250, .Value = std::string{"2"}}});
-    CHECK(read->Issues == std::vector{Issue{.Line = 7, .What = "group 250 is no DXF group, kept"}});
+    REQUIRE(read->Drawing.Entities.size() == 1);
+    CHECK(BaseOf(read->Drawing.Entities.front()).Extra
+          == std::vector{Tag{.Code = 250, .Value = std::string{"2"}}});
+    CHECK(read->Issues
+          == std::vector{Issue{
+              .Code = IssueCode::Unknown, .Line = 7, .What = "group 250 is no DXF group, kept"}});
   }
 
   TEST_CASE("load: a section whose parts do not hold together stops the file")
   {
     CHECK(Load("  0\nSECTION\n  2\nHEADER\n  1\nAC1032\n  0\nENDSEC\n  0\nEOF\n")
-          == std::unexpected{Failure{5, "header variable expected, found group 1"}});
+          == std::unexpected{Failure{.Code = FailureCode::Damaged,
+                                     .Line = 5,
+                                     .What = "header variable expected, found group 1"}});
     CHECK(Load("  0\nSECTION\n  2\nENTITIES\n  0\nENDSEC\n"
                "  0\nSECTION\n  2\nTABLES\n  0\nTABLE\n  2\nLAYER\n  0\nENDSEC\n  0\nEOF\n")
-          == std::unexpected{Failure{13, "ENDTAB missing"}});
+          == std::unexpected{
+              Failure{.Code = FailureCode::Damaged, .Line = 13, .What = "ENDTAB missing"}});
   }
 
   namespace
@@ -379,29 +398,29 @@ namespace DxfIO
   TEST_CASE("load: a drawing read on several threads is the drawing read on one, issues and all")
   {
     const std::string text  = Spanning();
-    const auto        alone = Load(text, Loading{.Threads = 1});
+    const auto        alone = Load(text, LoadOptions{.Threads = 1});
     REQUIRE(alone);
-    REQUIRE(alone->Document.Entities.size() == 955);
-    CHECK(alone->Document.Objects.size()    == 600);
-    CHECK(alone->Issues.size() == 951);
-    const auto *insert = std::get_if<Entities::Insert>(&alone->Document.Entities.at(250));
+    REQUIRE(alone->Drawing.Entities.size() == 955);
+    CHECK(alone->Drawing.Objects.size()    == 600);
+    CHECK(alone->Issues.size()             == 951);
+    const auto *insert = std::get_if<Entities::Insert>(&alone->Drawing.Entities.at(250));
     REQUIRE(insert != nullptr);
     CHECK(insert->Attributes.Children.size() == 400);
-    const auto *polyline = std::get_if<Entities::Polyline>(&alone->Document.Entities.at(251));
+    const auto *polyline = std::get_if<Entities::Polyline>(&alone->Drawing.Entities.at(251));
     REQUIRE(polyline != nullptr);
     CHECK(polyline->Vertices.Children.size() == 300);
     for (const int threads : {0, 2, 8})
     {
       CAPTURE(threads);
-      const auto together = Load(text, Loading{.Threads = threads});
+      const auto together = Load(text, LoadOptions{.Threads = threads});
       REQUIRE(together);
-      CHECK(together->Document == alone->Document);
-      CHECK(together->Issues   == alone->Issues);
+      CHECK(together->Drawing == alone->Drawing);
+      CHECK(together->Issues  == alone->Issues);
     }
     std::istringstream from{text};
-    const auto         streamed = Load(from, Loading{.Threads = 4});
+    const auto         streamed = Load(from, LoadOptions{.Threads = 4});
     REQUIRE(streamed);
-    CHECK(streamed->Document == alone->Document);
+    CHECK(streamed->Drawing == alone->Drawing);
   }
 
   TEST_CASE("load: a drawing reads from a stream and from a file")
@@ -413,10 +432,10 @@ namespace DxfIO
     std::istringstream from{Bytes(file)};
     const auto         streamed = Load(from);
     REQUIRE(streamed);
-    CHECK(streamed->Document == whole->Document);
+    CHECK(streamed->Drawing == whole->Drawing);
     const auto filed = LoadFile(file);
     REQUIRE(filed);
-    CHECK(filed->Document == whole->Document);
+    CHECK(filed->Drawing == whole->Drawing);
   }
 
   TEST_CASE("load: a file whose size is not known is read to its end")
@@ -431,7 +450,7 @@ namespace DxfIO
     CHECK(unsized);
     const auto read = LoadFile(device);
     REQUIRE(read);
-    CHECK(read->Document == Document{});
+    CHECK(read->Drawing == Drawing{});
   }
 
   TEST_CASE("load: a stream that fails, or a file not there, is told")
@@ -440,11 +459,11 @@ namespace DxfIO
     broken.setstate(std::ios::badbit);
     const auto unread = Load(broken);
     REQUIRE_FALSE(unread);
-    CHECK(unread.error().What == "the stream could not be read");
+    CHECK(unread.error().What == "stream not readable");
     const std::filesystem::path missing = std::filesystem::path{DXFIO_FUZZ_DIR} / "missing.dxf";
     const auto                  absent  = LoadFile(missing);
     REQUIRE_FALSE(absent);
-    CHECK(absent.error().What == missing.string() + " cannot be read");
+    CHECK(absent.error().What == "cannot open " + missing.string());
   }
 
   TEST_CASE("load: a stream that failed before it was read is told")
@@ -453,7 +472,7 @@ namespace DxfIO
     failed.setstate(std::ios::failbit);
     const auto unread = Load(failed);
     REQUIRE_FALSE(unread);
-    CHECK(unread.error().What == "the stream could not be read");
+    CHECK(unread.error().What == "stream not readable");
     std::ifstream closed{std::filesystem::path{DXFIO_FUZZ_DIR} / "missing.dxf"};
     CHECK_FALSE(Load(closed));
   }

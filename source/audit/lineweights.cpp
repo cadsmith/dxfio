@@ -8,6 +8,7 @@
 #include <array>
 #include <cstdlib>
 #include <format>
+#include <utility>
 #include <variant>
 
 namespace DxfIO::Audit
@@ -38,19 +39,20 @@ namespace DxfIO::Audit
       return out;
     }
 
-    template <class DocumentT>
-    void Weighed(Auditor<DocumentT> &with, Part<DocumentT, int> &weight, Handle self)
+    template <class DrawingT>
+    void Weighed(Auditor<DrawingT> &with, Part<DrawingT, Lineweight> &weight, Handle self)
     {
-      const int nearest = Nearest(weight);
-      if (nearest == weight)
+      const int held    = std::to_underlying(weight);
+      const int nearest = Nearest(held);
+      if (nearest == held)
       {
         return;
       }
       with.Note(Severity::Warning,
-                std::format("lineweight {} is none AutoCAD has, {} taken", weight, nearest), self);
-      if constexpr (Auditor<DocumentT>::Fix)
+                std::format("lineweight {} is none AutoCAD has, {} taken", held, nearest), self);
+      if constexpr (Auditor<DrawingT>::Fix)
       {
-        weight = nearest;
+        weight = static_cast<Lineweight>(nearest);
       }
     }
 
@@ -60,8 +62,8 @@ namespace DxfIO::Audit
    *  AutoCAD has 24 lineweights and three names; one of any other value is a warning, and takes the
    *  nearest when the checks fix, on a layer, an entity, or what an entity carries.
    */
-  template <class DocumentT>
-  void Weighted(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Weighted(Auditor<DrawingT> &with)
   {
     for (auto &layer : with.Drawing->Layer.Records)
     {
@@ -99,7 +101,7 @@ namespace DxfIO::Audit
           });
   }
 
-  template void Weighted(Auditor<Document> &with);
+  template void Weighted(Auditor<Drawing> &with);
 
-  template void Weighted(Auditor<const Document> &with);
+  template void Weighted(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

@@ -1,11 +1,16 @@
 add_library(dxfio
+  appearance.cpp
   braced.cpp
   braces.cpp
+  color.cpp
   create.cpp
+  drawing.cpp
   entity.cpp
   handle.cpp
   handseed.cpp
   head.cpp
+  index.cpp
+  lineweight.cpp
   load.cpp
   object.cpp
   parallel.cpp
@@ -17,6 +22,7 @@ add_library(dxfio
   tail.cpp
   unknown.cpp
   version.cpp
+  view.cpp
 )
 
 add_subdirectory(audit)
@@ -27,6 +33,7 @@ add_subdirectory(empty)
 add_subdirectory(encoding)
 add_subdirectory(entities)
 add_subdirectory(fields)
+add_subdirectory(geometry)
 add_subdirectory(file)
 add_subdirectory(header)
 add_subdirectory(objects)

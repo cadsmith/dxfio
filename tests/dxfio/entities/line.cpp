@@ -16,7 +16,7 @@ namespace DxfIO::Entities
   {
     const Line taken = Replayed<Line>(Drawn("2CE"));
     CHECK(taken.End          == Vector{.X = 100, .Y = 50, .Z = 0});
-    CHECK(taken.Record.Color == Colors::Bylayer);
+    CHECK(taken.Record.Color == Colors::ByLayer);
     CHECK(taken.Extrusion    == Up);
   }
 
@@ -31,7 +31,7 @@ namespace DxfIO::Entities
     CHECK(part.Transparency == 33554559);
     CHECK(part.Scale        == 3);
     CHECK(part.Hidden);
-    CHECK(part.Lineweight == 50);
+    CHECK(part.Lineweight == Lineweight::Mm050);
     CHECK(part.Shadow     == 1);
   }
 
@@ -50,7 +50,7 @@ namespace DxfIO::Entities
   {
     const Line thick = Replayed<Line>(Drawn("2CF"));
     CHECK(thick.Thickness         == 5);
-    CHECK(thick.Record.Lineweight == 35);
+    CHECK(thick.Record.Lineweight == Lineweight::Mm035);
     const Line turned = Replayed<Line>(Drawn("2DA"));
     CHECK(turned.Extrusion == Vector{.X = 0, .Y = 1, .Z = 0});
   }

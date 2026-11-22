@@ -58,17 +58,17 @@ namespace DxfIO
     }
   } // namespace
 
-  auto Acadver(Version release) -> std::string_view
+  auto AcadverOf(Version release) -> std::string_view
   {
     return At(release).Acadver;
   }
 
-  auto Name(Version release) -> std::string_view
+  auto NameOf(Version release) -> std::string_view
   {
     return At(release).Name;
   }
 
-  auto Release(std::string_view code) -> std::optional<Version>
+  auto ReleaseOf(std::string_view code) -> std::optional<Version>
   {
     const std::optional<int> wanted = Number(code);
     if (!wanted)

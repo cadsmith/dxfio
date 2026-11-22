@@ -14,7 +14,7 @@ namespace DxfIO
     {
       if (one < 0)
       {
-        return std::unexpected{Failure{.Line = 0, .What = "negative"}};
+        return std::unexpected{Failure{.Code = FailureCode::Damaged, .What = "negative"}};
       }
       return {};
     }

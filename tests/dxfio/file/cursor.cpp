@@ -23,7 +23,9 @@ namespace DxfIO::File
     REQUIRE(circle);
     CHECK(circle->Tags.size() == 2);
     CHECK(in.Done());
-    CHECK(in.Take() == std::unexpected{Failure{9, "group 0 expected, found none"}});
+    CHECK(in.Take()
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 9, .What = "group 0 expected, found none"}});
   }
 
   TEST_CASE("cursor: a record not opened by a group 0 is a failure")
@@ -31,7 +33,9 @@ namespace DxfIO::File
     const auto all = Tags::All("  8\n0\n");
     REQUIRE(all);
     Cursor in{*all};
-    CHECK(in.Take() == std::unexpected{Failure{1, "group 0 expected, found group 8"}});
+    CHECK(in.Take()
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 1, .What = "group 0 expected, found group 8"}});
   }
 
   TEST_CASE("cursor: a record of another name is a failure")
@@ -39,7 +43,9 @@ namespace DxfIO::File
     const auto all = Tags::All("  0\nBLOCK\n");
     REQUIRE(all);
     Cursor in{*all};
-    CHECK(in.Take("TABLE") == std::unexpected{Failure{1, "TABLE expected, found BLOCK"}});
+    CHECK(in.Take("TABLE")
+          == std::unexpected{Failure{
+              .Code = FailureCode::Damaged, .Line = 1, .What = "TABLE expected, found BLOCK"}});
   }
 
   TEST_CASE("cursor: the records up to one named, which is left")
@@ -60,7 +66,9 @@ namespace DxfIO::File
     const auto all = Tags::All("  0\nLAYER\n  2\n0\n");
     REQUIRE(all);
     Cursor in{*all};
-    CHECK(in.Until("ENDTAB") == std::unexpected{Failure{3, "ENDTAB missing"}});
+    CHECK(in.Until("ENDTAB")
+          == std::unexpected{
+              Failure{.Code = FailureCode::Damaged, .Line = 3, .What = "ENDTAB missing"}});
   }
 
   TEST_CASE("cursor: an empty run of tags has no line")
@@ -69,7 +77,7 @@ namespace DxfIO::File
     CHECK(in.Done());
     const auto none = in.Take();
     REQUIRE_FALSE(none);
-    CHECK(none.error().Line == 0);
+    CHECK_FALSE(none.error().Line);
   }
 
   TEST_CASE("cursor: a group where a record should open stops a run")

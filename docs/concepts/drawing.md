@@ -1,14 +1,14 @@
 ---
-title: The document
+title: The drawing
 ---
 
 What a drawing becomes in memory, and what is kept of it.
 
 ## Plain values [#model]
 
-A drawing is a `DxfIO::Document`, an aggregate of plain values: the header variables, the classes, one member per table, the blocks, the entities and the objects, and any section dxfio does not know, all in the order the file gave them. Copy it, compare it with `==`, change any field.
+A drawing is a `DxfIO::Drawing`, an aggregate of plain values: the header variables, the classes, one member per table, the blocks, the entities and the objects, and any section dxfio does not know, all in the order the file gave them. Copy it, compare it with `==`, change any field.
 
-Each family is a `std::variant` of the kinds dxfio types, ending with `Unknown`: a record of a kind it has no type for keeps its name and every group it came with. Kinds are named after their DXF names: `MText`, `LwPolyline`, `Solid3d`, `Vport`.
+Each family is a `std::variant` of the kinds dxfio types, ending with `Unknown`: a record of a kind it has no type for keeps its name and every group it came with. Kinds are named after their DXF names: `MText`, `LwPolyline`, `Solid3d`, `VPort`.
 
 ## What is kept [#kept]
 

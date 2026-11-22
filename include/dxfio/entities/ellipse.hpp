@@ -5,15 +5,8 @@
 #include "dxfio/entities/record.hpp"
 #include "dxfio/vector.hpp"
 
-#include <numbers>
-
 namespace DxfIO::Entities
 {
-  /**
-   *  A full turn, in radians: the end parameter of a closed ellipse.
-   */
-  inline constexpr double Turn = 2 * std::numbers::pi;
-
   /**
    *  An ELLIPSE: a full or partial ellipse, given by its center, its major axis and the ratio of
    *  its minor axis.

@@ -21,7 +21,7 @@ namespace DxfIO
     return std::format("{:X}", one.Value);
   }
 
-  auto Parsed(std::string_view text) -> std::optional<Handle>
+  auto ParseHandle(std::string_view text) -> std::optional<Handle>
   {
     const std::string_view word = Tags::Trimmed(text);
     if (word.empty() || word.size() > Digits)

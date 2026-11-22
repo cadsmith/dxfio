@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <expected>
 #include <optional>
+#include <type_traits>
+#include <utility>
 
 namespace DxfIO::Fields
 {
@@ -32,6 +34,25 @@ namespace DxfIO::Fields
   {
     static auto Read(Walk &in, int code) -> std::optional<double>;
     static auto Write(Writing &to, int code, double held) -> std::expected<void, Failure>;
+  };
+
+  /**
+   *  A coded value read and written as the integer its enumeration holds.
+   */
+  template <class EnumT>
+    requires std::is_enum_v<EnumT>
+  struct Value<EnumT>
+  {
+    static auto Read(Walk &in, int code) -> std::optional<EnumT>
+    {
+      const std::optional<int> read = Value<int>::Read(in, code);
+      return read ? std::optional{static_cast<EnumT>(*read)} : std::nullopt;
+    }
+
+    static auto Write(Writing &to, int code, EnumT held) -> std::expected<void, Failure>
+    {
+      return Value<int>::Write(to, code, static_cast<int>(std::to_underlying(held)));
+    }
   };
 
   template <>

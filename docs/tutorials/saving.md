@@ -12,10 +12,10 @@ The drawing here, `plan.dxf`, is one AutoCAD saved as R2018. Among its entities 
 const auto plan = DxfIO::LoadFile("plan.dxf");
 if (!plan)
 {
-  std::println("line {}: {}", plan.error().Line, plan.error().What);
+  std::println("line {}: {}", plan.error().Line.value_or(0), plan.error().What);
   return 1;
 }
-const DxfIO::Document &drawing = plan->Document;
+const DxfIO::Drawing &drawing = plan->Drawing;
 ```
 
 ## Print what a save reports [#issues]
@@ -27,9 +27,9 @@ const auto told = [](const std::vector<DxfIO::Issue> &issues)
 {
   for (const DxfIO::Issue &issue : issues)
   {
-    if (issue.Record)
+    if (issue.Subject)
     {
-      std::println("  {}: {}", DxfIO::Hex(issue.Record), issue.What);
+      std::println("  {}: {}", DxfIO::Hex(issue.Subject), issue.What);
     }
     else
     {
@@ -41,7 +41,7 @@ const auto told = [](const std::vector<DxfIO::Issue> &issues)
 
 ## R2000 [#r2000]
 
-`Options::Release` picks the release. R2000 holds every entity of this drawing, but not its visual styles, whose layout changes at R2010 and again at R2013: they are left out, and what names them is cleared.
+`SaveOptions::Release` picks the release. R2000 holds every entity of this drawing, but not its visual styles, whose layout changes at R2010 and again at R2013: they are left out, and what names them is cleared.
 
 ```cpp
 const auto r2000 = DxfIO::SaveFile(drawing, "saving-r2000.dxf", {.Release = DxfIO::Version::R2000});
@@ -106,7 +106,7 @@ ASCII 129595 bytes, binary 67615 bytes
 Before R2007 a file's text is in a code page: the drawing's own, `$DWGCODEPAGE`, unless `Codepage` names another. A character the page lacks is written as a `\U+` escape: Ø is not in ANSI 1251, the Cyrillic page. `Release` is R2018 unless set, whatever the drawing's own, and R2018 writes UTF-8, so name the release too.
 
 ```cpp
-DxfIO::Document note = DxfIO::Create(DxfIO::Version::R2004);
+DxfIO::Drawing note = DxfIO::Create(DxfIO::Version::R2004);
 DxfIO::Entities::Text text{};
 text.Lettering.Height = 2.5;
 text.Lettering.Value = "Ø 20";

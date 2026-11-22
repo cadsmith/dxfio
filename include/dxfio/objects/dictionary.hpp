@@ -43,7 +43,7 @@ namespace DxfIO::Objects
     /**
      *  Whether the dictionary owns its entries hard. Group 280, from R2000.
      */
-    bool Hard{};
+    bool HardOwner{};
     /**
      *  What cloning does with a name already taken: 0 nothing, 1 keeps the entry there, 2 takes the
      *  clone, 3 to 5 rename it. Group 281, from R2000.

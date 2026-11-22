@@ -9,7 +9,7 @@
 #include "past.hpp"
 #include "seed.hpp"
 
-#include "dxfio/edit/find.hpp"
+#include "dxfio/view.hpp"
 
 #include <algorithm>
 #include <string_view>
@@ -30,8 +30,8 @@ namespace DxfIO::Lift
      */
     struct Lifting
     {
-      Document *Into{};
-      Seed     *Handles{};
+      Drawing *Into{};
+      Seed    *Handles{};
     };
 
     /**
@@ -39,15 +39,15 @@ namespace DxfIO::Lift
      */
     auto Spaced(std::string_view name) -> std::string_view
     {
-      if (Edit::Same(name, "$MODEL_SPACE") || Edit::Same(name, Model))
+      if (View::Same(name, "$MODEL_SPACE") || View::Same(name, Model))
       {
         return Model;
       }
-      return Edit::Same(name, "$PAPER_SPACE") || Edit::Same(name, Paper) ? Paper
+      return View::Same(name, "$PAPER_SPACE") || View::Same(name, Paper) ? Paper
                                                                          : std::string_view{};
     }
 
-    auto Free(const Document &from) -> Seed
+    auto Free(const Drawing &from) -> Seed
     {
       std::vector<Handle> used;
       Held(from, [&used](Handle one) -> void { used.push_back(one); });
@@ -66,9 +66,9 @@ namespace DxfIO::Lift
       base.Owner = owner;
     }
 
-    auto Record(const Document &drawing, std::string_view block) -> Handle
+    auto Record(const Drawing &drawing, std::string_view block) -> Handle
     {
-      return Edit::Find(drawing.BlockRecord, block)->Record.Base.Self;
+      return View::Record(drawing.BlockRecord, block)->Record.Base.Self;
     }
 
     /**
@@ -81,7 +81,7 @@ namespace DxfIO::Lift
     {
       for (RecordT &one : records)
       {
-        RecordT *own = Edit::Find(into, one.Record.Name);
+        RecordT *own = View::Record(into, one.Record.Name);
         Base     base{};
         base.Self       = own == nullptr ? with.Handles->Take() : own->Record.Base.Self;
         base.Owner      = into.Head.Base.Self;
@@ -98,17 +98,17 @@ namespace DxfIO::Lift
       into.Head.Count = std::max(into.Head.Count, static_cast<int>(into.Records.size()));
     }
 
-    void Tabled(const Lifting &with, Document &from)
+    void Tabled(const Lifting &with, Drawing &from)
     {
-      Document &into = *with.Into;
-      Merged(with, into.Vport, std::move(from.Vport.Records));
-      Merged(with, into.Ltype, std::move(from.Ltype.Records));
+      Drawing &into = *with.Into;
+      Merged(with, into.VPort, std::move(from.VPort.Records));
+      Merged(with, into.LType, std::move(from.LType.Records));
       Merged(with, into.Layer, std::move(from.Layer.Records));
       Merged(with, into.Style, std::move(from.Style.Records));
       Merged(with, into.View, std::move(from.View.Records));
       Merged(with, into.Ucs, std::move(from.Ucs.Records));
-      Merged(with, into.Appid, std::move(from.Appid.Records));
-      Merged(with, into.Dimstyle, std::move(from.Dimstyle.Records));
+      Merged(with, into.AppId, std::move(from.AppId.Records));
+      Merged(with, into.DimStyle, std::move(from.DimStyle.Records));
       into.Loose = std::move(from.Loose);
     }
 
@@ -131,18 +131,18 @@ namespace DxfIO::Lift
      *  A block of the lifted drawing: a space block gives its entities to the release's own, any
      *  other is given its record, and its BLOCK, ENDBLK and entities their handles and owner.
      */
-    void Blocked(const Lifting &with, Blocks::Block block)
+    void Blocked(const Lifting &with, Blocks::Definition block)
     {
-      Document              &into  = *with.Into;
-      const std::string_view space = Spaced(block.Begin.Name);
+      Drawing               &into  = *with.Into;
+      const std::string_view space = Spaced(block.Block.Name);
       if (!space.empty())
       {
-        Blocks::Block &own   = *Edit::FindBlock(into, space);
-        const Handle   owner = own.Begin.Record.Base.Owner;
+        Blocks::Definition &own   = *View::Block(into, space);
+        const Handle        owner = own.Block.Record.Base.Owner;
         for (Entity &one : block.Entities)
         {
           Entities::Own(one, *with.Handles, owner);
-          if (own.Begin.Record.Paper)
+          if (own.Block.Record.Paper)
           {
             Entities::Claim(one, owner);
           }
@@ -150,9 +150,9 @@ namespace DxfIO::Lift
         }
         return;
       }
-      const Handle owner = Recorded(with, block.Begin.Name);
-      Owned(block.Begin.Record.Base, with, owner);
-      Owned(block.End.Record.Base, with, owner);
+      const Handle owner = Recorded(with, block.Block.Name);
+      Owned(block.Block.Record.Base, with, owner);
+      Owned(block.EndBlk.Record.Base, with, owner);
       for (Entity &one : block.Entities)
       {
         Entities::Own(one, *with.Handles, owner);
@@ -162,7 +162,7 @@ namespace DxfIO::Lift
 
     void Drawn(const Lifting &with, Entities::List all)
     {
-      Document    &into  = *with.Into;
+      Drawing     &into  = *with.Into;
       const Handle model = Record(into, Model);
       const Handle paper = Record(into, Paper);
       for (Entity &one : all)
@@ -175,7 +175,7 @@ namespace DxfIO::Lift
     /**
      *  The lifted drawing's header variables over the release's own, each in the place of its name.
      */
-    void Headed(Document &into, std::vector<Header::Variable> all)
+    void Headed(Drawing &into, std::vector<Header::Variable> all)
     {
       for (Header::Variable &one : all)
       {
@@ -189,24 +189,24 @@ namespace DxfIO::Lift
       }
     }
 
-    void Seeded(Document &into)
+    void Seeded(Drawing &into)
     {
       WriteSeed(into, Handle{.Value = Past(into).Value + 1});
     }
   } // namespace
 
-  auto Lifted(Document from, Version release) -> Document
+  auto Lifted(Drawing from, Version release) -> Drawing
   {
     if (Header::Declared(from.Header) >= Version::R13)
     {
       return from;
     }
     Seed          handles = Free(from);
-    Document      into    = Empty::Whole(release, handles);
+    Drawing       into    = Empty::Whole(release, handles);
     const Lifting with{.Into = &into, .Handles = &handles};
     Headed(into, std::move(from.Header));
     Tabled(with, from);
-    for (Blocks::Block &one : from.Blocks)
+    for (Blocks::Definition &one : from.Blocks)
     {
       Blocked(with, std::move(one));
     }

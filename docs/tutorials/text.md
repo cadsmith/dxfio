@@ -9,7 +9,7 @@ Single-line TEXT, justified and in a text style added to the STYLE table, and MT
 A STYLE record names the font and proportions text is drawn with: `Width` is the width of the letters over their height and `Oblique` their slant, in degrees. A `Height` of 0, the default, lets each text give its own.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 DxfIO::Tables::Style narrow{};
 narrow.Record.Name = "Narrow";
@@ -33,21 +33,23 @@ DxfIO::Edit::Add(drawing, title);
 
 ## Justification [#justification]
 
-`Lettering.Horizontal` takes 0 left, 1 center, 2 right or 4 middle, and the text's own `Vertical` 0 baseline, 1 bottom, 2 middle or 3 top. Each of these but left on the baseline holds the text to `Lettering.Alignment`. `Position` is then where the drawn text starts, which depends on the font and which dxfio does not work out, so these texts give it the alignment point too.
+`Lettering.Horizontal` takes `Left`, `Center`, `Right` or `Middle`, and the text's own `Vertical` `Baseline`, `Bottom`, `Middle` or `Top`. Each of these but left on the baseline holds the text to `Lettering.Alignment`. `Position` is then where the drawn text starts, which depends on the font and which dxfio does not work out, so these texts give it the alignment point too.
 
 ```cpp
+using Across = DxfIO::Entities::HorizontalAlignment;
+using Down = DxfIO::Entities::VerticalAlignment;
 struct Justification
 {
-  int Horizontal;
-  int Vertical;
+  Across Horizontal;
+  Down Vertical;
   std::string Value;
 };
 const std::vector<Justification> justifications{
-    {.Horizontal = 1, .Vertical = 0, .Value = "center"},
-    {.Horizontal = 2, .Vertical = 0, .Value = "right"},
-    {.Horizontal = 4, .Vertical = 0, .Value = "middle"},
-    {.Horizontal = 1, .Vertical = 3, .Value = "top center"},
-    {.Horizontal = 0, .Vertical = 1, .Value = "bottom left"},
+    {.Horizontal = Across::Center, .Vertical = Down::Baseline, .Value = "center"},
+    {.Horizontal = Across::Right, .Vertical = Down::Baseline, .Value = "right"},
+    {.Horizontal = Across::Middle, .Vertical = Down::Baseline, .Value = "middle"},
+    {.Horizontal = Across::Center, .Vertical = Down::Top, .Value = "top center"},
+    {.Horizontal = Across::Left, .Vertical = Down::Bottom, .Value = "bottom left"},
 };
 
 double y = 0;
@@ -82,14 +84,14 @@ DxfIO::Edit::Add(drawing, styled);
 
 ## Multiline text [#mtext]
 
-An MTEXT wraps its text in a frame `Width` wide, its `Attachment` point, top left by default, at `Position`. Its fields are in `Paragraph`, kept on the heap and reached with `->`. A value of any length goes in `Value` whole: dxfio writes it in pieces of 250 characters.
+An MTEXT wraps its text in a frame `Width` wide, its `Attachment` point, top left by default, at `Position`. Its fields are in `Data`, an `MTextData` kept on the heap and reached with `->`. A value of any length goes in `Value` whole: dxfio writes it in pieces of 250 characters.
 
 ```cpp
 DxfIO::Entities::MText note{};
-note.Paragraph->Position = {.X = 0, .Y = 50, .Z = 0};
-note.Paragraph->Height = 2.5;
-note.Paragraph->Width = 40;
-note.Paragraph->Value = R"(Pump P-1 feeds {\C1;tank 3} through valve V-12, open in service\PDrain before winter)";
+note.Data->Position = {.X = 0, .Y = 50, .Z = 0};
+note.Data->Height = 2.5;
+note.Data->Width = 40;
+note.Data->Value = R"(Pump P-1 feeds {\C1;tank 3} through valve V-12, open in service\PDrain before winter)";
 DxfIO::Edit::Add(drawing, note);
 ```
 
@@ -98,13 +100,13 @@ DxfIO::Edit::Add(drawing, note);
 The codes are in the text itself. Saved to R12, which has no MTEXT, the note becomes plain TEXT, a new one only where the note breaks its own line and not where its width wraps it. What is left shows what is code: `\P` ends a line, and a code with a value, such as `\C1;`, runs to its semicolon.
 
 ```cpp
-DxfIO::Document alone = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing alone = DxfIO::Create(DxfIO::Version::R2018);
 DxfIO::Edit::Add(alone, note);
 const auto older = DxfIO::Save(alone, {.Release = DxfIO::Version::R12})
                        .and_then([](const DxfIO::Saved &flat) { return DxfIO::Load(flat.Bytes); });
 if (older)
 {
-  for (const DxfIO::Entity &one : older->Document.Entities)
+  for (const DxfIO::Entity &one : older->Drawing.Entities)
   {
     if (const auto *line = std::get_if<DxfIO::Entities::Text>(&one))
     {

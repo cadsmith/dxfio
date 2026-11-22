@@ -20,7 +20,7 @@ namespace DxfIO
 
   TEST_CASE("entity: an unknown entity tells the name it came in with")
   {
-    Entity kept = Unknown{.Type = Symbol{"ACME_GEAR"}, .Base = {}, .Groups = {}};
+    Entity kept = Unknown{.Type = Symbol{"ACME_GEAR"}, .Base = {}, .Tags = {}};
     CHECK(TypeOf(kept) == "ACME_GEAR");
     BaseOf(kept).Owner = Handle{.Value = 0x1f};
     CHECK(std::get<Unknown>(kept).Base.Owner == Handle{.Value = 0x1f});
@@ -28,9 +28,9 @@ namespace DxfIO
 
   TEST_CASE("entity: an unknown entity's name outlives the record it was taken from")
   {
-    Entity                 kept = Unknown{.Type = Symbol{"ACME_GEAR"}, .Base = {}, .Groups = {}};
+    Entity                 kept = Unknown{.Type = Symbol{"ACME_GEAR"}, .Base = {}, .Tags = {}};
     const std::string_view name = TypeOf(kept);
-    kept                        = Unknown{.Type = Symbol{"ACME_BOLT"}, .Base = {}, .Groups = {}};
+    kept                        = Unknown{.Type = Symbol{"ACME_BOLT"}, .Base = {}, .Tags = {}};
     CHECK(name == "ACME_GEAR");
   }
 } // namespace DxfIO

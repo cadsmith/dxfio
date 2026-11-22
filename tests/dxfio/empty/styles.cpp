@@ -16,9 +16,9 @@ namespace DxfIO::Empty
     CHECK(all.at(1).Base.Self  == ids.Materials.Bylayer);
     CHECK(all.front().Channels == 63);
     const Objects::Material &global = all.back();
-    CHECK(global.Maps->Diffuse.Transform.Cells.front() == 0.0007999999797903);
-    CHECK(global.Maps->Bump.Transform     == global.Maps->Diffuse.Transform);
-    CHECK(global.Maps->Specular.Transform == Identity);
+    CHECK(global.Maps->Diffuse.Transform.front() == 0.0007999999797903);
+    CHECK(global.Maps->Bump.Transform            == global.Maps->Diffuse.Transform);
+    CHECK(global.Maps->Specular.Transform        == Identity);
   }
 
   TEST_CASE("styles: Standard's of multileaders, multilines and tables")

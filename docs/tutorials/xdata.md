@@ -9,9 +9,9 @@ Extended data carries an application's own values on an entity: register the app
 Each set of extended data names the application it belongs to, and the APPID table registers that name. `Edit::Add` adds the record, and fails when the table holds that name already.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
-DxfIO::Tables::Appid application{};
+DxfIO::Tables::AppId application{};
 application.Record.Name = "WALLPLAN";
 DxfIO::Edit::Add(drawing, application);
 ```
@@ -25,7 +25,7 @@ DxfIO::Entities::Line wall{};
 wall.End = {.X = 400, .Y = 0, .Z = 0};
 wall.Record.Base.Extended.push_back(DxfIO::Xdata{
     .Application = "WALLPLAN",
-    .Groups =
+    .Tags =
         {
             {.Code = 1000, .Value = std::string{"W-12"}},
             {.Code = 1040, .Value = 0.2},
@@ -48,25 +48,25 @@ if (!saved)
 
 ## Read it back [#read]
 
-`FindEntity` finds the line by the handle `Edit::Add` returned, and `BaseOf` gives the extended data of any entity. Other applications' data may sit beside yours, kept as it was read; `Edit::Same` matches the name as AutoCAD does, without case.
+`FindEntity` finds the line by the handle `Edit::Add` returned, and `BaseOf` gives the extended data of any entity. Other applications' data may sit beside yours, kept as it was read; `View::Same` matches the name as AutoCAD does, without case.
 
 ```cpp
 const auto loaded = DxfIO::LoadFile("xdata.dxf");
 if (!loaded)
 {
-  std::println("line {}: {}", loaded.error().Line, loaded.error().What);
+  std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
   return 1;
 }
-const DxfIO::Entity *found = DxfIO::Edit::FindEntity(loaded->Document, *handle);
+const DxfIO::Entity *found = DxfIO::FindEntity(loaded->Drawing, *handle);
 for (const DxfIO::Xdata &data : DxfIO::BaseOf(*found).Extended)
 {
-  if (!DxfIO::Edit::Same(data.Application, "WALLPLAN"))
+  if (!DxfIO::View::Same(data.Application, "WALLPLAN"))
   {
     continue;
   }
   std::println("{} {}: {} thick, rated {} minutes", DxfIO::TypeOf(*found),
-               std::get<std::string>(data.Groups.at(0).Value), std::get<double>(data.Groups.at(1).Value),
-               std::get<std::int64_t>(data.Groups.at(2).Value));
+               std::get<std::string>(data.Tags.at(0).Value), std::get<double>(data.Tags.at(1).Value),
+               std::get<std::int64_t>(data.Tags.at(2).Value));
 }
 ```
 

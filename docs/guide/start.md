@@ -30,7 +30,7 @@ ctest --preset debug
 
 auto main() -> int
 {
-  DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+  DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
   DxfIO::Entities::Line line{};
   line.End = {.X = 100, .Y = 50, .Z = 0};
@@ -46,10 +46,10 @@ auto main() -> int
   const auto loaded = DxfIO::LoadFile("first.dxf");
   if (!loaded)
   {
-    std::println("line {}: {}", loaded.error().Line, loaded.error().What);
+    std::println("line {}: {}", loaded.error().Line.value_or(0), loaded.error().What);
     return 1;
   }
-  std::println("{} entity, {} issues", loaded->Document.Entities.size(),
+  std::println("{} entity, {} issues", loaded->Drawing.Entities.size(),
                loaded->Issues.size());
 }
 ```

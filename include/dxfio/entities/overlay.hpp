@@ -8,7 +8,7 @@ namespace DxfIO::Entities
   /**
    *  The kind of file an underlay shows.
    */
-  enum class Overlay : std::uint8_t
+  enum class UnderlayKind : std::uint8_t
   {
     /**
      *  A PDF file, for a PDFUNDERLAY.

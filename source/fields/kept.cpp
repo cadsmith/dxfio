@@ -1,5 +1,6 @@
 #include "fields/owned.hpp"
 #include "fields/walk.hpp"
+#include "located.hpp"
 #include "tags/codes.hpp"
 #include "unknown/io.hpp"
 
@@ -18,10 +19,10 @@ namespace DxfIO::Fields
    *  straight after the part's fields, is left out and told: under the marker written before them,
    *  it would be read in their place.
    */
-  auto Walk::Rest() const -> std::vector<Group>
+  auto Walk::Rest() const -> std::vector<Tag>
   {
-    std::vector<Group> out;
-    const std::size_t  uncovered = Uncovered();
+    std::vector<Tag>  out;
+    const std::size_t uncovered = Uncovered();
     for (std::size_t index = 0; index < m_Body.size(); ++index)
     {
       const Tags::Tag &one = At(index);
@@ -31,7 +32,8 @@ namespace DxfIO::Fields
       }
       if (index < uncovered && !m_Unfit.at(index) && m_Repeats.Trails(one.Code))
       {
-        m_With.Tell(Issue{.Line = one.Line,
+        m_With.Tell(Issue{.Code = IssueCode::Damaged,
+                          .Line = Located(one.Line),
                           .What = std::format("group {} given again, one kept", one.Code)});
         continue;
       }
@@ -45,11 +47,11 @@ namespace DxfIO::Fields
     m_Used.assign(m_Body.size(), true);
   }
 
-  auto Walk::Kept() -> std::vector<Group>
+  auto Walk::Kept() -> std::vector<Tag>
   {
-    std::vector<Group> out;
-    bool               beyond = false;
-    const std::size_t  first  = Opening();
+    std::vector<Tag>  out;
+    bool              beyond = false;
+    const std::size_t first  = Opening();
     for (std::size_t index = 0; index < m_Body.size(); ++index)
     {
       const Tags::Tag &one = At(index);
@@ -60,7 +62,8 @@ namespace DxfIO::Fields
       if (std::optional<std::string> why =
               Dropped(index, one.Code, Standing{.Beyond = beyond, .Early = index < first}))
       {
-        m_With.Tell(Issue{.Line = one.Line, .What = std::move(*why)});
+        m_With.Tell(
+            Issue{.Code = IssueCode::Damaged, .Line = Located(one.Line), .What = std::move(*why)});
         continue;
       }
       beyond = beyond

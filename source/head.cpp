@@ -3,6 +3,7 @@
 #include "braces.hpp"
 #include "fields/handles.hpp"
 #include "fields/scratch.hpp"
+#include "located.hpp"
 #include "tags/codes.hpp"
 
 #include "dxfio/handle.hpp"
@@ -22,7 +23,8 @@ namespace DxfIO
       if (held)
       {
         with.Tell(Issue{
-            .Line = one.Line,
+            .Code = IssueCode::Damaged,
+            .Line = Located(one.Line),
             .What = std::format("group {} given again, one kept", one.Code),
         });
       }
@@ -30,7 +32,7 @@ namespace DxfIO
 
     auto Took(const Tags::Tag &one, const Heading &to, const Fields::Reading &with) -> bool
     {
-      const std::optional<Handle> found  = Parsed(Tags::Text(one));
+      const std::optional<Handle> found  = ParseHandle(Tags::Text(one));
       const bool                  modern = with.Release >= Version::R13;
       if (one.Code == to.Code && found && *found)
       {

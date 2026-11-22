@@ -9,7 +9,7 @@ A block defined once with its own entities and attribute definitions, then place
 `Edit::AddBlock` makes an empty block, with its block record where the drawing has block records. Entities added under the block's name go into it, in the block's own coordinates: an insert puts the block's base point, `Begin.Origin`, at its own position.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 DxfIO::Edit::AddBlock(drawing, "Valve");
 
 DxfIO::Entities::Circle body{};
@@ -24,20 +24,20 @@ DxfIO::Edit::Add(drawing, stem, "Valve");
 
 ## Attribute definitions [#attdef]
 
-An ATTDEF names an attribute by its `Tag`, with the `Prompt` shown when the block is inserted and a default value in `Lettering->Value`: an ATTDEF keeps its `Lettering` on the heap, reached with `->`. `Horizontal` 1 and `Vertical` 2 center the number on `Alignment`, the base point here, and `Flags` 1 makes the size invisible.
+An ATTDEF names an attribute by its `Tag`, with the `Prompt` shown when the block is inserted and a default value in `Lettering->Value`: an ATTDEF keeps its `Lettering` on the heap, reached with `->`. `Center` and `Middle` center the number on `Alignment`, the base point here, and `Flags` 1 makes the size invisible.
 
 ```cpp
-DxfIO::Entities::Attdef number{};
+DxfIO::Entities::AttDef number{};
 number.Tag = DxfIO::Symbol{"NUMBER"};
 number.Prompt = "Valve number";
 number.Lettering->Value = "V-0";
 number.Lettering->Height = 2.5;
-number.Lettering->Horizontal = 1;
-number.Vertical = 2;
+number.Lettering->Horizontal = DxfIO::Entities::HorizontalAlignment::Center;
+number.Vertical = DxfIO::Entities::VerticalAlignment::Middle;
 number.Lettering->Alignment = DxfIO::Vector{.X = 0, .Y = 0, .Z = 0};
 DxfIO::Edit::Add(drawing, number, "Valve");
 
-DxfIO::Entities::Attdef size{};
+DxfIO::Entities::AttDef size{};
 size.Tag = DxfIO::Symbol{"SIZE"};
 size.Prompt = "Pipe size";
 size.Lettering->Value = "DN50";
@@ -51,9 +51,9 @@ DxfIO::Edit::Add(drawing, size, "Valve");
 Bit 2 of `Begin.Flags` says the block has attribute definitions that are not constant. `AddBlock` leaves the flags at 0, so set it once the block has its ATTDEFs.
 
 ```cpp
-if (DxfIO::Blocks::Block *valve = DxfIO::Edit::FindBlock(drawing, "Valve"))
+if (DxfIO::Blocks::Definition *valve = DxfIO::View::Block(drawing, "Valve"))
 {
-  valve->Begin.Flags = 2;
+  valve->Block.Flags = 2;
 }
 ```
 
@@ -78,7 +78,7 @@ second.Rotation = 30;
 An insert gives each attribute its value in an ATTRIB of the same tag and flags. The insert does not move an ATTRIB: it is drawn where its own `Lettering` says, so give it the definition's text as the insert places it. For these two definitions, both at the base point, that is the insert's position, with the height scaled and the rotation turned.
 
 ```cpp
-const auto attribute = [](const DxfIO::Entities::Attdef &definition, const DxfIO::Entities::Insert &insert,
+const auto attribute = [](const DxfIO::Entities::AttDef &definition, const DxfIO::Entities::Insert &insert,
                           const std::string &value) -> DxfIO::Entities::Attrib
 {
   DxfIO::Entities::Attrib out{};

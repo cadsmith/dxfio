@@ -1,5 +1,6 @@
 #include "braces.hpp"
 #include "fields/owned.hpp"
+#include "located.hpp"
 #include "tags/codes.hpp"
 
 #include <algorithm>
@@ -24,15 +25,15 @@ namespace DxfIO
       return Tags::Holds(one, Tags::Codes::Control, "}");
     }
 
-    auto Handled(const Group &one) -> const Handle *
+    auto Handled(const Tag &one) -> const Handle *
     {
       return std::get_if<Handle>(&one.Value);
     }
 
-    auto Watched(Base &into, std::span<const Group> groups) -> std::size_t
+    auto Watched(Base &into, std::span<const Tag> groups) -> std::size_t
     {
       std::size_t lost = 0;
-      for (const Group &one : groups)
+      for (const Tag &one : groups)
       {
         if (const Handle *found = Handled(one))
         {
@@ -44,7 +45,7 @@ namespace DxfIO
       return lost;
     }
 
-    auto Place(Base &into, std::string_view name, std::vector<Group> groups) -> std::size_t
+    auto Place(Base &into, std::string_view name, std::vector<Tag> groups) -> std::size_t
     {
       if (name == Reactors)
       {
@@ -59,7 +60,7 @@ namespace DxfIO
         into.Dictionary        = *handle;
         return lost;
       }
-      into.Braces.push_back(Brace{.Name = std::string{name}, .Groups = std::move(groups)});
+      into.Braces.push_back(Brace{.Name = std::string{name}, .Tags = std::move(groups)});
       return 0;
     }
 
@@ -101,10 +102,10 @@ namespace DxfIO
   auto Braced(std::span<const Tags::Tag> body, Base &into, const Fields::Reading &with)
       -> std::size_t
   {
-    const auto         end    = Ending(body);
-    const bool         closed = end != body.end() && Closes(*end);
-    const auto         last   = closed ? end : Owned(body, end);
-    std::vector<Group> found;
+    const auto       end    = Ending(body);
+    const bool       closed = end != body.end() && Closes(*end);
+    const auto       last   = closed ? end : Owned(body, end);
+    std::vector<Tag> found;
     for (const Tags::Tag &one : std::ranges::subrange(std::next(body.begin()), last))
     {
       found.push_back(Fields::Owned(one, with.Text));
@@ -114,14 +115,16 @@ namespace DxfIO
     if (lost > 0)
     {
       with.Tell(Issue{
-          .Line = body.front().Line,
+          .Code = IssueCode::Damaged,
+          .Line = Located(body.front().Line),
           .What = std::format("brace {} lost {} of its groups", name, lost),
       });
     }
     if (!closed)
     {
       with.Tell(Issue{
-          .Line = body.front().Line,
+          .Code = IssueCode::Damaged,
+          .Line = Located(body.front().Line),
           .What = std::format("brace {} not closed", name),
       });
     }

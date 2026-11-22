@@ -18,7 +18,7 @@ namespace DxfIO::Tables
     CHECK(taken.Record.Name == "Standard");
     CHECK(taken.Font        == "arial.ttf");
     CHECK(taken.Bigfont.empty());
-    CHECK(taken.Previous == 2.5);
-    CHECK(Written(taken) == text);
+    CHECK(taken.LastHeight == 2.5);
+    CHECK(Written(taken)   == text);
   }
 } // namespace DxfIO::Tables

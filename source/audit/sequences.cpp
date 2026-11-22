@@ -45,8 +45,8 @@ namespace DxfIO::Audit
      *  An INSERT whose attributes are not flagged to follow it, group 66, has them read as entities
      *  on their own.
      */
-    template <class DocumentT, class InsertT>
-    void Flagged(Auditor<DocumentT> &with, InsertT &insert)
+    template <class DrawingT, class InsertT>
+    void Flagged(Auditor<DrawingT> &with, InsertT &insert)
     {
       if (insert.Attributes.Children.empty() || insert.Follows)
       {
@@ -54,7 +54,7 @@ namespace DxfIO::Audit
       }
       with.Note(Severity::Error, "INSERT attributes not marked to follow it",
                 insert.Record.Base.Self);
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         insert.Follows = true;
       }
@@ -64,8 +64,8 @@ namespace DxfIO::Audit
      *  The SEQEND that closes the vertices or attributes, when missing, is made on the entity's
      *  layer, owned by it.
      */
-    template <class DocumentT, class KindT>
-    void Ended(Auditor<DocumentT> &with, KindT &kind, std::string_view name)
+    template <class DrawingT, class KindT>
+    void Ended(Auditor<DrawingT> &with, KindT &kind, std::string_view name)
     {
       auto &chain = Chain(kind);
       if (chain.Closing || !Needed(kind))
@@ -73,7 +73,7 @@ namespace DxfIO::Audit
         return;
       }
       with.Note(Severity::Error, std::format("{} has no SEQEND", name), kind.Record.Base.Self);
-      if constexpr (Auditor<DocumentT>::Fix)
+      if constexpr (Auditor<DrawingT>::Fix)
       {
         Entities::Record record = kind.Record;
         record.Base             = {};
@@ -82,7 +82,7 @@ namespace DxfIO::Audit
           record.Base.Self = with.Take();
         }
         record.Base.Owner = kind.Record.Base.Self;
-        chain.Closing     = Boxed{Entities::Seqend{.Record = std::move(record)}};
+        chain.Closing     = Boxed{Entities::SeqEnd{.Record = std::move(record)}};
       }
     }
 
@@ -91,8 +91,8 @@ namespace DxfIO::Audit
      *  subclass, which AutoCAD refuses: an error, and the flags its polyline asks when the checks
      *  fix.
      */
-    template <class DocumentT, class PolylineT>
-    void Reflagged(Auditor<DocumentT> &with, PolylineT &polyline)
+    template <class DrawingT, class PolylineT>
+    void Reflagged(Auditor<DrawingT> &with, PolylineT &polyline)
     {
       for (auto &vertex : polyline.Vertices.Children)
       {
@@ -104,7 +104,7 @@ namespace DxfIO::Audit
         with.Note(Severity::Error,
                   std::format("vertex flagged {} where its polyline asks {}", vertex.Flags, asked),
                   vertex.Record.Base.Self);
-        if constexpr (Auditor<DocumentT>::Fix)
+        if constexpr (Auditor<DrawingT>::Fix)
         {
           vertex.Flags = asked;
         }
@@ -113,8 +113,8 @@ namespace DxfIO::Audit
 
   } // namespace
 
-  template <class DocumentT>
-  void Sequenced(Auditor<DocumentT> &with)
+  template <class DrawingT>
+  void Sequenced(Auditor<DrawingT> &with)
   {
     Lists(*with.Drawing,
           [&with](auto &all) -> void
@@ -140,7 +140,7 @@ namespace DxfIO::Audit
           });
   }
 
-  template void Sequenced(Auditor<Document> &with);
+  template void Sequenced(Auditor<Drawing> &with);
 
-  template void Sequenced(Auditor<const Document> &with);
+  template void Sequenced(Auditor<const Drawing> &with);
 } // namespace DxfIO::Audit

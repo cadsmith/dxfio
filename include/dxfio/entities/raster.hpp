@@ -7,23 +7,11 @@
 #include "dxfio/handle.hpp"
 #include "dxfio/vector.hpp"
 
-#include <string>
+#include <cstddef>
 #include <vector>
 
 namespace DxfIO::Entities
 {
-  /**
-   *  The display flags of a new image or wipeout, as AutoCAD writes them: shown, shown when not
-   *  aligned with the screen, and clipped.
-   */
-  inline constexpr int Displayed = 7;
-
-  /**
-   *  The brightness and the contrast of a new image or wipeout: 50, halfway, as AutoCAD writes
-   *  them.
-   */
-  inline constexpr int Halfway = 50;
-
   /**
    *  A vertex of the clipping boundary of an image or a wipeout.
    */
@@ -56,12 +44,12 @@ namespace DxfIO::Entities
      *  One pixel's step along the bottom edge of the image, in world coordinates. Groups 11, 21,
      *  31.
      */
-    Vector Across{};
+    Vector UVector{};
     /**
      *  One pixel's step up the left edge of the image, from the insertion point, in world
      *  coordinates. Groups 12, 22, 32.
      */
-    Vector Down{};
+    Vector VVector{};
     /**
      *  The width and height of the image, in pixels. Groups 13, 23.
      */
@@ -74,7 +62,7 @@ namespace DxfIO::Entities
      *  1 shown, 2 shown when not aligned with the screen, 4 clipped, 8 transparent; 7 for a new
      *  one, as AutoCAD writes it. Group 70.
      */
-    int Flags{Displayed};
+    int Flags{7};
     /**
      *  Whether the clipping boundary is on. Group 280.
      */
@@ -82,11 +70,11 @@ namespace DxfIO::Entities
     /**
      *  The brightness, 0 to 100. Group 281.
      */
-    int Brightness{Halfway};
+    int Brightness{50};
     /**
      *  The contrast, 0 to 100. Group 282.
      */
-    int Contrast{Halfway};
+    int Contrast{50};
     /**
      *  The fade, 0 to 100. Group 283.
      */
@@ -102,7 +90,7 @@ namespace DxfIO::Entities
     /**
      *  The shape of the clipping boundary: 1 a rectangle, as for a new one, 2 a polygon. Group 71.
      */
-    int Kind{1};
+    int ClipShape{1};
     /**
      *  The vertices of the clipping boundary, two opposite corners for a rectangle; group 91 counts
      *  them.
@@ -125,7 +113,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  Where the picture lies, how it is shown and how it is clipped, from the AcDbRasterImage
      *  subclass.
@@ -148,7 +136,7 @@ namespace DxfIO::Entities
      *  The proxy graphics, for programs that cannot draw the entity. Group 92, or 160 from R2010,
      *  then 310.
      */
-    std::string Picture{};
+    std::vector<std::byte> Picture{};
     /**
      *  Where the area lies and the boundary that shapes it, from the AcDbWipeout subclass.
      */

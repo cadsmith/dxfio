@@ -5,11 +5,47 @@
 #include "dxfio/symbol.hpp"
 #include "dxfio/vector.hpp"
 
+#include <cstdint>
 #include <optional>
 #include <string>
 
 namespace DxfIO::Entities
 {
+  /**
+   *  How a line of text lies along its alignment point, group 72.
+   */
+  // NOLINTNEXTLINE(performance-enum-size): a 16-bit group, any value round-trips
+  enum class HorizontalAlignment : std::int16_t
+  {
+    Left,
+    Center,
+    Right,
+    /**
+     *  Between the position and the alignment point, its height scaled with its width.
+     */
+    Aligned,
+    /**
+     *  Centered both ways on the alignment point.
+     */
+    Middle,
+    /**
+     *  Between the position and the alignment point, its height kept.
+     */
+    Fit,
+  };
+
+  /**
+   *  How a line of text lies across its alignment point, group 73 of a TEXT and 74 of an attribute.
+   */
+  // NOLINTNEXTLINE(performance-enum-size): a 16-bit group, any value round-trips
+  enum class VerticalAlignment : std::int16_t
+  {
+    Baseline,
+    Bottom,
+    Middle,
+    Top,
+  };
+
   /**
    *  The AcDbText subclass a TEXT, an ATTRIB and an ATTDEF share: what the text says, where, and in
    *  which style.
@@ -54,10 +90,9 @@ namespace DxfIO::Entities
      */
     int Generation{};
     /**
-     *  The horizontal justification: 0 left, 1 center, 2 right, 3 aligned, 4 middle, 5 fit. Group
-     *  72.
+     *  Group 72.
      */
-    int Horizontal{};
+    HorizontalAlignment Horizontal{};
     /**
      *  The second alignment point, which justified text keeps to; none for text aligned left.
      *  Groups 11, 21, 31.

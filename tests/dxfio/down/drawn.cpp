@@ -38,10 +38,10 @@ namespace DxfIO::Down
     auto Bezier(std::vector<double> weights = {}) -> Entities::Spline
     {
       Entities::Spline out{};
-      out.Curve->Degree  = 2;
-      out.Curve->Knots   = {0, 0, 0, 1, 1, 1};
-      out.Curve->Poles   = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
-      out.Curve->Weights = std::move(weights);
+      out.Curve->Degree        = 2;
+      out.Curve->Knots         = {0, 0, 0, 1, 1, 1};
+      out.Curve->ControlPoints = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
+      out.Curve->Weights       = std::move(weights);
       return out;
     }
 
@@ -76,16 +76,16 @@ namespace DxfIO::Down
      *  A drawing of each kind R12 has not but draws: an ellipse, a spline, a ray, a construction
      *  line, and in a block an MTEXT of two lines.
      */
-    auto Unkinded() -> Document
+    auto Unkinded() -> Drawing
     {
-      Document out = Create(Version::R2018);
+      Drawing out = Create(Version::R2018);
       out.Entities.emplace_back(
           Entities::Ellipse{.Record = {.Base = {.Self = Handle{.Value = 0x900}}}});
       out.Entities.emplace_back(Bezier());
       out.Entities.emplace_back(Entities::Ray{});
       out.Entities.emplace_back(Entities::XLine{});
       Entities::MText note{};
-      note.Paragraph->Value = "x\\Py";
+      note.Data->Value = "x\\Py";
       out.Blocks.front().Entities.emplace_back(note);
       return out;
     }
@@ -167,7 +167,7 @@ namespace DxfIO::Down
   {
     Seed             handles;
     Entities::Spline fitted{};
-    fitted.Curve->Fits = {Vector{.X = 1}, Vector{.X = 2}, Vector{.X = 3}};
+    fitted.Curve->FitPoints = {Vector{.X = 1}, Vector{.X = 2}, Vector{.X = 3}};
     CHECK(Traced(fitted, handles).Vertices.Children.size() == 3);
     Entities::Spline broken        = Bezier();
     broken.Curve->Knots            = {0, 1};
@@ -191,9 +191,9 @@ namespace DxfIO::Down
   TEST_CASE("drawn: a spline of several spans, 128 steps at least, 16 a span")
   {
     Entities::Spline out{};
-    out.Curve->Degree = 1;
-    out.Curve->Knots  = {0, 0, 0.5, 0.5, 1, 1};
-    out.Curve->Poles  = {Vector{}, Vector{.X = 1}, Vector{.X = 1, .Y = 1}, Vector{.Y = 1}};
+    out.Curve->Degree        = 1;
+    out.Curve->Knots         = {0, 0, 0.5, 0.5, 1, 1};
+    out.Curve->ControlPoints = {Vector{}, Vector{.X = 1}, Vector{.X = 1, .Y = 1}, Vector{.Y = 1}};
     Seed                     handles;
     const Entities::Polyline made = Traced(out, handles);
     REQUIRE(made.Vertices.Children.size() == 129);
@@ -203,7 +203,7 @@ namespace DxfIO::Down
     many.Curve->Knots  = {0};
     for (int at = 0; at <= 10; ++at)
     {
-      many.Curve->Poles.push_back(Vector{.X = static_cast<double>(at)});
+      many.Curve->ControlPoints.push_back(Vector{.X = static_cast<double>(at)});
       many.Curve->Knots.push_back(static_cast<double>(at));
     }
     many.Curve->Knots.push_back(10);
@@ -213,9 +213,9 @@ namespace DxfIO::Down
   TEST_CASE("drawn: a spline whose end knot repeats past its degree ends on the last span")
   {
     Entities::Spline out{};
-    out.Curve->Degree = 1;
-    out.Curve->Knots  = {0, 0, 1, 1, 1};
-    out.Curve->Poles  = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
+    out.Curve->Degree        = 1;
+    out.Curve->Knots         = {0, 0, 1, 1, 1};
+    out.Curve->ControlPoints = {Vector{}, Vector{.X = 1, .Y = 2}, Vector{.X = 2}};
     Seed                     handles;
     const Entities::Polyline made = Traced(out, handles);
     REQUIRE(made.Vertices.Children.size() == 129);
@@ -258,13 +258,13 @@ namespace DxfIO::Down
 
   TEST_CASE("drawn: the extents a drawing declares, when it declares them")
   {
-    Document drawing = Create(Version::R2018);
+    Drawing drawing = Create(Version::R2018);
     for (Header::Variable &one : drawing.Header)
     {
       if (one.Name == "$EXTMIN")
       {
-        one.Values = {Group{.Code = 10, .Value = 1.0}, Group{.Code = 20, .Value = 2.0},
-                      Group{.Code = 30, .Value = 3.0}};
+        one.Values = {Tag{.Code = 10, .Value = 1.0}, Tag{.Code = 20, .Value = 2.0},
+                      Tag{.Code = 30, .Value = 3.0}};
       }
     }
     const Extents box = Bounded(drawing);
@@ -276,7 +276,7 @@ namespace DxfIO::Down
     {
       if (one.Name == "$EXTMIN")
       {
-        one.Values = {Group{.Code = 10, .Value = 1.0}};
+        one.Values = {Tag{.Code = 10, .Value = 1.0}};
       }
     }
     CHECK(Bounded(drawing).High == Vector{});
@@ -302,7 +302,7 @@ namespace DxfIO::Down
     one.Record.Base.Self      = Handle{.Value = 0x60};
     one.Record.Base.Owner     = Handle{.Value = 0x1f};
     one.Record.Layer          = Symbol{"Notes"};
-    Entities::Paragraph &body = *one.Paragraph;
+    Entities::MTextData &body = *one.Data;
     body.Position             = Vector{.X = 10, .Y = 10};
     body.Height               = 3;
     body.Value                = "a\\Pb\\Pc";
@@ -314,49 +314,50 @@ namespace DxfIO::Down
     CHECK(top.at(1).Record.Base.Self       == Handle{.Value = 0x200});
     CHECK(top.at(1).Record.Base.Owner      == Handle{.Value = 0x1f});
     CHECK(top.at(1).Record.Layer           == "Notes");
-    CHECK(top.front().Vertical             == 3);
-    CHECK(top.front().Lettering.Horizontal == 0);
+    CHECK(top.front().Vertical             == Entities::VerticalAlignment::Top);
+    CHECK(top.front().Lettering.Horizontal == Entities::HorizontalAlignment::Left);
     CHECK(top.front().Lettering.Style      == "Romans");
     CHECK(Near(top.front().Lettering.Position, Vector{.X = 10, .Y = 10}));
     CHECK(Near(top.at(2).Lettering.Alignment.value_or(Vector{}), Vector{.X = 10, .Y = 0}));
     body.Attachment                          = 5;
     const std::vector<Entities::Text> middle = Lettered(one, handles);
-    CHECK(middle.front().Vertical             == 2);
-    CHECK(middle.front().Lettering.Horizontal == 1);
+    CHECK(middle.front().Vertical             == Entities::VerticalAlignment::Middle);
+    CHECK(middle.front().Lettering.Horizontal == Entities::HorizontalAlignment::Center);
     CHECK(Near(middle.at(1).Lettering.Position, Vector{.X = 10, .Y = 10}));
     body.Attachment                          = 9;
     const std::vector<Entities::Text> bottom = Lettered(one, handles);
-    CHECK(bottom.front().Vertical == 1);
+    CHECK(bottom.front().Vertical == Entities::VerticalAlignment::Bottom);
     CHECK(Near(bottom.at(2).Lettering.Position, Vector{.X = 10, .Y = 10}));
     body.Attachment = 0;
-    CHECK(Lettered(one, handles).front().Vertical == 3);
+    CHECK(Lettered(one, handles).front().Vertical == Entities::VerticalAlignment::Top);
     body.Attachment = 10;
-    CHECK(Lettered(one, handles).front().Lettering.Horizontal == 0);
+    CHECK(Lettered(one, handles).front().Lettering.Horizontal
+          == Entities::HorizontalAlignment::Left);
   }
 
   TEST_CASE("drawn: MTEXT turned by its direction, else by its rotation")
   {
     Entities::MText one{};
-    one.Paragraph->Height    = 3;
-    one.Paragraph->Value     = "a\\Pb";
-    one.Paragraph->Direction = Vector{.Y = 1};
+    one.Data->Height    = 3;
+    one.Data->Value     = "a\\Pb";
+    one.Data->Direction = Vector{.Y = 1};
     Seed                              handles;
     const std::vector<Entities::Text> turned = Lettered(one, handles);
     CHECK(std::abs(turned.front().Lettering.Rotation - 90) < 1e-9);
     CHECK(Near(turned.at(1).Lettering.Position, Vector{.X = 5}));
-    one.Paragraph->Direction.reset();
-    one.Paragraph->Rotation = HalfTurn;
+    one.Data->Direction.reset();
+    one.Data->Rotation = HalfTurn;
     CHECK(std::abs(Lettered(one, handles).front().Lettering.Rotation - 180) < 1e-9);
   }
 
   TEST_CASE("drawn: MTEXT placed in the TEXT's own coordinate system")
   {
     Entities::MText one{};
-    one.Paragraph->Height    = 3;
-    one.Paragraph->Value     = "a\\Pb";
-    one.Paragraph->Position  = Vector{.X = 10};
-    one.Paragraph->Direction = Vector{.X = 1};
-    one.Paragraph->Extrusion = Vector{.Z = -1};
+    one.Data->Height    = 3;
+    one.Data->Value     = "a\\Pb";
+    one.Data->Position  = Vector{.X = 10};
+    one.Data->Direction = Vector{.X = 1};
+    one.Data->Extrusion = Vector{.Z = -1};
     Seed                              handles;
     const std::vector<Entities::Text> under = Lettered(one, handles);
     REQUIRE(under.size() == 2);
@@ -364,7 +365,7 @@ namespace DxfIO::Down
     CHECK(std::abs(under.front().Lettering.Rotation - 180) < 1e-9);
     CHECK(Near(under.at(1).Lettering.Position, Vector{.X = -10, .Y = 5}));
     CHECK(under.front().Lettering.Extrusion == Vector{.Z = -1});
-    one.Paragraph->Direction.reset();
+    one.Data->Direction.reset();
     CHECK(std::abs(Lettered(one, handles).front().Lettering.Rotation) < 1e-9);
   }
 
@@ -389,14 +390,14 @@ namespace DxfIO::Down
 
   TEST_CASE("drawn: R12 draws what it has no kind for, each told")
   {
-    const Document     from = Unkinded();
+    const Drawing      from = Unkinded();
     std::vector<Issue> told;
-    const Document     out = Narrowed(from, Version::R12, &told);
-    REQUIRE(told.size()     == 5);
-    CHECK(told.front().What == "MTEXT drawn as TEXT for R12");
-    CHECK(told.at(1).What   == "ELLIPSE drawn as POLYLINE for R12");
-    CHECK(told.at(1).Record == Handle{.Value = 0x900});
-    CHECK(told.back().What  == "XLINE drawn as LINE for R12");
+    const Drawing      out = Narrowed(from, Version::R12, &told);
+    REQUIRE(told.size()      == 5);
+    CHECK(told.front().What  == "MTEXT drawn as TEXT for R12");
+    CHECK(told.at(1).What    == "ELLIPSE drawn as POLYLINE for R12");
+    CHECK(told.at(1).Subject == Handle{.Value = 0x900});
+    CHECK(told.back().What   == "XLINE drawn as LINE for R12");
     CHECK(std::holds_alternative<Entities::Polyline>(out.Entities.at(out.Entities.size() - 4)));
     CHECK(std::holds_alternative<Entities::Line>(out.Entities.back()));
     CHECK(std::ranges::count_if(out.Blocks.front().Entities, Textual) == 2);
@@ -404,14 +405,14 @@ namespace DxfIO::Down
 
   TEST_CASE("drawn: what R12 draws reads back, and R13 draws nothing")
   {
-    const Document from  = Unkinded();
-    const auto     saved = Tests::Written(from, Options{.Release = Version::R12});
+    const Drawing from  = Unkinded();
+    const auto    saved = Tests::Written(from, SaveOptions{.Release = Version::R12});
     REQUIRE(saved);
     const auto back = Load(*saved);
     REQUIRE(back);
     CHECK(back->Issues.empty());
     CHECK(Narrowed(from, Version::R13, nullptr).Entities.size() == from.Entities.size());
-    CHECK(Narrowed(from, Version::R12, nullptr).Entities.size() == back->Document.Entities.size());
+    CHECK(Narrowed(from, Version::R12, nullptr).Entities.size() == back->Drawing.Entities.size());
   }
 } // namespace DxfIO::Down
 
@@ -419,19 +420,19 @@ namespace DxfIO::Down
 {
   TEST_CASE("drawn: extents of other groups or of four reals take the first three")
   {
-    Document drawing = Create(Version::R2018);
+    Drawing drawing = Create(Version::R2018);
     for (Header::Variable &one : drawing.Header)
     {
       if (one.Name == "$EXTMIN")
       {
-        one.Values = {Group{.Code = 1, .Value = std::string{"x"}}, Group{.Code = 10, .Value = 1.0},
-                      Group{.Code = 20, .Value = 2.0},
-                      Group{.Code = 30, .Value = 3.0},
-                      Group{.Code = 40, .Value = 4.0}};
+        one.Values = {Tag{.Code = 1, .Value = std::string{"x"}}, Tag{.Code = 10, .Value = 1.0},
+                      Tag{.Code = 20, .Value = 2.0},
+                      Tag{.Code = 30, .Value = 3.0},
+                      Tag{.Code = 40, .Value = 4.0}};
       }
       if (one.Name == "$EXTMAX")
       {
-        one.Values = {Group{.Code = 10, .Value = 5.0}, Group{.Code = 20, .Value = 6.0}};
+        one.Values = {Tag{.Code = 10, .Value = 5.0}, Tag{.Code = 20, .Value = 6.0}};
       }
     }
     const Extents box = Bounded(drawing);

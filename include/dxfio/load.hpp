@@ -2,7 +2,7 @@
 #define DXFIO_LOAD_HPP
 
 #include "dxfio/api.hpp"
-#include "dxfio/document.hpp"
+#include "dxfio/drawing.hpp"
 #include "dxfio/failure.hpp"
 #include "dxfio/issue.hpp"
 
@@ -22,7 +22,7 @@ namespace DxfIO
     /**
      *  The drawing, every section and every group the file held.
      */
-    DxfIO::Document Document{};
+    DxfIO::Drawing Drawing{};
     /**
      *  What the reader kept, mended or left out, with the line it found it on.
      */
@@ -32,7 +32,7 @@ namespace DxfIO
   /**
    *  How a drawing is read.
    */
-  struct DXFIO_API Loading
+  struct DXFIO_API LoadOptions
   {
     /**
      *  The threads the entities and objects are read on: 0 for as many as the machine has, 1 for
@@ -46,20 +46,21 @@ namespace DxfIO
    *  R2018. Fails only when the bytes are not DXF at all; anything it can step over becomes an
    *  issue.
    */
-  [[nodiscard]] DXFIO_API auto Load(std::string_view bytes, const Loading &with = {})
+  [[nodiscard]] DXFIO_API auto Load(std::string_view bytes, const LoadOptions &with = {})
       -> std::expected<Loaded, Failure>;
 
   /**
    *  Reads a drawing from a stream, to its end. A stream that has already failed, as a file that
    *  did not open, fails.
    */
-  [[nodiscard]] DXFIO_API auto Load(std::istream &from, const Loading &with = {})
+  [[nodiscard]] DXFIO_API auto Load(std::istream &from, const LoadOptions &with = {})
       -> std::expected<Loaded, Failure>;
 
   /**
    *  Reads a drawing from a file.
    */
-  [[nodiscard]] DXFIO_API auto LoadFile(const std::filesystem::path &file, const Loading &with = {})
+  [[nodiscard]] DXFIO_API auto LoadFile(const std::filesystem::path &file,
+                                        const LoadOptions           &with = {})
       -> std::expected<Loaded, Failure>;
 } // namespace DxfIO
 

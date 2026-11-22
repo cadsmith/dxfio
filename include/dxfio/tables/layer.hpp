@@ -4,7 +4,7 @@
 #include "dxfio/api.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/symbol.hpp"
 #include "dxfio/tables/record.hpp"
 
@@ -13,11 +13,6 @@
 
 namespace DxfIO::Tables
 {
-  /**
-   *  The color of a new layer: white, index 7.
-   */
-  inline constexpr int White = Colors::White;
-
   /**
    *  A LAYER table record: how the entities on a layer are drawn. Its flags are 1 frozen, 2 frozen
    *  in new viewports and 4 locked.
@@ -31,7 +26,7 @@ namespace DxfIO::Tables
     /**
      *  The AutoCAD Color Index of the layer, 1 to 255; negative when the layer is off. Group 62.
      */
-    int Color{White};
+    int Color{Colors::White};
     /**
      *  The name of the layer's linetype. Group 6.
      */
@@ -41,9 +36,9 @@ namespace DxfIO::Tables
      */
     bool Plot{true};
     /**
-     *  The lineweight in hundredths of a millimeter, or -3 for the default. Group 370, from R2000.
+     *  Group 370, from R2000.
      */
-    int Lineweight{Lineweights::Standard};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::Default};
     /**
      *  The plot style, a placeholder in the plot style name dictionary. Group 390, from R2000.
      */
@@ -62,9 +57,9 @@ namespace DxfIO::Tables
      */
     std::optional<std::string> Book{};
     /**
-     *  A handle AutoCAD writes with no published meaning, usually none. Group 348, from R2013.
+     *  Unnamed in the DXF reference; null as AutoCAD writes it. Group 348, from R2013.
      */
-    Handle Spare{};
+    Handle Unknown1{};
 
     auto operator==(const Layer &) const -> bool = default;
   };

@@ -34,25 +34,25 @@ namespace DxfIO
       int Tiling{};
       int Automatic{};
       int Transform{};
-      int Fallback{Bitmap};
+      int Fallback{1};
     };
 
     template <int Method, int Factor, int Color>
     inline constexpr auto Shaded = std::tuple{
-        Fields::Field<Shade, int, int>{
+        Fields::Field<MaterialColor, int, int>{
             .Code     = Method,
-            .Member   = &Shade::Method,
+            .Member   = &MaterialColor::Method,
             .Fallback = 0,
         },
-        Fields::Field<Shade, double, double>{
+        Fields::Field<MaterialColor, double, double>{
             .Code     = Factor,
-            .Member   = &Shade::Factor,
+            .Member   = &MaterialColor::Factor,
             .Fallback = 1.0,
         },
-        Fields::Field<Shade, int, int>{
+        Fields::Field<MaterialColor, int, int>{
             .Code     = Color,
-            .Member   = &Shade::Color,
-            .Fallback = Black,
+            .Member   = &MaterialColor::Color,
+            .Fallback = -1040187392,
         },
     };
 
@@ -76,17 +76,17 @@ namespace DxfIO
         Fields::Field<Map, int, int>{
             .Code     = At.Projection,
             .Member   = &Map::Projection,
-            .Fallback = Box,
+            .Fallback = 2,
         },
         Fields::Field<Map, int, int>{
             .Code     = At.Tiling,
             .Member   = &Map::Tiling,
-            .Fallback = Tiled,
+            .Fallback = 1,
         },
         Fields::Field<Map, int, int>{
             .Code     = At.Automatic,
             .Member   = &Map::Automatic,
-            .Fallback = Manual,
+            .Fallback = 1,
         },
         Fields::Field<Map, Matrix, Matrix>{
             .Code     = At.Transform,
@@ -163,7 +163,7 @@ namespace DxfIO
       Fields::Field{
           .Code     = 44,
           .Member   = &Objects::Material::Gloss,
-          .Fallback = Objects::Glossy,
+          .Fallback = 0.5,
       },
       Fields::Part{
           .Member = &Objects::Material::Specular,
@@ -228,7 +228,7 @@ namespace DxfIO
                           .Tiling     = 275,
                           .Automatic  = 276,
                           .Transform  = 147,
-                          .Fallback   = Objects::Scene,
+                          .Fallback   =   0,
                       }>,
       Fields::Since{.Release = Version::R2007, .Fields = Objects::Added},
   };

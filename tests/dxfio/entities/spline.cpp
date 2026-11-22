@@ -38,38 +38,38 @@ namespace DxfIO::Entities
   TEST_CASE("spline: by its control points, each of its lists")
   {
     const Spline one = Alikened(Marked("2D5"));
-    CHECK(one.Curve->Normal  == Up);
-    CHECK(one.Curve->Flags   == 8);
-    CHECK(one.Curve->Degree  == 3);
-    CHECK(one.Curve->Knotted == Knotting);
-    CHECK(one.Curve->Framed  == Framing);
-    CHECK_FALSE(one.Curve->Fitted);
-    CHECK_FALSE(one.Curve->Start);
-    CHECK(one.Curve->Knots.size()   == 8);
-    REQUIRE(one.Curve->Poles.size() == 4);
-    CHECK(one.Curve->Poles.at(1)    == Vector{.X = 50, .Y = 10});
+    CHECK(one.Curve->Normal           == Up);
+    CHECK(one.Curve->Flags            == 8);
+    CHECK(one.Curve->Degree           == 3);
+    CHECK(one.Curve->KnotTolerance    == 1e-9);
+    CHECK(one.Curve->ControlTolerance == 1e-10);
+    CHECK_FALSE(one.Curve->FitTolerance);
+    CHECK_FALSE(one.Curve->StartTangent);
+    CHECK(one.Curve->Knots.size()           == 8);
+    REQUIRE(one.Curve->ControlPoints.size() == 4);
+    CHECK(one.Curve->ControlPoints.at(1)    == Vector{.X = 50, .Y = 10});
     CHECK(one.Curve->Weights.empty());
-    CHECK(one.Curve->Fits.empty());
+    CHECK(one.Curve->FitPoints.empty());
   }
 
   TEST_CASE("spline: fit by its points, what they were worked into beside them")
   {
     const Spline one = Alikened(Marked("2CD"));
-    CHECK(one.Curve->Flags         == 1064);
-    CHECK(one.Curve->Fitted        == Framing);
-    CHECK(one.Curve->Knots.size()  == 10);
-    CHECK(one.Curve->Poles.size()  == 6);
-    REQUIRE(one.Curve->Fits.size() == 4);
-    CHECK(one.Curve->Fits.at(3)    == Vector{.X = 30, .Y = 10});
-    CHECK(Alikened(Marked("2CF")).Curve->Fitted == 0.5);
+    CHECK(one.Curve->Flags        == 1064);
+    CHECK(one.Curve->FitTolerance == 1e-10);
+    CHECK(one.Curve->Knots.size() == 10);
+    CHECK(one.Curve->ControlPoints.size() == 6);
+    REQUIRE(one.Curve->FitPoints.size()   == 4);
+    CHECK(one.Curve->FitPoints.at(3)      == Vector{.X = 30, .Y = 10});
+    CHECK(Alikened(Marked("2CF")).Curve->FitTolerance == 0.5);
   }
 
   TEST_CASE("spline: its tangents where they were given")
   {
     const Spline one = Alikened(Marked("2CE"));
-    CHECK(one.Curve->Start);
-    CHECK(one.Curve->End);
-    CHECK_FALSE(Alikened(Marked("2CD")).Curve->Start);
+    CHECK(one.Curve->StartTangent);
+    CHECK(one.Curve->EndTangent);
+    CHECK_FALSE(Alikened(Marked("2CD")).Curve->StartTangent);
   }
 
   TEST_CASE("spline: rational, each weight after its point")
@@ -101,7 +101,7 @@ namespace DxfIO::Entities
   {
     const Spline one = Alikened(Marked("2D3"));
     CHECK(one.Curve->Flags == 8);
-    CHECK(one.Curve->Fits.empty());
+    CHECK(one.Curve->FitPoints.empty());
   }
 
   TEST_CASE("spline: every release from R2000 alike")
@@ -120,8 +120,8 @@ namespace DxfIO::Entities
         Held(" 71\r\n     1\r\n 72\r\n     1\r\n 73\r\n     9\r\n 74\r\n     7\r\n"
              " 40\r\n0.0\r\n 40\r\n0.0\r\n 40\r\n1.0\r\n 40\r\n1.0\r\n"
              " 10\r\n0.0\r\n 20\r\n0.0\r\n 10\r\n1.0\r\n 20\r\n0.0\r\n"));
-    CHECK(one.Curve->Knots.size() == 4);
-    CHECK(one.Curve->Poles.size() == 2);
+    CHECK(one.Curve->Knots.size()         == 4);
+    CHECK(one.Curve->ControlPoints.size() == 2);
     const std::string out = Written(one);
     CHECK(out.contains(" 72\r\n     4\r\n 73\r\n     2\r\n 74\r\n     0\r\n"));
   }
@@ -148,16 +148,16 @@ namespace DxfIO::Entities
     const Spline one =
         DxfIO::Read<Spline>(Held(" 70\r\n  1064\r\n 71\r\n     3\r\n 11\r\n0.0\r\n 21\r\n0.0\r\n"
                                  " 11\r\n1.0\r\n 21\r\n1.0\r\n 11\r\n2.0\r\n 21\r\n0.0\r\n"));
-    CHECK(one.Curve->Fits.size() == 3);
+    CHECK(one.Curve->FitPoints.size() == 3);
     CHECK(one.Curve->Knots.empty());
-    CHECK(one.Curve->Poles.empty());
+    CHECK(one.Curve->ControlPoints.empty());
   }
 
   TEST_CASE("spline: tolerances a record leaves out are AutoCAD's")
   {
     const Spline one = DxfIO::Read<Spline>(Held(" 71\r\n     3\r\n"));
-    CHECK(one.Curve->Knotted == Knotting);
-    CHECK(one.Curve->Framed  == Framing);
+    CHECK(one.Curve->KnotTolerance    == 1e-9);
+    CHECK(one.Curve->ControlTolerance == 1e-10);
   }
 
   TEST_CASE("spline: what AutoCAD takes and ignores kept, after the fields")
@@ -192,13 +192,13 @@ namespace DxfIO::Entities
   TEST_CASE("spline: a pole or a weight not finite fails the write")
   {
     Spline one{};
-    one.Curve->Poles   = {Vector{.X = std::numeric_limits<double>::quiet_NaN()}, Vector{}};
-    one.Curve->Weights = {1, 1};
+    one.Curve->ControlPoints = {Vector{.X = std::numeric_limits<double>::quiet_NaN()}, Vector{}};
+    one.Curve->Weights       = {1, 1};
     Fields::Sheet page{};
     CHECK_FALSE(Given(page.To, one));
     Spline heavy{};
-    heavy.Curve->Poles   = {Vector{}, Vector{}};
-    heavy.Curve->Weights = {std::numeric_limits<double>::quiet_NaN(), 1};
+    heavy.Curve->ControlPoints = {Vector{}, Vector{}};
+    heavy.Curve->Weights       = {std::numeric_limits<double>::quiet_NaN(), 1};
     Fields::Sheet other{};
     CHECK_FALSE(Given(other.To, heavy));
   }

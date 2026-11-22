@@ -14,7 +14,7 @@ namespace DxfIO
     constexpr Handle Last{.Value = std::numeric_limits<std::uint64_t>::max()};
   } // namespace
 
-  auto Past(const Document &from) -> Handle
+  auto Past(const Drawing &from) -> Handle
   {
     Handle held{};
     Held(from, [&held](Handle one) -> void { held = std::max(held, one); });

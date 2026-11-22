@@ -32,19 +32,19 @@ namespace DxfIO
 
     inline void Pointed(Curve &one, Fields::Walk &in)
     {
-      Take(Fields::Many{.Code = Polar, .Member = &Curve::Poles}, one, in);
+      Take(Fields::Many{.Code = Polar, .Member = &Curve::ControlPoints}, one, in);
       Take(Fields::Many{.Code = Weighted, .Member = &Curve::Weights}, one, in);
     }
 
     inline auto Pointing(const Curve &one, Fields::Writing &to) -> std::expected<void, Failure>
     {
-      const std::size_t            most = std::max(one.Poles.size(), one.Weights.size());
+      const std::size_t            most = std::max(one.ControlPoints.size(), one.Weights.size());
       std::expected<void, Failure> done{};
       for (std::size_t at = 0; at < most && done; ++at)
       {
-        if (at < one.Poles.size())
+        if (at < one.ControlPoints.size())
         {
-          done = Fields::Value<Vector>::Write(to, Polar, one.Poles.at(at));
+          done = Fields::Value<Vector>::Write(to, Polar, one.ControlPoints.at(at));
         }
         if (done && at < one.Weights.size())
         {
@@ -62,19 +62,19 @@ namespace DxfIO
       Fields::Field{.Code = 70, .Member = &Entities::Curve::Flags},
       Fields::Field{.Code = 71, .Member = &Entities::Curve::Degree},
       Fields::Tally{.Code = 72, .Member = &Entities::Curve::Knots},
-      Fields::Tally{.Code = 73, .Member = &Entities::Curve::Poles},
-      Fields::Tally{.Code = 74, .Member = &Entities::Curve::Fits},
-      Fields::Field{.Code = 42, .Member = &Entities::Curve::Knotted},
-      Fields::Field{.Code = 43, .Member = &Entities::Curve::Framed},
-      Fields::Field{.Code = 44, .Member = &Entities::Curve::Fitted},
-      Fields::Field{.Code = 12, .Member = &Entities::Curve::Start},
-      Fields::Field{.Code = 13, .Member = &Entities::Curve::End},
+      Fields::Tally{.Code = 73, .Member = &Entities::Curve::ControlPoints},
+      Fields::Tally{.Code = 74, .Member = &Entities::Curve::FitPoints},
+      Fields::Field{.Code = 42, .Member = &Entities::Curve::KnotTolerance},
+      Fields::Field{.Code = 43, .Member = &Entities::Curve::ControlTolerance},
+      Fields::Field{.Code = 44, .Member = &Entities::Curve::FitTolerance},
+      Fields::Field{.Code = 12, .Member = &Entities::Curve::StartTangent},
+      Fields::Field{.Code = 13, .Member = &Entities::Curve::EndTangent},
       Fields::Many{.Code = 40, .Member = &Entities::Curve::Knots},
       Fields::Custom<Entities::Curve>{
           .Read  = Entities::Pointed,
           .Write = Entities::Pointing,
       },
-      Fields::Many{.Code = 11, .Member = &Entities::Curve::Fits},
+      Fields::Many{.Code = 11, .Member = &Entities::Curve::FitPoints},
   };
 
   template <>

@@ -12,16 +12,6 @@
 namespace DxfIO::Entities
 {
   /**
-   *  The knot tolerance a new spline takes.
-   */
-  inline constexpr double Knotting = 1e-9;
-
-  /**
-   *  The control point tolerance a new spline takes.
-   */
-  inline constexpr double Framing = 1e-10;
-
-  /**
    *  The AcDbSpline subclass a SPLINE and a HELIX share: a NURBS curve, by its knots and control
    *  points or by the points it fits.
    */
@@ -43,23 +33,23 @@ namespace DxfIO::Entities
     /**
      *  The knot tolerance. Group 42.
      */
-    double Knotted{Knotting};
+    double KnotTolerance{1e-9};
     /**
      *  The control point tolerance. Group 43.
      */
-    double Framed{Framing};
+    double ControlTolerance{1e-10};
     /**
      *  The fit tolerance, when the spline is given by fit points. Group 44.
      */
-    std::optional<double> Fitted{};
+    std::optional<double> FitTolerance{};
     /**
      *  The tangent at the start, when one is given. Groups 12, 22, 32.
      */
-    std::optional<Vector> Start{};
+    std::optional<Vector> StartTangent{};
     /**
      *  The tangent at the end, when one is given. Groups 13, 23, 33.
      */
-    std::optional<Vector> End{};
+    std::optional<Vector> EndTangent{};
     /**
      *  The knot values; group 72 counts them. Group 40.
      */
@@ -67,7 +57,7 @@ namespace DxfIO::Entities
     /**
      *  The control points, in world coordinates; group 73 counts them. Groups 10, 20, 30.
      */
-    std::vector<Vector> Poles{};
+    std::vector<Vector> ControlPoints{};
     /**
      *  The weight of each control point, when the spline is rational. Group 41.
      */
@@ -76,7 +66,7 @@ namespace DxfIO::Entities
      *  The points the curve passes through, in world coordinates; group 74 counts them. Groups 11,
      *  21, 31.
      */
-    std::vector<Vector> Fits{};
+    std::vector<Vector> FitPoints{};
 
     auto operator==(const Curve &) const -> bool = default;
   };

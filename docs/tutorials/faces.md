@@ -9,7 +9,7 @@ Six 3DFACE entities closing a box in model space of a new drawing, the top one w
 A 3DFACE is a triangle or a quadrilateral with its corners anywhere in space. `Corners` holds four, in world coordinates, groups 10 to 13 in that order; a triangle repeats its third as its fourth.
 
 ```cpp
-DxfIO::Document drawing = DxfIO::Create(DxfIO::Version::R2018);
+DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
 
 const DxfIO::Corners bottom{{
     {.X = 0, .Y = 0, .Z = 0},

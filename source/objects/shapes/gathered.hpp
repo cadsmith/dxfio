@@ -15,11 +15,11 @@
 #include "shapes.hpp"
 
 #include "dxfio/failure.hpp"
-#include "dxfio/group.hpp"
 #include "dxfio/objects/dictionaryvar.hpp"
 #include "dxfio/objects/group.hpp"
 #include "dxfio/objects/image/definition.hpp"
 #include "dxfio/objects/xrecord.hpp"
+#include "dxfio/tag.hpp"
 #include "dxfio/version.hpp"
 
 #include <cstdint>
@@ -37,8 +37,7 @@ namespace DxfIO
   {
     inline constexpr int Flag = 280;
 
-    inline auto Flagged(const std::vector<DxfIO::Group> &data, Version release)
-        -> std::optional<int>
+    inline auto Flagged(const std::vector<DxfIO::Tag> &data, Version release) -> std::optional<int>
     {
       if (release < Version::R2000 || data.empty() || data.front().Code != Flag)
       {
@@ -54,7 +53,7 @@ namespace DxfIO
 
     inline void Held(XRecord &one, Fields::Walk &in)
     {
-      std::vector<DxfIO::Group> data = in.Rest();
+      std::vector<DxfIO::Tag> data = in.Rest();
       in.Spend();
       if (const std::optional<int> cloning = Flagged(data, in.With().Release))
       {

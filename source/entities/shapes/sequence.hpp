@@ -31,9 +31,9 @@ namespace DxfIO::Entities
       into.Children.push_back(Taken<ChildT>(one, with));
     }
     rest = rest.subspan(count);
-    if (!rest.empty() && rest.front().Name == Type<Seqend>)
+    if (!rest.empty() && rest.front().Name == Type<SeqEnd>)
     {
-      into.Closing = Boxed{Taken<Seqend>(rest.front(), with)};
+      into.Closing = Boxed{Taken<SeqEnd>(rest.front(), with)};
       rest         = rest.subspan(1);
     }
   }

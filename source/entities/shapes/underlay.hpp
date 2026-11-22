@@ -27,41 +27,41 @@ namespace DxfIO
   };
 
   template <>
-  inline constexpr auto Shapes<Entities::Overlaid> = std::tuple{
+  inline constexpr auto Shapes<Entities::UnderlayData> = std::tuple{
       Fields::Subclass{.Marker = "AcDbUnderlayReference"},
-      Fields::Field{.Code = 340, .Member = &Entities::Overlaid::Definition},
-      Fields::Field{.Code = 10, .Member = &Entities::Overlaid::Position},
+      Fields::Field{.Code = 340, .Member = &Entities::UnderlayData::Definition},
+      Fields::Field{.Code = 10, .Member = &Entities::UnderlayData::Position},
       Fields::Part{
-          .Member = &Entities::Overlaid::Scale,
+          .Member = &Entities::UnderlayData::Scale,
           .Fields = Entities::Scales,
       },
       Fields::Field{
           .Code     = 50,
-          .Member   = &Entities::Overlaid::Rotation,
+          .Member   = &Entities::UnderlayData::Rotation,
           .Fallback = 0.0,
       },
       Fields::Field{
           .Code     = 210,
-          .Member   = &Entities::Overlaid::Extrusion,
+          .Member   = &Entities::UnderlayData::Extrusion,
           .Fallback = Up,
       },
-      Fields::Field{.Code = 280, .Member = &Entities::Overlaid::Flags},
-      Fields::Field{.Code = 281, .Member = &Entities::Overlaid::Contrast},
-      Fields::Field{.Code = 282, .Member = &Entities::Overlaid::Fade},
+      Fields::Field{.Code = 280, .Member = &Entities::UnderlayData::Flags},
+      Fields::Field{.Code = 281, .Member = &Entities::UnderlayData::Contrast},
+      Fields::Field{.Code = 282, .Member = &Entities::UnderlayData::Fade},
       Fields::Every{
           .Opener = 11,
-          .Member = &Entities::Overlaid::Clip,
+          .Member = &Entities::UnderlayData::Clip,
           .Fields = Shapes<Entities::Bound>,
       },
   };
 
-  template <Entities::Overlay KindV>
+  template <Entities::UnderlayKind KindV>
   inline constexpr auto Shapes<Entities::UnderlayOf<KindV>> = std::tuple{
       Entities::Part<Entities::UnderlayOf<KindV>>,
       Fields::Picture{.Member = &Entities::UnderlayOf<KindV>::Picture},
       Fields::Part{
-          .Member = &Entities::UnderlayOf<KindV>::Overlaid,
-          .Fields = Shapes<Entities::Overlaid>,
+          .Member = &Entities::UnderlayOf<KindV>::Data,
+          .Fields = Shapes<Entities::UnderlayData>,
       },
   };
 

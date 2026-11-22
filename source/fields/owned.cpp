@@ -1,5 +1,6 @@
 #include "fields/owned.hpp"
 
+#include "bytes.hpp"
 #include "chained.hpp"
 #include "fields/text.hpp"
 #include "hex.hpp"
@@ -14,6 +15,7 @@
 #include <string_view>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace DxfIO::Fields
 {
@@ -23,7 +25,7 @@ namespace DxfIO::Fields
 
     constexpr int Start = 0;
 
-    auto Unhexed(std::string &out, std::string_view text) -> bool
+    auto Unhexed(std::vector<std::byte> &out, std::string_view text) -> bool
     {
       if (text.size() % Pair != 0)
       {
@@ -38,7 +40,7 @@ namespace DxfIO::Fields
           out.resize(kept);
           return false;
         }
-        out.push_back(static_cast<char>(*byte));
+        out.push_back(static_cast<std::byte>(*byte));
       }
       return true;
     }
@@ -58,14 +60,14 @@ namespace DxfIO::Fields
       const Tags::Codes::Type is = Tags::Codes::Of(code);
       if (is == Tags::Codes::Type::Handle)
       {
-        if (const std::optional<Handle> found = Parsed(raw))
+        if (const std::optional<Handle> found = ParseHandle(raw))
         {
           return *found;
         }
       }
       if (is == Tags::Codes::Type::Binary)
       {
-        std::string bytes;
+        std::vector<std::byte> bytes;
         bytes.reserve(raw.size() / Pair);
         if (Unhexed(bytes, raw))
         {
@@ -81,33 +83,37 @@ namespace DxfIO::Fields
     }
   } // namespace
 
-  auto Owned(const Tags::Tag &one, const Encoding::Scheme &with) -> Group
+  auto Owned(const Tags::Tag &one, const Encoding::Scheme &with) -> Tag
   {
-    return Group{
+    return Tag{
         .Code  = one.Code,
         .Value = std::visit(
             DxfIO::Match{
                 [&one, &with](std::string_view raw) -> Content
                 { return Text(one.Code, raw, with); },
                 [](const Tags::Chunk &bytes) -> Content
-                { return Content{Chunk{std::string{bytes.Bytes}}}; },
+                {
+                  Chunk out;
+                  Append(out.Bytes, bytes.Bytes);
+                  return Content{std::move(out)};
+                },
                 [](const auto &number) -> auto { return Content{number}; },
             },
             one.Value),
     };
   }
 
-  auto Appended(std::string &out, const Tags::Tag &one) -> bool
+  auto Appended(std::vector<std::byte> &out, const Tags::Tag &one) -> bool
   {
     if (const auto *bytes = std::get_if<Tags::Chunk>(&one.Value))
     {
-      out += bytes->Bytes;
+      Append(out, bytes->Bytes);
       return true;
     }
     return Unhexed(out, Tags::Text(one));
   }
 
-  auto Put(Writing &to, const Group &one) -> std::expected<void, Failure>
+  auto Put(Writing &to, const Tag &one) -> std::expected<void, Failure>
   {
     return std::visit(
         DxfIO::Match{
@@ -125,16 +131,19 @@ namespace DxfIO::Fields
               });
             },
             [&to, &one](const Chunk &bytes) -> std::expected<void, Failure>
-            { return to.To->Put(Tags::Tag{.Code = one.Code, .Value = Tags::Chunk{bytes.Bytes}}); },
+            {
+              return to.To->Put(
+                  Tags::Tag{.Code = one.Code, .Value = Tags::Chunk{Viewed(bytes.Bytes)}});
+            },
             [&to, &one](const auto &number) -> auto
             { return to.To->Put(Tags::Tag{.Code = one.Code, .Value = number}); },
         },
         one.Value);
   }
 
-  auto Put(Writing &to, std::span<const Group> all) -> std::expected<void, Failure>
+  auto Put(Writing &to, std::span<const Tag> all) -> std::expected<void, Failure>
   {
     return Chained(all,
-                   [&](const Group &one) -> std::expected<void, Failure> { return Put(to, one); });
+                   [&](const Tag &one) -> std::expected<void, Failure> { return Put(to, one); });
   }
 } // namespace DxfIO::Fields

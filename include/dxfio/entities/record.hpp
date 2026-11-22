@@ -5,7 +5,7 @@
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
 #include "dxfio/handle.hpp"
-#include "dxfio/lineweights.hpp"
+#include "dxfio/lineweight.hpp"
 #include "dxfio/symbol.hpp"
 
 #include <optional>
@@ -60,12 +60,11 @@ namespace DxfIO::Entities
     /**
      *  The AutoCAD Color Index: 1 to 255, 0 for ByBlock, 256 for ByLayer. Group 62.
      */
-    int Color{Colors::Bylayer};
+    int Color{Colors::ByLayer};
     /**
-     *  The lineweight in hundredths of a millimeter, or -1 ByLayer, -2 ByBlock, -3 the default.
      *  Group 370, from R2000.
      */
-    int Lineweight{Lineweights::Bylayer};
+    DxfIO::Lineweight Lineweight{DxfIO::Lineweight::ByLayer};
     /**
      *  How the entity takes part in shadows: 0 casts and receives, 1 casts, 2 receives, 3 neither.
      *  Group 284, from R2007.

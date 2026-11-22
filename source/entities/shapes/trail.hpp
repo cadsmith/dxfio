@@ -7,27 +7,27 @@
 #include "fields/walk.hpp"
 
 #include "dxfio/failure.hpp"
-#include "dxfio/group.hpp"
+#include "dxfio/tag.hpp"
 
 #include <expected>
 #include <vector>
 
 namespace DxfIO::Entities
 {
-  template <class OwnerT, std::vector<Group> OwnerT::*MemberV>
+  template <class OwnerT, std::vector<Tag> OwnerT::*MemberV>
   void Trailing(OwnerT &one, Fields::Walk &in)
   {
     one.*MemberV = in.Rest();
     in.Spend();
   }
 
-  template <class OwnerT, std::vector<Group> OwnerT::*MemberV>
+  template <class OwnerT, std::vector<Tag> OwnerT::*MemberV>
   auto Trail(const OwnerT &one, Fields::Writing &to) -> std::expected<void, Failure>
   {
     return Fields::Put(to, one.*MemberV);
   }
 
-  template <class OwnerT, std::vector<Group> OwnerT::*MemberV>
+  template <class OwnerT, std::vector<Tag> OwnerT::*MemberV>
   inline constexpr Fields::Custom<OwnerT> Trailed{
       .Read  = Trailing<OwnerT, MemberV>,
       .Write = Trail<OwnerT, MemberV>,

@@ -64,7 +64,7 @@ namespace DxfIO::Tables
                                        "347\r\n2CC\r\n"
                                        "371\r\n    30\r\n"
                                        "372\r\n    50\r\n";
-    const Dimstyle             taken = Read<Dimstyle>(text);
+    const DimStyle             taken = Read<DimStyle>(text);
     CHECK(taken.Record.Name      == "full");
     CHECK(taken.Record.Base.Self == Handle{.Value = 0x2ED});
     CHECK(taken.Dimpost          == "mm");
@@ -89,10 +89,10 @@ namespace DxfIO::Tables
                                        "  2\r\nStandard\r\n"
                                        " 70\r\n     0\r\n"
                                        "340\r\n11\r\n";
-    const Dimstyle             taken = Read<Dimstyle>(text);
-    CHECK(taken.Dimasz    == Size);
+    const DimStyle             taken = Read<DimStyle>(text);
+    CHECK(taken.Dimasz    == 0.18);
     CHECK(taken.Dimdsep   == '.');
-    CHECK(taken.Dimjogang == Jog);
+    CHECK(taken.Dimjogang == 45);
     CHECK(Written(taken)  == text);
   }
 
@@ -170,7 +170,7 @@ namespace DxfIO::Tables
                                        "1001\r\nACAD_DSTYLE_DIM_EXT2_LINETYPE\r\n"
                                        "1070\r\n   382\r\n"
                                        "1005\r\n2CC\r\n";
-    const Dimstyle             taken = Read<Dimstyle>(text, Version::R2000);
+    const DimStyle             taken = Read<DimStyle>(text, Version::R2000);
     CHECK(taken.Dimtfill == 0);
     CHECK(taken.Record.Base.Extended.size() == 8);
     CHECK(Written(taken, Version::R2000)    == text);
@@ -220,7 +220,7 @@ namespace DxfIO::Tables
                                        "176\r\n     1\r\n"
                                        "177\r\n     2\r\n"
                                        "178\r\n     3\r\n";
-    const Dimstyle             taken = Read<Dimstyle>(text, Version::R12);
+    const DimStyle             taken = Read<DimStyle>(text, Version::R12);
     CHECK(taken.Arrows.Dimblk.empty());
     CHECK(taken.Arrows.Dimblk1 == "OPEN");
     CHECK(taken.Dimclrt        == 3);
@@ -229,10 +229,10 @@ namespace DxfIO::Tables
 
   TEST_CASE("dimstyle: written before R2000, every variable, at R12's place")
   {
-    const std::string text = Written(Dimstyle{}, Version::R12);
+    const std::string text = Written(DimStyle{}, Version::R12);
     CHECK(text.find(" 48\r\n0.0\r\n140\r\n0.18\r\n") != std::string::npos);
     CHECK(text.find("147\r\n0.09\r\n 71\r\n") != std::string::npos);
     CHECK(text.ends_with("178\r\n     0\r\n"));
-    CHECK(Written(Dimstyle{}).ends_with(" 70\r\n     0\r\n"));
+    CHECK(Written(DimStyle{}).ends_with(" 70\r\n     0\r\n"));
   }
 } // namespace DxfIO::Tables
