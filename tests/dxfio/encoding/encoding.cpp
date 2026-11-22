@@ -140,6 +140,14 @@ namespace DxfIO::Encoding
     CHECK(Decode(Opaque(), "^J") == "^J");
   }
 
+  TEST_CASE("encoding: text read opaque, written in another scheme, has its escapes and carets "
+            "read once")
+  {
+    const std::string held = Decode(Opaque(), "A\\U+00E9^J^ b");
+    CHECK(Encode(Opened(Version::R2018, Standard()), held) == "A\u00e9^J^ b");
+    CHECK(Encode(Opened(Version::R2000, Standard()), held) == "A\xe9^J^ b");
+  }
+
   TEST_CASE("encoding: opaque keeps a control character off the line")
   {
     CHECK(Encode(Opaque(), "a\nb") == "a^Jb");

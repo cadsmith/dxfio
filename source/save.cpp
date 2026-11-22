@@ -197,14 +197,14 @@ namespace DxfIO
 
     auto Text(const Drawing &drawing, const SaveOptions &with) -> Encoding::Scheme
     {
-      const Encoding::Codepage *asked = Encoding::Find(with.Codepage);
-      if (asked != nullptr)
+      const Encoding::Codepage *asked  = Encoding::Find(with.Codepage);
+      const bool                opaque = Header::Opaque(drawing.Header);
+      if (opaque && asked == nullptr && with.Release < Version::R2007)
       {
-        return Encoding::Of(with.Release, *asked);
+        return Encoding::Opaque();
       }
-      return with.Release < Version::R2007 && Header::Opaque(drawing.Header)
-               ? Encoding::Opaque()
-               : Encoding::Of(with.Release, Header::Named(drawing.Header));
+      const Encoding::Codepage &page = asked != nullptr ? *asked : Header::Named(drawing.Header);
+      return opaque ? Encoding::Opened(with.Release, page) : Encoding::Of(with.Release, page);
     }
 
     auto Form(const SaveOptions &with) -> Tags::Form
@@ -264,6 +264,19 @@ namespace DxfIO
       }
       return out;
     }
+
+    /**
+     *  Writes the bytes of a save to a stream, which then holds them all or failed.
+     */
+    auto Streamed(Saved saved, std::ostream &to) -> std::expected<std::vector<Issue>, Failure>
+    {
+      to.write(saved.Bytes.data(), static_cast<std::streamsize>(saved.Bytes.size())).flush();
+      if (!to)
+      {
+        return std::unexpected{Failure{.Code = FailureCode::Io, .What = "stream not writable"}};
+      }
+      return std::move(saved.Issues);
+    }
   } // namespace
 
   auto Save(const Drawing &drawing, const SaveOptions &with) -> std::expected<Saved, Failure>
@@ -289,29 +302,25 @@ namespace DxfIO
       -> std::expected<std::vector<Issue>, Failure>
   {
     return Save(drawing, with)
-        .and_then(
-            [&to](Saved saved) -> std::expected<std::vector<Issue>, Failure>
-            {
-              to.write(saved.Bytes.data(), static_cast<std::streamsize>(saved.Bytes.size()))
-                  .flush();
-              if (!to)
-              {
-                return std::unexpected{
-                    Failure{.Code = FailureCode::Io, .What = "stream not writable"}};
-              }
-              return std::move(saved.Issues);
-            });
+        .and_then([&to](Saved saved) -> std::expected<std::vector<Issue>, Failure>
+                  { return Streamed(std::move(saved), to); });
   }
 
   auto SaveFile(const Drawing &drawing, const std::filesystem::path &file, const SaveOptions &with)
       -> std::expected<std::vector<Issue>, Failure>
   {
-    std::ofstream to{file, std::ios::binary | std::ios::trunc};
-    if (!to)
-    {
-      return std::unexpected{
-          Failure{.Code = FailureCode::Io, .What = std::format("cannot write {}", file.string())}};
-    }
-    return Save(drawing, to, with);
+    return Save(drawing, with)
+        .and_then(
+            [&file](Saved saved) -> std::expected<std::vector<Issue>, Failure>
+            {
+              std::ofstream to{file, std::ios::binary | std::ios::trunc};
+              if (!to)
+              {
+                return std::unexpected{
+                    Failure{.Code = FailureCode::Io,
+                            .What = std::format("cannot write {}", file.string())}};
+              }
+              return Streamed(std::move(saved), to);
+            });
   }
 } // namespace DxfIO

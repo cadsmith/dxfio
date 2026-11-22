@@ -26,6 +26,12 @@ namespace DxfIO::Encoding
 
   [[nodiscard]] DXFIO_API auto Of(Version release, const Codepage &page) -> Scheme;
 
+  /**
+   *  The scheme of a release and code page for text read through Opaque, which kept the escapes and
+   *  carets of the file as they came: they are read before the text is encoded.
+   */
+  [[nodiscard]] DXFIO_API auto Opened(Version release, const Codepage &page) -> Scheme;
+
   [[nodiscard]] DXFIO_API auto Decode(const Scheme &with, std::string_view raw) -> std::string;
 
   [[nodiscard]] DXFIO_API auto Encode(const Scheme &with, std::string_view text) -> std::string;

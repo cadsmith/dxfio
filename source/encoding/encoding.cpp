@@ -190,6 +190,16 @@ namespace DxfIO::Encoding
     {
       return Whole(Unpacked<Kept>(raw, page));
     }
+
+    /**
+     *  Encodes text read through Opaque, whose escapes and carets stand in it as they came: they
+     *  are read first, so each goes out once, not escaped again.
+     */
+    template <Beyond High>
+    auto Relayed(std::string_view text, const Codepage *page) -> std::string
+    {
+      return Packed<High>(Checked(text, nullptr), page);
+    }
   } // namespace
 
   auto Utf8() -> Scheme
@@ -210,6 +220,13 @@ namespace DxfIO::Encoding
   auto Of(Version release, const Codepage &page) -> Scheme
   {
     return release >= Version::R2007 ? Utf8() : Paged(page);
+  }
+
+  auto Opened(Version release, const Codepage &page) -> Scheme
+  {
+    Scheme out = Of(release, page);
+    out.Out    = release >= Version::R2007 ? Relayed<Spelled> : Relayed<Mapped>;
+    return out;
   }
 
   auto Decode(const Scheme &with, std::string_view raw) -> std::string

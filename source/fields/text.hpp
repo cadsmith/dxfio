@@ -23,6 +23,10 @@ namespace DxfIO::Fields
     static auto Write(Writing &to, int code, std::string_view held) -> std::expected<void, Failure>;
   };
 
+  /**
+   *  Writes text as it is, as a name or a type, unless it holds a line break or a NUL, which would
+   *  cut its group short: then it goes out encoded, those bytes as carets.
+   */
   [[nodiscard]] DXFIO_API auto Word(Writing &to, int code, std::string_view text)
       -> std::expected<void, Failure>;
 

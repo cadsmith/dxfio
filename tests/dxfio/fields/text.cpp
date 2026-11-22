@@ -6,6 +6,7 @@
 #include <doctest/doctest.h>
 
 #include <string>
+#include <string_view>
 
 namespace DxfIO::Fields
 {
@@ -34,6 +35,20 @@ namespace DxfIO::Fields
     Sheet page;
     REQUIRE(Word(page.To, 2, "A\r\nB"));
     CHECK(page.Out == "  2\r\nA^M^JB\r\n");
+  }
+
+  TEST_CASE(
+      "text: a word's NUL goes out as a caret, in either form; other control bytes as they are")
+  {
+    using namespace std::string_view_literals;
+    Sheet page;
+    REQUIRE(Word(page.To, 0, "FO\0O\tX"sv));
+    CHECK(page.Out == "  0\r\nFO^@O^IX\r\n");
+    std::string     packed;
+    Tags::Writer    writer{packed, Tags::Form::Narrow};
+    Fields::Writing to{.To = &writer, .Release = Version::R12};
+    REQUIRE(Word(to, 0, "FO\0O"sv));
+    CHECK(packed == "\0FO^@O\0"sv);
   }
 
   TEST_CASE("text: a name read as a symbol and written back")
