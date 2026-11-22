@@ -119,7 +119,8 @@
     },
     {
       "name": "fuzz",
-      "configurePreset": "fuzz"
+      "configurePreset": "fuzz",
+      "targets": ["dxfio_fuzz_dxf", "dxfio_fuzz_escapes", "dxfio_fuzz_tags"]
     },
     {
       "name": "thread",
