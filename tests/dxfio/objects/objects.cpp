@@ -63,7 +63,7 @@ namespace DxfIO::Objects
 
   TEST_CASE("objects: a material's maps on the heap, copied with it")
   {
-    CHECK(sizeof(Object) < sizeof(Maps) / 2);
+    CHECK(sizeof(Object) < sizeof(Materials::Maps) / 2);
     CHECK(sizeof(Layout) < sizeof(Plot) * 2);
     Material one{};
     one.Maps->Bump.File = "bump.png";

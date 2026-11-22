@@ -25,14 +25,14 @@ namespace DxfIO::Objects
       out.Rows      = 2;
       out.Name      = "Parts";
       out.Columns   = {
-          Column{.Kind  = 1,
-                 .Name  = "Count",
-                 .Cells = {DxfIO::Tag{.Code = 93, .Value = std::int64_t{3}},
-                           DxfIO::Tag{.Code = 93, .Value = std::int64_t{4}}}},
-          Column{.Kind  = 4,
-                 .Name  = "Part",
-                 .Cells = {DxfIO::Tag{.Code = 3, .Value = std::string{"bolt"}},
-                           DxfIO::Tag{.Code = 3, .Value = std::string{"nut"}}}},
+          DataTables::Column{.Kind  = 1,
+                             .Name  = "Count",
+                             .Cells = {DxfIO::Tag{.Code = 93, .Value = std::int64_t{3}},
+                                       DxfIO::Tag{.Code = 93, .Value = std::int64_t{4}}}},
+          DataTables::Column{.Kind  = 4,
+                             .Name  = "Part",
+                             .Cells = {DxfIO::Tag{.Code = 3, .Value = std::string{"bolt"}},
+                                       DxfIO::Tag{.Code = 3, .Value = std::string{"nut"}}}},
       };
       return out;
     }

@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 
-namespace DxfIO::Objects
+namespace DxfIO::Objects::Materials
 {
   /**
    *  One color of a material: its ambient, diffuse or specular color.
@@ -115,7 +115,10 @@ namespace DxfIO::Objects
 
     auto operator==(const Maps &) const -> bool = default;
   };
+} // namespace DxfIO::Objects::Materials
 
+namespace DxfIO::Objects
+{
   /**
    *  A MATERIAL: how the surfaces of the objects it is given to are rendered.
    */
@@ -136,11 +139,11 @@ namespace DxfIO::Objects
     /**
      *  The color in ambient light. Groups 70, 40, 90.
      */
-    MaterialColor Ambient{};
+    Materials::MaterialColor Ambient{};
     /**
      *  The color under direct light. Groups 71, 41, 91.
      */
-    MaterialColor Diffuse{};
+    Materials::MaterialColor Diffuse{};
     /**
      *  How glossy the surface is, from 0 to 1. Group 44.
      */
@@ -148,7 +151,7 @@ namespace DxfIO::Objects
     /**
      *  The color of highlights. Groups 76, 45, 92.
      */
-    MaterialColor Specular{};
+    Materials::MaterialColor Specular{};
     /**
      *  How opaque the material is, from 0 to 1. Group 140.
      */
@@ -161,7 +164,7 @@ namespace DxfIO::Objects
      *  The maps laid over its channels, kept on the heap: six maps would make every object as
      *  large.
      */
-    Boxed<Objects::Maps> Maps{};
+    Boxed<Materials::Maps> Maps{};
     /**
      *  How much light passes through the material, from 0 to 1. Group 148, from R2007.
      */

@@ -2286,7 +2286,7 @@ namespace DxfIO
 #include <cstdint>
 #include <string>
 #include <vector>
-namespace DxfIO::Objects
+namespace DxfIO::Objects::DataTables
 {
   struct DXFIO_API Column
   {
@@ -2295,6 +2295,9 @@ namespace DxfIO::Objects
     std::vector<DxfIO::Tag> Cells{};
     auto operator==(const Column &) const -> bool = default;
   };
+}
+namespace DxfIO::Objects
+{
   enum class Edition : std::uint8_t
   {
     Early,
@@ -2307,7 +2310,7 @@ namespace DxfIO::Objects
     int Version{2};
     int Rows{};
     std::string Name{};
-    std::vector<Column> Columns{};
+    std::vector<DataTables::Column> Columns{};
     auto operator==(const DataTableOf &) const -> bool = default;
   };
   using DataTable = DataTableOf<Edition::Current>;
@@ -2453,7 +2456,7 @@ namespace DxfIO::Objects
 #include "dxfio/matrix.hpp"
 #include <optional>
 #include <string>
-namespace DxfIO::Objects
+namespace DxfIO::Objects::Materials
 {
   struct DXFIO_API MaterialColor
   {
@@ -2491,18 +2494,21 @@ namespace DxfIO::Objects
     };
     auto operator==(const Maps &) const -> bool = default;
   };
+}
+namespace DxfIO::Objects
+{
   struct DXFIO_API Material
   {
     DxfIO::Base Base{};
     std::string Name{};
     std::string Description{};
-    MaterialColor Ambient{};
-    MaterialColor Diffuse{};
+    Materials::MaterialColor Ambient{};
+    Materials::MaterialColor Diffuse{};
     double Gloss{0.5};
-    MaterialColor Specular{};
+    Materials::MaterialColor Specular{};
     double Opacity{1};
     double Refraction{1};
-    Boxed<Objects::Maps> Maps{};
+    Boxed<Materials::Maps> Maps{};
     double Translucence{};
     double Illumination{};
     double Reflectivity{};
