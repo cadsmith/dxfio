@@ -37,6 +37,8 @@ namespace DxfIO
       return one.Soft || !one.Hard ? Fields::Put(Pointer, one, to) : std::expected<void, Failure>{};
     }
 
+    inline constexpr std::string_view WithDefault = "ACDBDICTIONARYWDFLT";
+
     inline constexpr Fields::Subclass Defaulting{.Marker = "AcDbDictionaryWithDefault"};
 
     inline constexpr Fields::Field DefaultPointer{.Code = 340, .Member = &Dictionary::Default};
@@ -50,6 +52,18 @@ namespace DxfIO
       {
         one.Default = Handle{};
         Fields::Take(DefaultPointer, one, in);
+      }
+    }
+
+    /**
+     *  A dictionary read as an ACDBDICTIONARYWDFLT stays one, its default null, though its
+     *  AcDbDictionaryWithDefault part is missing, so it is written back under the type it came in.
+     */
+    inline void Aliased(Dictionary &one, std::string_view type)
+    {
+      if (type == WithDefault && !one.Default)
+      {
+        one.Default = Handle{};
       }
     }
 
@@ -108,8 +122,6 @@ namespace DxfIO
 
   namespace Objects
   {
-    inline constexpr std::string_view WithDefault = "ACDBDICTIONARYWDFLT";
-
     /**
      *  The type a dictionary is written as: an ACDBDICTIONARYWDFLT when it has a default.
      */

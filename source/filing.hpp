@@ -89,6 +89,15 @@ namespace DxfIO
         .and_then([&to, &base] -> auto { return Tail(to, base); });
   }
 
+  /**
+   *  Gives a record read under a name other than its kind's what that name says of it: nothing for
+   *  most kinds.
+   */
+  template <class KindT>
+  void Aliased(KindT & /*unused*/, std::string_view /*type*/)
+  {
+  }
+
   template <class KindT>
   void Follow(KindT & /*unused*/, std::span<const File::Record> & /*unused*/,
               const Fields::Reading & /*unused*/)

@@ -107,6 +107,7 @@ namespace DxfIO::Family
     {
       with.Tell(std::move(issue));
     }
+    Aliased(out, Tags::Text(one.Tags.front()));
     Follow(out, rest, with);
     return out;
   }
