@@ -67,7 +67,7 @@ DxfIO::Edit::Add(drawing, heavy);
 DxfIO::Entities::Line invisible{};
 invisible.Start = {.X = 0, .Y = 40, .Z = 0};
 invisible.End = {.X = 100, .Y = 40, .Z = 0};
-invisible.Record.Hidden = true;
+invisible.Record.Invisible = true;
 DxfIO::Edit::Add(drawing, invisible);
 ```
 

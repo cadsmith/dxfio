@@ -26,11 +26,11 @@ namespace DxfIO::Entities
     const Record &part  = taken.Record;
     CHECK(part.Linetype == std::string_view{"DASHED"});
     CHECK(part.Material);
-    CHECK(part.Color        == 30);
-    CHECK(part.Rgb          == 16744448);
-    CHECK(part.Transparency == 33554559);
-    CHECK(part.Scale        == 3);
-    CHECK(part.Hidden);
+    CHECK(part.Color         == 30);
+    CHECK(part.Rgb           == 16744448);
+    CHECK(part.Transparency  == 33554559);
+    CHECK(part.LinetypeScale == 3);
+    CHECK(part.Invisible);
     CHECK(part.Lineweight == Lineweight::Mm050);
     CHECK(part.Shadow     == 1);
   }
@@ -42,7 +42,7 @@ namespace DxfIO::Entities
       CAPTURE(release);
       const Line taken = Replayed<Line>(Drawn("2DB", release), release);
       CHECK(taken.Record.Rgb.has_value() == (release >= Version::R2004));
-      CHECK(taken.Record.Hidden);
+      CHECK(taken.Record.Invisible);
     }
   }
 
@@ -70,8 +70,8 @@ namespace DxfIO::Entities
         "100\r\nAcDbLine\r\n 10\r\n0.0\r\n 20\r\n0.0\r\n 30\r\n0.0\r\n"
         " 11\r\n1.0\r\n 21\r\n1.0\r\n 31\r\n0.0\r\n";
     const Line taken = Replayed<Line>(std::string{text}, Version::R14);
-    CHECK(taken.Record.Scale == 3);
-    CHECK(taken.Record.Hidden);
+    CHECK(taken.Record.LinetypeScale == 3);
+    CHECK(taken.Record.Invisible);
   }
 
   TEST_CASE("line: a null handle given before its own")

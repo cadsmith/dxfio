@@ -38,9 +38,10 @@ namespace DxfIO::Tables
      */
     bool Explodable{true};
     /**
-     *  Whether an insert of the block scales the same along every axis. Group 281, from R2007.
+     *  0 when an insert of the block may scale each axis its own way, 1 when it scales them alike.
+     *  Group 281, from R2007.
      */
-    bool Uniform{};
+    int Scaling{};
 
     auto operator==(const BlockRecord &) const -> bool = default;
   };

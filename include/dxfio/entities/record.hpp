@@ -37,11 +37,11 @@ namespace DxfIO::Entities
     /**
      *  The plot style, when the drawing names its plot styles. Group 390, from R2000.
      */
-    Handle Style{};
+    Handle Plotstyle{};
     /**
      *  The scale of the linetype for this entity. Group 48, from R13.
      */
-    double Scale{1};
+    double LinetypeScale{1};
     /**
      *  The color book and the color's name in it, joined by a $, when the color comes from one.
      *  Group 430, from R2004.
@@ -76,7 +76,7 @@ namespace DxfIO::Entities
     /**
      *  Whether the entity is invisible. Group 60, from R13.
      */
-    bool Hidden{};
+    bool Invisible{};
 
     auto operator==(const Record &) const -> bool = default;
   };

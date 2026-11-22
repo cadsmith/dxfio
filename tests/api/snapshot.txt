@@ -1583,8 +1583,8 @@ namespace DxfIO::Entities
     Symbol Layer{"0"};
     Symbol Linetype{"ByLayer"};
     Handle Material{};
-    Handle Style{};
-    double Scale{1};
+    Handle Plotstyle{};
+    double LinetypeScale{1};
     std::optional<std::string> Book{};
     std::optional<int> Rgb{};
     std::optional<int> Transparency{};
@@ -1592,7 +1592,7 @@ namespace DxfIO::Entities
     DxfIO::Lineweight Lineweight{DxfIO::Lineweight::ByLayer};
     int Shadow{};
     bool Paper{};
-    bool Hidden{};
+    bool Invisible{};
     auto operator==(const Record &) const -> bool = default;
   };
 }
@@ -3007,7 +3007,7 @@ namespace DxfIO::Tables
     std::vector<Handle> Inserts{};
     int Units{};
     bool Explodable{true};
-    bool Uniform{};
+    int Scaling{};
     auto operator==(const BlockRecord &) const -> bool = default;
   };
 }
