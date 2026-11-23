@@ -11,6 +11,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/release.yml
+      - .github/actions/msvc/**
       - CMakeLists.txt
       - CMakePresets.json
       - LICENSE
@@ -118,7 +119,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+      - uses: ./.github/actions/msvc
         if: runner.os == 'Windows'
 
       - name: Build and install
