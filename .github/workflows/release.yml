@@ -200,9 +200,11 @@ jobs:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-26.04
     timeout-minutes: 10
+    # id-token lets the attestation be signed with this workflow's identity:
+    # a permission, not a token kept in the file.
     permissions:
       contents: write
-      id-token: write
+      id-token: write # nosemgrep
       attestations: write
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -216,8 +218,7 @@ jobs:
 
       - name: Publish
         env:
-          # The job's own short-lived token, not a secret kept in the file.
-          GH_TOKEN: ${{ github.token }} # nosemgrep
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           gh release create "$GITHUB_REF_NAME" dist/* \
