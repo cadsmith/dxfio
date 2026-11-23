@@ -66,7 +66,7 @@ namespace DxfIO::Entities
     /**
      *  Whether the clipping boundary is on. Group 280.
      */
-    int Clipped{};
+    bool Clipped{};
     /**
      *  The brightness, 0 to 100. Group 281.
      */

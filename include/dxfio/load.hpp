@@ -35,8 +35,9 @@ namespace DxfIO
   struct DXFIO_API LoadOptions
   {
     /**
-     *  The threads the entities and objects are read on: 0 for as many as the machine has, 1 for
-     *  the calling thread alone. The drawing and its issues come out the same whatever the count.
+     *  The threads the entities and objects are read on: 0 or less for as many as the machine has,
+     *  1 for the calling thread alone. The drawing and its issues come out the same whatever the
+     *  count.
      */
     int Threads{0};
   };

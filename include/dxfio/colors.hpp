@@ -29,6 +29,12 @@ namespace DxfIO::Colors
    *  nothing below it.
    */
   inline constexpr int PackedByBlock = -1056964608;
+
+  /**
+   *  Black as AutoCAD packs a true color into one integer: the color method 0xC2 in the top byte
+   *  and 0x000000 below it, what a new material's colors hold.
+   */
+  inline constexpr int PackedBlack = -1040187392;
 } // namespace DxfIO::Colors
 
 #endif /* DXFIO_COLORS_HPP */

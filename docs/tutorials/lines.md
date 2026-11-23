@@ -19,12 +19,12 @@ Coordinates are in drawing units, in the world coordinate system for these two.
 ```cpp
 DxfIO::Entities::Point point{};
 point.Position = {.X = 0, .Y = 0, .Z = 0};
-DxfIO::Edit::Add(drawing, point);
+if (!DxfIO::Edit::Add(drawing, point)) return 1;
 
 DxfIO::Entities::Line line{};
 line.Start = {.X = 0, .Y = 0, .Z = 0};
 line.End = {.X = 100, .Y = 50, .Z = 0};
-DxfIO::Edit::Add(drawing, line);
+if (!DxfIO::Edit::Add(drawing, line)) return 1;
 ```
 
 ## Circles and arcs [#circles]
@@ -35,14 +35,14 @@ An arc runs counterclockwise from `Start` to `End`, both in degrees.
 DxfIO::Entities::Circle circle{};
 circle.Center = {.X = 150, .Y = 25, .Z = 0};
 circle.Radius = 25;
-DxfIO::Edit::Add(drawing, circle);
+if (!DxfIO::Edit::Add(drawing, circle)) return 1;
 
 DxfIO::Entities::Arc arc{};
 arc.Center = {.X = 220, .Y = 25, .Z = 0};
 arc.Radius = 25;
 arc.Start = 0;
 arc.End = 180;
-DxfIO::Edit::Add(drawing, arc);
+if (!DxfIO::Edit::Add(drawing, arc)) return 1;
 ```
 
 ## Ellipses [#ellipses]
@@ -54,7 +54,7 @@ DxfIO::Entities::Ellipse ellipse{};
 ellipse.Center = {.X = 300, .Y = 25, .Z = 0};
 ellipse.Axis = {.X = 40, .Y = 0, .Z = 0};
 ellipse.Ratio = 0.5;
-DxfIO::Edit::Add(drawing, ellipse);
+if (!DxfIO::Edit::Add(drawing, ellipse)) return 1;
 ```
 
 ## Filled solids [#solids]
@@ -69,7 +69,7 @@ square.Corners = {{
     {.X = 360, .Y = 50, .Z = 0},
     {.X = 410, .Y = 50, .Z = 0},
 }};
-DxfIO::Edit::Add(drawing, square);
+if (!DxfIO::Edit::Add(drawing, square)) return 1;
 ```
 
 ## Save [#save]

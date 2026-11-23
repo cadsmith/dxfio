@@ -15,7 +15,7 @@ DxfIO::Entities::Line plain{};
 plain.End = {.X = 100, .Y = 0, .Z = 0};
 std::println("layer {}, color {}, lineweight {}", plain.Record.Layer, plain.Record.Color,
              std::to_underlying(plain.Record.Lineweight));
-DxfIO::Edit::Add(drawing, plain);
+if (!DxfIO::Edit::Add(drawing, plain)) return 1;
 ```
 
 ```text title="Output"
@@ -31,7 +31,7 @@ DxfIO::Entities::Line indexed{};
 indexed.Start = {.X = 0, .Y = 10, .Z = 0};
 indexed.End = {.X = 100, .Y = 10, .Z = 0};
 indexed.Record.Color = 1;
-DxfIO::Edit::Add(drawing, indexed);
+if (!DxfIO::Edit::Add(drawing, indexed)) return 1;
 ```
 
 ## True color [#rgb]
@@ -44,7 +44,7 @@ orange.Start = {.X = 0, .Y = 20, .Z = 0};
 orange.End = {.X = 100, .Y = 20, .Z = 0};
 orange.Record.Color = 30;
 orange.Record.Rgb = 0xFF8000;
-DxfIO::Edit::Add(drawing, orange);
+if (!DxfIO::Edit::Add(drawing, orange)) return 1;
 ```
 
 ## Lineweight [#lineweight]
@@ -56,7 +56,7 @@ DxfIO::Entities::Line heavy{};
 heavy.Start = {.X = 0, .Y = 30, .Z = 0};
 heavy.End = {.X = 100, .Y = 30, .Z = 0};
 heavy.Record.Lineweight = DxfIO::Lineweight::Mm050;
-DxfIO::Edit::Add(drawing, heavy);
+if (!DxfIO::Edit::Add(drawing, heavy)) return 1;
 ```
 
 ## Visibility [#hidden]
@@ -68,7 +68,7 @@ DxfIO::Entities::Line invisible{};
 invisible.Start = {.X = 0, .Y = 40, .Z = 0};
 invisible.End = {.X = 100, .Y = 40, .Z = 0};
 invisible.Record.Invisible = true;
-DxfIO::Edit::Add(drawing, invisible);
+if (!DxfIO::Edit::Add(drawing, invisible)) return 1;
 ```
 
 ## Save [#save]

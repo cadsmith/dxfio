@@ -10,16 +10,16 @@ A block defined once with its own entities and attribute definitions, then place
 
 ```cpp
 DxfIO::Drawing drawing = DxfIO::Create(DxfIO::Version::R2018);
-DxfIO::Edit::AddBlock(drawing, "Valve");
+if (!DxfIO::Edit::AddBlock(drawing, "Valve")) return 1;
 
 DxfIO::Entities::Circle body{};
 body.Radius = 5;
-DxfIO::Edit::Add(drawing, body, "Valve");
+if (!DxfIO::Edit::Add(drawing, body, "Valve")) return 1;
 
 DxfIO::Entities::Line stem{};
 stem.Start = {.X = 0, .Y = 5, .Z = 0};
 stem.End = {.X = 0, .Y = 12, .Z = 0};
-DxfIO::Edit::Add(drawing, stem, "Valve");
+if (!DxfIO::Edit::Add(drawing, stem, "Valve")) return 1;
 ```
 
 ## Attribute definitions [#attdef]
@@ -35,7 +35,7 @@ number.Lettering->Height = 2.5;
 number.Lettering->Horizontal = DxfIO::Entities::HorizontalAlignment::Center;
 number.Vertical = DxfIO::Entities::VerticalAlignment::Middle;
 number.Lettering->Alignment = DxfIO::Vector{.X = 0, .Y = 0, .Z = 0};
-DxfIO::Edit::Add(drawing, number, "Valve");
+if (!DxfIO::Edit::Add(drawing, number, "Valve")) return 1;
 
 DxfIO::Entities::AttDef size{};
 size.Tag = DxfIO::Symbol{"SIZE"};
@@ -43,7 +43,7 @@ size.Prompt = "Pipe size";
 size.Lettering->Value = "DN50";
 size.Lettering->Height = 2.5;
 size.Flags = 1;
-DxfIO::Edit::Add(drawing, size, "Valve");
+if (!DxfIO::Edit::Add(drawing, size, "Valve")) return 1;
 ```
 
 ## The block's flags [#flags]
@@ -105,10 +105,10 @@ The ATTRIBs follow their INSERT in the file, up to a SEQEND. `Edit::Add` sets th
 
 ```cpp
 first.Attributes.Children = {attribute(number, first, "V-12"), attribute(size, first, "DN50")};
-DxfIO::Edit::Add(drawing, first);
+if (!DxfIO::Edit::Add(drawing, first)) return 1;
 
 second.Attributes.Children = {attribute(number, second, "V-13"), attribute(size, second, "DN80")};
-DxfIO::Edit::Add(drawing, second);
+if (!DxfIO::Edit::Add(drawing, second)) return 1;
 ```
 
 ## Save [#save]

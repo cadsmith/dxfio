@@ -19,13 +19,13 @@ border.Vertices = {
     {.Position = {.X = 11.5, .Y = 8.5, .Z = 0}},
     {.Position = {.X = 0.5, .Y = 8.5, .Z = 0}},
 };
-DxfIO::Edit::Add(drawing, border, DxfIO::Space::Paper);
+if (!DxfIO::Edit::Add(drawing, border, DxfIO::Space::Paper)) return 1;
 
 DxfIO::Entities::Text title{};
 title.Lettering.Position = {.X = 1, .Y = 1, .Z = 0};
 title.Lettering.Height = 0.25;
 title.Lettering.Value = "Ground floor";
-DxfIO::Edit::Add(drawing, title, DxfIO::Space::Paper);
+if (!DxfIO::Edit::Add(drawing, title, DxfIO::Space::Paper)) return 1;
 ```
 
 ## Another layout [#layout]

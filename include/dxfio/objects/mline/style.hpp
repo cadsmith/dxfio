@@ -4,6 +4,7 @@
 #include "dxfio/api.hpp"
 #include "dxfio/base.hpp"
 #include "dxfio/colors.hpp"
+#include "dxfio/symbol.hpp"
 
 #include <string>
 #include <vector>
@@ -26,7 +27,7 @@ namespace DxfIO::Objects::MLineStyles
     /**
      *  The name of the line's linetype. Group 6.
      */
-    std::string Linetype{"BYLAYER"};
+    Symbol Linetype{"BYLAYER"};
 
     auto operator==(const Element &) const -> bool = default;
   };

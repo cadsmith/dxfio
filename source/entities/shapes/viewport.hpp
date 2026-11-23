@@ -78,11 +78,7 @@ namespace DxfIO
         Fields::Field{.Code = 142, .Member = &ViewportData::Contrast},
         Fields::Field{.Code = 63, .Member = &ViewportData::Ambient},
         Fields::Field{.Code = 421, .Member = &ViewportData::Rgb},
-        Fields::Field{
-            .Code     = 431,
-            .Member   = &ViewportData::Book,
-            .Fallback = std::string_view{},
-        },
+        Fields::Field{.Code = 431, .Member = &ViewportData::Book},
         Fields::Field{.Code = 361, .Member = &ViewportData::Sun, .Fallback = Handle{}},
     };
   } // namespace Entities

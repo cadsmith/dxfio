@@ -20,7 +20,9 @@ namespace DxfIO::Objects::SortEntsTables
      */
     Handle Entity{};
     /**
-     *  The handle the entity is drawn in the order of, in place of its own. Group 5.
+     *  The handle the entity is drawn in the order of, in place of its own. Group 5. Empty for a
+     *  pair that has no group 5, so it is written back without one; a group 5 of 0 is the null
+     *  handle, kept apart from that.
      */
     std::optional<Handle> Key{};
 

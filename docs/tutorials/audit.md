@@ -19,18 +19,18 @@ DxfIO::Entities::Circle circle{};
 circle.Record.Base.Self = *first;
 circle.Center = {.X = 50, .Y = 50, .Z = 0};
 circle.Radius = 20;
-DxfIO::Edit::Add(drawing, circle);
+if (!DxfIO::Edit::Add(drawing, circle)) return 1;
 
 DxfIO::Entities::Line wall{};
 wall.Record.Layer = DxfIO::Symbol{"Walls"};
 wall.Record.Linetype = DxfIO::Symbol{"DASHED"};
 wall.End = {.X = 0, .Y = 100, .Z = 0};
-DxfIO::Edit::Add(drawing, wall);
+if (!DxfIO::Edit::Add(drawing, wall)) return 1;
 
 DxfIO::Entities::Insert door{};
 door.Block = DxfIO::Symbol{"Door"};
 door.Position = {.X = 100, .Y = 100, .Z = 0};
-DxfIO::Edit::Add(drawing, door);
+if (!DxfIO::Edit::Add(drawing, door)) return 1;
 ```
 
 ## Check [#check]

@@ -108,29 +108,29 @@ namespace DxfIO::Tables
      */
     int Dimtfillclr{};
     /**
-     *  DIMTOL: nonzero to append tolerances to measurements. Group 71.
+     *  DIMTOL: whether to append tolerances to measurements. Group 71.
      */
-    int Dimtol{};
+    bool Dimtol{};
     /**
-     *  DIMLIM: nonzero to give measurements as limits. Group 72.
+     *  DIMLIM: whether to give measurements as limits. Group 72.
      */
-    int Dimlim{};
+    bool Dimlim{};
     /**
-     *  DIMTIH: nonzero to keep text between extension lines horizontal. Group 73.
+     *  DIMTIH: whether to keep text between extension lines horizontal. Group 73.
      */
-    int Dimtih{1};
+    bool Dimtih{true};
     /**
-     *  DIMTOH: nonzero to keep text outside extension lines horizontal. Group 74.
+     *  DIMTOH: whether to keep text outside extension lines horizontal. Group 74.
      */
-    int Dimtoh{1};
+    bool Dimtoh{true};
     /**
-     *  DIMSE1: nonzero to leave out the first extension line. Group 75.
+     *  DIMSE1: whether to leave out the first extension line. Group 75.
      */
-    int Dimse1{};
+    bool Dimse1{};
     /**
-     *  DIMSE2: nonzero to leave out the second extension line. Group 76.
+     *  DIMSE2: whether to leave out the second extension line. Group 76.
      */
-    int Dimse2{};
+    bool Dimse2{};
     /**
      *  DIMTAD: where text stands against the dimension line: 0 centered, 1 above, 2 on the far
      *  side, 3 JIS, 4 below. Group 77.
@@ -188,30 +188,30 @@ namespace DxfIO::Tables
      */
     double Dimaltrnd{};
     /**
-     *  DIMALT: nonzero to add alternate units to measurements. Group 170.
+     *  DIMALT: whether to add alternate units to measurements. Group 170.
      */
-    int Dimalt{};
+    bool Dimalt{};
     /**
      *  DIMALTD: the decimal places of alternate units. Group 171.
      */
     int Dimaltd{2};
     /**
-     *  DIMTOFL: nonzero to draw the dimension line between extension lines when text is outside.
+     *  DIMTOFL: whether to draw the dimension line between extension lines when text is outside.
      *  Group 172.
      */
-    int Dimtofl{};
+    bool Dimtofl{};
     /**
-     *  DIMSAH: nonzero to take the arrows from DIMBLK1 and DIMBLK2 rather than DIMBLK. Group 173.
+     *  DIMSAH: whether to take the arrows from DIMBLK1 and DIMBLK2 rather than DIMBLK. Group 173.
      */
-    int Dimsah{};
+    bool Dimsah{};
     /**
-     *  DIMTIX: nonzero to keep text between extension lines. Group 174.
+     *  DIMTIX: whether to keep text between extension lines. Group 174.
      */
-    int Dimtix{};
+    bool Dimtix{};
     /**
-     *  DIMSOXD: nonzero to leave out dimension lines outside extension lines. Group 175.
+     *  DIMSOXD: whether to leave out dimension lines outside extension lines. Group 175.
      */
-    int Dimsoxd{};
+    bool Dimsoxd{};
     /**
      *  DIMCLRD: the color of dimension lines, arrowheads and leaders. Group 176.
      */
@@ -273,13 +273,13 @@ namespace DxfIO::Tables
      */
     int Dimjust{};
     /**
-     *  DIMSD1: nonzero to leave out the first half of the dimension line. Group 281, from R13.
+     *  DIMSD1: whether to leave out the first half of the dimension line. Group 281, from R13.
      */
-    int Dimsd1{};
+    bool Dimsd1{};
     /**
-     *  DIMSD2: nonzero to leave out the second half of the dimension line. Group 282, from R13.
+     *  DIMSD2: whether to leave out the second half of the dimension line. Group 282, from R13.
      */
-    int Dimsd2{};
+    bool Dimsd2{};
     /**
      *  DIMTOLJ: where tolerances stand against the measurement: 0 bottom, 1 middle, 2 top. Group
      *  283, from R13.
@@ -298,10 +298,10 @@ namespace DxfIO::Tables
      */
     int Dimalttz{};
     /**
-     *  DIMUPT: nonzero for the cursor to place the text as well as the dimension line. Group 288,
-     *  from R13.
+     *  DIMUPT: whether the cursor places the text as well as the dimension line. Group 288, from
+     *  R13.
      */
-    int Dimupt{};
+    bool Dimupt{};
     /**
      *  DIMATFIT: what moves outside extension lines when text and arrows do not fit: 0 both, 1
      *  arrows, 2 text, 3 whichever fits best. Group 289, from R2000.

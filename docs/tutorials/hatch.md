@@ -38,11 +38,11 @@ square.Vertices = {
     {.Position = {.X = 40, .Y = 40, .Z = 0}},
     {.Position = {.X = 0, .Y = 40, .Z = 0}},
 };
-DxfIO::Edit::Add(drawing, square);
+if (!DxfIO::Edit::Add(drawing, square)) return 1;
 
 DxfIO::Entities::Hatch solid{};
 solid.Data->Paths = {traced(square)};
-DxfIO::Edit::Add(drawing, solid);
+if (!DxfIO::Edit::Add(drawing, solid)) return 1;
 ```
 
 ## A pattern [#pattern]
@@ -58,7 +58,7 @@ arch.Vertices = {
     {.Position = {.X = 100, .Y = 30, .Z = 0}, .Bulge = 1},
     {.Position = {.X = 60, .Y = 30, .Z = 0}},
 };
-DxfIO::Edit::Add(drawing, arch);
+if (!DxfIO::Edit::Add(drawing, arch)) return 1;
 
 DxfIO::Entities::Hatch pattern{};
 pattern.Data->Name = "ANSI31";
@@ -68,7 +68,7 @@ pattern.Data->Angle = 45;
 pattern.Data->Scale = 2;
 pattern.Data->PatternLines = {{.Angle = 90, .X = 0, .Y = 0, .Run = -6.35, .Rise = 0, .Dashes = {}}};
 pattern.Data->Paths = {traced(arch)};
-DxfIO::Edit::Add(drawing, pattern);
+if (!DxfIO::Edit::Add(drawing, pattern)) return 1;
 ```
 
 ## Save [#save]

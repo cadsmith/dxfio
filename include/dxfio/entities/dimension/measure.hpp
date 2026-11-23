@@ -73,11 +73,11 @@ namespace DxfIO::Entities
     /**
      *  Whether the first arrowhead is flipped. Group 74, from R2007.
      */
-    int FlipFirst{};
+    bool FlipFirst{};
     /**
      *  Whether the second arrowhead is flipped. Group 75, from R2007.
      */
-    int FlipSecond{};
+    bool FlipSecond{};
     /**
      *  The oblique angle of the extension lines of a linear dimension. Group 52.
      */

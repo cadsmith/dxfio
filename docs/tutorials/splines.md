@@ -20,7 +20,7 @@ controlled.Curve->ControlPoints = {
     {.X = 0, .Y = 0, .Z = 0},  {.X = 20, .Y = 40, .Z = 0},  {.X = 50, .Y = 40, .Z = 0},
     {.X = 70, .Y = 0, .Z = 0}, {.X = 100, .Y = 0, .Z = 0}, {.X = 120, .Y = 40, .Z = 0},
 };
-DxfIO::Edit::Add(drawing, controlled);
+if (!DxfIO::Edit::Add(drawing, controlled)) return 1;
 ```
 
 ## Through fit points [#fits]
@@ -39,7 +39,7 @@ fitted.Curve->FitPoints = {
     {.X = 80, .Y = 80, .Z = 0},
     {.X = 120, .Y = 120, .Z = 0},
 };
-DxfIO::Edit::Add(drawing, fitted);
+if (!DxfIO::Edit::Add(drawing, fitted)) return 1;
 ```
 
 ## Save [#save]

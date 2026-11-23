@@ -22,14 +22,14 @@ namespace DxfIO::Edit
    *  128 for a face. An ATTDEF that is not constant flags the block it goes to, the space's
    *  included, as holding attribute definitions.
    */
-  DXFIO_API auto Add(Drawing &drawing, Entity one, Space space = Space::Model)
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Entity one, Space space = Space::Model)
       -> std::expected<Handle, Failure>;
 
   /**
    *  Adds an entity to the block of that name, as the other Add does to a space, and returns its
    *  handle. Fails when there is no such block.
    */
-  DXFIO_API auto Add(Drawing &drawing, Entity one, std::string_view block)
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Entity one, std::string_view block)
       -> std::expected<Handle, Failure>;
 
   /**
@@ -37,7 +37,7 @@ namespace DxfIO::Edit
    *  returns the handle of its BLOCK. Fails when the name is empty or the drawing has a block of
    *  that name.
    */
-  DXFIO_API auto AddBlock(Drawing &drawing, std::string_view name)
+  [[nodiscard]] DXFIO_API auto AddBlock(Drawing &drawing, std::string_view name)
       -> std::expected<Handle, Failure>;
 
   /**
@@ -45,43 +45,51 @@ namespace DxfIO::Edit
    *  has no name, or when the table holds a record of that name, but for VPORT, whose tiled
    *  viewports share one.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::VPort one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::VPort one)
+      -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a linetype. Fails when the LTYPE table holds one of that name.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::LType one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::LType one)
+      -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a layer. One that names no plot style or material takes layer 0's: AutoCAD refuses a
    *  layer with no plot style from R2000 on. Fails when the LAYER table holds one of that name.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::Layer one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::Layer one)
+      -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a text style. Fails when the STYLE table holds one of that name.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::Style one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::Style one)
+      -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a named view. Fails when the VIEW table holds one of that name.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::View one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::View one)
+      -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a user coordinate system. Fails when the UCS table holds one of that name.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::Ucs one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::Ucs one)
+      -> std::expected<Handle, Failure>;
 
   /**
    *  Registers an application for extended data. Fails when the APPID table holds one of that name.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::AppId one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::AppId one)
+      -> std::expected<Handle, Failure>;
 
   /**
    *  Adds a dimension style. Fails when the DIMSTYLE table holds one of that name.
    */
-  DXFIO_API auto Add(Drawing &drawing, Tables::DimStyle one) -> std::expected<Handle, Failure>;
+  [[nodiscard]] DXFIO_API auto Add(Drawing &drawing, Tables::DimStyle one)
+      -> std::expected<Handle, Failure>;
 } // namespace DxfIO::Edit
 
 #endif /* DXFIO_EDIT_ADD_HPP */

@@ -43,6 +43,11 @@ namespace DxfIO::View
       -> const Blocks::Definition *;
 
   /**
+   *  Refused: the block would be gone with the drawing.
+   */
+  auto Block(const Drawing &&drawing, std::string_view name) -> const Blocks::Definition * = delete;
+
+  /**
    *  The record of that name in a table, compared without case, such as `Record(drawing.Layer,
    *  "Walls")`, or null.
    */
@@ -135,44 +140,124 @@ namespace DxfIO::View
   }
 
   /**
+   *  Refused: the record would be gone with the drawing.
+   */
+  template <class RecordT>
+  auto Record(const Drawing &&drawing, std::string_view name) -> const RecordT * = delete;
+
+  /**
    *  The BLOCK_RECORD of *Model_Space; null before R13, which has no such table.
+   */
+  [[nodiscard]] DXFIO_API auto ModelSpace(Drawing &drawing) -> Tables::BlockRecord *;
+
+  /**
+   *  The BLOCK_RECORD of *Model_Space, read only; null before R13.
    */
   [[nodiscard]] DXFIO_API auto ModelSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
 
   /**
+   *  Refused: the record would be gone with the drawing.
+   */
+  auto ModelSpace(const Drawing &&drawing) -> const Tables::BlockRecord * = delete;
+
+  /**
    *  The BLOCK_RECORD of *Paper_Space, the active layout's paper space; null before R13.
+   */
+  [[nodiscard]] DXFIO_API auto PaperSpace(Drawing &drawing) -> Tables::BlockRecord *;
+
+  /**
+   *  The BLOCK_RECORD of *Paper_Space, read only; null before R13.
    */
   [[nodiscard]] DXFIO_API auto PaperSpace(const Drawing &drawing) -> const Tables::BlockRecord *;
 
   /**
+   *  Refused: the record would be gone with the drawing.
+   */
+  auto PaperSpace(const Drawing &&drawing) -> const Tables::BlockRecord * = delete;
+
+  /**
    *  Every layout of the drawing, in tab order, Model first; none before R2000.
+   */
+  [[nodiscard]] DXFIO_API auto Layouts(Drawing &drawing) -> std::vector<Objects::Layout *>;
+
+  /**
+   *  Every layout of the drawing, in tab order, Model first, read only; none before R2000.
    */
   [[nodiscard]] DXFIO_API auto Layouts(const Drawing &drawing)
       -> std::vector<const Objects::Layout *>;
 
   /**
+   *  Refused: the layouts would be gone with the drawing.
+   */
+  auto Layouts(const Drawing &&drawing) -> std::vector<const Objects::Layout *> = delete;
+
+  /**
    *  The layout of that name, compared without case, or null.
+   */
+  [[nodiscard]] DXFIO_API auto Layout(Drawing &drawing, std::string_view name) -> Objects::Layout *;
+
+  /**
+   *  The layout of that name, compared without case, or null; read only.
    */
   [[nodiscard]] DXFIO_API auto Layout(const Drawing &drawing, std::string_view name)
       -> const Objects::Layout *;
 
   /**
+   *  Refused: the layout would be gone with the drawing.
+   */
+  auto Layout(const Drawing &&drawing, std::string_view name) -> const Objects::Layout * = delete;
+
+  /**
    *  The named objects dictionary: the first dictionary of the OBJECTS section that no other object
    *  owns.
+   */
+  [[nodiscard]] DXFIO_API auto Root(Drawing &drawing) -> Objects::Dictionary *;
+
+  /**
+   *  The named objects dictionary, read only.
    */
   [[nodiscard]] DXFIO_API auto Root(const Drawing &drawing) -> const Objects::Dictionary *;
 
   /**
+   *  Refused: the dictionary would be gone with the drawing.
+   */
+  auto Root(const Drawing &&drawing) -> const Objects::Dictionary * = delete;
+
+  /**
    *  The object the dictionary's entry of that name leads to, whether it owns it hard or soft.
+   */
+  [[nodiscard]] DXFIO_API auto Entry(Drawing &drawing, const Objects::Dictionary &dictionary,
+                                     std::string_view name) -> Object *;
+
+  /**
+   *  The object the dictionary's entry of that name leads to, read only.
    */
   [[nodiscard]] DXFIO_API auto Entry(const Drawing &drawing, const Objects::Dictionary &dictionary,
                                      std::string_view name) -> const Object *;
 
   /**
+   *  Refused: the object would be gone with the drawing.
+   */
+  auto Entry(const Drawing &&drawing, const Objects::Dictionary &dictionary, std::string_view name)
+      -> const Object * = delete;
+
+  /**
    *  The dictionary the root's entry of that name leads to, such as ACAD_LAYOUT.
+   */
+  [[nodiscard]] DXFIO_API auto Dictionary(Drawing &drawing, std::string_view name)
+      -> Objects::Dictionary *;
+
+  /**
+   *  The dictionary the root's entry of that name leads to, read only.
    */
   [[nodiscard]] DXFIO_API auto Dictionary(const Drawing &drawing, std::string_view name)
       -> const Objects::Dictionary *;
+
+  /**
+   *  Refused: the dictionary would be gone with the drawing.
+   */
+  auto Dictionary(const Drawing &&drawing, std::string_view name)
+      -> const Objects::Dictionary * = delete;
 } // namespace DxfIO::View
 
 #endif /* DXFIO_VIEW_HPP */

@@ -16,7 +16,7 @@ narrow.Record.Name = "Narrow";
 narrow.Font = "txt.shx";
 narrow.Width = 0.8;
 narrow.Oblique = 15;
-DxfIO::Edit::Add(drawing, narrow);
+if (!DxfIO::Edit::Add(drawing, narrow)) return 1;
 ```
 
 ## A line of text [#text]
@@ -28,7 +28,7 @@ DxfIO::Entities::Text title{};
 title.Lettering.Position = {.X = 0, .Y = 0, .Z = 0};
 title.Lettering.Height = 2.5;
 title.Lettering.Value = "Pump room";
-DxfIO::Edit::Add(drawing, title);
+if (!DxfIO::Edit::Add(drawing, title)) return 1;
 ```
 
 ## Justification [#justification]
@@ -62,7 +62,7 @@ for (const Justification &one : justifications)
   text.Lettering.Value = one.Value;
   text.Lettering.Horizontal = one.Horizontal;
   text.Vertical = one.Vertical;
-  DxfIO::Edit::Add(drawing, text);
+  if (!DxfIO::Edit::Add(drawing, text)) return 1;
   y += 6;
 }
 ```
@@ -79,7 +79,7 @@ styled.Lettering.Value = "Narrow and slanted";
 styled.Lettering.Style = DxfIO::Symbol{"Narrow"};
 styled.Lettering.Width = narrow.Width;
 styled.Lettering.Oblique = narrow.Oblique;
-DxfIO::Edit::Add(drawing, styled);
+if (!DxfIO::Edit::Add(drawing, styled)) return 1;
 ```
 
 ## Multiline text [#mtext]
@@ -92,7 +92,7 @@ note.Data->Position = {.X = 0, .Y = 50, .Z = 0};
 note.Data->Height = 2.5;
 note.Data->Width = 40;
 note.Data->Value = R"(Pump P-1 feeds {\C1;tank 3} through valve V-12, open in service\PDrain before winter)";
-DxfIO::Edit::Add(drawing, note);
+if (!DxfIO::Edit::Add(drawing, note)) return 1;
 ```
 
 ## Formatting codes [#codes]
@@ -101,7 +101,7 @@ The codes are in the text itself. Saved to R12, which has no MTEXT, the note bec
 
 ```cpp
 DxfIO::Drawing alone = DxfIO::Create(DxfIO::Version::R2018);
-DxfIO::Edit::Add(alone, note);
+if (!DxfIO::Edit::Add(alone, note)) return 1;
 const auto older = DxfIO::Save(alone, {.Release = DxfIO::Version::R12})
                        .and_then([](const DxfIO::Saved &flat) { return DxfIO::Load(flat.Bytes); });
 if (older)
