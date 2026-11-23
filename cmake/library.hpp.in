@@ -11,7 +11,7 @@
 namespace DxfIO
 {
   /**
-   *  The version of dxfio itself, such as "0.1.0": DXFIO_VERSION_STRING, for code that would rather
+   *  The version of dxfio itself, such as "0.2.0": DXFIO_VERSION_STRING, for code that would rather
    *  not use the macros.
    */
   inline constexpr std::string_view LibraryVersion = DXFIO_VERSION_STRING;
