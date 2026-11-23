@@ -27,8 +27,13 @@
 
 Every build when dxfio is the top level project defines `_GLIBCXX_ASSERTIONS`
 and libc++'s debug hardening mode, so the standard library checks its
-preconditions. The `sanitize`, `thread` and `memory` test presets set the
+preconditions; `-DDXFIO_HARDENING=OFF` leaves them out, as the release
+archives do. The `sanitize`, `thread` and `memory` test presets set the
 sanitizers' strictest runtime options.
+
+The Debug library is `dxfiod`, so a Debug and a Release build install side by
+side, and the package accepts a request for the same minor version only while
+dxfio is 0.x.
 
 ## Targets
 

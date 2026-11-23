@@ -19,6 +19,36 @@ cmake --build --preset debug
 ctest --preset debug
 ```
 
+## Prebuilt libraries [#prebuilt]
+
+Each release on GitHub carries the library built for four platforms: its headers, the library and the CMake package that `find_package` reads, in one archive each.
+
+| Archive | Built with | Needs |
+| :--- | :--- | :--- |
+| `linux-x64`, `linux-arm64` | GCC 15 on Ubuntu 26.04, libstdc++ | GCC 15's libstdc++ or later |
+| `macos-universal` | Apple Clang on macOS 26, arm64 and x86_64 in one library | macOS 26 or later |
+| `windows-x64` | MSVC 19.52 of Visual Studio 2026, the dynamic runtime: `dxfio.lib` for Release, `dxfiod.lib` for Debug | Visual Studio 2026 or later |
+
+Check an archive before using it. `SHA256SUMS` lists every file's checksum, and each file carries a build provenance attestation, signed by GitHub, that it was built by this repository's release workflow from the tagged commit:
+
+```sh
+sha256sum --check --ignore-missing SHA256SUMS
+gh attestation verify dxfio-<version>-linux-x64.tar.gz --repo cadsmith/dxfio
+```
+
+Unpack it anywhere and point CMake at the folder:
+
+```cmake tab="CMakeLists.txt"
+find_package(dxfio CONFIG REQUIRED)
+target_link_libraries(app PRIVATE dxfio::dxfio)
+```
+
+```sh tab="Configure"
+cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/dxfio-<version>-linux-x64
+```
+
+While dxfio is 0.x, a release accepts a request for its own minor version only, as each may change the interface.
+
 ## A first program [#first]
 
 `dxfio/dxfio.hpp` brings in the whole interface, under the namespace `DxfIO`. This program makes a drawing with one line, saves it, and reads it back. A bad file never throws: a load or a save that fails returns its `Failure`, with what went wrong and, for an ASCII file, on which line. Only running out of memory, or of threads to start, can throw.

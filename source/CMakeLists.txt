@@ -52,6 +52,7 @@ target_include_directories(dxfio
 target_compile_features(dxfio PUBLIC cxx_std_23)
 
 set_target_properties(dxfio PROPERTIES
+  DEBUG_POSTFIX d
   CXX_VISIBILITY_PRESET hidden
   VISIBILITY_INLINES_HIDDEN YES
   POSITION_INDEPENDENT_CODE ON
