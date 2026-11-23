@@ -109,7 +109,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if (MSVC)
-  add_compile_options(/W4 /utf-8)
+  add_compile_options(/W4 /utf-8 /bigobj)
 endif()
 
 if (PROJECT_IS_TOP_LEVEL)
