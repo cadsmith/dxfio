@@ -80,7 +80,12 @@ endif()
 
 option(DXFIO_ENABLE_TIDY "Run clang-tidy on the library as it builds" OFF)
 
-if (PROJECT_IS_TOP_LEVEL)
+option(DXFIO_HARDENING
+  "Have the standard library check its preconditions"
+  ${PROJECT_IS_TOP_LEVEL}
+)
+
+if (DXFIO_HARDENING)
   add_compile_definitions(
     _GLIBCXX_ASSERTIONS
     _LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG
@@ -104,7 +109,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if (MSVC)
-  add_compile_options(/W4 /utf-8)
+  add_compile_options(/W4 /utf-8 /bigobj)
 endif()
 
 if (PROJECT_IS_TOP_LEVEL)
@@ -127,7 +132,7 @@ install(EXPORT dxfioTargets
 
 write_basic_package_version_file(
   ${PROJECT_BINARY_DIR}/dxfioConfigVersion.cmake
-  COMPATIBILITY SameMajorVersion
+  COMPATIBILITY SameMinorVersion
 )
 
 install(FILES ${PROJECT_SOURCE_DIR}/cmake/config.cmake

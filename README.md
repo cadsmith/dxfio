@@ -70,6 +70,21 @@ target_link_libraries(app PRIVATE dxfio::dxfio)
 cmake -S . -B build -DCMAKE_PREFIX_PATH=/some/prefix
 ```
 
+Or prebuilt: each [release](https://github.com/cadsmith/dxfio/releases)
+carries the installed library for Linux x64 and arm64, macOS (universal, 26
+or later) and Windows x64 (MSVC, Release and Debug), with a `SHA256SUMS`
+file and a build provenance attestation for every archive:
+
+```sh
+gh attestation verify dxfio-<version>-linux-x64.tar.gz \
+  --repo cadsmith/dxfio \
+  --signer-workflow cadsmith/dxfio/.github/workflows/release.yml \
+  --source-ref refs/tags/v<version>
+```
+
+[Prebuilt libraries](https://dxfio.dev/guide/start/#prebuilt) says what each
+archive was built with.
+
 `Load` and `Save` read and write a drawing's entities and objects on every core
 the machine has; `LoadOptions{.Threads = 1}` and `SaveOptions{.Threads = 1}`
 keep them to the calling thread, and the drawing, its issues and the bytes come
@@ -127,7 +142,10 @@ Markdown runs the checks alone.
 [fuzz.yml](.github/workflows/fuzz.yml) fuzzes each target for twenty minutes
 every night and keeps what it finds, and
 [codeql.yml](.github/workflows/codeql.yml) runs CodeQL's security and quality
-queries.
+queries, and [release.yml](.github/workflows/release.yml) builds, packs, attests
+and publishes the prebuilt libraries for a tag `v<version>`, the version
+`CMakeLists.txt` declares; a pull request that changes how they are made
+builds and packs them without publishing.
 
 ## Layout
 

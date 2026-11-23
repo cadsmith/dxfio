@@ -1,0 +1,228 @@
+name: Release
+
+# A tag v<version> builds the library for each platform, packs each install
+# tree, and publishes them on the tag's release with their checksums and a
+# build provenance attestation for every file. A pull request that touches
+# what the archives are made from builds and packs them without publishing;
+# it is not a required check, so it costs a pull request no wait.
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - CMakeLists.txt
+      - CMakePresets.json
+      - LICENSE
+      - README.md
+      - cmake/**
+      - include/**
+      - source/**
+      - vendor/**
+      - tests/package/**
+      - tests/fixtures/acad/entities-r2018.dxf
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # The version the archives are named for, from the project; a tag must
+  # name the same one.
+  version:
+    name: version
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read the version
+        id: read
+        run: |
+          version=$(sed -nE 's/^project\(dxfio VERSION ([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' CMakeLists.txt)
+          if [ -z "$version" ]; then
+            echo "::error::no version in CMakeLists.txt"
+            exit 1
+          fi
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME is not v$version, the project's version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  # Each platform's library, built without the tests or the standard
+  # library's debug checks, installed, used by tests/package the way a
+  # consumer would, then packed.
+  build:
+    name: ${{ matrix.platform }}
+    needs: version
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x64
+            os: ubuntu-26.04
+            container: ubuntu:26.04
+            cxx: g++-15
+            archive: tar.gz
+          - platform: linux-arm64
+            os: ubuntu-24.04-arm
+            container: ubuntu:26.04
+            cxx: g++-15
+            archive: tar.gz
+          - platform: macos-universal
+            os: macos-26
+            cxx: c++
+            archive: tar.gz
+            flags: -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=26.0
+          - platform: windows-x64
+            os: windows-2025
+            cxx: cl
+            archive: zip
+            # Debug info in the Debug library's objects alone, no PDB to lose.
+            flags: -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=$<$<CONFIG:Debug>:Embedded>
+            debug: true
+            # A consumer in each configuration finds the matching library.
+            consume: Release Debug RelWithDebInfo MinSizeRel
+    env:
+      CXX: ${{ matrix.cxx }}
+      NAME: dxfio-${{ needs.version.outputs.version }}-${{ matrix.platform }}
+      # Split on blanks only: the architectures' semicolon stays in one word.
+      FLAGS: ${{ matrix.flags }}
+      CONFIGS: ${{ matrix.debug && 'Release Debug' || 'Release' }}
+      CONSUME: ${{ matrix.consume || 'Release' }}
+      ARCHIVE: ${{ matrix.archive }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install the toolchain
+        if: matrix.container
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates cmake git g++-15 ninja-build
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        if: runner.os == 'Windows'
+
+      - name: Build and install
+        run: |
+          for config in $CONFIGS; do
+            # shellcheck disable=SC2086 # FLAGS is several arguments.
+            cmake -S . -B "build/$config" -G Ninja \
+              -DCMAKE_BUILD_TYPE="$config" \
+              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
+              -DBUILD_TESTING=OFF \
+              -DDXFIO_HARDENING=OFF \
+              $FLAGS
+            cmake --build "build/$config"
+            cmake --install "build/$config" --prefix "stage/$NAME"
+          done
+          cp LICENSE README.md "stage/$NAME/"
+
+      - name: Consume
+        run: |
+          for config in $CONSUME; do
+            cmake -S tests/package -B "consumer/$config" -G Ninja \
+              -DCMAKE_BUILD_TYPE="$config" \
+              -DCMAKE_PREFIX_PATH="$PWD/stage/$NAME"
+            cmake --build "consumer/$config"
+            "consumer/$config/dxfio_package" tests/fixtures/acad/entities-r2018.dxf
+          done
+
+      - name: Pack
+        run: |
+          mkdir dist
+          cd stage
+          if [ "$ARCHIVE" = zip ]; then
+            cmake -E tar cf "../dist/$NAME.zip" --format=zip "$NAME"
+          else
+            cmake -E tar czf "../dist/$NAME.tar.gz" "$NAME"
+          fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ matrix.platform }}
+          path: dist/*
+          if-no-files-found: error
+
+  # The archives together, with their checksums, as the release will hold
+  # them.
+  gather:
+    name: gather
+    needs: build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Sum
+        working-directory: dist
+        run: |
+          sha256sum -- * > SHA256SUMS
+          {
+            echo '## Release archives'
+            echo '```'
+            cat SHA256SUMS
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: dist/*
+          if-no-files-found: error
+
+  # A tag's archives attested and published: the attestation ties each file
+  # to this workflow and commit, and `gh attestation verify` checks it.
+  publish:
+    name: publish
+    needs: [version, gather]
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    # id-token lets the attestation be signed with this workflow's identity:
+    # a permission, not a token kept in the file.
+    permissions:
+      contents: write
+      id-token: write # nosemgrep
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: dist
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/*
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "dxfio $VERSION" \
+            --generate-notes
