@@ -85,7 +85,8 @@ jobs:
             os: windows-2025
             cxx: cl
             archive: zip
-            flags: -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
+            # Debug info in the Debug library's objects alone, no PDB to lose.
+            flags: -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=$<$<CONFIG:Debug>:Embedded>
             debug: true
     env:
       CXX: ${{ matrix.cxx }}
