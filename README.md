@@ -76,7 +76,10 @@ or later) and Windows x64 (MSVC, Release and Debug), with a `SHA256SUMS`
 file and a build provenance attestation for every archive:
 
 ```sh
-gh attestation verify dxfio-<version>-linux-x64.tar.gz --repo cadsmith/dxfio
+gh attestation verify dxfio-<version>-linux-x64.tar.gz \
+  --repo cadsmith/dxfio \
+  --signer-workflow cadsmith/dxfio/.github/workflows/release.yml \
+  --source-ref refs/tags/v<version>
 ```
 
 [Prebuilt libraries](https://dxfio.dev/guide/start/#prebuilt) says what each

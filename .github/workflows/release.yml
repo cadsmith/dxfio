@@ -3,7 +3,8 @@ name: Release
 # A tag v<version> builds the library for each platform, packs each install
 # tree, and publishes them on the tag's release with their checksums and a
 # build provenance attestation for every file. A pull request that touches
-# what the archives are made from builds and packs them without publishing.
+# what the archives are made from builds and packs them without publishing;
+# it is not a required check, so it costs a pull request no wait.
 on:
   push:
     tags: ['v*']
@@ -12,10 +13,14 @@ on:
       - .github/workflows/release.yml
       - CMakeLists.txt
       - CMakePresets.json
+      - LICENSE
+      - README.md
       - cmake/**
-      - include/CMakeLists.txt
-      - source/CMakeLists.txt
+      - include/**
+      - source/**
+      - vendor/**
       - tests/package/**
+      - tests/fixtures/acad/entities-r2018.dxf
   workflow_dispatch:
 
 permissions:
@@ -88,12 +93,15 @@ jobs:
             # Debug info in the Debug library's objects alone, no PDB to lose.
             flags: -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=$<$<CONFIG:Debug>:Embedded>
             debug: true
+            # A consumer in each configuration finds the matching library.
+            consume: Release Debug RelWithDebInfo MinSizeRel
     env:
       CXX: ${{ matrix.cxx }}
       NAME: dxfio-${{ needs.version.outputs.version }}-${{ matrix.platform }}
       # Split on blanks only: the architectures' semicolon stays in one word.
       FLAGS: ${{ matrix.flags }}
       CONFIGS: ${{ matrix.debug && 'Release Debug' || 'Release' }}
+      CONSUME: ${{ matrix.consume || 'Release' }}
       ARCHIVE: ${{ matrix.archive }}
     defaults:
       run:
@@ -130,7 +138,7 @@ jobs:
 
       - name: Consume
         run: |
-          for config in $CONFIGS; do
+          for config in $CONSUME; do
             cmake -S tests/package -B "consumer/$config" -G Ninja \
               -DCMAKE_BUILD_TYPE="$config" \
               -DCMAKE_PREFIX_PATH="$PWD/stage/$NAME"
@@ -208,7 +216,8 @@ jobs:
 
       - name: Publish
         env:
-          GH_TOKEN: ${{ github.token }}
+          # The job's own short-lived token, not a secret kept in the file.
+          GH_TOKEN: ${{ github.token }} # nosemgrep
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           gh release create "$GITHUB_REF_NAME" dist/* \

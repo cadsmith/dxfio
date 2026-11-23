@@ -29,12 +29,17 @@ Each release on GitHub carries the library built for four platforms: its headers
 | `macos-universal` | Apple Clang on macOS 26, arm64 and x86_64 in one library | macOS 26 or later |
 | `windows-x64` | MSVC 19.52 of Visual Studio 2026, the dynamic runtime: `dxfio.lib` for Release, `dxfiod.lib` for Debug | Visual Studio 2026 or later |
 
-Check an archive before using it. `SHA256SUMS` lists every file's checksum, and each file carries a build provenance attestation, signed by GitHub, that it was built by this repository's release workflow from the tagged commit:
+Check an archive before using it. `SHA256SUMS` lists every file's checksum, and each file carries a build provenance attestation, signed through GitHub, that it was built by this repository's release workflow from the tagged commit; the verification names both, so an attestation from any other workflow or ref fails:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
-gh attestation verify dxfio-<version>-linux-x64.tar.gz --repo cadsmith/dxfio
+gh attestation verify dxfio-<version>-linux-x64.tar.gz \
+  --repo cadsmith/dxfio \
+  --signer-workflow cadsmith/dxfio/.github/workflows/release.yml \
+  --source-ref refs/tags/v<version>
 ```
+
+On Windows, `Get-FileHash dxfio-<version>-windows-x64.zip` gives the checksum to compare with the archive's line in `SHA256SUMS`.
 
 Unpack it anywhere and point CMake at the folder:
 
