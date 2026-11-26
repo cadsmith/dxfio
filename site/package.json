@@ -36,7 +36,7 @@
     "mdast-util-mdx-jsx": "^3.2.1",
     "oxlint": "^1.92.0",
     "oxlint-tsgolint": "^7.0.2007",
-    "postcss": "^8.5.32",
+    "postcss": "^8.5.33",
     "serve": "^14.2.8",
     "tailwindcss": "^4.3.5",
     "typescript": "~7.0.2"
