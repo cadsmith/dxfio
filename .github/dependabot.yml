@@ -7,6 +7,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: chore
+    # CodeQL's init and analyze steps fail unless they run the same version.
+    groups:
+      codeql-action:
+        patterns: ['github/codeql-action*']
   - package-ecosystem: npm
     directory: /site
     schedule:
@@ -14,3 +18,7 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    # fumadocs-ui pins fumadocs-core to its own exact version.
+    groups:
+      fumadocs:
+        patterns: ['fumadocs-*', '@fumadocs/*']
