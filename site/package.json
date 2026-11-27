@@ -35,7 +35,7 @@
     "@types/react-dom": "^19.3.0",
     "mdast-util-mdx-jsx": "^3.2.2",
     "oxlint": "^1.92.0",
-    "oxlint-tsgolint": "^7.0.2007",
+    "oxlint-tsgolint": "^7.0.2008",
     "postcss": "^8.5.33",
     "serve": "^14.2.8",
     "tailwindcss": "^4.3.5",
