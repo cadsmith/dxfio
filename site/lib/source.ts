@@ -15,7 +15,8 @@ const docs = defineDocs({
   docs: {
     files: ['guide/*.md', 'tutorials/*.md', 'concepts/*.md'],
     schema: pageSchema,
-    postprocess: { includeProcessedMarkdown: true },
+    // A string, not the component form: that imports fumadocs-core/server, which docs/ cannot resolve outside the site.
+    postprocess: { includeProcessedMarkdown: { output: 'string' } },
     mdxOptions,
   },
   meta: { files: ['meta.json', '*/meta.json'], schema: metaSchema },
